@@ -6,6 +6,21 @@ import Phaser from '../lib/phaser.js';
 import { PHASER_SCENE_LOG_STYLE } from '../utils/logging.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
+const BATTLE_MENU_OPTIONS = Object.freeze({
+  FIGHT: 'FIGHT',
+  SWITCH: 'SWITCH',
+  ITEM: 'ITEM',
+  FLEE: 'FLEE',
+});
+
+/**
+ * @type {Phaser.Types.GameObjects.Text.TextStyle}
+ */
+const battleUiTextStyle = {
+  color: 'black',
+  fontSize: '30px',
+};
+
 /**
  * This scene will be used to display the monster battle screen, which should be shown
  * when the player encounters a wild monster, or they are battling another trainer.
@@ -30,8 +45,54 @@ export class BattleScene extends Phaser.Scene {
     this.add.image(256, 316, MONSTER_ASSET_KEYS.IGUANIGNITE, 0).setFlipX(true);
 
     // render out the player and enemy health bars
+
     // render out the main info panel
+    this.#createMainInfoPane();
+
     // render out the battle option panel
+    this.add.container(520, 448, [
+      this.#createMainInfoSubPane(),
+      this.add.text(55, 22, BATTLE_MENU_OPTIONS.FIGHT, battleUiTextStyle),
+      this.add.text(240, 22, BATTLE_MENU_OPTIONS.SWITCH, battleUiTextStyle),
+      this.add.text(55, 70, BATTLE_MENU_OPTIONS.ITEM, battleUiTextStyle),
+      this.add.text(240, 70, BATTLE_MENU_OPTIONS.FLEE, battleUiTextStyle),
+    ]);
+
     // render out the attack option panel
+    this.add.container(0, 448, [
+      this.add.text(55, 22, 'slash', battleUiTextStyle),
+      this.add.text(240, 22, 'growl', battleUiTextStyle),
+      this.add.text(55, 70, '-', battleUiTextStyle),
+      this.add.text(240, 70, '-', battleUiTextStyle),
+    ]);
+  }
+
+  #createMainInfoPane() {
+    const rectWidth = 1016;
+    const rectHeight = 124;
+    const padding = 4;
+
+    const g = this.add.graphics();
+    const x = this.scale.width - rectWidth - padding;
+    const y = this.scale.height - rectHeight - padding;
+    g.fillStyle(0xede4f3, 1);
+    g.fillRect(x + 1, y + 1, rectWidth - 1, rectHeight - 1);
+    g.lineStyle(8, 0xe4434a, 10);
+    g.strokeRect(x, y, rectWidth, rectHeight);
+  }
+
+  #createMainInfoSubPane() {
+    const rectWidth = 500;
+    const rectHeight = 124;
+
+    const g = this.add.graphics();
+    const x = 0;
+    const y = 0;
+    g.fillStyle(0xede4f3, 1);
+    g.fillRect(x + 1, y + 1, rectWidth - 1, rectHeight - 1);
+    g.lineStyle(8, 0x905ac2, 10);
+    g.strokeRect(x, y, rectWidth, rectHeight);
+
+    return g;
   }
 }
