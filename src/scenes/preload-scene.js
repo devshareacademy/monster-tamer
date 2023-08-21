@@ -1,3 +1,4 @@
+import { BATTLE_BACKGROUND_ASSET_KEYS } from '../assets/asset-keys.js';
 import Phaser from '../lib/phaser.js';
 import { PHASER_SCENE_LOG_STYLE } from '../utils/logging.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -18,6 +19,14 @@ export class PreloadScene extends Phaser.Scene {
     console.log(
       `%c[${PreloadScene.name}:preload] invoked`,
       PHASER_SCENE_LOG_STYLE
+    );
+
+    const monsterTameAssetPath = 'assets/images/monster-tamer';
+
+    // load in images
+    this.load.image(
+      BATTLE_BACKGROUND_ASSET_KEYS.FOREST,
+      `${monsterTameAssetPath}/battle-backgrounds/forest-background.png`
     );
   }
 
