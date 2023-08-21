@@ -1,4 +1,7 @@
-import { BATTLE_BACKGROUND_ASSET_KEYS } from '../assets/asset-keys.js';
+import {
+  BATTLE_BACKGROUND_ASSET_KEYS,
+  MONSTER_ASSET_KEYS,
+} from '../assets/asset-keys.js';
 import Phaser from '../lib/phaser.js';
 import { PHASER_SCENE_LOG_STYLE } from '../utils/logging.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -23,6 +26,9 @@ export class BattleScene extends Phaser.Scene {
     this.add.image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.FOREST, 0).setOrigin(0);
 
     // render out the player and enemy monsters
+    this.add.image(768, 144, MONSTER_ASSET_KEYS.CARNODUSK, 0);
+    this.add.image(256, 316, MONSTER_ASSET_KEYS.IGUANIGNITE, 0).setFlipX(true);
+
     // render out the player and enemy health bars
     // render out the main info panel
     // render out the battle option panel

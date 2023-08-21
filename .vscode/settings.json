@@ -7,5 +7,12 @@
   "prettier.singleQuote": true,
   "prettier.semi": true,
   "editor.formatOnSave": true,
-  "cSpell.words": ["Gamepad", "Kenney", "Ritwick", "xdeviruchi"]
+  "cSpell.words": [
+    "Gamepad",
+    "Kenney",
+    "Ritwick",
+    "xdeviruchi",
+    "CARNODUSK",
+    "IGUANIGNITE"
+  ]
 }
