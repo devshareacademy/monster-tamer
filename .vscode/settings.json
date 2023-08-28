@@ -8,11 +8,12 @@
   "prettier.semi": true,
   "editor.formatOnSave": true,
   "cSpell.words": [
-    "Gamepad",
-    "Kenney",
-    "Ritwick",
-    "xdeviruchi",
     "CARNODUSK",
-    "IGUANIGNITE"
+    "Gamepad",
+    "IGUANIGNITE",
+    "Kenney",
+    "kenneys",
+    "Ritwick",
+    "xdeviruchi"
   ]
 }
