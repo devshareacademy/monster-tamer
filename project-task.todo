@@ -1,0 +1,54 @@
+Project Setup
+---
+- [x] create basic html page with minor css
+- [x] running project on local web server
+- [x] add phaser 3 library
+- [x] create a basic phaser 3 game instance
+- [x] add jsconfig to get phaser 3 types and intellisense
+
+Game Project Assets
+---
+- [ ] download game assets and add to project
+- [ ] show links to where assets can be found
+
+Battle System
+---
+- [ ] load game assets
+- [ ] create battle scene layout
+- [ ] create dialog menu
+- [ ] create option menu
+- [ ] create monster attack move list
+- [ ] handle player input
+- [ ] code optimization - move logic to components
+- [ ] create health component
+- [ ] create monster components
+- [ ] adding basic attack logic
+- [ ] taking damage and monster knock out
+- [ ] battle state machine
+  - [ ] what is a finite state machine
+  - [ ] review the battle states and what each one represents
+  - [ ] implement each state
+  - [ ] add item, flee, and monster states
+- [ ] battle scene polish
+  - [ ] text animations
+  - [ ] monster animations
+  - [ ] attack animations
+  - [ ] scene transitions
+
+Tools Part 1
+---
+- [ ] using tweakpane for testing
+  - [ ] positioning game objects
+  - [ ] monster attacks
+  - [ ] animations
+
+Title Screen
+---
+- [ ] create basic title screen
+- [ ] add options menu
+- [ ] save & loading options
+- [ ] connecting option data to battle scene
+
+World Scene
+---
+- [ ] coming soon...
