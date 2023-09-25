@@ -35,12 +35,9 @@ Battle System
   - [ ] attack animations
   - [ ] scene transitions
 
-Tools Part 1
+World Scene
 ---
-- [ ] using tweakpane for testing
-  - [ ] positioning game objects
-  - [ ] monster attacks
-  - [ ] animations
+- [ ] coming soon...
 
 Title Screen
 ---
@@ -49,6 +46,9 @@ Title Screen
 - [ ] save & loading options
 - [ ] connecting option data to battle scene
 
-World Scene
+Tools Part 1
 ---
-- [ ] coming soon...
+- [ ] using tweakpane for testing
+  - [ ] positioning game objects
+  - [ ] monster attacks
+  - [ ] animations
