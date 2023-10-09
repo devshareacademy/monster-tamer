@@ -88,11 +88,16 @@ export class BattleScene extends Phaser.Scene {
   update() {
     const wasSpaceKeyPressed = Phaser.Input.Keyboard.JustDown(this.#cursorKeys.space);
     if (wasSpaceKeyPressed) {
-      // TODO: update battle menu
+      this.#battleMenu.handlePlayerInput('OK');
       return;
     }
 
-    /** @type {keyof typeof DIRECTION} */
+    if (Phaser.Input.Keyboard.JustDown(this.#cursorKeys.shift)) {
+      this.#battleMenu.handlePlayerInput('CANCEL');
+      return;
+    }
+
+    /** @type {import('../common/direction.js').Direction} */
     let selectedDirection = DIRECTION.NONE;
 
     if (this.#cursorKeys.left.isDown) {
@@ -105,10 +110,15 @@ export class BattleScene extends Phaser.Scene {
       selectedDirection = DIRECTION.UP;
     }
     if (selectedDirection !== DIRECTION.NONE) {
-      // TODO: update battle menu
+      this.#battleMenu.handlePlayerInput(selectedDirection);
     }
   }
 
+  /**
+   * @param {number} x the x position to place the health bar container
+   * @param {number} y the y position to place the health bar container
+   * @returns {Phaser.GameObjects.Container}
+   */
   #createHealthBar(x, y) {
     const scaleY = 0.7;
     const leftCap = this.add.image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP).setOrigin(0, 0.5).setScale(1, scaleY);
