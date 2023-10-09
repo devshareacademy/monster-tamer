@@ -85,7 +85,6 @@ export class BattleMenu {
    * @param {import('../../common/direction.js').Direction | 'OK' | 'CANCEL'} input
    */
   handlePlayerInput(input) {
-    console.log(input);
     if (input === 'CANCEL') {
       this.hideMonsterAttackSubMenu();
       this.showMainBattleMenu();
@@ -100,8 +99,6 @@ export class BattleMenu {
     this.#updateSelectedMoveMenuOptionFromInput(input);
     this.#moveMainBattleMenuCursor();
     this.#moveMoveSelectBattleMenuCursor();
-    console.log(this.#selectedBattleMenuOption);
-    console.log(this.#selectedAttackMenuOption);
   }
 
   #createMainBattleMenu() {
