@@ -7,10 +7,13 @@ import {
 } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import { DIRECTION } from '../common/direction.js';
 
 export class BattleScene extends Phaser.Scene {
   /** @type {BattleMenu} */
   #battleMenu;
+  /** @type {Phaser.Types.Input.Keyboard.CursorKeys} */
+  #cursorKeys;
 
   constructor() {
     super({
@@ -78,6 +81,32 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.showMainBattleMenu();
     // this.#battleMenu.hideMainBattleMenu();
     // this.#battleMenu.showMonsterAttackSubMenu();
+
+    this.#cursorKeys = this.input.keyboard.createCursorKeys();
+  }
+
+  update() {
+    const wasSpaceKeyPressed = Phaser.Input.Keyboard.JustDown(this.#cursorKeys.space);
+    if (wasSpaceKeyPressed) {
+      // TODO: update battle menu
+      return;
+    }
+
+    /** @type {keyof typeof DIRECTION} */
+    let selectedDirection = DIRECTION.NONE;
+
+    if (this.#cursorKeys.left.isDown) {
+      selectedDirection = DIRECTION.LEFT;
+    } else if (this.#cursorKeys.right.isDown) {
+      selectedDirection = DIRECTION.RIGHT;
+    } else if (this.#cursorKeys.down.isDown) {
+      selectedDirection = DIRECTION.DOWN;
+    } else if (this.#cursorKeys.up.isDown) {
+      selectedDirection = DIRECTION.UP;
+    }
+    if (selectedDirection !== DIRECTION.NONE) {
+      // TODO: update battle menu
+    }
   }
 
   #createHealthBar(x, y) {
