@@ -1,9 +1,23 @@
 import Phaser from '../../lib/phaser.js';
-import { MONSTER_ASSET_KEYS } from '../../assets/asset-keys.js';
+import { MONSTER_ASSET_KEYS, UI_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { BATTLE_UI_TEXT_STYLE } from './battle-menu-config.js';
 import { ACTIVE_BATTLE_MENU, ATTACK_MOVE_OPTIONS, BATTLE_MENU_OPTIONS } from './battle-menu-options.js';
 import { DIRECTION } from '../../common/direction.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
+
+const battleMenuCursorPos = {
+  x: 42,
+  y: 38,
+};
+
+const attackMenuCursorPos = {
+  x: 42,
+  y: 38,
+};
+
+const playerInputCursorPos = {
+  y: 488,
+};
 
 export class BattleMenu {
   /** @type {Phaser.Scene} */
@@ -22,6 +36,10 @@ export class BattleMenu {
   #selectedAttackMenuOption;
   /** @type {import('./battle-menu-options.js').ActiveBattleMenu} */
   #activeBattleMenu;
+  /** @type {Phaser.GameObjects.Image} */
+  #mainBattleMenuCursorPhaserImageGameObject;
+  /** @type {Phaser.GameObjects.Image} */
+  #attackBattleMenuCursorPhaserImageGameObject;
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
@@ -42,6 +60,9 @@ export class BattleMenu {
     this.#mainBattleMenuPhaserContainerGameObject.setAlpha(1);
     this.#battleTextGameObjectLine1.setAlpha(1);
     this.#battleTextGameObjectLine2.setAlpha(1);
+
+    this.#selectedBattleMenuOption = BATTLE_MENU_OPTIONS.FIGHT;
+    this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(battleMenuCursorPos.x, battleMenuCursorPos.y);
   }
 
   hideMainBattleMenu() {
@@ -77,6 +98,8 @@ export class BattleMenu {
     }
     this.#updateSelectedBattleMenuOptionFromInput(input);
     this.#updateSelectedMoveMenuOptionFromInput(input);
+    this.#moveMainBattleMenuCursor();
+    this.#moveMoveSelectBattleMenuCursor();
     console.log(this.#selectedBattleMenuOption);
     console.log(this.#selectedAttackMenuOption);
   }
@@ -93,23 +116,35 @@ export class BattleMenu {
     this.#battleTextGameObjectLine1.setAlpha(0);
     this.#battleTextGameObjectLine2.setAlpha(0);
 
+    this.#mainBattleMenuCursorPhaserImageGameObject = this.#scene.add
+      .image(battleMenuCursorPos.x, battleMenuCursorPos.y, UI_ASSET_KEYS.CURSOR)
+      .setOrigin(0.5)
+      .setScale(2.5);
+
     this.#mainBattleMenuPhaserContainerGameObject = this.#scene.add.container(520, 448, [
       this.#createMainInfoSubPane(),
       this.#scene.add.text(55, 22, BATTLE_MENU_OPTIONS.FIGHT, BATTLE_UI_TEXT_STYLE),
       this.#scene.add.text(240, 22, BATTLE_MENU_OPTIONS.SWITCH, BATTLE_UI_TEXT_STYLE),
       this.#scene.add.text(55, 70, BATTLE_MENU_OPTIONS.ITEM, BATTLE_UI_TEXT_STYLE),
       this.#scene.add.text(240, 70, BATTLE_MENU_OPTIONS.FLEE, BATTLE_UI_TEXT_STYLE),
+      this.#mainBattleMenuCursorPhaserImageGameObject,
     ]);
 
     this.#mainBattleMenuPhaserContainerGameObject.setAlpha(0);
   }
 
   #createMonsterAttackSubMenu() {
+    this.#attackBattleMenuCursorPhaserImageGameObject = this.#scene.add
+      .image(attackMenuCursorPos.x, attackMenuCursorPos.y, UI_ASSET_KEYS.CURSOR)
+      .setOrigin(0.5)
+      .setScale(2.5);
+
     this.#moveSelectionSubBattleMenuPhaserContainerGameObject = this.#scene.add.container(0, 448, [
       this.#scene.add.text(55, 22, 'slash', BATTLE_UI_TEXT_STYLE),
       this.#scene.add.text(240, 22, 'growl', BATTLE_UI_TEXT_STYLE),
       this.#scene.add.text(55, 70, '-', BATTLE_UI_TEXT_STYLE),
       this.#scene.add.text(240, 70, '-', BATTLE_UI_TEXT_STYLE),
+      this.#attackBattleMenuCursorPhaserImageGameObject,
     ]);
     this.#moveSelectionSubBattleMenuPhaserContainerGameObject.setAlpha(0);
   }
@@ -309,5 +344,53 @@ export class BattleMenu {
 
     // We should never reach this default case
     exhaustiveGuard(this.#selectedAttackMenuOption);
+  }
+
+  #moveMoveSelectBattleMenuCursor() {
+    if (this.#activeBattleMenu !== ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
+      return;
+    }
+
+    switch (this.#selectedAttackMenuOption) {
+      case ATTACK_MOVE_OPTIONS.MOVE_1:
+        this.#attackBattleMenuCursorPhaserImageGameObject.setPosition(attackMenuCursorPos.x, attackMenuCursorPos.y);
+        return;
+      case ATTACK_MOVE_OPTIONS.MOVE_3:
+        this.#attackBattleMenuCursorPhaserImageGameObject.setPosition(42, 86);
+        return;
+      case ATTACK_MOVE_OPTIONS.MOVE_4:
+        this.#attackBattleMenuCursorPhaserImageGameObject.setPosition(228, 86);
+        return;
+      case ATTACK_MOVE_OPTIONS.MOVE_2:
+        this.#attackBattleMenuCursorPhaserImageGameObject.setPosition(228, 38);
+        return;
+      default:
+        // We should never reach this default case
+        exhaustiveGuard(this.#selectedAttackMenuOption);
+    }
+  }
+
+  #moveMainBattleMenuCursor() {
+    if (this.#activeBattleMenu !== ACTIVE_BATTLE_MENU.BATTLE_MAIN) {
+      return;
+    }
+
+    switch (this.#selectedBattleMenuOption) {
+      case BATTLE_MENU_OPTIONS.FIGHT:
+        this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(battleMenuCursorPos.x, battleMenuCursorPos.y);
+        return;
+      case BATTLE_MENU_OPTIONS.ITEM:
+        this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(42, 86);
+        return;
+      case BATTLE_MENU_OPTIONS.FLEE:
+        this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(228, 86);
+        return;
+      case BATTLE_MENU_OPTIONS.SWITCH:
+        this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(228, 38);
+        return;
+      default:
+        // We should never reach this default case
+        exhaustiveGuard(this.#selectedBattleMenuOption);
+    }
   }
 }
