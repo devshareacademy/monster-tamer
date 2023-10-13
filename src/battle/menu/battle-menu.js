@@ -46,6 +46,16 @@ export class BattleMenu {
   #queuedInfoPanelMessagesCallback;
   /** @type {boolean} */
   #waitingForPlayerInput;
+  /** @type {number | undefined} */
+  #selectedAttackIndex;
+
+  /** @type {number | undefined} */
+  get selectedAttack() {
+    if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
+      return this.#selectedAttackIndex;
+    }
+    return undefined;
+  }
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
@@ -57,6 +67,8 @@ export class BattleMenu {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#queuedInfoPanelMessages = [];
     this.#waitingForPlayerInput = false;
+    this.#selectedAttackIndex = undefined;
+    this.#queuedInfoPanelMessagesCallback = undefined;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -71,6 +83,7 @@ export class BattleMenu {
 
     this.#selectedBattleMenuOption = BATTLE_MENU_OPTIONS.FIGHT;
     this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(battleMenuCursorPos.x, battleMenuCursorPos.y);
+    this.#selectedAttackIndex = undefined;
   }
 
   hideMainBattleMenu() {
@@ -109,8 +122,7 @@ export class BattleMenu {
         return;
       }
       if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
-        // TODO
-        // this.#handlePlayerChooseAttack()
+        this.#handlePlayerChooseAttack();
         return;
       }
       return;
@@ -500,5 +512,28 @@ export class BattleMenu {
     this.#waitingForPlayerInput = false;
     this.hideMonsterAttackSubMenu();
     this.showMainBattleMenu();
+  }
+
+  #handlePlayerChooseAttack() {
+    let selectedMoveIndex = 0;
+    switch (this.#selectedAttackMenuOption) {
+      case ATTACK_MOVE_OPTIONS.MOVE_1:
+        selectedMoveIndex = 0;
+        break;
+      case ATTACK_MOVE_OPTIONS.MOVE_3:
+        selectedMoveIndex = 2;
+        break;
+      case ATTACK_MOVE_OPTIONS.MOVE_4:
+        selectedMoveIndex = 3;
+        break;
+      case ATTACK_MOVE_OPTIONS.MOVE_2:
+        selectedMoveIndex = 1;
+        break;
+      default:
+        // We should never reach this default case
+        exhaustiveGuard(this.#selectedAttackMenuOption);
+    }
+
+    this.#selectedAttackIndex = selectedMoveIndex;
   }
 }
