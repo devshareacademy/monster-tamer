@@ -40,6 +40,12 @@ export class BattleMenu {
   #mainBattleMenuCursorPhaserImageGameObject;
   /** @type {Phaser.GameObjects.Image} */
   #attackBattleMenuCursorPhaserImageGameObject;
+  /** @type {string[]} */
+  #queuedInfoPanelMessages;
+  /** @type {() => void | undefined} */
+  #queuedInfoPanelMessagesCallback;
+  /** @type {boolean} */
+  #waitingForPlayerInput;
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
@@ -49,6 +55,8 @@ export class BattleMenu {
     this.#selectedBattleMenuOption = BATTLE_MENU_OPTIONS.FIGHT;
     this.#selectedAttackMenuOption = ATTACK_MOVE_OPTIONS.MOVE_1;
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
+    this.#queuedInfoPanelMessages = [];
+    this.#waitingForPlayerInput = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -85,20 +93,43 @@ export class BattleMenu {
    * @param {import('../../common/direction.js').Direction | 'OK' | 'CANCEL'} input
    */
   handlePlayerInput(input) {
-    if (input === 'CANCEL') {
-      this.hideMonsterAttackSubMenu();
-      this.showMainBattleMenu();
+    if (this.#waitingForPlayerInput && this.#queuedInfoPanelMessagesCallback) {
+      this.#updateInfoPaneWithMessage();
       return;
     }
+
+    if (input === 'CANCEL') {
+      this.#switchToMainBattleMenu();
+      return;
+    }
+
     if (input === 'OK') {
-      this.hideMainBattleMenu();
-      this.showMonsterAttackSubMenu();
+      if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MAIN) {
+        this.#handlePlayerChooseMainBattleOption();
+        return;
+      }
+      if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
+        // TODO
+        // this.#handlePlayerChooseAttack()
+        return;
+      }
       return;
     }
     this.#updateSelectedBattleMenuOptionFromInput(input);
     this.#updateSelectedMoveMenuOptionFromInput(input);
     this.#moveMainBattleMenuCursor();
     this.#moveMoveSelectBattleMenuCursor();
+  }
+
+  /**
+   * @param {string[]} messages
+   * @param {() => void} [callback]
+   */
+  updateInfoPaneMessagesAndWaitForInput(messages, callback) {
+    this.#queuedInfoPanelMessages = messages;
+    this.#queuedInfoPanelMessagesCallback = callback;
+
+    this.#updateInfoPaneWithMessage();
   }
 
   #createMainBattleMenu() {
@@ -389,5 +420,85 @@ export class BattleMenu {
         // We should never reach this default case
         exhaustiveGuard(this.#selectedBattleMenuOption);
     }
+  }
+
+  #handlePlayerChooseMainBattleOption() {
+    if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FIGHT) {
+      this.hideMainBattleMenu();
+      this.showMonsterAttackSubMenu();
+      this.#waitingForPlayerInput = true;
+      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT;
+      return;
+    }
+
+    if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.ITEM) {
+      this.hideMainBattleMenu();
+      // TODO: add feature in a future update
+      /*
+        for the time being, we will display text about the player having no items
+        and allow the player to navigate back to the main menu
+      */
+      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_ITEM;
+      this.updateInfoPaneMessagesAndWaitForInput(['Your bag is empty...'], () => {
+        this.#switchToMainBattleMenu();
+      });
+      return;
+    }
+    if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.SWITCH) {
+      this.hideMainBattleMenu();
+      // TODO: add feature in a future update
+      /*
+        for the time being, we will display text about the player having no more monsters
+        and allow the player to navigate back to the main menu
+      */
+      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_SWITCH;
+      this.updateInfoPaneMessagesAndWaitForInput(['You have no other monsters in your party...'], () => {
+        this.#switchToMainBattleMenu();
+      });
+      return;
+    }
+    if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
+      this.hideMainBattleMenu();
+      // TODO: add feature in a future update
+      /*
+        for the time being, we will display text about the player successfully running away
+        and then restart the Phaser scene after doing a screen fade out
+      */
+      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.FLEE;
+      this.updateInfoPaneMessagesAndWaitForInput(['You fail to run away...'], () => {
+        this.#switchToMainBattleMenu();
+      });
+      // TODO: emit event about player fleeing
+      return;
+    }
+
+    // We should never reach this default case
+    exhaustiveGuard(this.#selectedBattleMenuOption);
+  }
+
+  #updateInfoPaneWithMessage() {
+    this.#waitingForPlayerInput = false;
+    this.#battleTextGameObjectLine1.setText('').setAlpha(1);
+
+    // check if all messages have been displayed from the queue and call the callback
+    if (this.#queuedInfoPanelMessages.length === 0) {
+      this.#waitingForPlayerInput = false;
+      if (this.#queuedInfoPanelMessagesCallback) {
+        this.#queuedInfoPanelMessagesCallback();
+        this.#queuedInfoPanelMessagesCallback = undefined;
+      }
+      return;
+    }
+
+    // get first message from queue and animate message
+    const messageToDisplay = this.#queuedInfoPanelMessages.shift();
+    this.#battleTextGameObjectLine1.setText(messageToDisplay);
+    this.#waitingForPlayerInput = true;
+  }
+
+  #switchToMainBattleMenu() {
+    this.#waitingForPlayerInput = false;
+    this.hideMonsterAttackSubMenu();
+    this.showMainBattleMenu();
   }
 }
