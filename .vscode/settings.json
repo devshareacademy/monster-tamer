@@ -7,6 +7,7 @@
   "prettier.singleQuote": true,
   "prettier.semi": true,
   "editor.formatOnSave": true,
+  "prettier.printWidth": 120,
   "cSpell.words": [
     "CARNODUSK",
     "Gamepad",
