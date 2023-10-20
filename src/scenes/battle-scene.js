@@ -5,7 +5,7 @@ import {
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
 } from '../assets/asset-keys.js';
-import { BattleMenu } from '../battle/menu/battle-menu.js';
+import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 export class BattleScene extends Phaser.Scene {
