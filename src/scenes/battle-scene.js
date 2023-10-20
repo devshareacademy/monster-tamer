@@ -1,3 +1,4 @@
+import Phaser from '../lib/phaser.js';
 import {
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
@@ -5,10 +6,10 @@ import {
   MONSTER_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
-import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 export class BattleScene extends Phaser.Scene {
+  /** @type {BattleMenu} */
   #battleMenu;
 
   constructor() {
