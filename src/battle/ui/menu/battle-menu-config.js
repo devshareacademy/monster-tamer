@@ -1,4 +1,4 @@
-import Phaser from '../../lib/phaser.js';
+import Phaser from '../../../lib/phaser.js';
 
 /**
  * @type {Phaser.Types.GameObjects.Text.TextStyle}

@@ -1,9 +1,9 @@
-import Phaser from '../../lib/phaser.js';
-import { MONSTER_ASSET_KEYS, UI_ASSET_KEYS } from '../../assets/asset-keys.js';
+import Phaser from '../../../lib/phaser.js';
+import { MONSTER_ASSET_KEYS, UI_ASSET_KEYS } from '../../../assets/asset-keys.js';
 import { BATTLE_UI_TEXT_STYLE } from './battle-menu-config.js';
 import { ACTIVE_BATTLE_MENU, ATTACK_MOVE_OPTIONS, BATTLE_MENU_OPTIONS } from './battle-menu-options.js';
-import { DIRECTION } from '../../common/direction.js';
-import { exhaustiveGuard } from '../../utils/guard.js';
+import { DIRECTION } from '../../../common/direction.js';
+import { exhaustiveGuard } from '../../../utils/guard.js';
 
 const battleMenuCursorPos = {
   x: 42,
@@ -82,7 +82,7 @@ export class BattleMenu {
 
   /**
    *
-   * @param {import('../../common/direction.js').Direction | 'OK' | 'CANCEL'} input
+   * @param {import('../../../common/direction.js').Direction | 'OK' | 'CANCEL'} input
    */
   handlePlayerInput(input) {
     if (input === 'CANCEL') {
@@ -174,7 +174,7 @@ export class BattleMenu {
   }
 
   /**
-   * @param {import('../../common/direction.js').Direction} direction
+   * @param {import('../../../common/direction.js').Direction} direction
    * @returns void
    */
   #updateSelectedBattleMenuOptionFromInput(direction) {
@@ -259,7 +259,7 @@ export class BattleMenu {
   }
 
   /**
-   * @param {import('../../common/direction.js').Direction} direction
+   * @param {import('../../../common/direction.js').Direction} direction
    * @returns void
    */
   #updateSelectedMoveMenuOptionFromInput(direction) {
