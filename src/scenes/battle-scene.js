@@ -77,11 +77,12 @@ export class BattleScene extends Phaser.Scene {
       color: '#7E3D3F',
       fontSize: '32px',
     });
-    const enemyHealthBar = new HealthBar(this, 34, 34);
+
     this.add.container(0, 0, [
       this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1, 0.8),
       enemyMonsterName,
-      enemyHealthBar.container,
+      // @ts-ignore
+      this.#activeEnemyMonster._healthBar.container,
       this.add.text(enemyMonsterName.width + 35, 23, 'L5', {
         color: '#ED474B',
         fontSize: '28px',
@@ -104,6 +105,7 @@ export class BattleScene extends Phaser.Scene {
         console.log('animation completed');
       },
     });
+    this.#activeEnemyMonster.takeDamage(20);
   }
 
   update() {
