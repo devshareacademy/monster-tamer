@@ -1,6 +1,6 @@
 /**
  * @typedef {keyof typeof BATTLE_MENU_OPTIONS} BattleMenuOptions
- **/
+ */
 
 /** @enum {BattleMenuOptions} */
 export const BATTLE_MENU_OPTIONS = Object.freeze({
@@ -12,7 +12,7 @@ export const BATTLE_MENU_OPTIONS = Object.freeze({
 
 /**
  * @typedef {keyof typeof ATTACK_MOVE_OPTIONS} AttackMoveOptions
- **/
+ */
 
 /** @enum {AttackMoveOptions} */
 export const ATTACK_MOVE_OPTIONS = Object.freeze({
@@ -24,7 +24,7 @@ export const ATTACK_MOVE_OPTIONS = Object.freeze({
 
 /**
  * @typedef {keyof typeof ACTIVE_BATTLE_MENU} ActiveBattleMenu
- **/
+ */
 
 /** @enum {ActiveBattleMenu} */
 export const ACTIVE_BATTLE_MENU = Object.freeze({
@@ -32,5 +32,5 @@ export const ACTIVE_BATTLE_MENU = Object.freeze({
   BATTLE_MOVE_SELECT: 'BATTLE_MOVE_SELECT',
   BATTLE_ITEM: 'BATTLE_ITEM',
   BATTLE_SWITCH: 'BATTLE_SWITCH',
-  FLEE: 'FLEE',
+  BATTLE_FLEE: 'BATTLE_FLEE',
 });

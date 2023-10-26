@@ -82,8 +82,6 @@ export class BattleScene extends Phaser.Scene {
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this);
     this.#battleMenu.showMainBattleMenu();
-    // this.#battleMenu.hideMainBattleMenu();
-    // this.#battleMenu.showMonsterAttackSubMenu();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
     playerHealthBar.setMeterPercentageAnimated(0.5, {
@@ -99,7 +97,7 @@ export class BattleScene extends Phaser.Scene {
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
 
-      // check if the player selected an attack, and update display text
+      //check if the player selected an attack, and update display text
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
       }
@@ -119,18 +117,40 @@ export class BattleScene extends Phaser.Scene {
 
     /** @type {import('../common/direction.js').Direction} */
     let selectedDirection = DIRECTION.NONE;
-
     if (this.#cursorKeys.left.isDown) {
       selectedDirection = DIRECTION.LEFT;
     } else if (this.#cursorKeys.right.isDown) {
       selectedDirection = DIRECTION.RIGHT;
-    } else if (this.#cursorKeys.down.isDown) {
-      selectedDirection = DIRECTION.DOWN;
     } else if (this.#cursorKeys.up.isDown) {
       selectedDirection = DIRECTION.UP;
+    } else if (this.#cursorKeys.down.isDown) {
+      selectedDirection = DIRECTION.DOWN;
     }
+
     if (selectedDirection !== DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
     }
+  }
+
+  /**
+   *
+   * @param {number} x the x position to place the health bar container
+   * @param {number} y the y position to place the health bar container
+   * @returns {Phaser.GameObjects.Container}
+   */
+  #createHealthBar(x, y) {
+    const scaleY = 0.7;
+    const leftCap = this.add.image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP).setOrigin(0, 0.5).setScale(1, scaleY);
+    const middle = this.add
+      .image(leftCap.x + leftCap.width, y, HEALTH_BAR_ASSET_KEYS.MIDDLE)
+      .setOrigin(0, 0.5)
+      .setScale(1, scaleY);
+    middle.displayWidth = 360;
+    const rightCap = this.add
+      .image(middle.x + middle.displayWidth, y, HEALTH_BAR_ASSET_KEYS.RIGHT_CAP)
+      .setOrigin(0, 0.5)
+      .setScale(1, scaleY);
+
+    return this.add.container(x, y, [leftCap, middle, rightCap]);
   }
 }
