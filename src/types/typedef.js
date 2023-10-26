@@ -5,6 +5,7 @@ import Phaser from '../lib/phaser.js';
  * @type {object}
  * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
  * @property {Monster} monsterDetails the details of the monster that is currently in battle
+ * @property {number} [scaleHealthBarBackgroundImageByY=1] scales the health bar background vertically by the specified value, defaults to 1
  */
 
 /**
@@ -13,6 +14,7 @@ import Phaser from '../lib/phaser.js';
  * @property {string} name the name of the monster
  * @property {string} assetKey the name of the asset key that should be used for this monster
  * @property {number} [assetFrame=0] if the asset key is tied to a spritesheet, this frame will be used, defaults to 0
+ * @property {number} currentLevel the current level of this monster
  * @property {number} maxHp the max health of this monster
  * @property {number} currentHp the max health of this monster
  * @property {number} baseAttack the base attack value of this monster
