@@ -42,7 +42,7 @@ export class BattleMonster {
 
   /** @type {boolean} */
   get isFainted() {
-    return this.currentHealth <= 0;
+    return this._currentHealth <= 0;
   }
 
   /** @type {string} */
