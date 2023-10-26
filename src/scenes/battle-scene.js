@@ -1,9 +1,8 @@
 import Phaser from '../lib/phaser.js';
-import { BATTLE_ASSET_KEYS, BATTLE_BACKGROUND_ASSET_KEYS, MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
+import { BATTLE_BACKGROUND_ASSET_KEYS, MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { DIRECTION } from '../common/direction.js';
-import { HealthBar } from '../battle/ui/health-bar.js';
 import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 
@@ -37,7 +36,7 @@ export class BattleScene extends Phaser.Scene {
         assetFrame: 0,
         currentHp: 25,
         maxHp: 25,
-        attackIds: [],
+        attackIds: [1],
         baseAttack: 5,
         currentLevel: 5,
       },
@@ -50,14 +49,14 @@ export class BattleScene extends Phaser.Scene {
         assetFrame: 0,
         currentHp: 25,
         maxHp: 25,
-        attackIds: [],
+        attackIds: [2],
         baseAttack: 5,
         currentLevel: 5,
       },
     });
 
     // render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this);
+    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
     this.#battleMenu.showMainBattleMenu();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
@@ -106,5 +105,14 @@ export class BattleScene extends Phaser.Scene {
     if (selectedDirection !== DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
     }
+  }
+
+  #handleBattleSequence() {
+    // general battle flow
+    // show attack used, brief pause
+    // then play attack animation, brief pause
+    // then play damage animation, brief pause
+    // then play health bar animation, brief pause
+    // then repeat the steps above for the other monster
   }
 }
