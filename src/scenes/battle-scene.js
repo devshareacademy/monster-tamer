@@ -147,10 +147,41 @@ export class BattleScene extends Phaser.Scene {
       () => {
         this.time.delayedCall(500, () => {
           this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-            this.#battleMenu.showMainBattleMenu();
+            this.#postBattleSequenceCheck();
           });
         });
       }
     );
+  }
+
+  #postBattleSequenceCheck() {
+    if (this.#activeEnemyMonster.isFainted) {
+      this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+        [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
+        () => {
+          this.#transitionToNextScene();
+        }
+      );
+      return;
+    }
+
+    if (this.#activePlayerMonster.isFainted) {
+      this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+        [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
+        () => {
+          this.#transitionToNextScene();
+        }
+      );
+      return;
+    }
+
+    this.#battleMenu.showMainBattleMenu();
+  }
+
+  #transitionToNextScene() {
+    this.cameras.main.fadeOut(600, 0, 0, 0);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+    });
   }
 }
