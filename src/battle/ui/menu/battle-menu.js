@@ -159,8 +159,25 @@ export class BattleMenu {
   }
 
   /**
+   * @param {string} message
+   * @param {() => void} [callback]
+   * @returns {void}
+   */
+  updateInfoPaneMessageNoInputRequired(message, callback) {
+    this.#battleTextGameObjectLine1.setText('').setAlpha(1);
+
+    // TODO animate message
+    this.#battleTextGameObjectLine1.setText(message);
+    this.#waitingForPlayerInput = false;
+    if (callback) {
+      callback();
+    }
+  }
+
+  /**
    * @param {string[]} messages
    * @param {() => void} [callback]
+   * @returns {void}
    */
   updateInfoPaneMessagesAndWaitForInput(messages, callback) {
     this.#queuedInfoPanelMessages = messages;
