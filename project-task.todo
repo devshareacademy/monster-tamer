@@ -26,6 +26,7 @@ Battle System:
     ☐ review the battle states and what each one represents
     ☐ implement each state
     ☐ add item, flee, and monster states
+    ☐ player input improvements
   ☐ battle scene polish
     ☐ text animations
     ☐ monster animations
