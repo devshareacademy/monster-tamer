@@ -100,6 +100,7 @@ export class BattleMenu {
   }
 
   hideMonsterAttackSubMenu() {
+    this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#moveSelectionSubBattleMenuPhaserContainerGameObject.setAlpha(0);
   }
 
@@ -199,7 +200,6 @@ export class BattleMenu {
     /** @type {string[]} */
     const attackNames = [];
     for (let i = 0; i < 4; i += 1) {
-      console.log(i);
       attackNames.push(this.#activePlayerMonster.attacks[i]?.name || '-');
     }
 

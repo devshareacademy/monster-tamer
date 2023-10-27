@@ -15,11 +15,17 @@ export class BattleScene extends Phaser.Scene {
   #activeEnemyMonster;
   /** @type {PlayerBattleMonster} */
   #activePlayerMonster;
+  /** @type {number} */
+  #activePlayerAttackIndex;
 
   constructor() {
     super({
       key: SCENE_KEYS.BATTLE_SCENE,
     });
+  }
+
+  init() {
+    this.#activePlayerAttackIndex = -1;
   }
 
   create() {
@@ -60,11 +66,6 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.showMainBattleMenu();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
-
-    // testing damage functionality
-    this.#activeEnemyMonster.takeDamage(20, () => {
-      this.#activePlayerMonster.takeDamage(15);
-    });
   }
 
   update() {
@@ -72,16 +73,21 @@ export class BattleScene extends Phaser.Scene {
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
 
-      //check if the player selected an attack, and update display text
+      //check if the player selected an attack, and start battle sequence for the fight
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
       }
-      console.log(`Player selected the following move: ${this.#battleMenu.selectedAttack}`);
+      this.#activePlayerAttackIndex = this.#battleMenu.selectedAttack;
+
+      if (!this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex]) {
+        return;
+      }
+
+      console.log(
+        `Player selected the following move: ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`
+      );
       this.#battleMenu.hideMonsterAttackSubMenu();
-      // TODO: update to use the actual attack name
-      this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['Your monster attacks the enemy'], () => {
-        this.#battleMenu.showMainBattleMenu();
-      });
+      this.#handleBattleSequence();
       return;
     }
 
@@ -114,5 +120,37 @@ export class BattleScene extends Phaser.Scene {
     // then play damage animation, brief pause
     // then play health bar animation, brief pause
     // then repeat the steps above for the other monster
+
+    this.#playerAttack();
+  }
+
+  #playerAttack() {
+    this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+      [
+        `${this.#activePlayerMonster.name} used ${
+          this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name
+        }`,
+      ],
+      () => {
+        this.time.delayedCall(500, () => {
+          this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
+            this.#enemyAttack();
+          });
+        });
+      }
+    );
+  }
+
+  #enemyAttack() {
+    this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+      [`foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`],
+      () => {
+        this.time.delayedCall(500, () => {
+          this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+            this.#battleMenu.showMainBattleMenu();
+          });
+        });
+      }
+    );
   }
 }
