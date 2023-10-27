@@ -7,6 +7,19 @@ import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { StateMachine } from '../utils/state-machine.js';
 
+const BATTLE_STATES = Object.freeze({
+  INTRO: 'INTRO',
+  PRE_BATTLE_INFO: 'PRE_BATTLE_INFO',
+  PRE_BATTLE_WAIT_FOR_INPUT: 'PRE_BATTLE_WAIT_FOR_INPUT',
+  BRING_OUT_MONSTER: 'BRING_OUT_MONSTER',
+  PLAYER_INPUT: 'PLAYER_INPUT',
+  ENEMY_INPUT: 'ENEMY_INPUT',
+  BATTLE: 'BATTLE',
+  POST_ATTACK_CHECK: 'POST_ATTACK_CHECK',
+  FINISHED: 'FINISHED',
+  FLEE_ATTEMPT: 'FLEE_ATTEMPT',
+});
+
 export class BattleScene extends Phaser.Scene {
   /** @type {BattleMenu} */
   #battleMenu;
@@ -67,20 +80,7 @@ export class BattleScene extends Phaser.Scene {
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
     this.#battleMenu.showMainBattleMenu();
-
-    this.battleStateMachine = new StateMachine('battle', this);
-    this.battleStateMachine.addState({
-      name: 'INTRO',
-      onEnter: () => {
-        this.time.delayedCall(1000, () => {
-          this.battleStateMachine.setState('BATTLE');
-        });
-      },
-    });
-    this.battleStateMachine.addState({
-      name: 'BATTLE',
-    });
-    this.battleStateMachine.setState('INTRO');
+    this.#createBattleStateMachine();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
   }
@@ -200,5 +200,72 @@ export class BattleScene extends Phaser.Scene {
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start(SCENE_KEYS.BATTLE_SCENE);
     });
+  }
+
+  #createBattleStateMachine() {
+    /**
+     * General state flow for battle scene
+     *
+     * scene transition to the battle menu
+     * battle states
+     * intro -> setup everything that is needed
+     * pre-battle -> animations as characters and stuff appears
+     * monster info text renders onto the page & wait for player input
+     * any key press, and now menu stuff shows up
+     * player_turn -> choose what to do, wait for input from player
+     * enemy_turn -> random choice,
+     * battle_fight -> enemy and player options evaluated, play each attack animation
+     * battle_fight_post_check -> see if one of the characters died, repeat
+     */
+
+    this.battleStateMachine = new StateMachine('battle', this);
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.INTRO,
+      onEnter: () => {
+        this.time.delayedCall(1000, () => {
+          this.battleStateMachine.setState(BATTLE_STATES.BATTLE);
+        });
+      },
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.PRE_BATTLE_INFO,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.PRE_BATTLE_WAIT_FOR_INPUT,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.BRING_OUT_MONSTER,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.PLAYER_INPUT,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.ENEMY_INPUT,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.BATTLE,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.POST_ATTACK_CHECK,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.FINISHED,
+    });
+
+    this.battleStateMachine.addState({
+      name: BATTLE_STATES.FLEE_ATTEMPT,
+    });
+
+    // start state machine
+    this.battleStateMachine.setState(BATTLE_STATES.INTRO);
   }
 }
