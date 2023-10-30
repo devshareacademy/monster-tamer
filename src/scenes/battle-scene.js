@@ -150,9 +150,13 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
-        this.time.delayedCall(1200, () => {
-          this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
-            this.#enemyAttack();
+        // play attack animation based on the selected attack
+        // when attack is finished, play damage animation and then update health bar
+        this.time.delayedCall(500, () => {
+          this.#activeEnemyMonster.playTakeDamageAnimation(() => {
+            this.#activeEnemyMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+              this.#enemyAttack();
+            });
           });
         });
       }
@@ -168,9 +172,13 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
       () => {
-        this.time.delayedCall(1200, () => {
-          this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+        // play attack animation based on the selected attack
+        // when attack is finished, play damage animation and then update health bar
+        this.time.delayedCall(500, () => {
+          this.#activePlayerMonster.playTakeDamageAnimation(() => {
+            this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
           });
         });
       }
@@ -276,23 +284,27 @@ export class BattleScene extends Phaser.Scene {
       onEnter: () => {
         if (this.#activeEnemyMonster.isFainted) {
           // play monster fainted animation and wait for animation to finish
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
-            () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-            }
-          );
+          this.#activeEnemyMonster.playDeathAnimation(() => {
+            this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+              [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
+              () => {
+                this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+              }
+            );
+          });
           return;
         }
 
         if (this.#activePlayerMonster.isFainted) {
           // play monster fainted animation and wait for animation to finish
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
-            () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-            }
-          );
+          this.#activePlayerMonster.playDeathAnimation(() => {
+            this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+              [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
+              () => {
+                this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+              }
+            );
+          });
           return;
         }
 

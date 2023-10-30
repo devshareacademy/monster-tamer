@@ -240,7 +240,7 @@ export class BattleMenu {
       return;
     }
 
-    this.#queuedMessagesSkipAnimation = true;
+    this.#queuedMessageAnimationPlaying = true;
     animateText(this.#scene, this.#battleTextGameObjectLine1, messageToDisplay, {
       delay: 50,
       callback: () => {
