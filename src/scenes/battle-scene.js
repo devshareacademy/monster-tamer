@@ -172,13 +172,9 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
       () => {
-        // play attack animation based on the selected attack
-        // when attack is finished, play damage animation and then update health bar
-        this.time.delayedCall(500, () => {
-          this.#activePlayerMonster.playTakeDamageAnimation(() => {
-            this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
-            });
+        this.time.delayedCall(1200, () => {
+          this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
           });
         });
       }
