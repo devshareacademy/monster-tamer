@@ -75,6 +75,9 @@ export class BattleScene extends Phaser.Scene {
         currentLevel: 5,
       },
     });
+    this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
+      // TODO
+    });
 
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);

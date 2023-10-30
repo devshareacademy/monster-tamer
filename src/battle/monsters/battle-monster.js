@@ -90,6 +90,38 @@ export class BattleMonster {
     this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, { callback });
   }
 
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playMonsterAppearAnimation(callback) {
+    throw new Error('playMonsterAppearAnimation is not implemented.');
+  }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playMonsterHealthBarAppearAnimation(callback) {
+    throw new Error('playMonsterHealthBarAppearAnimation is not implemented.');
+  }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playTakeDamageAnimation(callback) {
+    throw new Error('playTakeDamageAnimation is not implemented.');
+  }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playDeathAnimation(callback) {
+    throw new Error('playDeathAnimation is not implemented.');
+  }
+
   #createHealthBarComponents(scaleHealthBarBackgroundImageByY = 1) {
     this._healthBar = new HealthBar(this._scene, 34, 34);
 
