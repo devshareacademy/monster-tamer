@@ -75,9 +75,6 @@ export class BattleScene extends Phaser.Scene {
         currentLevel: 5,
       },
     });
-    this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
-      // TODO
-    });
 
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
@@ -219,15 +216,15 @@ export class BattleScene extends Phaser.Scene {
       name: BATTLE_STATES.PRE_BATTLE_INFO,
       onEnter: () => {
         // wait for enemy monster to appear on the screen and notify player about wild monster
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`wild ${this.#activeEnemyMonster.name} appeared!`],
-          () => {
-            // wait for text animation to complete and move to next state
-            this.time.delayedCall(500, () => {
+        this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
+          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+            [`wild ${this.#activeEnemyMonster.name} appeared!`],
+            () => {
               this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
-            });
-          }
-        );
+            }
+          );
+        });
       },
     });
 

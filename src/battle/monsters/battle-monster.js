@@ -35,12 +35,9 @@ export class BattleMonster {
     this._maxHealth = this._monsterDetails.maxHp;
     this._monsterAttacks = [];
 
-    this._phaserGameObject = this._scene.add.image(
-      position.x,
-      position.y,
-      this._monsterDetails.assetKey,
-      this._monsterDetails.assetFrame || 0
-    );
+    this._phaserGameObject = this._scene.add
+      .image(position.x, position.y, this._monsterDetails.assetKey, this._monsterDetails.assetFrame || 0)
+      .setAlpha(0);
     this.#createHealthBarComponents(config.scaleHealthBarBackgroundImageByY);
 
     this._monsterDetails.attackIds.forEach((attackId) => {
@@ -155,5 +152,6 @@ export class BattleMonster {
       monsterHealthBarLevelText,
       monsterHpText,
     ]);
+    this._phaserHealthBarGameContainer.setAlpha(0);
   }
 }
