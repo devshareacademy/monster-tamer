@@ -7,6 +7,7 @@ import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { StateMachine } from '../utils/state-machine.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
+import { Background } from '../battle/background.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -47,7 +48,8 @@ export class BattleScene extends Phaser.Scene {
   create() {
     console.log(`[${BattleScene.name}:create] invoked`);
     // create main background
-    this.add.image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.FOREST).setOrigin(0);
+    const background = new Background(this);
+    background.showForest();
 
     // create the player and enemy monsters
     this.#activeEnemyMonster = new EnemyBattleMonster({
