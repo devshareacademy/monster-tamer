@@ -8,6 +8,8 @@ import {
   UI_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import WebFontFileLoader from '../assets/web-font-file-loader.js';
+import { KENNY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -63,6 +65,9 @@ export class PreloadScene extends Phaser.Scene {
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+
+    // load custom fonts
+    this.load.addFile(new WebFontFileLoader(this.load, [KENNY_FUTURE_NARROW_FONT_NAME]));
   }
 
   create() {
