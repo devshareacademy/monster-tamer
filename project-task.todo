@@ -30,8 +30,11 @@ Battle System:
   ☐ battle scene polish
     ☐ text animations
     ☐ monster animations
+    ☐ skip animations
     ☐ attack animations
     ☐ scene transitions
+    ☐ custom fonts
+    ☐ create background component
 
 World Scene:
   ☐ load level background
