@@ -58,7 +58,7 @@ export class BattleScene extends Phaser.Scene {
         currentHp: 25,
         maxHp: 25,
         attackIds: [1],
-        baseAttack: 5,
+        baseAttack: 25,
         currentLevel: 5,
       },
     });
@@ -154,7 +154,7 @@ export class BattleScene extends Phaser.Scene {
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
           this.#activeEnemyMonster.playTakeDamageAnimation(() => {
-            this.#activeEnemyMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+            this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
               this.#enemyAttack();
             });
           });
@@ -172,9 +172,13 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
       () => {
-        this.time.delayedCall(1200, () => {
-          this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+        // play attack animation based on the selected attack
+        // when attack is finished, play damage animation and then update health bar
+        this.time.delayedCall(500, () => {
+          this.#activePlayerMonster.playTakeDamageAnimation(() => {
+            this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
           });
         });
       }
@@ -236,12 +240,13 @@ export class BattleScene extends Phaser.Scene {
       name: BATTLE_STATES.BRING_OUT_MONSTER,
       onEnter: () => {
         // wait for player monster to appear on the screen and notify player about monster
-        this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
-          // wait for text animation to complete and for monster to appear before moving to next state
-          this.time.delayedCall(1200, () => {
+        this.#activePlayerMonster.playMonsterAppearAnimation(() => {
+          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => {
             this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
           });
         });
+
+        this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, undefined);
       },
     });
 

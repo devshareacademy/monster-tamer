@@ -46,4 +46,96 @@ export class PlayerBattleMonster extends BattleMonster {
     super.takeDamage(damage, callback);
     this.#setHealthBarText();
   }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playMonsterAppearAnimation(callback) {
+    const startXPos = -30;
+    this._phaserGameObject.setPosition(startXPos, Player_POSITION.y);
+    this._phaserGameObject.setAlpha(1);
+
+    this._scene.tweens.add({
+      delay: 0,
+      duration: 800,
+      x: {
+        from: startXPos,
+        start: startXPos,
+        to: Player_POSITION.x,
+      },
+      targets: this._phaserGameObject,
+      onComplete: () => {
+        callback();
+      },
+    });
+  }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playMonsterHealthBarAppearAnimation(callback) {
+    const startXPos = 800;
+    this._phaserHealthBarGameContainer.setAlpha(1);
+
+    this._scene.tweens.add({
+      delay: 0,
+      duration: 800,
+      x: {
+        from: startXPos,
+        start: startXPos,
+        to: this._phaserHealthBarGameContainer.x,
+      },
+      targets: this._phaserHealthBarGameContainer,
+      onComplete: () => {
+        callback();
+      },
+    });
+  }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playTakeDamageAnimation(callback) {
+    this._scene.tweens.add({
+      delay: 0,
+      duration: 150,
+      targets: this._phaserGameObject,
+      onComplete: () => {
+        this._phaserGameObject.setAlpha(1);
+        callback();
+      },
+      alpha: {
+        from: 1,
+        start: 1,
+        to: 0,
+      },
+      repeat: 10,
+    });
+  }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playDeathAnimation(callback) {
+    const startYPos = this._phaserGameObject.y;
+    const endYPos = startYPos + 400;
+
+    this._scene.tweens.add({
+      delay: 0,
+      duration: 2000,
+      y: {
+        from: startYPos,
+        start: startYPos,
+        to: endYPos,
+      },
+      targets: this._phaserGameObject,
+      onComplete: () => {
+        callback();
+      },
+    });
+  }
 }
