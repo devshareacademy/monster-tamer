@@ -207,7 +207,7 @@ export class BattleMenu {
   updateInfoPaneMessagesAndWaitForInput(messages, callback, skipAnimation = false) {
     this.#queuedInfoPanelMessages = messages;
     this.#queuedInfoPanelCallback = callback;
-    this.#queuedMessagesSkipAnimation = false;
+    this.#queuedMessagesSkipAnimation = skipAnimation;
 
     this.#updateInfoPaneWithMessage();
   }
@@ -233,10 +233,7 @@ export class BattleMenu {
       this.#battleTextGameObjectLine1.setText(messageToDisplay);
       this.#queuedMessageAnimationPlaying = false;
       this.#waitingForPlayerInput = true;
-      if (this.#queuedInfoPanelCallback) {
-        this.#queuedInfoPanelCallback();
-        this.#queuedInfoPanelCallback = undefined;
-      }
+      this.playInputCursorAnimation();
       return;
     }
 

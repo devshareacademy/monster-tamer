@@ -20,6 +20,8 @@ export class BattleMonster {
   _monsterAttacks;
   /** @protected @type {Phaser.GameObjects.Container} */
   _phaserHealthBarGameContainer;
+  /** @protected @type {boolean} */
+  _skipBattleAnimations;
 
   /**
    * @param {import('../../types/typedef.js').BattleMonsterConfig} config
@@ -34,6 +36,7 @@ export class BattleMonster {
     this._currentHealth = this._monsterDetails.currentHp;
     this._maxHealth = this._monsterDetails.maxHp;
     this._monsterAttacks = [];
+    this._skipBattleAnimations = config.skipBattleAnimations || false;
 
     this._phaserGameObject = this._scene.add
       .image(position.x, position.y, this._monsterDetails.assetKey, this._monsterDetails.assetFrame || 0)

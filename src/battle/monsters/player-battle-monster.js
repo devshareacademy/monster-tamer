@@ -56,6 +56,12 @@ export class PlayerBattleMonster extends BattleMonster {
     this._phaserGameObject.setPosition(startXPos, Player_POSITION.y);
     this._phaserGameObject.setAlpha(1);
 
+    if (this._skipBattleAnimations) {
+      this._phaserGameObject.setX(Player_POSITION.x);
+      callback();
+      return;
+    }
+
     this._scene.tweens.add({
       delay: 0,
       duration: 800,
@@ -79,6 +85,12 @@ export class PlayerBattleMonster extends BattleMonster {
     const startXPos = 800;
     this._phaserHealthBarGameContainer.setAlpha(1);
 
+    if (this._skipBattleAnimations) {
+      this._phaserHealthBarGameContainer.setX(this._phaserHealthBarGameContainer.x);
+      callback();
+      return;
+    }
+
     this._scene.tweens.add({
       delay: 0,
       duration: 800,
@@ -99,6 +111,12 @@ export class PlayerBattleMonster extends BattleMonster {
    * @returns {void}
    */
   playTakeDamageAnimation(callback) {
+    if (this._skipBattleAnimations) {
+      this._phaserGameObject.setAlpha(1);
+      callback();
+      return;
+    }
+
     this._scene.tweens.add({
       delay: 0,
       duration: 150,
@@ -123,6 +141,12 @@ export class PlayerBattleMonster extends BattleMonster {
   playDeathAnimation(callback) {
     const startYPos = this._phaserGameObject.y;
     const endYPos = startYPos + 400;
+
+    if (this._skipBattleAnimations) {
+      this._phaserGameObject.setY(endYPos);
+      callback();
+      return;
+    }
 
     this._scene.tweens.add({
       delay: 0,
