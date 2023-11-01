@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { BATTLE_BACKGROUND_ASSET_KEYS, MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
+import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { DIRECTION } from '../common/direction.js';
@@ -8,6 +8,8 @@ import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js
 import { StateMachine } from '../utils/state-machine.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
 import { Background } from '../battle/background.js';
+import { Attack } from '../battle/attacks/attack.js';
+import { IceShard } from '../battle/attacks/ice-shard.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -86,6 +88,9 @@ export class BattleScene extends Phaser.Scene {
     this.#createBattleStateMachine();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
+
+    const atk = new IceShard(this, { x: 745, y: 140 });
+    atk.playAnimation();
   }
 
   update() {
