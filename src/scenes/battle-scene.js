@@ -10,6 +10,7 @@ import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
 import { Background } from '../battle/background.js';
 import { Attack } from '../battle/attacks/attack.js';
 import { IceShard } from '../battle/attacks/ice-shard.js';
+import { Slash } from '../battle/attacks/slash.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -89,7 +90,8 @@ export class BattleScene extends Phaser.Scene {
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
 
-    const atk = new IceShard(this, { x: 745, y: 140 });
+    // const atk = new IceShard(this, { x: 745, y: 140 });
+    const atk = new Slash(this, { x: 745, y: 140 });
     atk.playAnimation();
   }
 
