@@ -1,21 +1,21 @@
 Project Setup:
-  ☐ create basic html page with minor css
-  ☐ running project on local web server
-  ☐ add phaser 3 library
-  ☐ create a basic phaser 3 game instance
-  ☐ add jsconfig to get phaser 3 types and intellisense
+  ✔ create basic html page with minor css @done(23-11-01 10:15)
+  ✔ running project on local web server @done(23-11-01 10:15)
+  ✔ add phaser 3 library @done(23-11-01 10:15)
+  ✔ create a basic phaser 3 game instance @done(23-11-01 10:15)
+  ✔ add jsconfig to get phaser 3 types and intellisense @done(23-11-01 10:15)
 
 Game Project Assets:
-  ☐ download game assets and add to project
-  ☐ show links to where assets can be found
+  ✔ download game assets and add to project @done(23-11-01 10:15)
+  ✔ show links to where assets can be found @done(23-11-01 10:15)
 
 Battle System:
-  ☐ load game assets
-  ☐ create battle scene layout
-  ☐ create dialog menu
-  ☐ create option menu
-  ☐ create monster attack move list
-  ☐ handle player input
+  ✔ load game assets @done(23-11-01 10:15)
+  ✔ create battle scene layout @done(23-11-01 10:15)
+  ✔ create dialog menu @done(23-11-01 10:15)
+  ✔ create option menu @done(23-11-01 10:15)
+  ✔ create monster attack move list @done(23-11-01 10:16)
+  ✔ handle player input @done(23-11-01 10:16)
   ☐ code optimization - move logic to components
     ☐ create health component
     ☐ create background component
@@ -35,6 +35,7 @@ Battle System:
     ☐ attack animations
     ☐ scene transitions
     ☐ custom fonts
+    ☐ create background component
 
 World Scene:
   ☐ load level background
