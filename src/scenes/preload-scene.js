@@ -7,6 +7,7 @@ import {
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
   UI_ASSET_KEYS,
+  WORLD_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import WebFontFileLoader from '../assets/web-font-file-loader.js';
@@ -84,6 +85,9 @@ export class PreloadScene extends Phaser.Scene {
       frameWidth: 48,
       frameHeight: 48,
     });
+
+    // load world assets
+    this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
   }
 
   create() {
