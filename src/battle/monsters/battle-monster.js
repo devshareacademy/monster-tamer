@@ -88,7 +88,10 @@ export class BattleMonster {
     if (this._currentHealth < 0) {
       this._currentHealth = 0;
     }
-    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, { callback });
+    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, {
+      callback,
+      skipBattleAnimations: this._skipBattleAnimations,
+    });
   }
 
   /**

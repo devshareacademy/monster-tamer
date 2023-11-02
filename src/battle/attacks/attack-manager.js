@@ -17,6 +17,8 @@ export const ATTACK_TARGET = Object.freeze({
 export class AttackManager {
   /** @type {Phaser.Scene} */
   #scene;
+  /** @type {boolean} */
+  #skipBattleAnimations;
   /** @type {IceShard} */
   #iceShardAttack;
   /** @type {Slash} */
@@ -24,9 +26,11 @@ export class AttackManager {
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the attack game object will be added to
+   * @param {boolean} [skipBattleAnimations=false] used to skip all animations tied to the monster attack during battle
    */
-  constructor(scene) {
+  constructor(scene, skipBattleAnimations = false) {
     this.#scene = scene;
+    this.#skipBattleAnimations = skipBattleAnimations;
   }
 
   /**
@@ -36,6 +40,11 @@ export class AttackManager {
    * @returns {void}
    */
   playAttackAnimation(attack, target, callback) {
+    if (this.#skipBattleAnimations) {
+      callback();
+      return;
+    }
+
     // if attack target is enemy
     let x = 745;
     let y = 140;

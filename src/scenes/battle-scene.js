@@ -86,7 +86,7 @@ export class BattleScene extends Phaser.Scene {
 
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
-    this.#attackManager = new AttackManager(this);
+    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
     this.#createBattleStateMachine();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
