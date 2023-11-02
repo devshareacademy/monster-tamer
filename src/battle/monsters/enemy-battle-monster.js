@@ -12,6 +12,6 @@ export class EnemyBattleMonster extends BattleMonster {
    * @param {import("../../types/typedef").BattleMonsterConfig} config
    */
   constructor(config) {
-    super(config, ENEMY_POSITION);
+    super({ ...config, scaleHealthBarBackgroundImageByY: 0.8 }, ENEMY_POSITION);
   }
 }

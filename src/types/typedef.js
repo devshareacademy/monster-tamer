@@ -5,6 +5,7 @@ import Phaser from '../lib/phaser.js';
  * @type {Object}
  * @property {Phaser.Scene} scene
  * @property {Monster} monsterDetails
+ * @property {number} [scaleHealthBarBackgroundImageByY=1]
  */
 
 /**
@@ -13,6 +14,7 @@ import Phaser from '../lib/phaser.js';
  * @property {string} name
  * @property {string} assetKey
  * @property {number} [assetFrame=0]
+ * @property {number} currentLevel
  * @property {number} maxHp
  * @property {number} currentHp
  * @property {number} baseAttack
