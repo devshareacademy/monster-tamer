@@ -75,7 +75,7 @@ export class Slash extends Attack {
       this.#attackGameObject1.setFrame(0);
       this.#attackGameObject2.setFrame(0);
       this.#attackGameObject3.setFrame(0);
-      this.isAnimationPlaying = false;
+      this._isAnimationPlaying = false;
 
       if (callback) {
         callback();

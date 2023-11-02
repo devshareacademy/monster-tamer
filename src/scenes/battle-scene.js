@@ -8,9 +8,7 @@ import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js
 import { StateMachine } from '../utils/state-machine.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
 import { Background } from '../battle/background.js';
-import { Attack } from '../battle/attacks/attack.js';
-import { IceShard } from '../battle/attacks/ice-shard.js';
-import { Slash } from '../battle/attacks/slash.js';
+import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -37,6 +35,8 @@ export class BattleScene extends Phaser.Scene {
   #activePlayerAttackIndex;
   /** @type {StateMachine} */
   #battleStateMachine;
+  /** @type {AttackManager} */
+  #attackManager;
 
   constructor() {
     super({
@@ -78,7 +78,7 @@ export class BattleScene extends Phaser.Scene {
         currentHp: 25,
         maxHp: 25,
         attackIds: [2],
-        baseAttack: 25,
+        baseAttack: 5,
         currentLevel: 5,
       },
       skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
@@ -86,13 +86,10 @@ export class BattleScene extends Phaser.Scene {
 
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
+    this.#attackManager = new AttackManager(this);
     this.#createBattleStateMachine();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
-
-    // const atk = new IceShard(this, { x: 745, y: 140 });
-    const atk = new Slash(this, { x: 745, y: 140 });
-    atk.playAnimation();
   }
 
   update() {
@@ -165,11 +162,17 @@ export class BattleScene extends Phaser.Scene {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
-          this.#activeEnemyMonster.playTakeDamageAnimation(() => {
-            this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
-              this.#enemyAttack();
-            });
-          });
+          this.#attackManager.playAttackAnimation(
+            this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].animationName,
+            ATTACK_TARGET.ENEMY,
+            () => {
+              this.#activeEnemyMonster.playTakeDamageAnimation(() => {
+                this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
+                  this.#enemyAttack();
+                });
+              });
+            }
+          );
         });
       },
       SKIP_BATTLE_ANIMATIONS
@@ -188,11 +191,17 @@ export class BattleScene extends Phaser.Scene {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
-          this.#activePlayerMonster.playTakeDamageAnimation(() => {
-            this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
-            });
-          });
+          this.#attackManager.playAttackAnimation(
+            this.#activeEnemyMonster.attacks[0].animationName,
+            ATTACK_TARGET.PLAYER,
+            () => {
+              this.#activePlayerMonster.playTakeDamageAnimation(() => {
+                this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+                  this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+                });
+              });
+            }
+          );
         });
       },
       SKIP_BATTLE_ANIMATIONS
@@ -244,7 +253,8 @@ export class BattleScene extends Phaser.Scene {
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
             () => {
               this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
-            }
+            },
+            SKIP_BATTLE_ANIMATIONS
           );
         });
       },
