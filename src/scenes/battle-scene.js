@@ -29,6 +29,7 @@ export class BattleScene extends Phaser.Scene {
     this.add.image(256, 316, MONSTER_ASSET_KEYS.IGUANIGNITE, 0).setFlipX(true);
 
     // render out the player health bar
+    const playerHealthBar = new HealthBar(this, 34, 34);
     const playerMonsterName = this.add.text(30, 20, MONSTER_ASSET_KEYS.IGUANIGNITE, {
       color: '#7E3D3F',
       fontSize: '32px',
@@ -36,7 +37,7 @@ export class BattleScene extends Phaser.Scene {
     this.add.container(556, 318, [
       this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0),
       playerMonsterName,
-      new HealthBar(this, 34, 34).container,
+      playerHealthBar.container,
       this.add.text(playerMonsterName.width + 35, 23, 'L5', {
         color: '#ED474B',
         fontSize: '28px',
@@ -55,6 +56,7 @@ export class BattleScene extends Phaser.Scene {
     ]);
 
     // render out the enemy health bar
+    const enemyHealthBar = new HealthBar(this, 34, 34);
     const enemyMonsterName = this.add.text(30, 20, MONSTER_ASSET_KEYS.CARNODUSK, {
       color: '#7E3D3F',
       fontSize: '32px',
@@ -62,7 +64,7 @@ export class BattleScene extends Phaser.Scene {
     this.add.container(0, 0, [
       this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1, 0.8),
       enemyMonsterName,
-      new HealthBar(this, 34, 34).container,
+      enemyHealthBar.container,
       this.add.text(enemyMonsterName.width + 35, 23, 'L5', {
         color: '#ED474B',
         fontSize: '28px',
@@ -79,6 +81,12 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.showMainBattleMenu();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
+    playerHealthBar.setMeterPercentageAnimated(0.5, {
+      duration: 3000,
+      callback: () => {
+        console.log('animation completed');
+      },
+    });
   }
 
   update() {
