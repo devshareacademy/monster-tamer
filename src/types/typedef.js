@@ -2,7 +2,7 @@ import Phaser from '../lib/phaser.js';
 
 /**
  * @typedef BattleMonsterConfig
- * @type {object}
+ * @type {Object}
  * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
  * @property {Monster} monsterDetails the details of the monster that is currently in battle
  * @property {number} [scaleHealthBarBackgroundImageByY=1] scales the health bar background vertically by the specified value, defaults to 1
@@ -11,7 +11,7 @@ import Phaser from '../lib/phaser.js';
 
 /**
  * @typedef Monster
- * @type {object}
+ * @type {Object}
  * @property {string} name the name of the monster
  * @property {string} assetKey the name of the asset key that should be used for this monster
  * @property {number} [assetFrame=0] if the asset key is tied to a spritesheet, this frame will be used, defaults to 0
@@ -24,14 +24,14 @@ import Phaser from '../lib/phaser.js';
 
 /**
  * @typedef Coordinate
- * @type {object}
+ * @type {Object}
  * @property {number} x the position of this coordinate
  * @property {number} y the position of this coordinate
  */
 
 /**
  * @typedef Attack
- * @type {object}
+ * @type {Object}
  * @property {number} id the unique id of this attack
  * @property {string} name the name of this attack
  * @property {import('../battle/attacks/attack-keys.js').AttackKeys} animationName the animation key that is tied to this attack, will be used to play the attack animation when attack is used.
