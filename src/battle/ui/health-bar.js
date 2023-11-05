@@ -4,24 +4,24 @@ import { HEALTH_BAR_ASSET_KEYS } from '../../assets/asset-keys.js';
 export class HealthBar {
   /** @type {Phaser.Scene} */
   #scene;
+  /** @type {Phaser.GameObjects.Container} */
+  #healthBarContainer;
   /** @type {number} */
   #fullWidth;
   /** @type {number} */
   #scaleY;
-  /** @type {Phaser.GameObjects.Container} */
-  #healthBarContainer;
-  /** @type {Phaser.GameObjects.Image} */
-  #leftShadowCap;
-  /** @type {Phaser.GameObjects.Image} */
-  #middleShadowCap;
-  /** @type {Phaser.GameObjects.Image} */
-  #rightShadowCap;
   /** @type {Phaser.GameObjects.Image} */
   #leftCap;
   /** @type {Phaser.GameObjects.Image} */
   #middle;
   /** @type {Phaser.GameObjects.Image} */
   #rightCap;
+  /** @type {Phaser.GameObjects.Image} */
+  #leftShadowCap;
+  /** @type {Phaser.GameObjects.Image} */
+  #middleShadow;
+  /** @type {Phaser.GameObjects.Image} */
+  #rightShadowCap;
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the health bar will be added to
@@ -34,7 +34,7 @@ export class HealthBar {
     this.#scaleY = 0.7;
 
     this.#healthBarContainer = this.#scene.add.container(x, y, []);
-    this.#createShadowImages(x, y);
+    this.#createHealthBarShadowImages(x, y);
     this.#createHealthBarImages(x, y);
     this.#setMeterPercentage(1);
   }
@@ -45,31 +45,33 @@ export class HealthBar {
   }
 
   /**
-   * @param {number} x the x position to place the health bar container
-   * @param {number} y the y position to place the health bar container
+   * @param {number} x the x position to place the health bar game object
+   * @param {number} y the y position to place the health bar game object
    * @returns {void}
    */
-  #createShadowImages(x, y) {
+  #createHealthBarShadowImages(x, y) {
     this.#leftShadowCap = this.#scene.add
       .image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW)
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
-    this.#middleShadowCap = this.#scene.add
+
+    this.#middleShadow = this.#scene.add
       .image(this.#leftShadowCap.x + this.#leftShadowCap.width, y, HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW)
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
-    this.#middleShadowCap.displayWidth = this.#fullWidth;
+    this.#middleShadow.displayWidth = this.#fullWidth;
+
     this.#rightShadowCap = this.#scene.add
-      .image(this.#middleShadowCap.x + this.#middleShadowCap.displayWidth, y, HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW)
+      .image(this.#middleShadow.x + this.#middleShadow.displayWidth, y, HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW)
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
 
-    this.#healthBarContainer.add([this.#leftShadowCap, this.#middleShadowCap, this.#rightShadowCap]);
+    this.#healthBarContainer.add([this.#leftShadowCap, this.#middleShadow, this.#rightShadowCap]);
   }
 
   /**
-   * @param {number} x the x position to place the health bar container
-   * @param {number} y the y position to place the health bar container
+   * @param {number} x the x position to place the health bar game object
+   * @param {number} y the y position to place the health bar game object
    * @returns {void}
    */
   #createHealthBarImages(x, y) {
@@ -77,10 +79,12 @@ export class HealthBar {
       .image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP)
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
+
     this.#middle = this.#scene.add
       .image(this.#leftCap.x + this.#leftCap.width, y, HEALTH_BAR_ASSET_KEYS.MIDDLE)
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
+
     this.#rightCap = this.#scene.add
       .image(this.#middle.x + this.#middle.displayWidth, y, HEALTH_BAR_ASSET_KEYS.RIGHT_CAP)
       .setOrigin(0, 0.5)
@@ -108,7 +112,7 @@ export class HealthBar {
   }
 
   /**
-   * @param {number} percent a number between 0 and 1 that is used for setting how filled the health bar is
+   * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the health bar is
    * @param {Object} [options] optional configuration options that can be provided for the animation
    * @param {number} [options.duration=1000] the duration of the health bar animation
    * @param {() => void} [options.callback] an optional callback that will be called when the animation is complete
