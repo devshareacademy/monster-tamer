@@ -53,6 +53,19 @@ export class PreloadScene extends Phaser.Scene {
       `${kenneysAssetPath}/ui-space-expansion/barHorizontal_shadow_right.png`
     );
 
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW,
+      `${kenneysAssetPath}/ui-space-expansion/barHorizontal_shadow_right.png`
+    );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW,
+      `${kenneysAssetPath}/ui-space-expansion/barHorizontal_shadow_mid.png`
+    );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW,
+      `${kenneysAssetPath}/ui-space-expansion/barHorizontal_shadow_left.png`
+    );
+
     // monster assets
     this.load.image(MONSTER_ASSET_KEYS.CARNODUSK, `${monsterTamerAssetPath}/monsters/carnodusk.png`);
     this.load.image(MONSTER_ASSET_KEYS.IGUANIGNITE, `${monsterTamerAssetPath}/monsters/iguanignite.png`);
