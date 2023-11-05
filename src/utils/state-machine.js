@@ -20,8 +20,8 @@ export class StateMachine {
   #changingStateQueue;
 
   /**
-   * @param {string} id
-   * @param {Object} [context]
+   * @param {string} id the unique identifier for this state machine instance.
+   * @param {Object} [context] the context to use when invoking each method on the state.
    */
   constructor(id, context) {
     this.#id = id;
@@ -37,6 +37,10 @@ export class StateMachine {
     return this.#currentState?.name;
   }
 
+  /**
+   * Used for processing any queued states and is meant to be called during every step of our game loop.
+   * @returns {void}
+   */
   update() {
     if (this.#changingStateQueue.length > 0) {
       this.setState(this.#changingStateQueue.shift());
@@ -44,7 +48,11 @@ export class StateMachine {
   }
 
   /**
+   * Updates the current state of the state machine to the provided state name. If the state machine
+   * is already transitioning states, or if there is a queue of states, the new state will be added
+   * to that queue and processed after the queue is processed.
    * @param {string} name
+   * @returns {void}
    */
   setState(name) {
     const methodName = 'setState';
@@ -79,7 +87,10 @@ export class StateMachine {
   }
 
   /**
+   * Adds a new state to the current state machine instance. If a state already exists with the given name
+   * that previous state will be replaced with the new state that was provided.
    * @param {State} state
+   * @returns {void}
    */
   addState(state) {
     this.#states.set(state.name, {
@@ -89,6 +100,7 @@ export class StateMachine {
   }
 
   /**
+   * Checks to see if the provided state name is the state that is currently being handled by the state machine instance.
    * @param {string} name
    * @returns {boolean}
    */
