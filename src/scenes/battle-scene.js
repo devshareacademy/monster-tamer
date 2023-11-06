@@ -90,6 +90,22 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.update();
 
     const wasSpaceKeyPressed = Phaser.Input.Keyboard.JustDown(this.#cursorKeys.space);
+    // limit input based on the current battle state we are in
+    // if we are not in the right battle state, return early and do not process input
+    if (
+      wasSpaceKeyPressed &&
+      (this.#battleStateMachine.currentStateName === BATTLE_STATES.PRE_BATTLE_INFO ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.POST_ATTACK_CHECK ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT)
+    ) {
+      this.#battleMenu.handlePlayerInput('OK');
+      return;
+    }
+
+    if (this.#battleStateMachine.currentStateName !== BATTLE_STATES.PLAYER_INPUT) {
+      return;
+    }
+
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
 
@@ -133,14 +149,10 @@ export class BattleScene extends Phaser.Scene {
   }
 
   #playerAttack() {
-    this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-      [
-        `${this.#activePlayerMonster.name} used ${
-          this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name
-        }`,
-      ],
+    this.#battleMenu.updateInfoPaneMessageNoInputRequired(
+      `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
-        this.time.delayedCall(500, () => {
+        this.time.delayedCall(1200, () => {
           this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
             this.#enemyAttack();
           });
@@ -155,10 +167,10 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
 
-    this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-      [`for ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`],
+    this.#battleMenu.updateInfoPaneMessageNoInputRequired(
+      `for ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
       () => {
-        this.time.delayedCall(500, () => {
+        this.time.delayedCall(1200, () => {
           this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
             this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
           });
@@ -231,9 +243,9 @@ export class BattleScene extends Phaser.Scene {
       name: BATTLE_STATES.BRING_OUT_MONSTER,
       onEnter: () => {
         // wait for player monster to appear on the screen and notify the player about monster
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`go ${this.#activePlayerMonster.name}!`], () => {
+        this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
           // wait for text animation to complete and move to next state
-          this.time.delayedCall(500, () => {
+          this.time.delayedCall(1200, () => {
             this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
           });
         });
