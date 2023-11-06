@@ -129,7 +129,6 @@ export class BattleMenu {
       }
       return;
     }
-
     this.#updateSelectedBattleMenuOptionFromInput(input);
     this.#updateSelectedMoveMenuOptionFromInput(input);
     this.#moveMainBattleMenuCursor();
