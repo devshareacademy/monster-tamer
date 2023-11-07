@@ -1,4 +1,5 @@
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
+import { DataUtils } from '../../utils/data-utils.js';
 import { HealthBar } from '../ui/health-bar.js';
 
 export class BattleMonster {
@@ -37,6 +38,12 @@ export class BattleMonster {
       this._monsterDetails.assetFrame || 0
     );
     this.#createHealthBarComponents(config.scaleHealthBarBackgroundImageByY);
+    this._monsterDetails.attackIds.forEach((attackId) => {
+      const monsterAttack = DataUtils.getMonsterAttack(this._scene, attackId);
+      if (monsterAttack !== undefined) {
+        this._monsterAttacks.push(monsterAttack);
+      }
+    });
   }
 
   /** @type {boolean} */

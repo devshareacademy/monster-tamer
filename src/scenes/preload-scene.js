@@ -1,6 +1,7 @@
 import {
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
+  DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
   UI_ASSET_KEYS,
@@ -60,6 +61,9 @@ export class PreloadScene extends Phaser.Scene {
 
     // ui assets
     this.load.image(UI_ASSET_KEYS.CURSOR, `${monsterTamerAssetPath}/ui/cursor.png`);
+
+    // load json data
+    this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
   }
 
   create() {
