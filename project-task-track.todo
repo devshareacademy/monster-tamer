@@ -17,8 +17,8 @@ Battle System:
   ✔ create monster attack move list @done(23-11-01 10:16)
   ✔ handle player input @done(23-11-01 10:16)
   ☐ code optimization - move logic to components
-    ☐ create health component
-    ☐ create background component
+    ✔ create health component @done(23-11-02 10:28)
+    ✔ create background component @done(23-11-02 10:28)
     ☐ create monster components
   ☐ adding basic attack logic
   ☐ taking damage and monster knock out
