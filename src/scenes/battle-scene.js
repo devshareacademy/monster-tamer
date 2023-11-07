@@ -1,10 +1,9 @@
 import Phaser from '../lib/phaser.js';
-import { BATTLE_ASSET_KEYS, MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
+import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { Background } from '../battle/background.js';
-import { HealthBar } from '../battle/ui/health-bar.js';
 import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 
