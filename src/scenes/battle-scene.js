@@ -45,7 +45,7 @@ export class BattleScene extends Phaser.Scene {
         currentHp: 25,
         maxHp: 25,
         attackIds: [1],
-        baseAttack: 25,
+        baseAttack: 5,
         currentLevel: 5,
       },
     });
@@ -135,7 +135,7 @@ export class BattleScene extends Phaser.Scene {
       ],
       () => {
         this.time.delayedCall(500, () => {
-          this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
+          this.#activeEnemyMonster.takeDamage(20, () => {
             this.#enemyAttack();
           });
         });
@@ -144,51 +144,15 @@ export class BattleScene extends Phaser.Scene {
   }
 
   #enemyAttack() {
-    if (this.#activeEnemyMonster.isFainted) {
-      this.#postBattleSequenceCheck();
-      return;
-    }
-
     this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
       [`for ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`],
       () => {
         this.time.delayedCall(500, () => {
-          this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-            this.#postBattleSequenceCheck();
+          this.#activePlayerMonster.takeDamage(20, () => {
+            this.#battleMenu.showMainBattleMenu();
           });
         });
       }
     );
-  }
-
-  #postBattleSequenceCheck() {
-    if (this.#activeEnemyMonster.isFainted) {
-      this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-        [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
-        () => {
-          this.#transitionToNextScene();
-        }
-      );
-      return;
-    }
-
-    if (this.#activePlayerMonster.isFainted) {
-      this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-        [`${this.#activePlayerMonster.name} fainted`, 'You have no more monsters, escaping to safety...'],
-        () => {
-          this.#transitionToNextScene();
-        }
-      );
-      return;
-    }
-
-    this.#battleMenu.showMainBattleMenu();
-  }
-
-  #transitionToNextScene() {
-    this.cameras.main.fadeOut(600, 0, 0, 0);
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start(SCENE_KEYS.BATTLE_SCENE);
-    });
   }
 }
