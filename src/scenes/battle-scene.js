@@ -5,14 +5,14 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { Background } from '../battle/background.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
-import { BattleMonster } from '../battle/monsters/battle-monster.js';
+import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 
 export class BattleScene extends Phaser.Scene {
   /** @type {BattleMenu} */
   #battleMenu;
   /** @type {Phaser.Types.Input.Keyboard.CursorKeys} */
   #cursorKeys;
-  /** @type {BattleMonster} */
+  /** @type {EnemyBattleMonster} */
   #activeEnemyMonster;
 
   constructor() {
@@ -28,24 +28,18 @@ export class BattleScene extends Phaser.Scene {
     background.showForest();
 
     // render out the player and enemy monsters
-    this.#activeEnemyMonster = new BattleMonster(
-      {
-        scene: this,
-        monsterDetails: {
-          name: MONSTER_ASSET_KEYS.CARNODUSK,
-          assetKey: MONSTER_ASSET_KEYS.CARNODUSK,
-          assetFrame: 0,
-          currentHp: 25,
-          maxHp: 25,
-          attackIds: [],
-          baseAttack: 5,
-        },
+    this.#activeEnemyMonster = new EnemyBattleMonster({
+      scene: this,
+      monsterDetails: {
+        name: MONSTER_ASSET_KEYS.CARNODUSK,
+        assetKey: MONSTER_ASSET_KEYS.CARNODUSK,
+        assetFrame: 0,
+        currentHp: 25,
+        maxHp: 25,
+        attackIds: [],
+        baseAttack: 5,
       },
-      {
-        x: 768,
-        y: 144,
-      }
-    );
+    });
     // this.add.image(768, 144, MONSTER_ASSET_KEYS.CARNODUSK, 0);
     this.add.image(256, 316, MONSTER_ASSET_KEYS.IGUANIGNITE, 0).setFlipX(true);
 
@@ -109,6 +103,7 @@ export class BattleScene extends Phaser.Scene {
         console.log('animation completed');
       },
     });
+    this.#activeEnemyMonster.takeDamage(20);
   }
 
   update() {
