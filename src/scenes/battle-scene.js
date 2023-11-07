@@ -81,9 +81,11 @@ export class BattleScene extends Phaser.Scene {
       }
       console.log(`Player selected the following move: ${this.#battleMenu.selectedAttack}`);
       this.#battleMenu.hideMonsterAttackSubMenu();
+      // TODO: update to use the actual attack name
       this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['Your monster attacks the enemy'], () => {
         this.#battleMenu.showMainBattleMenu();
       });
+      return;
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.#cursorKeys.shift)) {
