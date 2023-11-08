@@ -23,10 +23,10 @@ Battle System:
   ✔ adding basic attack logic @done(23-11-05 13:28)
   ✔ taking damage and monster knock out @done(23-11-05 13:28)
   ☐ battle state machine
-    ☐ what is a finite state machine
-    ☐ review the battle states and what each one represents
-    ☐ implement each state
-    ☐ add item, flee, and monster states
+    ✔ what is a finite state machine @done(23-11-06 07:48)
+    ✔ review the battle states and what each one represents @done(23-11-06 07:48)
+    ✔ implement each state @done(23-11-06 07:48)
+    ✔ add item, flee, and monster states @done(23-11-06 07:48)
     ☐ player input improvements
   ☐ battle scene polish
     ☐ text animations
@@ -35,7 +35,6 @@ Battle System:
     ☐ attack animations
     ☐ scene transitions
     ☐ custom fonts
-    ☐ create background component
 
 World Scene:
   ☐ load level background
