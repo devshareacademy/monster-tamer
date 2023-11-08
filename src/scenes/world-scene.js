@@ -1,6 +1,6 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
-import { CHARACTER_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { Player } from '../world/characters/player.js';
 
 const TILE_SIZE = 64;
@@ -24,7 +24,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
-    this.player = new Player({
+    this.#player = new Player({
       scene: this,
       position: PLAYER_POSITION,
     });

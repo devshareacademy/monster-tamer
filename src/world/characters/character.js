@@ -20,7 +20,7 @@ export class Character {
    */
   constructor(config) {
     this._scene = config.scene;
-    this._sprite = this._scene.add
+    this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, config.assetFrame || 0)
       .setOrigin(0);
   }
