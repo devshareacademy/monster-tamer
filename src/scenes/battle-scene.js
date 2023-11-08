@@ -156,7 +156,7 @@ export class BattleScene extends Phaser.Scene {
     }
 
     this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-      [`for ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`],
+      [`foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`],
       () => {
         this.time.delayedCall(500, () => {
           this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
