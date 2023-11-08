@@ -1,4 +1,5 @@
 import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { DIRECTION } from '../common/direction.js';
 import Phaser from '../lib/phaser.js';
 import { Controls } from '../utils/controls.js';
 import { createNineSliceContainer } from '../utils/nine-slice.js';
@@ -63,5 +64,80 @@ export class TitleScene extends Phaser.Scene {
     const optionText = this.add.text(menuBgWidth / 2, 140, 'Options', MENU_TEXT_STYLE).setOrigin(0.5);
     const menuContainer = this.add.container(0, 0, [menuBgContainer, newGameText, continueText, optionText]);
     menuContainer.setPosition(this.scale.width / 2 - menuBgWidth / 2, 300);
+
+    // create cursors
+    this.#mainMenuCursorPhaserImageGameObject = this.add
+      .image(PLAYER_INPUT_CURSOR_POSITION.x, 41, UI_ASSET_KEYS.CURSOR)
+      .setOrigin(0.5)
+      .setScale(2.5);
+    menuBgContainer.add(this.#mainMenuCursorPhaserImageGameObject);
+    this.tweens.add({
+      delay: 0,
+      duration: 500,
+      repeat: -1,
+      x: {
+        from: PLAYER_INPUT_CURSOR_POSITION.x,
+        start: PLAYER_INPUT_CURSOR_POSITION.x,
+        to: PLAYER_INPUT_CURSOR_POSITION.x + 3,
+      },
+      targets: this.#mainMenuCursorPhaserImageGameObject,
+    });
+
+    // add in fade affects
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        return;
+      }
+
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
+        this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
+        return;
+      }
+
+      // TODO: implement continue logic
+      this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    });
+
+    this.#controls = new Controls(this);
+  }
+
+  update() {
+    if (this.#controls.isInputLocked) {
+      return;
+    }
+
+    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    if (wasSpaceKeyPressed) {
+      if (
+        this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME ||
+        this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS
+      ) {
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.#controls.lockInput = true;
+        return;
+      }
+    }
+
+    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#moveMenuSelectCursor(selectedDirection);
+    }
+  }
+
+  /**
+   * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
+   */
+  #moveMenuSelectCursor(direction) {
+    // TODO
+  }
+
+  /**
+   * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
+   */
+  #updateSelectedMenuOptionFromInput(direction) {
+    // TODO
   }
 }
