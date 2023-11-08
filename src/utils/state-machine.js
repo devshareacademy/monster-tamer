@@ -8,57 +8,43 @@
 export class StateMachine {
   /** @type {Map<string, State>} */
   #states;
-  /** @type {State|undefined} */
+  /** @type {State | undefined} */
   #currentState;
   /** @type {string} */
   #id;
-  /** @type {object|undefined} */
+  /** @type {object | undefined} */
   #context;
   /** @type {boolean} */
   #isChangingState;
   /** @type {string[]} */
-  #changeStateQueue;
+  #changingStateQueue;
 
   /**
    * @param {string} id the unique identifier for this state machine instance.
-   * @param {object} [context] the context to use when invoking each method on the state.
+   * @param {Object} [context] the context to use when invoking each method on the state.
    */
   constructor(id, context) {
     this.#id = id;
     this.#context = context;
     this.#isChangingState = false;
-    this.#changeStateQueue = [];
+    this.#changingStateQueue = [];
     this.#currentState = undefined;
     this.#states = new Map();
   }
 
-  /** @type {string|undefined} */
+  /** @type {string | undefined} */
   get currentStateName() {
     return this.#currentState?.name;
   }
 
   /**
-   * Adds a new state to the current state machine instance. If a state already exists with the given name
-   * that previous state will be replaced with the new state that was provided.
-   * @param {State} state
-   * @returns {StateMachine}
+   * Used for processing any queued states and is meant to be called during every step of our game loop.
+   * @returns {void}
    */
-  addState(state) {
-    const context = this.#context;
-
-    if (this.#context) {
-      this.#states.set(state.name, {
-        name: state.name,
-        onEnter: state?.onEnter?.bind(context),
-      });
-      return this;
+  update() {
+    if (this.#changingStateQueue.length > 0) {
+      this.setState(this.#changingStateQueue.shift());
     }
-
-    this.#states.set(state.name, {
-      name: state.name,
-      onEnter: state?.onEnter,
-    });
-    return this;
   }
 
   /**
@@ -81,12 +67,11 @@ export class StateMachine {
     }
 
     if (this.#isChangingState) {
-      this.#changeStateQueue.push(name);
+      this.#changingStateQueue.push(name);
       return;
     }
 
-    this.isChangingState = true;
-
+    this.#isChangingState = true;
     console.log(
       `[${StateMachine.name}-${this.#id}:${methodName}] change from ${this.#currentState?.name ?? 'none'} to ${name}`
     );
@@ -102,14 +87,16 @@ export class StateMachine {
   }
 
   /**
-   * Used for processing any queued states and is meant to be called during every step of our game loop.
+   * Adds a new state to the current state machine instance. If a state already exists with the given name
+   * that previous state will be replaced with the new state that was provided.
+   * @param {State} state
    * @returns {void}
    */
-  update() {
-    if (this.#changeStateQueue.length > 0) {
-      this.setState(this.#changeStateQueue.shift());
-      return;
-    }
+  addState(state) {
+    this.#states.set(state.name, {
+      name: state.name,
+      onEnter: this.#context ? state.onEnter?.bind(this.#context) : state.onEnter,
+    });
   }
 
   /**
@@ -121,7 +108,6 @@ export class StateMachine {
     if (!this.#currentState) {
       return false;
     }
-
     return this.#currentState.name === name;
   }
 }
