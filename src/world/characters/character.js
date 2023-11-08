@@ -19,6 +19,10 @@ export class Character {
    * @param {CharacterConfig} config
    */
   constructor(config) {
+    if (this.constructor === Character) {
+      throw new Error('Character is an abstract class and cannot be instantiated.');
+    }
+
     this._scene = config.scene;
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, config.assetFrame || 0)
