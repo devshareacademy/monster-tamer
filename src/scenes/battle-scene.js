@@ -79,7 +79,7 @@ export class BattleScene extends Phaser.Scene {
         currentHp: 25,
         maxHp: 25,
         attackIds: [2],
-        baseAttack: 5,
+        baseAttack: 15,
         currentLevel: 5,
       },
       skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
@@ -97,7 +97,6 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.update();
 
     const wasSpaceKeyPressed = Phaser.Input.Keyboard.JustDown(this.#cursorKeys.space);
-
     // limit input based on the current battle state we are in
     // if we are not in the right battle state, return early and do not process input
     if (
@@ -209,6 +208,38 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
+  #postBattleSequenceCheck() {
+    if (this.#activeEnemyMonster.isFainted) {
+      // play monster fainted animation and wait for animation to finish
+      this.#activeEnemyMonster.playDeathAnimation(() => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
+          () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          },
+          SKIP_BATTLE_ANIMATIONS
+        );
+      });
+      return;
+    }
+
+    if (this.#activePlayerMonster.isFainted) {
+      // play monster fainted animation and wait for animation to finish
+      this.#activePlayerMonster.playDeathAnimation(() => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
+          () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          },
+          SKIP_BATTLE_ANIMATIONS
+        );
+      });
+      return;
+    }
+
+    this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+  }
+
   #transitionToNextScene() {
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
@@ -293,7 +324,7 @@ export class BattleScene extends Phaser.Scene {
       name: BATTLE_STATES.ENEMY_INPUT,
       onEnter: () => {
         // TODO: add feature in a future update
-        // pick a random move for the enemy monster, in the future, implement some type of AI behavior
+        // pick a random move for the enemy monster, and in the future implement some type of AI behavior
         this.#battleStateMachine.setState(BATTLE_STATES.BATTLE);
       },
     });
@@ -315,35 +346,7 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.POST_ATTACK_CHECK,
       onEnter: () => {
-        if (this.#activeEnemyMonster.isFainted) {
-          // play monster fainted animation and wait for animation to finish
-          this.#activeEnemyMonster.playDeathAnimation(() => {
-            this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-              [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
-              () => {
-                this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-              },
-              SKIP_BATTLE_ANIMATIONS
-            );
-          });
-          return;
-        }
-
-        if (this.#activePlayerMonster.isFainted) {
-          // play monster fainted animation and wait for animation to finish
-          this.#activePlayerMonster.playDeathAnimation(() => {
-            this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-              [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
-              () => {
-                this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-              },
-              SKIP_BATTLE_ANIMATIONS
-            );
-          });
-          return;
-        }
-
-        this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+        this.#postBattleSequenceCheck();
       },
     });
 

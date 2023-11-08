@@ -180,7 +180,7 @@ export class BattleMenu {
 
     if (skipAnimation) {
       this.#battleTextGameObjectLine1.setText(message);
-      this.waitingForPlayerInput = false;
+      this.#waitingForPlayerInput = false;
       if (callback) {
         callback();
       }
@@ -233,7 +233,16 @@ export class BattleMenu {
       this.#battleTextGameObjectLine1.setText(messageToDisplay);
       this.#queuedMessageAnimationPlaying = false;
       this.#waitingForPlayerInput = true;
-      this.playInputCursorAnimation();
+
+      // TODO: need to address as a bug fix, in current video we call the callback
+      // without waiting for input or playing the cursor animation
+      // code should be this line
+      // this.playInputCursorAnimation();
+
+      if (this.#queuedInfoPanelCallback) {
+        this.#queuedInfoPanelCallback();
+        this.#queuedInfoPanelCallback = undefined;
+      }
       return;
     }
 
@@ -618,19 +627,11 @@ export class BattleMenu {
   }
 
   #createPlayerInputCursor() {
-    this.#userInputCursorPhaserImageGameObject = this.#scene.add.image(
-      0,
-      PLAYER_INPUT_CURSOR_POS.y,
-      UI_ASSET_KEYS.CURSOR
-    );
-    this.#userInputCursorPhaserImageGameObject.setPosition(
-      this.#battleTextGameObjectLine1.displayWidth + this.#userInputCursorPhaserImageGameObject.displayWidth * 4,
-      PLAYER_INPUT_CURSOR_POS.y
-    );
+    this.#userInputCursorPhaserImageGameObject = this.#scene.add.image(0, 0, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursorPhaserImageGameObject.setAngle(90).setScale(2.5, 1.25);
     this.#userInputCursorPhaserImageGameObject.setAlpha(0);
 
-    this.#userInputCursorPhaserTween = this.#scene.tweens.add({
+    this.#userInputCursorPhaserTween = this.#scene.add.tween({
       delay: 0,
       duration: 500,
       repeat: -1,
