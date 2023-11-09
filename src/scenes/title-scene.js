@@ -1,7 +1,8 @@
+import Phaser from '../lib/phaser.js';
 import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
-import Phaser from '../lib/phaser.js';
 import { Controls } from '../utils/controls.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 import { createNineSliceContainer } from '../utils/nine-slice.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
@@ -130,7 +131,20 @@ export class TitleScene extends Phaser.Scene {
    * @returns {void}
    */
   #moveMenuSelectCursor(direction) {
-    // TODO
+    this.#updateSelectedMenuOptionFromInput(direction);
+    switch (this.#selectedMenuOption) {
+      case MAIN_MENU_OPTIONS.NEW_GAME:
+        this.#mainMenuCursorPhaserImageGameObject.setY(41);
+        break;
+      case MAIN_MENU_OPTIONS.CONTINUE:
+        this.#mainMenuCursorPhaserImageGameObject.setY(91);
+        break;
+      case MAIN_MENU_OPTIONS.OPTIONS:
+        this.#mainMenuCursorPhaserImageGameObject.setY(141);
+        break;
+      default:
+        exhaustiveGuard(this.#selectedMenuOption);
+    }
   }
 
   /**
@@ -138,6 +152,19 @@ export class TitleScene extends Phaser.Scene {
    * @returns {void}
    */
   #updateSelectedMenuOptionFromInput(direction) {
-    // TODO
+    switch (direction) {
+      case DIRECTION.UP:
+        this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
+        return;
+      case DIRECTION.DOWN:
+        this.#selectedMenuOption = MAIN_MENU_OPTIONS.OPTIONS;
+        return;
+      case DIRECTION.LEFT:
+      case DIRECTION.RIGHT:
+      case DIRECTION.NONE:
+        return;
+      default:
+        exhaustiveGuard(direction);
+    }
   }
 }
