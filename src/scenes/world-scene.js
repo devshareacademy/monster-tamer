@@ -6,11 +6,32 @@ import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILE_SIZE } from '../config.js';
 import { Character } from '../world/characters/character.js';
+import { NPC } from '../world/characters/npc.js';
+
+/**
+ * @typedef TiledObjectProperty
+ * @type {object}
+ * @property {string} name
+ * @property {string} messages
+ * @property {any} value
+ */
 
 /** @type {import('../types/typedef.js').Coordinate} */
 const PLAYER_POSITION = Object.freeze({
   x: 6 * TILE_SIZE,
   y: 21 * TILE_SIZE,
+});
+
+const CUSTOM_TILED_TYPES = Object.freeze({
+  NPC: 'npc',
+  NPC_PATH: 'npc_path',
+});
+
+const TILED_NPC_PROPERTY = Object.freeze({
+  IS_SPAWN_POINT: 'is_spawn_point',
+  MOVEMENT_PATTERN: 'movement_pattern',
+  MESSAGES: 'messages',
+  FRAME: 'frame',
 });
 
 /*
@@ -90,5 +111,58 @@ export class WorldScene extends Phaser.Scene {
    */
   #createNPCs(map) {
     this.#npcs = [];
+
+    const npcLayers = map.getObjectLayerNames().filter((layerName) => layerName.includes('NPC'));
+    npcLayers.forEach((layerName) => {
+      const layer = map.getObjectLayer(layerName);
+      const npcObject = layer.objects.find((obj) => {
+        return obj.type === CUSTOM_TILED_TYPES.NPC;
+      });
+      if (!npcObject || npcObject.x === undefined || npcObject.y === undefined) {
+        return;
+      }
+      // get the path objects for this npc
+      const pathObjects = layer.objects.filter((obj) => {
+        return obj.type === CUSTOM_TILED_TYPES.NPC_PATH;
+      });
+      /** @type {import('../world/characters/npc.js').NPCPath} */
+      const npcPath = {
+        0: new Phaser.Math.Vector2(npcObject.x, npcObject.y - TILE_SIZE),
+      };
+      pathObjects.forEach((obj) => {
+        if (obj.x === undefined || obj.y === undefined) {
+          return;
+        }
+        npcPath[parseInt(obj.name, 10)] = new Phaser.Math.Vector2(obj.x, obj.y - TILE_SIZE);
+      });
+
+      /** @type {string} */
+      const npcFrame =
+        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+          (property) => property.name === TILED_NPC_PROPERTY.FRAME
+        )?.value || '0';
+      /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
+      const npcMovement = /** @type {TiledObjectProperty[]} */ npcObject.properties.find(
+        (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
+      )?.value;
+      /** @type {string} */
+      const npcMessagesString =
+        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
+        )?.value || '';
+      const npcMessages = npcMessagesString.split('::');
+
+      // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
+      const npc = new NPC({
+        scene: this,
+        position: new Phaser.Math.Vector2(npcObject.x, npcObject.y - TILE_SIZE),
+        direction: DIRECTION.DOWN,
+        frame: parseInt(npcFrame, 10),
+        messages: npcMessages,
+        npcPath,
+        movementPattern: npcMovement,
+      });
+      this.#npcs.push(npc);
+    });
   }
 }

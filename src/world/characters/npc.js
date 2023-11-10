@@ -15,11 +15,16 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
 });
 
 /**
+ * @typedef NPCPath
+ * @type {Object.<number, import('../../types/typedef.js').Coordinate>}
+ */
+
+/**
  * @typedef NPCConfigProps
  * @type {object}
  * @property {number} frame
  * @property {string[]} messages
- * @property {Object.<number, import('../../types/typedef.js').Coordinate>} npcPath
+ * @property {NPCPath} npcPath
  * @property {NpcMovementPattern} movementPattern
  */
 
@@ -30,7 +35,7 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
 export class NPC extends Character {
   /** @type {string[]} */
   #messages;
-  /** @type {Object.<number, import('../../types/typedef.js').Coordinate>} */
+  /** @type {NPCPath} */
   #npcPath;
   /** @type {number} */
   #currentPathIndex;
@@ -65,6 +70,7 @@ export class NPC extends Character {
     this.#movementPattern = config.movementPattern;
     this.#lastMoveMentTime = Phaser.Math.Between(3500, 5000);
     this.#talkingToPlayer = false;
+    this._phaserGameObject.setScale(4);
   }
 
   /** @type {string[]} */

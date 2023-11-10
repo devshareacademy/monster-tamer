@@ -83,7 +83,7 @@ export class Character {
     this._otherCharactersToCheckForCollisionWith = config.otherCharactersToCheckForCollisionWith || [];
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
-      .setOrigin(0);
+      .setOrigin(this._origin.x, this._origin.y);
   }
 
   /** @type {Phaser.GameObjects.Sprite} */

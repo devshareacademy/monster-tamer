@@ -154,6 +154,29 @@ export class PreloadScene extends Phaser.Scene {
       yoyo: true,
     });
 
+    // create npc animations
+    this.anims.create({
+      key: `NPC_1_${DIRECTION.DOWN}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [24, 20, 25] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `NPC_1_${DIRECTION.UP}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [26, 21, 27] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `NPC_1_${DIRECTION.RIGHT}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [28, 22, 29] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+
     // create nineslice textures
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND);
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
