@@ -3,13 +3,9 @@ import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 
-/**
- * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'isPlayer' | 'origin' | 'idleFrame'>} PlayerConfig
- */
-
 export class Player extends Character {
   /**
-   * @param {PlayerConfig} config
+   * @param {import('./character.js').BaseCharacterConfig} config
    */
   constructor(config) {
     super({

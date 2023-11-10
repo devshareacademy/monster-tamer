@@ -14,17 +14,26 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  */
 
 /**
- * @typedef CharacterConfig
+ * @typedef BaseCharacterConfig
  * @type {object}
  * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
- * @property {string} assetKey the name of the asset key that should be used for this character
  * @property {import('../../types/typedef.js').Coordinate} position the starting position of the character
- * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
- * @property {boolean} [isPlayer=false]
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionWith=[]]
- * @property {CharacterIdleFrameConfig} idleFrame
  * @property {import('../../common/direction.js').Direction} direction
+ */
+
+/**
+ * @typedef CharacterConfigProps
+ * @type {object}
+ * @property {string} assetKey the name of the asset key that should be used for this character
+ * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
+ * @property {boolean} [isPlayer=false]
+ * @property {CharacterIdleFrameConfig} idleFrame
+ */
+
+/**
+ * @typedef {BaseCharacterConfig & CharacterConfigProps} CharacterConfig
  */
 
 export class Character {
