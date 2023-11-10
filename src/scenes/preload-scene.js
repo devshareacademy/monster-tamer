@@ -15,6 +15,8 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { createNineSliceTextures } from '../utils/nine-slice.js';
+import { DIRECTION } from '../common/direction.js';
+import { WALK_FRAME_RATE } from '../config.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -101,6 +103,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // load world assets
     this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
+    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL, `assets/data/level.json`);
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulartAssetPath}/character/custom.png`, {
@@ -121,11 +124,41 @@ export class PreloadScene extends Phaser.Scene {
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
 
+    // create player animations
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.DOWN}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [6, 7, 8] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.RIGHT}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [3, 4, 5] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.LEFT}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [9, 10, 11] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.UP}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [0, 1, 2] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+
     // create nineslice textures
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND);
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE);
 
-    this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 }
