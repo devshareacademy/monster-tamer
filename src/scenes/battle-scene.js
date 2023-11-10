@@ -7,6 +7,7 @@ import { Background } from '../battle/background.js';
 import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { StateMachine } from '../utils/state-machine.js';
+import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -63,6 +64,7 @@ export class BattleScene extends Phaser.Scene {
         baseAttack: 5,
         currentLevel: 5,
       },
+      skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
     });
 
     this.#activePlayerMonster = new PlayerBattleMonster({
@@ -77,6 +79,7 @@ export class BattleScene extends Phaser.Scene {
         baseAttack: 15,
         currentLevel: 5,
       },
+      skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
     });
 
     // render out the main info and sub info panes
@@ -159,7 +162,8 @@ export class BattleScene extends Phaser.Scene {
             });
           });
         });
-      }
+      },
+      SKIP_BATTLE_ANIMATIONS
     );
   }
 
@@ -179,7 +183,8 @@ export class BattleScene extends Phaser.Scene {
             });
           });
         });
-      }
+      },
+      SKIP_BATTLE_ANIMATIONS
     );
   }
 
@@ -190,7 +195,8 @@ export class BattleScene extends Phaser.Scene {
           [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          }
+          },
+          SKIP_BATTLE_ANIMATIONS
         );
       });
       return;
@@ -202,7 +208,8 @@ export class BattleScene extends Phaser.Scene {
           [`${this.#activePlayerMonster.name} fainted`, 'You have no more monsters, escaping to safety...'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          }
+          },
+          SKIP_BATTLE_ANIMATIONS
         );
       });
       return;
@@ -242,7 +249,8 @@ export class BattleScene extends Phaser.Scene {
             () => {
               // wait for text animation to complete and move to next state
               this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
-            }
+            },
+            SKIP_BATTLE_ANIMATIONS
           );
         });
       },
@@ -254,12 +262,16 @@ export class BattleScene extends Phaser.Scene {
         // wait for player monster to appear on the screen and notify the player about monster
         this.#activePlayerMonster.playMonsterAppearAnimation(() => {
           this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => undefined);
-          this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
-            // wait for text animation to complete and move to next state
-            this.time.delayedCall(1200, () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
-            });
-          });
+          this.#battleMenu.updateInfoPaneMessageNoInputRequired(
+            `go ${this.#activePlayerMonster.name}!`,
+            () => {
+              // wait for text animation to complete and move to next state
+              this.time.delayedCall(1200, () => {
+                this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+              });
+            },
+            SKIP_BATTLE_ANIMATIONS
+          );
         });
       },
     });
@@ -311,9 +323,13 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`You got away safely!`], () => {
-          this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-        });
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          [`You got away safely!`],
+          () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          },
+          SKIP_BATTLE_ANIMATIONS
+        );
       },
     });
 
