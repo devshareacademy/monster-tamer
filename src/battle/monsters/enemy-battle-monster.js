@@ -52,6 +52,7 @@ export class EnemyBattleMonster extends BattleMonster {
   playMonsterHealthBarAppearAnimation(callback) {
     const startXPos = -600;
     const endXPos = 0;
+    this._phaserHealthBarGameContainer.setPosition(startXPos, this._phaserHealthBarGameContainer.y);
     this._phaserHealthBarGameContainer.setAlpha(1);
 
     if (this._skipBattleAnimations) {
@@ -79,34 +80,6 @@ export class EnemyBattleMonster extends BattleMonster {
    * @param {() => void} callback
    * @returns {void}
    */
-  playTakeDamageAnimation(callback) {
-    if (this._skipBattleAnimations) {
-      this._phaserGameObject.setAlpha(1);
-      callback();
-      return;
-    }
-
-    this._scene.tweens.add({
-      delay: 0,
-      duration: 150,
-      targets: this._phaserGameObject,
-      onComplete: () => {
-        this._phaserGameObject.setAlpha(1);
-        callback();
-      },
-      alpha: {
-        from: 1,
-        start: 1,
-        to: 0,
-      },
-      repeat: 10,
-    });
-  }
-
-  /**
-   * @param {() => void} callback
-   * @returns {void}
-   */
   playDeathAnimation(callback) {
     const startYPos = this._phaserGameObject.y;
     const endYPos = startYPos - 400;
@@ -126,7 +99,9 @@ export class EnemyBattleMonster extends BattleMonster {
         to: endYPos,
       },
       targets: this._phaserGameObject,
-      onComplete: callback,
+      onComplete: () => {
+        callback();
+      },
     });
   }
 }

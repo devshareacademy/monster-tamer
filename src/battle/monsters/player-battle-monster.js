@@ -1,8 +1,8 @@
 import { KENNY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { BattleMonster } from './battle-monster.js';
 
-/** @type {import('../../types/typedef.js').Coordinate} */
-const Player_POSITION = Object.freeze({
+/** @type {import('../../types/typedef').Coordinate} */
+const PLAYER_POSITION = Object.freeze({
   x: 256,
   y: 316,
 });
@@ -15,7 +15,7 @@ export class PlayerBattleMonster extends BattleMonster {
    * @param {import('../../types/typedef.js').BattleMonsterConfig} config
    */
   constructor(config) {
-    super(config, Player_POSITION);
+    super(config, PLAYER_POSITION);
     this._phaserGameObject.setFlipX(true);
     this._phaserHealthBarGameContainer.setPosition(556, 318);
 
@@ -55,11 +55,12 @@ export class PlayerBattleMonster extends BattleMonster {
    */
   playMonsterAppearAnimation(callback) {
     const startXPos = -30;
-    this._phaserGameObject.setPosition(startXPos, Player_POSITION.y);
+    const endXPos = PLAYER_POSITION.x;
+    this._phaserGameObject.setPosition(startXPos, PLAYER_POSITION.y);
     this._phaserGameObject.setAlpha(1);
 
     if (this._skipBattleAnimations) {
-      this._phaserGameObject.setX(Player_POSITION.x);
+      this._phaserGameObject.setX(endXPos);
       callback();
       return;
     }
@@ -70,7 +71,7 @@ export class PlayerBattleMonster extends BattleMonster {
       x: {
         from: startXPos,
         start: startXPos,
-        to: Player_POSITION.x,
+        to: endXPos,
       },
       targets: this._phaserGameObject,
       onComplete: () => {
@@ -85,10 +86,12 @@ export class PlayerBattleMonster extends BattleMonster {
    */
   playMonsterHealthBarAppearAnimation(callback) {
     const startXPos = 800;
+    const endXPos = this._phaserHealthBarGameContainer.x;
+    this._phaserHealthBarGameContainer.setPosition(startXPos, this._phaserHealthBarGameContainer.y);
     this._phaserHealthBarGameContainer.setAlpha(1);
 
     if (this._skipBattleAnimations) {
-      this._phaserHealthBarGameContainer.setX(this._phaserHealthBarGameContainer.x);
+      this._phaserHealthBarGameContainer.setX(endXPos);
       callback();
       return;
     }
@@ -99,40 +102,12 @@ export class PlayerBattleMonster extends BattleMonster {
       x: {
         from: startXPos,
         start: startXPos,
-        to: this._phaserHealthBarGameContainer.x,
+        to: endXPos,
       },
       targets: this._phaserHealthBarGameContainer,
       onComplete: () => {
         callback();
       },
-    });
-  }
-
-  /**
-   * @param {() => void} callback
-   * @returns {void}
-   */
-  playTakeDamageAnimation(callback) {
-    if (this._skipBattleAnimations) {
-      this._phaserGameObject.setAlpha(1);
-      callback();
-      return;
-    }
-
-    this._scene.tweens.add({
-      delay: 0,
-      duration: 150,
-      targets: this._phaserGameObject,
-      onComplete: () => {
-        this._phaserGameObject.setAlpha(1);
-        callback();
-      },
-      alpha: {
-        from: 1,
-        start: 1,
-        to: 0,
-      },
-      repeat: 10,
     });
   }
 

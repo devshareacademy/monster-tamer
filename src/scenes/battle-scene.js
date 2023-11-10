@@ -281,12 +281,13 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.PRE_BATTLE_INFO,
       onEnter: () => {
-        // wait for enemy monster to appear on the screen and notify player about wild monster
+        // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
           this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
             () => {
+              // wait for text animation to complete and move to next state
               this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
             },
             SKIP_BATTLE_ANIMATIONS
@@ -298,17 +299,19 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.BRING_OUT_MONSTER,
       onEnter: () => {
-        // wait for player monster to appear on the screen and notify player about monster
-        this.#battleMenu.updateInfoPaneMessageNoInputRequired(
-          `go ${this.#activePlayerMonster.name}!`,
-          undefined,
-          SKIP_BATTLE_ANIMATIONS
-        );
-
+        // wait for player monster to appear on the screen and notify the player about monster
         this.#activePlayerMonster.playMonsterAppearAnimation(() => {
-          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => {
-            this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
-          });
+          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this.#battleMenu.updateInfoPaneMessageNoInputRequired(
+            `go ${this.#activePlayerMonster.name}!`,
+            () => {
+              // wait for text animation to complete and move to next state
+              this.time.delayedCall(1200, () => {
+                this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+              });
+            },
+            SKIP_BATTLE_ANIMATIONS
+          );
         });
       },
     });
