@@ -6,6 +6,7 @@ import { ACTIVE_BATTLE_MENU, ATTACK_MOVE_OPTIONS, BATTLE_MENU_OPTIONS } from './
 import { BATTLE_UI_TEXT_STYLE } from './battle-menu-config.js';
 import { BattleMonster } from '../../monsters/battle-monster.js';
 import { animateText } from '../../../utils/text-utils.js';
+import { SKIP_BATTLE_ANIMATIONS } from '../../../config.js';
 
 const BATTLE_MENU_CURSOR_POS = Object.freeze({
   x: 42,
@@ -233,10 +234,7 @@ export class BattleMenu {
       this.#battleTextGameObjectLine1.setText(messageToDisplay);
       this.#queuedMessageAnimationPlaying = false;
       this.#waitingForPlayerInput = true;
-      if (this.#queuedInfoPanelCallback) {
-        this.#queuedInfoPanelCallback();
-        this.#queuedInfoPanelCallback = undefined;
-      }
+      this.playInputCursorAnimation();
       return;
     }
 
@@ -563,9 +561,13 @@ export class BattleMenu {
         and allow the player to navigate back to the main menu
       */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
-      this.updateInfoPaneMessagesAndWaitForInput(['Your bag is empty...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.updateInfoPaneMessagesAndWaitForInput(
+        ['Your bag is empty...'],
+        () => {
+          this.#switchToMainBattleMenu();
+        },
+        SKIP_BATTLE_ANIMATIONS
+      );
       return;
     }
 
@@ -576,9 +578,13 @@ export class BattleMenu {
         and allow the player to navigate back to the main menu
       */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_SWITCH;
-      this.updateInfoPaneMessagesAndWaitForInput(['You have no other monsters in your party...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.updateInfoPaneMessagesAndWaitForInput(
+        ['You have no other monsters in your party...'],
+        () => {
+          this.#switchToMainBattleMenu();
+        },
+        SKIP_BATTLE_ANIMATIONS
+      );
       return;
     }
 
@@ -589,9 +595,13 @@ export class BattleMenu {
         and then restart the Phaser scene after doing a screen fade out
       */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
-      this.updateInfoPaneMessagesAndWaitForInput(['You fail to run away...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.updateInfoPaneMessagesAndWaitForInput(
+        ['You fail to run away...'],
+        () => {
+          this.#switchToMainBattleMenu();
+        },
+        SKIP_BATTLE_ANIMATIONS
+      );
       return;
     }
 
