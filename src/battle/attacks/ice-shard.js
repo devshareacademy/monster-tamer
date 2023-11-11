@@ -7,8 +7,8 @@ export class IceShard extends Attack {
   _attackGameObject;
 
   /**
-   * @param {Phaser.Scene} scene
-   * @param {import("../../types/typedef").Coordinate} position
+   * @param {Phaser.Scene} scene the Phaser 3 Scene the game object will be added to
+   * @param {import('../../types/typedef.js').Coordinate} position the position the game object will be added to
    */
   constructor(scene, position) {
     super(scene, position);
