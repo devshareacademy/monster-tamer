@@ -8,6 +8,8 @@ import {
 } from '../assets/asset-keys.js';
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import * as WebFontLoader from '../lib/webfontloader.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -68,6 +70,15 @@ export class PreloadScene extends Phaser.Scene {
 
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
-    this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+
+    WebFontLoader.default.load({
+      custom: {
+        families: [KENNEY_FUTURE_NARROW_FONT_NAME],
+      },
+      active: () => {
+        console.log('font ready');
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+      },
+    });
   }
 }
