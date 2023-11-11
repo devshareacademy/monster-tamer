@@ -1,3 +1,4 @@
+import Phaser from '../../lib/phaser.js';
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DataUtils } from '../../utils/data-utils.js';

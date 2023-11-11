@@ -8,6 +8,7 @@ import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { StateMachine } from '../utils/state-machine.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
+import { IceShard } from '../battle/attacks/ice-shard.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -87,6 +88,9 @@ export class BattleScene extends Phaser.Scene {
     this.#createBattleStateMachine();
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
+
+    const atk = new IceShard(this, { x: 745, y: 140 });
+    atk.playAnimation();
   }
 
   update() {
