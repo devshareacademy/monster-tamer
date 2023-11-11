@@ -1,3 +1,4 @@
+import Phaser from '../lib/phaser.js';
 import {
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
@@ -6,8 +7,9 @@ import {
   MONSTER_ASSET_KEYS,
   UI_ASSET_KEYS,
 } from '../assets/asset-keys.js';
-import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -64,6 +66,9 @@ export class PreloadScene extends Phaser.Scene {
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+
+    // load custom fonts
+    this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
   }
 
   create() {

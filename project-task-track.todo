@@ -34,7 +34,7 @@ Battle System:
     ✔ skip animations @done(23-11-10 02:52)
     ☐ attack animations
     ☐ scene transitions
-    ☐ custom fonts
+    ✔ custom fonts @done(23-11-10 21:19)
 
 World Scene:
   ☐ load level background

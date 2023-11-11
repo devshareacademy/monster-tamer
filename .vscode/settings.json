@@ -8,5 +8,16 @@
   "prettier.semi": true,
   "editor.formatOnSave": true,
   "prettier.printWidth": 120,
-  "cSpell.words": ["CARNODUSK", "Gamepad", "IGUANIGNITE", "Kenney", "kenneys", "Ritwick", "tweens", "xdeviruchi"]
+  "cSpell.words": [
+    "CARNODUSK",
+    "Gamepad",
+    "IGUANIGNITE",
+    "Kenney",
+    "kenneys",
+    "Ritwick",
+    "tweens",
+    "webfont",
+    "webfontloader",
+    "xdeviruchi"
+  ]
 }
