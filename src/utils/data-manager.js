@@ -137,7 +137,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       player: {
         position: {
           x: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).x,
-          y: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION).y,
+          y: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).y,
         },
         direction: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
       },
