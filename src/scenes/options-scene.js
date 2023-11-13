@@ -165,6 +165,7 @@ export class OptionsScene extends Phaser.Scene {
     this.#updateBattleSceneOptionGameObjects();
     this.#updateBattleStyleOptionGameObjects();
     this.#updateTextSpeedOptionGameObjects();
+    this.#updateVolumeSlider();
 
     this.#controls = new Controls(this);
 
@@ -186,6 +187,7 @@ export class OptionsScene extends Phaser.Scene {
 
     if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
       this.#controls.lockInput = true;
+      this.#updateOptionDataInDataManager();
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
@@ -194,6 +196,17 @@ export class OptionsScene extends Phaser.Scene {
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveOptionMenuCursor(selectedDirection);
     }
+  }
+
+  #updateOptionDataInDataManager() {
+    dataManager.store.set({
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: this.#selectedTextSpeedOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS]: this.#selectedBattleSceneOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE]: this.#selectedBattleStyleOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND]: this.#selectedSoundMenuOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: this.#selectedVolumeOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: this.#selectedMenuColorOption,
+    });
   }
 
   #updateMenuColorDisplayText() {
