@@ -190,6 +190,6 @@ export class PreloadScene extends Phaser.Scene {
     // attempt to populate data manager with saved data
     dataManager.loadData();
 
-    this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 }
