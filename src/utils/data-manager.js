@@ -1,6 +1,7 @@
 import Phaser from '../lib/phaser.js';
 import { TILE_SIZE } from '../config.js';
 import { DIRECTION } from '../common/direction.js';
+import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
 
 /**
  * @typedef GlobalState
@@ -10,6 +11,13 @@ import { DIRECTION } from '../common/direction.js';
  * @property {number} player.position.x
  * @property {number} player.position.y
  * @property {import('../common/direction.js').Direction} player.direction
+ * @property {object} options
+ * @property {import('../common/options.js').TextSpeedMenuOptions} options.textSpeed
+ * @property {import('../common/options.js').BattleSceneMenuOptions} options.battleSceneAnimations
+ * @property {import('../common/options.js').BattleStyleMenuOptions} options.battleStyle
+ * @property {import('../common/options.js').SoundMenuOptions} options.sound
+ * @property {import('../common/options.js').VolumeMenuOptions} options.volume
+ * @property {import('../common/options.js').VolumeMenuOptions} options.menuColor
  */
 
 /** @type {GlobalState} */
@@ -20,6 +28,14 @@ const initialState = {
       y: 21 * TILE_SIZE,
     },
     direction: DIRECTION.DOWN,
+  },
+  options: {
+    textSpeed: TEXT_SPEED_OPTIONS.MID,
+    battleSceneAnimations: BATTLE_SCENE_OPTIONS.ON,
+    battleStyle: BATTLE_STYLE_OPTIONS.SHIFT,
+    sound: SOUND_OPTIONS.ON,
+    volume: 4,
+    menuColor: 0,
   },
 };
 
