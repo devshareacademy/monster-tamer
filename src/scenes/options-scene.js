@@ -207,6 +207,7 @@ export class OptionsScene extends Phaser.Scene {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: this.#selectedVolumeOption,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: this.#selectedMenuColorOption,
     });
+    dataManager.saveData();
   }
 
   #updateMenuColorDisplayText() {

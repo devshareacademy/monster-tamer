@@ -17,6 +17,7 @@ import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { createNineSliceTextures } from '../utils/nine-slice.js';
 import { DIRECTION } from '../common/direction.js';
 import { WALK_FRAME_RATE } from '../config.js';
+import { dataManager } from '../utils/data-manager.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -185,6 +186,9 @@ export class PreloadScene extends Phaser.Scene {
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND);
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE);
+
+    // attempt to populate data manager with saved data
+    dataManager.loadData();
 
     this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
   }
