@@ -13,6 +13,7 @@ import {
   BATTLE_STYLE_OPTIONS,
   SOUND_OPTIONS,
 } from '../common/options.js';
+import { dataManager, DATA_MANAGER_STORE_KEYS } from '../utils/data-manager.js';
 
 const TEXT_FONT_COLORS = Object.freeze({
   NOT_SELECTED: '#FFFFFF',
@@ -82,12 +83,12 @@ export class OptionsScene extends Phaser.Scene {
 
   init() {
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
-    this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
-    this.#selectedBattleSceneOption = BATTLE_SCENE_OPTIONS.ON;
-    this.#selectedBattleStyleOption = BATTLE_STYLE_OPTIONS.SHIFT;
-    this.#selectedSoundMenuOption = SOUND_OPTIONS.ON;
-    this.#selectedVolumeOption = 4;
-    this.#selectedMenuColorOption = 0;
+    this.#selectedTextSpeedOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    this.#selectedBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
+    this.#selectedBattleStyleOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE);
+    this.#selectedSoundMenuOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND);
+    this.#selectedVolumeOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME);
+    this.#selectedMenuColorOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
   }
 
   create() {

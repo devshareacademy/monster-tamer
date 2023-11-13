@@ -42,6 +42,12 @@ const initialState = {
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   PLAYER_POSITION: 'PLAYER_POSITION',
   PLAYER_DIRECTION: 'PLAYER_DIRECTION',
+  OPTIONS_TEXT_SPEED: 'OPTIONS_TEXT_SPEED',
+  OPTIONS_BATTLE_SCENE_ANIMATIONS: 'OPTIONS_BATTLE_SCENE_ANIMATIONS',
+  OPTIONS_BATTLE_STYLE: 'OPTIONS_BATTLE_STYLE',
+  OPTIONS_SOUND: 'OPTIONS_SOUND',
+  OPTIONS_VOLUME: 'OPTIONS_VOLUME',
+  OPTIONS_MENU_COLOR: 'OPTIONS_MENU_COLOR',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -54,6 +60,15 @@ class DataManager extends Phaser.Events.EventEmitter {
     // initialize state with initial values
     this.#store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, initialState.player.position);
     this.#store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, initialState.player.direction);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED, initialState.options.textSpeed);
+    this.#store.set(
+      DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS,
+      initialState.options.battleSceneAnimations
+    );
+    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE, initialState.options.battleStyle);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND, initialState.options.sound);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME, initialState.options.volume);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR, initialState.options.menuColor);
   }
 
   get store() {
@@ -62,10 +77,22 @@ class DataManager extends Phaser.Events.EventEmitter {
 
   loadData() {
     // attempt to load data from browser storage and populate the data manager
+    if (typeof Storage === 'undefined') {
+      console.warn(
+        `[${DataManager.name}:loadData] localStorage is not supported, will not be able to save and load data.`
+      );
+      return;
+    }
   }
 
   saveData() {
     // attempt to storage data in browser storage from data manager
+    if (typeof Storage === 'undefined') {
+      console.warn(
+        `[${DataManager.name}:saveData] localStorage is not supported, will not be able to save and load data.`
+      );
+      return;
+    }
   }
 }
 

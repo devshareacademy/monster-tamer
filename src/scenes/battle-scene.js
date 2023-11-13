@@ -1,5 +1,4 @@
 import Phaser from '../lib/phaser.js';
-import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { DIRECTION } from '../common/direction.js';
@@ -71,7 +70,6 @@ export class BattleScene extends Phaser.Scene {
 
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
-    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
 
