@@ -1,3 +1,4 @@
+import Phaser from '../../lib/phaser.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 import { ATTACK_KEYS } from './attack-keys.js';
 import { IceShard } from './ice-shard.js';
@@ -24,9 +25,8 @@ export class AttackManager {
   #slashAttack;
 
   /**
-   *
-   * @param {Phaser.Scene} scene
-   * @param {boolean} skipBattleAnimations
+   * @param {Phaser.Scene} scene the Phaser 3 Scene the attack game object will be added to
+   * @param {boolean} [skipBattleAnimations=false] used to skip all animations tied to the monster attack during battle
    */
   constructor(scene, skipBattleAnimations) {
     this.#scene = scene;
@@ -34,8 +34,7 @@ export class AttackManager {
   }
 
   /**
-   *
-   * @param {import('./attack-keys').AttackKeys} attack
+   * @param {import('./attack-keys.js').AttackKeys} attack
    * @param {AttackTarget} target
    * @param {() => void} callback
    * @returns {void}
