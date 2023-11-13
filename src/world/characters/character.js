@@ -1,6 +1,6 @@
+import Phaser from '../../lib/phaser.js';
 import { DIRECTION } from '../../common/direction.js';
 import { TILE_SIZE } from '../../config.js';
-import Phaser from '../../lib/phaser.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 
 /**
@@ -22,6 +22,10 @@ export class Character {
    * @param {CharacterConfig} config
    */
   constructor(config) {
+    if (this.constructor === Character) {
+      throw new Error('Character is an abstract class and cannot be instantiated.');
+    }
+
     this._scene = config.scene;
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, config.assetFrame || 0)
@@ -30,6 +34,7 @@ export class Character {
 
   /**
    * @param {import('../../common/direction.js').Direction} direction
+   * @returns {void}
    */
   moveCharacter(direction) {
     switch (direction) {

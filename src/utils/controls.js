@@ -1,31 +1,34 @@
+import Phaser from '../lib/phaser.js';
 import { DIRECTION } from '../common/direction.js';
 
 export class Controls {
   /** @type {Phaser.Scene} */
   #scene;
-  /** @type {Phaser.Types.Input.Keyboard.CursorKeys} */
+  /** @type {Phaser.Types.Input.Keyboard.CursorKeys | undefined} */
   #cursorKeys;
   /** @type {boolean} */
   #lockPlayerInput;
 
   /**
-   *
-   * @param {Phaser.Scene} scene
+   * @param {Phaser.Scene} scene the Phaser 3 Scene the cursor keys will be created in
    */
   constructor(scene) {
     this.#scene = scene;
-    this.#cursorKeys = this.#scene.input.keyboard.createCursorKeys();
+    this.#cursorKeys = this.#scene.input.keyboard?.createCursorKeys();
     this.#lockPlayerInput = false;
   }
 
+  /** @type {boolean} */
   get isInputLocked() {
     return this.#lockPlayerInput;
   }
 
+  /** @param {boolean} val the value that will be assigned */
   set lockInput(val) {
     this.#lockPlayerInput = val;
   }
 
+  /** @returns {boolean} */
   wasSpaceKeyPressed() {
     if (this.#cursorKeys === undefined) {
       return false;
@@ -33,6 +36,7 @@ export class Controls {
     return Phaser.Input.Keyboard.JustDown(this.#cursorKeys.space);
   }
 
+  /** @returns {boolean} */
   wasBackKeyPressed() {
     if (this.#cursorKeys === undefined) {
       return false;
@@ -40,6 +44,7 @@ export class Controls {
     return Phaser.Input.Keyboard.JustDown(this.#cursorKeys.shift);
   }
 
+  /** @returns {import('../common/direction.js').Direction} */
   getDirectionKeyJustPressed() {
     if (this.#cursorKeys === undefined) {
       return DIRECTION.NONE;
@@ -60,6 +65,7 @@ export class Controls {
     return selectedDirection;
   }
 
+  /** @returns {import('../common/direction.js').Direction} */
   getDirectionKeyPressedDown() {
     if (this.#cursorKeys === undefined) {
       return DIRECTION.NONE;
