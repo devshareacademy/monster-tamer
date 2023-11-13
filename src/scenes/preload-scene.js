@@ -3,6 +3,7 @@ import {
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
+  CHARACTER_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
@@ -26,6 +27,8 @@ export class PreloadScene extends Phaser.Scene {
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
     const pimenAssetPath = 'assets/images/pimen';
+    const axulartAssetPath = 'assets/images/axulart';
+    const pbGamesAssetPath = 'assets/images/parabellum-games';
 
     // battle backgrounds
     this.load.image(
@@ -89,6 +92,16 @@ export class PreloadScene extends Phaser.Scene {
 
     // load world assets
     this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
+
+    // load character images
+    this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulartAssetPath}/character/custom.png`, {
+      frameWidth: 64,
+      frameHeight: 88,
+    });
+    this.load.spritesheet(CHARACTER_ASSET_KEYS.NPC, `${pbGamesAssetPath}/characters.png`, {
+      frameWidth: 16,
+      frameHeight: 16,
+    });
   }
 
   create() {

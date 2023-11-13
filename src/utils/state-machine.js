@@ -1,6 +1,6 @@
 /**
  * @typedef State
- * @type {Object}
+ * @type {object}
  * @property {string} name
  * @property {() => void} [onEnter]
  */
@@ -12,7 +12,7 @@ export class StateMachine {
   #currentState;
   /** @type {string} */
   #id;
-  /** @type {Object | undefined} */
+  /** @type {object | undefined} */
   #context;
   /** @type {boolean} */
   #isChangingState;
@@ -21,7 +21,7 @@ export class StateMachine {
 
   /**
    * @param {string} id the unique identifier for this state machine instance.
-   * @param {Object} [context] the context to use when invoking each method on the state.
+   * @param {object} [context] the context to use when invoking each method on the state.
    */
   constructor(id, context) {
     this.#id = id;
