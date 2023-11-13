@@ -39,12 +39,14 @@ Currently, the only supported way to play the game is with a Keyboard. The game 
 
 This project uses both assets I developed as well as other assets that have been created by some wondering creators. This project would not have been possible without the following people/resources:
 
-| Asset        | Author | Link                                                                         |
-| ------------ | ------ | ---------------------------------------------------------------------------- |
-| Fonts        | Kenney | [Kenney Fonts](https://www.kenney.nl/assets/kenney-fonts)                    |
-| UI Panel     | Kenney | [Kenney UI Space Pack](https://www.kenney.nl/assets/ui-pack-space-expansion) |
-| Ice Attack   | Pimen  | [Pimen Ice Spell Effect](https://pimen.itch.io/ice-spell-effect-01)          |
-| Slash Attack | Pimen  | [Pimen Slash VFX](https://pimen.itch.io/battle-vfx-slashes-and-thrusts)      |
+| Asset            | Author           | Link                                                                                  |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------------- |
+| Fonts            | Kenney           | [Kenney Fonts](https://www.kenney.nl/assets/kenney-fonts)                             |
+| UI Panel         | Kenney           | [Kenney UI Space Pack](https://www.kenney.nl/assets/ui-pack-space-expansion)          |
+| Ice Attack       | Pimen            | [Pimen Ice Spell Effect](https://pimen.itch.io/ice-spell-effect-01)                   |
+| Slash Attack     | Pimen            | [Pimen Slash VFX](https://pimen.itch.io/battle-vfx-slashes-and-thrusts)               |
+| Player Character | AxulArt          | [Small 8-direction Characters](https://axulart.itch.io/small-8-direction-characters)  |
+| NPC              | Parabellum Games | [Retro RPG Character Pack](https://parabellum-games.itch.io/retro-rpg-character-pack) |
 
 ## Issues
 
