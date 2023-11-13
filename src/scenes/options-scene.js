@@ -5,7 +5,7 @@ import { createNineSliceContainer, updateNineSliceContainerTexture } from '../ut
 import { SCENE_KEYS } from './scene-keys.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { DIRECTION } from '../common/direction.js';
-import { KENNY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 
 /**
  * @typedef {keyof typeof OPTION_MENU_OPTIONS} OptionMenuOptions
@@ -88,7 +88,7 @@ const OPTION_MENU_OPTION_INFO_MSG = Object.freeze({
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const OPTIONS_TEXT_STYLE = {
-  fontFamily: KENNY_FUTURE_NARROW_FONT_NAME,
+  fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: '#FFFFFF',
   fontSize: '30px',
 };

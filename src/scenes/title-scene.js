@@ -5,11 +5,11 @@ import { Controls } from '../utils/controls.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { createNineSliceContainer } from '../utils/nine-slice.js';
 import { SCENE_KEYS } from './scene-keys.js';
-import { KENNY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = {
-  fontFamily: KENNY_FUTURE_NARROW_FONT_NAME,
+  fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: '#4D4A49',
   fontSize: '30px',
 };

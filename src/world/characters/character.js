@@ -21,6 +21,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionWith=[]]
  * @property {import('../../common/direction.js').Direction} direction
+ * @property {() => void} [spriteGridMovementFinishedCallback]
  */
 
 /**
@@ -61,6 +62,8 @@ export class Character {
   _idleFrame;
   /** @protected @type {Character[]} */
   _otherCharactersToCheckForCollisionWith;
+  /** @protected @type {() => void | undefined} */
+  _spriteGridMovementFinishedCallback;
 
   /**
    * @param {CharacterConfig} config
@@ -84,6 +87,7 @@ export class Character {
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
       .setOrigin(this._origin.x, this._origin.y);
+    this._spriteGridMovementFinishedCallback = config.spriteGridMovementFinishedCallback;
   }
 
   /** @type {Phaser.GameObjects.Sprite} */
@@ -176,10 +180,9 @@ export class Character {
     }
     this._isMoving = true;
 
-    if (this._isPlayer) {
-      // TODO
-      // customEmitter.emit(PLAYER_EVENTS.PLAYER_MOVEMENT_STARTED);
-    }
+    // if (this._isPlayer) {
+    //   // customEmitter.emit(PLAYER_EVENTS.PLAYER_MOVEMENT_STARTED);
+    // }
 
     this.#handleSpriteMovement();
   }
@@ -229,9 +232,11 @@ export class Character {
         this._isMoving = false;
         // update previous and target positions
         this._previousTargetPosition = { ...this._targetPosition };
-        if (this._isPlayer) {
-          // TODO
-          //customEmitter.emit(PLAYER_EVENTS.PLAYER_MOVEMENT_FINISHED, this._direction);
+        // if (this._isPlayer) {
+        //   //customEmitter.emit(PLAYER_EVENTS.PLAYER_MOVEMENT_FINISHED, this._direction);
+        // }
+        if (this._isPlayer && this._spriteGridMovementFinishedCallback) {
+          this._spriteGridMovementFinishedCallback();
         }
       },
     });

@@ -4,9 +4,12 @@ import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
-import { TILE_SIZE } from '../config.js';
-import { Character } from '../world/characters/character.js';
+import { DISABLE_WILD_ENCOUNTERS, TILE_SIZE } from '../config.js';
 import { NPC } from '../world/characters/npc.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { DialogUi } from '../world/dialog-ui.js';
+import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
+import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -15,12 +18,6 @@ import { NPC } from '../world/characters/npc.js';
  * @property {string} messages
  * @property {any} value
  */
-
-/** @type {import('../types/typedef.js').Coordinate} */
-const PLAYER_POSITION = Object.freeze({
-  x: 6 * TILE_SIZE,
-  y: 21 * TILE_SIZE,
-});
 
 const CUSTOM_TILED_TYPES = Object.freeze({
   NPC: 'npc',
@@ -32,6 +29,10 @@ const TILED_NPC_PROPERTY = Object.freeze({
   MOVEMENT_PATTERN: 'movement_pattern',
   MESSAGES: 'messages',
   FRAME: 'frame',
+});
+
+const TILED_SIGN_PROPERTY = Object.freeze({
+  MESSAGE: 'message',
 });
 
 /*
@@ -49,11 +50,21 @@ export class WorldScene extends Phaser.Scene {
   #player;
   /** @type {Controls} */
   #controls;
-  /** @type {Character[]} */
+  /** @type {NPC[]} */
   #npcs;
+  /** @type {boolean} */
+  #wildMonsterEncountered;
+  /** @type {Phaser.Tilemaps.TilemapLayer} */
+  #encounterLayer;
+  /** @type {DialogUi} */
+  #dialogUi;
 
   constructor() {
     super({ key: SCENE_KEYS.WORLD_SCENE });
+  }
+
+  init() {
+    this.#wildMonsterEncountered = false;
   }
 
   create() {
@@ -68,6 +79,37 @@ export class WorldScene extends Phaser.Scene {
 
     // create map and collision layer
     const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
+    // The first parameter is the name of the tileset in Tiled and the second parameter is the key
+    // of the tileset image used when loading the file in preload.
+    const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
+    if (!collisionTiles) {
+      console.log('encountered error while creating world data from tiled');
+      return;
+    }
+    const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
+    if (!collisionLayer) {
+      console.log('encountered error while creating collision layer using data from tiled');
+      return;
+    }
+    collisionLayer.setAlpha(0);
+    this.signLayer = map.getObjectLayer('Sign');
+    if (!this.signLayer) {
+      console.log('encountered error while creating sign layer using data from tiled');
+      return;
+    }
+
+    // create collision layer for encounters
+    const encounterTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+    if (!encounterTiles) {
+      console.log('encountered error while creating world data from tiled');
+      return;
+    }
+    this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
+    if (!this.#encounterLayer) {
+      console.log('encountered error while creating encounter layer using data from tiled');
+      return;
+    }
+    this.#encounterLayer.setAlpha(0);
 
     // add world background
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
@@ -76,16 +118,31 @@ export class WorldScene extends Phaser.Scene {
     this.#createNPCs(map);
 
     // create player
+    /** @type {import('../types/typedef.js').Coordinate} */
+    const playerPosition = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION);
     this.#player = new Player({
       scene: this,
-      position: PLAYER_POSITION,
-      collisionLayer: undefined,
-      direction: DIRECTION.DOWN,
-      otherCharactersToCheckForCollisionWith: [],
+      position: playerPosition,
+      collisionLayer: collisionLayer,
+      direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
+      otherCharactersToCheckForCollisionWith: this.#npcs,
+      spriteGridMovementFinishedCallback: () => {
+        this.#handlePlayerMovementUpdate();
+      },
     });
     this.cameras.main.startFollow(this.#player.sprite);
+    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
+
+    this.#npcs.forEach((npc) => {
+      npc.addCharacterToCheckForCollisionsWith(this.#player);
+    });
 
     this.#controls = new Controls(this);
+
+    // create dialog ui
+    this.#dialogUi = new DialogUi(this, MAX_WORLD_WIDTH);
+
+    this.cameras.main.fadeIn(1000, 0, 0, 0);
   }
 
   /**
@@ -93,9 +150,17 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
+    if (this.#wildMonsterEncountered) {
+      return;
+    }
+
     const selectedDirection = this.#controls.getDirectionKeyPressedDown();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#player.moveCharacter(selectedDirection);
+    }
+
+    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+      this.#handlePlayerInteraction();
     }
 
     this.#player.update(time);
@@ -164,5 +229,100 @@ export class WorldScene extends Phaser.Scene {
       });
       this.#npcs.push(npc);
     });
+  }
+
+  #handlePlayerInteraction() {
+    if (this.#dialogUi.isAnimationPlaying) {
+      return;
+    }
+
+    if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
+      this.#dialogUi.hideDialogModal();
+      this.#npcs.some((npc) => {
+        if (npc.isTalkingToPlayer) {
+          npc.isTalkingToPlayer = false;
+          return true;
+        }
+        return false;
+      });
+      return;
+    }
+
+    if (this.#dialogUi.isVisible && this.#dialogUi.moreMessagesToShow) {
+      this.#dialogUi.showNextMessage();
+      return;
+    }
+
+    // console.log('start of interaction check');
+    // get players current direction and check 1 tile over in that direction to see if there is an object that can be interacted with
+    const { x, y } = this.#player.sprite;
+    const targetPosition = getTargetPositionFromGameObjectPositionAndDirection({ x, y }, this.#player.direction);
+
+    // check for sign, and display appropriate message if player is not facing up
+    const nearbySign = this.signLayer?.objects.find((object) => {
+      if (!object.x || !object.y) {
+        return false;
+      }
+      return object.x === targetPosition.x && object.y - TILE_SIZE === targetPosition.y;
+    });
+
+    if (nearbySign) {
+      /** @type {TiledObjectProperty[]} */
+      const props = nearbySign.properties;
+      /** @type {string} */
+      const msg = props.find((prop) => prop.name === TILED_SIGN_PROPERTY.MESSAGE)?.value;
+
+      const usePlaceholderText = this.#player.direction !== DIRECTION.UP;
+      let textToShow = CANNOT_READ_SIGN_TEXT;
+      if (!usePlaceholderText) {
+        textToShow = msg || SAMPLE_TEXT;
+      }
+      this.#dialogUi.showDialogModal([textToShow]);
+      return;
+    }
+
+    const nearbyNpc = this.#npcs.find((npc) => {
+      return npc.sprite.x === targetPosition.x && npc.sprite.y === targetPosition.y;
+    });
+    if (nearbyNpc) {
+      nearbyNpc.facePlayer(this.#player.direction);
+      nearbyNpc.isTalkingToPlayer = true;
+      this.#dialogUi.showDialogModal(nearbyNpc.messages);
+      return;
+    }
+  }
+
+  #handlePlayerMovementUpdate() {
+    // update player position on global data store
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+      x: this.#player.sprite.x,
+      y: this.#player.sprite.y,
+    });
+    // update player direction on global data store
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
+
+    if (DISABLE_WILD_ENCOUNTERS) {
+      return;
+    }
+    if (!this.#encounterLayer) {
+      return;
+    }
+    const isInEncounterZone =
+      this.#encounterLayer.getTileAtWorldXY(this.#player.sprite.x, this.#player.sprite.y, true).index !== -1;
+    if (!isInEncounterZone) {
+      return;
+    }
+
+    console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
+    this.#wildMonsterEncountered = Math.random() < 0.2;
+    if (this.#wildMonsterEncountered) {
+      console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);
+      // TODO: add feature in a future update
+      // add in a custom animation that is similar to the old games
+      this.cameras.main.fadeOut(2000);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+      });
+    }
   }
 }

@@ -1,11 +1,11 @@
 import Phaser from '../lib/phaser.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
-import { KENNY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text-utils.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
-  fontFamily: KENNY_FUTURE_NARROW_FONT_NAME,
+  fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: 'black',
   fontSize: '32px',
   wordWrap: { width: 0 },

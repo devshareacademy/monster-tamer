@@ -1,5 +1,5 @@
-import { DIRECTION } from '../common/direction.js';
 import Phaser from '../lib/phaser.js';
+import { DIRECTION } from '../common/direction.js';
 
 export class Controls {
   /** @type {Phaser.Scene} */
