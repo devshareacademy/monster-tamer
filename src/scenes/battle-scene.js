@@ -8,7 +8,7 @@ import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { StateMachine } from '../utils/state-machine.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
-import { IceShard } from '../battle/attacks/ice-shard.js';
+import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -35,6 +35,8 @@ export class BattleScene extends Phaser.Scene {
   #activePlayerAttackIndex;
   /** @type {StateMachine} */
   #battleStateMachine;
+  /** @type {AttackManager} */
+  #attackManager;
 
   constructor() {
     super({
@@ -86,11 +88,9 @@ export class BattleScene extends Phaser.Scene {
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
     this.#createBattleStateMachine();
+    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
 
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
-
-    const atk = new IceShard(this, { x: 745, y: 140 });
-    atk.playAnimation();
   }
 
   update() {
@@ -160,11 +160,17 @@ export class BattleScene extends Phaser.Scene {
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
         this.time.delayedCall(500, () => {
-          this.#activeEnemyMonster.playTakeDamageAnimation(() => {
-            this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
-              this.#enemyAttack();
-            });
-          });
+          this.#attackManager.playAttackAnimation(
+            this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].animationName,
+            ATTACK_TARGET.ENEMY,
+            () => {
+              this.#activeEnemyMonster.playTakeDamageAnimation(() => {
+                this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
+                  this.#enemyAttack();
+                });
+              });
+            }
+          );
         });
       },
       SKIP_BATTLE_ANIMATIONS
@@ -181,11 +187,17 @@ export class BattleScene extends Phaser.Scene {
       `foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
       () => {
         this.time.delayedCall(500, () => {
-          this.#activePlayerMonster.playTakeDamageAnimation(() => {
-            this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
-            });
-          });
+          this.#attackManager.playAttackAnimation(
+            this.#activeEnemyMonster.attacks[0].animationName,
+            ATTACK_TARGET.PLAYER,
+            () => {
+              this.#activePlayerMonster.playTakeDamageAnimation(() => {
+                this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+                  this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+                });
+              });
+            }
+          );
         });
       },
       SKIP_BATTLE_ANIMATIONS
