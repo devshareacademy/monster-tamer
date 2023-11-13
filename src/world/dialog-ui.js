@@ -1,7 +1,11 @@
 import Phaser from '../lib/phaser.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text-utils.js';
+import { animateText } from '../utils/text-utils.js';
+import { TEXT_SPEED } from '../config.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { TEXT_SPEED_OPTIONS } from '../common/options.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -51,7 +55,7 @@ export class DialogUi {
 
     this.#graphics = this.#createGraphics();
     this.#container = this.#scene.add.container(0, 0, [this.#graphics]);
-    this.#uiText = this.#scene.add.text(18, 12, CANNOT_READ_SIGN_TEXT, {
+    this.#uiText = this.#scene.add.text(18, 12, '', {
       ...UI_TEXT_STYLE,
       ...{ wordWrap: { width: this.#width - 18 } },
     });
@@ -104,7 +108,7 @@ export class DialogUi {
 
     this.#uiText.setText('').setAlpha(1);
     animateText(this.#scene, this.#uiText, this.#messagesToShow.shift(), {
-      delay: 50,
+      delay: this.#getAnimatedTextSpeed(),
       callback: () => {
         this.#textAnimationPlaying = false;
       },
@@ -156,5 +160,26 @@ export class DialogUi {
     });
     this.#userInputCursorTween.pause();
     this.#container.add(this.#userInputCursor);
+  }
+
+  /**
+   * @returns {number}
+   */
+  #getAnimatedTextSpeed() {
+    /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
+    const chosenTextSpeed = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    if (!chosenTextSpeed) {
+      return TEXT_SPEED.MEDIUM;
+    }
+    switch (chosenTextSpeed) {
+      case TEXT_SPEED_OPTIONS.FAST:
+        return TEXT_SPEED.FAST;
+      case TEXT_SPEED_OPTIONS.MID:
+        return TEXT_SPEED.MEDIUM;
+      case TEXT_SPEED_OPTIONS.SLOW:
+        return TEXT_SPEED.SLOW;
+      default:
+        exhaustiveGuard(chosenTextSpeed);
+    }
   }
 }
