@@ -1,12 +1,11 @@
 import Phaser from '../lib/phaser.js';
 import * as WebFontLoader from '../lib/webfontloader.js';
 
-export default class WebFontFileLoader extends Phaser.Loader.File {
+export class WebFontFileLoader extends Phaser.Loader.File {
   /** @type {string[]} */
   #fontNames;
 
   /**
-   *
    * @param {Phaser.Loader.LoaderPlugin} loader The Loader that is going to load this File.
    * @param {string[]} fontNames The list of font names that will be loaded by the WebFontLoader library.
    *                             The font names need to match the font-family name in the @font-face style declaration.
@@ -21,20 +20,17 @@ export default class WebFontFileLoader extends Phaser.Loader.File {
   }
 
   load() {
-    /** @type {WebFont.Config} */
-    const config = {
+    WebFontLoader.default.load({
+      custom: {
+        families: this.#fontNames,
+      },
       active: () => {
         this.loader.nextFile(this, true);
       },
       inactive: () => {
-        console.error('Failed load the custom fonts');
+        console.error(`Failed to load custom fonts ${JSON.stringify(this.#fontNames)}`);
         this.loader.nextFile(this, false);
       },
-      custom: {
-        families: this.#fontNames,
-      },
-    };
-
-    WebFontLoader.default.load(config);
+    });
   }
 }

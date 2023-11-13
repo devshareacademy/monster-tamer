@@ -21,33 +21,31 @@ export function createSceneTransition(scene, options) {
   const mask = g.createGeometryMask();
   scene.cameras.main.setMask(mask);
 
-  scene.events.once(Phaser.Scenes.Events.CREATE, () => {
-    scene.tweens.add({
-      onUpdate: () => {
-        g.clear().fillRectShape(rectShape);
-      },
-      delay: 400,
-      duration: 800,
-      height: {
-        ease: Phaser.Math.Easing.Expo.InOut,
-        from: 0,
-        start: 0,
-        to: height,
-      },
-      y: {
-        ease: Phaser.Math.Easing.Expo.InOut,
-        from: height / 2,
-        start: height / 2,
-        to: 0,
-      },
-      targets: rectShape,
-      onComplete: () => {
-        mask.destroy();
-        scene.cameras.main.clearMask();
-        if (options?.callback) {
-          options.callback();
-        }
-      },
-    });
+  scene.tweens.add({
+    onUpdate: () => {
+      g.clear().fillRectShape(rectShape);
+    },
+    delay: 400,
+    duration: 800,
+    height: {
+      ease: Phaser.Math.Easing.Expo.InOut,
+      from: 0,
+      start: 0,
+      to: height,
+    },
+    y: {
+      ease: Phaser.Math.Easing.Expo.InOut,
+      from: height / 2,
+      start: height / 2,
+      to: 0,
+    },
+    targets: rectShape,
+    onComplete: () => {
+      mask.destroy();
+      scene.cameras.main.clearMask();
+      if (options?.callback) {
+        options.callback();
+      }
+    },
   });
 }

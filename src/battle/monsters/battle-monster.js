@@ -1,8 +1,8 @@
 import Phaser from '../../lib/phaser.js';
 import { HealthBar } from '../ui/health-bar.js';
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DataUtils } from '../../utils/data-utils.js';
-import { KENNY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 
 export class BattleMonster {
   /** @protected @type {Phaser.Scene} */
@@ -114,32 +114,8 @@ export class BattleMonster {
    * @param {() => void} callback
    * @returns {void}
    */
-  playTakeDamageAnimation(callback) {
-    throw new Error('playTakeDamageAnimation is not implemented.');
-  }
-
-  /**
-   * @param {() => void} callback
-   * @returns {void}
-   */
   playDeathAnimation(callback) {
     throw new Error('playDeathAnimation is not implemented.');
-  }
-
-  /**
-   * @param {() => void} callback
-   * @returns {void}
-   */
-  playMonsterAppearAnimation(callback) {
-    throw new Error('playMonsterAppearAnimation is not implemented.');
-  }
-
-  /**
-   * @param {() => void} callback
-   * @returns {void}
-   */
-  playMonsterHealthBarAppearAnimation(callback) {
-    throw new Error('playMonsterHealthBarAppearAnimation is not implemented.');
   }
 
   /**
@@ -170,19 +146,11 @@ export class BattleMonster {
     });
   }
 
-  /**
-   * @param {() => void} callback
-   * @returns {void}
-   */
-  playDeathAnimation(callback) {
-    throw new Error('playDeathAnimation is not implemented.');
-  }
-
   #createHealthBarComponents(scaleHealthBarBackgroundImageByY = 1) {
     this._healthBar = new HealthBar(this._scene, 34, 34);
 
     const monsterNameGameText = this._scene.add.text(30, 20, this.name, {
-      fontFamily: KENNY_FUTURE_NARROW_FONT_NAME,
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#7E3D3F',
       fontSize: '32px',
     });
@@ -192,16 +160,14 @@ export class BattleMonster {
       .setOrigin(0)
       .setScale(1, scaleHealthBarBackgroundImageByY);
 
-    const monsterHealthBarLevelText = this._scene.add
-      .text(monsterNameGameText.width + 35, 23, `L${this.level}`, {
-        fontFamily: KENNY_FUTURE_NARROW_FONT_NAME,
-        color: '#ED474B',
-        fontSize: '28px',
-      })
-      .setOrigin(0);
+    const monsterHealthBarLevelText = this._scene.add.text(monsterNameGameText.width + 35, 23, `L${this.level}`, {
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      color: '#ED474B',
+      fontSize: '28px',
+    });
 
     const monsterHpText = this._scene.add.text(30, 55, 'HP', {
-      fontFamily: KENNY_FUTURE_NARROW_FONT_NAME,
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#FF6505',
       fontSize: '24px',
       fontStyle: 'italic',

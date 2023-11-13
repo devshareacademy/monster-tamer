@@ -3,7 +3,7 @@ import Phaser from '../../lib/phaser.js';
 export class Attack {
   /** @protected @type {Phaser.Scene} */
   _scene;
-  /** @protected @type {import('../../types/typedef.js').Coordinate} */
+  /** @protected @type {import("../../types/typedef").Coordinate} */
   _position;
   /** @protected @type {boolean} */
   _isAnimationPlaying;

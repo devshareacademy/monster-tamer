@@ -5,12 +5,12 @@ import { Attack } from './attack.js';
 export class Slash extends Attack {
   /** @protected @type {Phaser.GameObjects.Container} */
   _attackGameObject;
-  /** @type {Phaser.GameObjects.Sprite} */
-  #attackGameObject1;
-  /** @type {Phaser.GameObjects.Sprite} */
-  #attackGameObject2;
-  /** @type {Phaser.GameObjects.Sprite} */
-  #attackGameObject3;
+  /** @protected @type {Phaser.GameObjects.Sprite} */
+  _attackGameObject1;
+  /** @protected @type {Phaser.GameObjects.Sprite} */
+  _attackGameObject2;
+  /** @protected @type {Phaser.GameObjects.Sprite} */
+  _attackGameObject3;
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the game object will be added to
@@ -29,28 +29,16 @@ export class Slash extends Attack {
     });
 
     // create game objects
-    this.#attackGameObject1 = this._scene.add
-      .sprite(0, 0, ATTACK_ASSET_KEYS.SLASH, 0)
-      .setOrigin(0.5)
-      .setScale(4)
-      .setTint(0x000000, 0x000000, 0x000000, 0xffffff);
-    this.#attackGameObject2 = this._scene.add
-      .sprite(30, 0, ATTACK_ASSET_KEYS.SLASH, 0)
-      .setOrigin(0.5)
-      .setScale(4)
-      .setTint(0x000000, 0x000000, 0x000000, 0xffffff);
-    this.#attackGameObject3 = this._scene.add
-      .sprite(-30, 0, ATTACK_ASSET_KEYS.SLASH, 0)
-      .setOrigin(0.5)
-      .setScale(4)
-      .setTint(0x000000, 0x000000, 0x000000, 0xffffff);
+    this._attackGameObject1 = this._scene.add.sprite(0, 0, ATTACK_ASSET_KEYS.SLASH, 0).setOrigin(0.5).setScale(4);
+    this._attackGameObject2 = this._scene.add.sprite(30, 0, ATTACK_ASSET_KEYS.SLASH, 0).setOrigin(0.5).setScale(4);
+    this._attackGameObject3 = this._scene.add.sprite(-30, 0, ATTACK_ASSET_KEYS.SLASH, 0).setOrigin(0.5).setScale(4);
     this._attackGameObject = this._scene.add
       .container(this._position.x, this._position.y, [
-        this.#attackGameObject1,
-        this.#attackGameObject2,
-        this.#attackGameObject3,
+        this._attackGameObject1,
+        this._attackGameObject2,
+        this._attackGameObject3,
       ])
-      .setAlpha(1);
+      .setAlpha(0);
   }
 
   /**
@@ -65,17 +53,16 @@ export class Slash extends Attack {
     this._isAnimationPlaying = true;
     this._attackGameObject.setAlpha(1);
 
-    // play animation and once complete call the callback
-    this.#attackGameObject1.play(ATTACK_ASSET_KEYS.SLASH);
-    this.#attackGameObject2.play(ATTACK_ASSET_KEYS.SLASH);
-    this.#attackGameObject3.play(ATTACK_ASSET_KEYS.SLASH);
+    this._attackGameObject1.play(ATTACK_ASSET_KEYS.SLASH);
+    this._attackGameObject2.play(ATTACK_ASSET_KEYS.SLASH);
+    this._attackGameObject3.play(ATTACK_ASSET_KEYS.SLASH);
 
-    this.#attackGameObject1.once(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + ATTACK_ASSET_KEYS.SLASH, () => {
-      this._attackGameObject.setAlpha(0);
-      this.#attackGameObject1.setFrame(0);
-      this.#attackGameObject2.setFrame(0);
-      this.#attackGameObject3.setFrame(0);
+    this._attackGameObject1.once(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + ATTACK_ASSET_KEYS.SLASH, () => {
       this._isAnimationPlaying = false;
+      this._attackGameObject.setAlpha(0);
+      this._attackGameObject1.setFrame(0);
+      this._attackGameObject2.setFrame(0);
+      this._attackGameObject3.setFrame(0);
 
       if (callback) {
         callback();

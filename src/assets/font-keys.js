@@ -1,1 +1,1 @@
-export const KENNY_FUTURE_NARROW_FONT_NAME = 'Kenney-Future-Narrow';
+export const KENNEY_FUTURE_NARROW_FONT_NAME = 'Kenney-Future-Narrow';

@@ -28,13 +28,13 @@ Battle System:
     ✔ implement each state @done(23-11-06 07:48)
     ✔ add item, flee, and monster states @done(23-11-06 07:48)
     ✔ player input improvements @done(23-11-06 08:42)
-  ☐ battle scene polish
+  ✔ battle scene polish @done(23-11-12 22:28)
     ✔ text animations @done(23-11-06 09:13)
     ✔ monster animations @done(23-11-10 02:18)
     ✔ skip animations @done(23-11-10 02:52)
-    ☐ attack animations
-    ☐ scene transitions
-    ☐ custom fonts
+    ✔ attack animations @done(23-11-12 21:40)
+    ✔ scene transitions @done(23-11-12 22:21)
+    ✔ custom fonts @done(23-11-10 21:19)
 
 World Scene:
   ☐ load level background
