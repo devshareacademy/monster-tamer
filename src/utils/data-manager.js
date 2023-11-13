@@ -117,7 +117,7 @@ class DataManager extends Phaser.Events.EventEmitter {
    * @returns {void}
    */
   #updateDataManger(data) {
-    dataManager.store.set({
+    this.#store.set({
       [DATA_MANAGER_STORE_KEYS.PLAYER_POSITION]: data.player.position,
       [DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION]: data.player.direction,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: data.options.textSpeed,
