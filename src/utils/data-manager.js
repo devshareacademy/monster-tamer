@@ -117,14 +117,16 @@ class DataManager extends Phaser.Events.EventEmitter {
    * @returns {void}
    */
   #updateDataManger(data) {
-    this.#store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, data.player.position);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, data.player.direction);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED, data.options.textSpeed);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS, data.options.battleSceneAnimations);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE, data.options.battleStyle);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND, data.options.sound);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME, data.options.volume);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR, data.options.menuColor);
+    dataManager.store.set({
+      [DATA_MANAGER_STORE_KEYS.PLAYER_POSITION]: data.player.position,
+      [DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION]: data.player.direction,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: data.options.textSpeed,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS]: data.options.battleSceneAnimations,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE]: data.options.battleStyle,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND]: data.options.sound,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: data.options.volume,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
+    });
   }
 
   /**
