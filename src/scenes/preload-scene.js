@@ -186,6 +186,6 @@ export class PreloadScene extends Phaser.Scene {
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE);
 
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.TEST_SCENE);
   }
 }
