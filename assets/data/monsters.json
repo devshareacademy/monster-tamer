@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "name": "iguanignite",
+    "attackIds": [2],
+    "assetKey": "IGUANIGNITE",
+    "assetFrame": 0,
+    "currentLevel": 5,
+    "currentHp": 25,
+    "baseAttack": 5,
+    "maxHp": 25
+  },
+  {
+    "id": 2,
+    "name": "carnodusk",
+    "attacks": [1],
+    "assetKey": "CARNODUSK",
+    "assetFrame": 0,
+    "currentLevel": 5,
+    "currentHp": 25,
+    "baseAttack": 5,
+    "maxHp": 25
+  }
+]
