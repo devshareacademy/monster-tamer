@@ -56,7 +56,7 @@ export class BattleScene extends Phaser.Scene {
     const background = new Background(this);
     background.showForest();
 
-    // render out the player and enemy monsters
+    // create the player and enemy monsters
     this.#activeEnemyMonster = new EnemyBattleMonster({
       scene: this,
       monsterDetails: {
@@ -71,7 +71,6 @@ export class BattleScene extends Phaser.Scene {
       },
       skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
     });
-
     this.#activePlayerMonster = new PlayerBattleMonster({
       scene: this,
       monsterDetails: {
@@ -110,7 +109,6 @@ export class BattleScene extends Phaser.Scene {
       this.#battleMenu.handlePlayerInput('OK');
       return;
     }
-
     if (this.#battleStateMachine.currentStateName !== BATTLE_STATES.PLAYER_INPUT) {
       return;
     }
@@ -118,7 +116,7 @@ export class BattleScene extends Phaser.Scene {
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
 
-      //check if the player selected an attack, and update display text
+      // check if the player selected an attack, and start battle sequence for the fight
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
       }
@@ -129,10 +127,12 @@ export class BattleScene extends Phaser.Scene {
         return;
       }
 
-      console.log(`Player selected the following move: ${this.#battleMenu.selectedAttack}`);
-
+      console.log(
+        `Player selected the following move: ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`
+      );
       this.#battleMenu.hideMonsterAttackSubMenu();
       this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+      return;
     }
 
     if (this.#controls.wasBackKeyPressed()) {
@@ -150,6 +150,8 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
+        // play attack animation based on the selected attack
+        // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
           this.#attackManager.playAttackAnimation(
             this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].animationName,
@@ -177,6 +179,8 @@ export class BattleScene extends Phaser.Scene {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
       () => {
+        // play attack animation based on the selected attack
+        // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
           this.#attackManager.playAttackAnimation(
             this.#activeEnemyMonster.attacks[0].animationName,
@@ -197,9 +201,10 @@ export class BattleScene extends Phaser.Scene {
 
   #postBattleSequenceCheck() {
     if (this.#activeEnemyMonster.isFainted) {
+      // play monster fainted animation and wait for animation to finish
       this.#activeEnemyMonster.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
+          [`Wild ${this.#activeEnemyMonster.name} fainted.`, 'You have gained some experience'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
           },
@@ -210,9 +215,10 @@ export class BattleScene extends Phaser.Scene {
     }
 
     if (this.#activePlayerMonster.isFainted) {
+      // play monster fainted animation and wait for animation to finish
       this.#activePlayerMonster.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`${this.#activePlayerMonster.name} fainted`, 'You have no more monsters, escaping to safety...'],
+          [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
           },
@@ -233,6 +239,21 @@ export class BattleScene extends Phaser.Scene {
   }
 
   #createBattleStateMachine() {
+    /**
+     * General state flow for battle scene
+     *
+     * scene transition to the battle menu
+     * battle states
+     * intro -> setup everything that is needed
+     * pre-battle -> animations as characters and stuff appears
+     * monster info text renders onto the page & wait for player input
+     * any key press, and now menu stuff shows up
+     * player_turn -> choose what to do, wait for input from player
+     * enemy_turn -> random choice,
+     * battle_fight -> enemy and player options evaluated, play each attack animation
+     * battle_fight_post_check -> see if one of the characters died, repeat
+     */
+
     this.#battleStateMachine = new StateMachine('battle', this);
 
     this.#battleStateMachine.addState({
@@ -334,7 +355,7 @@ export class BattleScene extends Phaser.Scene {
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`You got away safely!`],
+          ['You got away safely!'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
           },
@@ -343,7 +364,7 @@ export class BattleScene extends Phaser.Scene {
       },
     });
 
-    // start the state machine
-    this.#battleStateMachine.setState('INTRO');
+    // start state machine
+    this.#battleStateMachine.setState(BATTLE_STATES.INTRO);
   }
 }
