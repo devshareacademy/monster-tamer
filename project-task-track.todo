@@ -44,6 +44,7 @@ World Scene:
   ☐ handle grid based movement
   ☐ handle collisions
   ☐ add wild monster encounter logic
+  ☐ store player position in data manager
 
 Level Development With Tiled:
   ☐ Basic level design concepts
