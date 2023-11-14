@@ -75,9 +75,23 @@ Tools Part 1:
 Systems:
   ☐ saving & loading data
   ☐ inventory
-  ☐ picking up items
-  ☐ viewing monsters
+
+Battle Scene Part 2:
+  ☐ using items
+  ☐ running away
+  ☐ enemy random attack
+  ☐ player faint
+  ☐ attacking order
+  ☐ dynamic monster data based on player party and encounter
+
+World Scene Part 3:
+  ☐ advanced wild monster encounter logic
+  ☐ adding a game menu
+    ☐ view inventory
+    ☐ view monster party
+    ☐ saving game data
   ☐ buildings
+  ☐ items in the field
 
 -------------------------------
 
