@@ -30,7 +30,7 @@ export class IceShard extends Attack {
       delay: 0,
     });
 
-    // create game objects
+    // create game object
     this._attackGameObject = this._scene.add
       .sprite(this._position.x, this._position.y, ATTACK_ASSET_KEYS.ICE_SHARD, 5)
       .setOrigin(0.5)
@@ -50,6 +50,7 @@ export class IceShard extends Attack {
     this._isAnimationPlaying = true;
     this._attackGameObject.setAlpha(1);
 
+    // play animation and once complete call the callback
     this._attackGameObject.play(ATTACK_ASSET_KEYS.ICE_SHARD_START);
 
     this._attackGameObject.once(

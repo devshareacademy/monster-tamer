@@ -8,14 +8,13 @@ export class Background {
   #backgroundGameObject;
 
   /**
-   *
-   * @param {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
+   * @param {Phaser.Scene} scene the Phaser 3 Scene the health bar will be added to
    */
   constructor(scene) {
     this.#scene = scene;
 
     this.#backgroundGameObject = this.#scene.add
-      .image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.FOREST)
+      .image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.FOREST, 0)
       .setOrigin(0)
       .setAlpha(0);
   }

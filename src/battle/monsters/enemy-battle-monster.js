@@ -8,8 +8,7 @@ const ENEMY_POSITION = Object.freeze({
 
 export class EnemyBattleMonster extends BattleMonster {
   /**
-   *
-   * @param {import("../../types/typedef.js").BattleMonsterConfig} config
+   * @param {import('../../types/typedef.js').BattleMonsterConfig} config
    */
   constructor(config) {
     super({ ...config, scaleHealthBarBackgroundImageByY: 0.8 }, ENEMY_POSITION);

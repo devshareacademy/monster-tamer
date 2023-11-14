@@ -1,8 +1,8 @@
 import Phaser from '../../lib/phaser.js';
+import { HealthBar } from '../ui/health-bar.js';
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DataUtils } from '../../utils/data-utils.js';
-import { HealthBar } from '../ui/health-bar.js';
 
 export class BattleMonster {
   /** @protected @type {Phaser.Scene} */
@@ -32,7 +32,6 @@ export class BattleMonster {
     if (this.constructor === BattleMonster) {
       throw new Error('BattleMonster is an abstract class and cannot be instantiated.');
     }
-
     this._scene = config.scene;
     this._monsterDetails = config.monsterDetails;
     this._currentHealth = this._monsterDetails.currentHp;
@@ -44,6 +43,7 @@ export class BattleMonster {
       .image(position.x, position.y, this._monsterDetails.assetKey, this._monsterDetails.assetFrame || 0)
       .setAlpha(0);
     this.#createHealthBarComponents(config.scaleHealthBarBackgroundImageByY);
+
     this._monsterDetails.attackIds.forEach((attackId) => {
       const monsterAttack = DataUtils.getMonsterAttack(this._scene, attackId);
       if (monsterAttack !== undefined) {
@@ -80,6 +80,7 @@ export class BattleMonster {
   /**
    * @param {number} damage
    * @param {() => void} [callback]
+   * @returns {void}
    */
   takeDamage(damage, callback) {
     // update current monster health and animate health bar
@@ -87,7 +88,10 @@ export class BattleMonster {
     if (this._currentHealth < 0) {
       this._currentHealth = 0;
     }
-    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, { callback });
+    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, {
+      callback,
+      skipBattleAnimations: this._skipBattleAnimations,
+    });
   }
 
   /**
@@ -104,6 +108,14 @@ export class BattleMonster {
    */
   playMonsterHealthBarAppearAnimation(callback) {
     throw new Error('playMonsterHealthBarAppearAnimation is not implemented.');
+  }
+
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  playDeathAnimation(callback) {
+    throw new Error('playDeathAnimation is not implemented.');
   }
 
   /**
@@ -132,14 +144,6 @@ export class BattleMonster {
         callback();
       },
     });
-  }
-
-  /**
-   * @param {() => void} callback
-   * @returns {void}
-   */
-  playDeathAnimation(callback) {
-    throw new Error('playDeathAnimation is not implemented.');
   }
 
   #createHealthBarComponents(scaleHealthBarBackgroundImageByY = 1) {

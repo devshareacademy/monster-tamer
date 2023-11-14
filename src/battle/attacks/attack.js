@@ -38,6 +38,6 @@ export class Attack {
    * @returns {void}
    */
   playAnimation(callback) {
-    throw new Error('playAnimation is not implemented');
+    throw new Error('playAnimation is not implemented.');
   }
 }

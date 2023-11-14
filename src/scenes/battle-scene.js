@@ -3,11 +3,11 @@ import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { DIRECTION } from '../common/direction.js';
-import { Background } from '../battle/background.js';
 import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { StateMachine } from '../utils/state-machine.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
+import { Background } from '../battle/background.js';
 import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
 import { Controls } from '../utils/controls.js';
@@ -120,7 +120,6 @@ export class BattleScene extends Phaser.Scene {
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
       }
-
       this.#activePlayerAttackIndex = this.#battleMenu.selectedAttack;
 
       if (!this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex]) {

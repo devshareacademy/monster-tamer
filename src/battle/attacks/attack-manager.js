@@ -28,7 +28,7 @@ export class AttackManager {
    * @param {Phaser.Scene} scene the Phaser 3 Scene the attack game object will be added to
    * @param {boolean} [skipBattleAnimations=false] used to skip all animations tied to the monster attack during battle
    */
-  constructor(scene, skipBattleAnimations) {
+  constructor(scene, skipBattleAnimations = false) {
     this.#scene = scene;
     this.#skipBattleAnimations = skipBattleAnimations;
   }

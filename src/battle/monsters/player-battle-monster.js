@@ -12,8 +12,7 @@ export class PlayerBattleMonster extends BattleMonster {
   #healthBarTextGameObject;
 
   /**
-   *
-   * @param {import("../../types/typedef").BattleMonsterConfig} config
+   * @param {import('../../types/typedef.js').BattleMonsterConfig} config
    */
   constructor(config) {
     super(config, PLAYER_POSITION);
@@ -43,6 +42,7 @@ export class PlayerBattleMonster extends BattleMonster {
   /**
    * @param {number} damage
    * @param {() => void} [callback]
+   * @returns {void}
    */
   takeDamage(damage, callback) {
     super.takeDamage(damage, callback);

@@ -99,9 +99,16 @@ export class HealthBar {
    */
   #setMeterPercentage(percent = 1) {
     const width = this.#fullWidth * percent;
-
     this.#middle.displayWidth = width;
+    this.#updateHealthBarGameObjects();
+  }
+
+  #updateHealthBarGameObjects() {
     this.#rightCap.x = this.#middle.x + this.#middle.displayWidth;
+    const isVisible = this.#middle.displayWidth > 0;
+    this.#leftCap.visible = isVisible;
+    this.#middle.visible = isVisible;
+    this.#rightCap.visible = isVisible;
   }
 
   /**
@@ -109,10 +116,19 @@ export class HealthBar {
    * @param {object} [options] optional configuration options that can be provided for the animation
    * @param {number} [options.duration=1000] the duration of the health bar animation
    * @param {() => void} [options.callback] an optional callback that will be called when the animation is complete
+   * @param {boolean} [options.skipBattleAnimations=false] determines if we skip the health bar animation
    * @returns {void}
    */
   setMeterPercentageAnimated(percent, options) {
     const width = this.#fullWidth * percent;
+
+    if (options?.skipBattleAnimations) {
+      this.#setMeterPercentage(percent);
+      if (options?.callback) {
+        options.callback();
+      }
+      return;
+    }
 
     this.#scene.tweens.add({
       targets: this.#middle,
@@ -120,11 +136,7 @@ export class HealthBar {
       duration: options?.duration || 1000,
       ease: Phaser.Math.Easing.Sine.Out,
       onUpdate: () => {
-        this.#rightCap.x = this.#middle.x + this.#middle.displayWidth;
-        const isVisible = this.#middle.displayWidth > 0;
-        this.#leftCap.visible = isVisible;
-        this.#middle.visible = isVisible;
-        this.#rightCap.visible = isVisible;
+        this.#updateHealthBarGameObjects();
       },
       onComplete: options?.callback,
     });
