@@ -17,6 +17,7 @@ import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { createNineSliceTextures } from '../utils/nine-slice.js';
 import { DIRECTION } from '../common/direction.js';
 import { WALK_FRAME_RATE } from '../config.js';
+import { dataManager } from '../utils/data-manager.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -83,6 +84,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+    this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -185,6 +187,9 @@ export class PreloadScene extends Phaser.Scene {
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
     createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE);
 
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    // attempt to populate data manager with saved data
+    dataManager.loadData();
+
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 }

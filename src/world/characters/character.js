@@ -252,6 +252,9 @@ export class Character {
       return false;
     }
     const tile = this._collisionLayer.getTileAtWorldXY(x, y, true);
+    if (tile === null) {
+      return false;
+    }
     return tile.index !== -1;
   }
 

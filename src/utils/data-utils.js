@@ -13,4 +13,24 @@ export class DataUtils {
     const data = scene.cache.json.get(DATA_ASSET_KEYS.ATTACKS);
     return data.find((attack) => attack.id === attackId);
   }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @returns {import('../types/typedef.js').Monster}
+   */
+  static getIguanignite(scene) {
+    /** @type { import('../types/typedef.js').Monster[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
+    return data.find((monster) => monster.id === 1);
+  }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @returns {import('../types/typedef.js').Monster}
+   */
+  static getCarnodusk(scene) {
+    /** @type { import('../types/typedef.js').Monster[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
+    return data.find((monster) => monster.id === 2);
+  }
 }

@@ -6,70 +6,14 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { DIRECTION } from '../common/direction.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-
-/**
- * @typedef {keyof typeof OPTION_MENU_OPTIONS} OptionMenuOptions
- */
-
-/** @enum {OptionMenuOptions} */
-const OPTION_MENU_OPTIONS = Object.freeze({
-  TEXT_SPEED: 'TEXT_SPEED',
-  BATTLE_SCENE: 'BATTLE_SCENE',
-  BATTLE_STYLE: 'BATTLE_STYLE',
-  SOUND: 'SOUND',
-  VOLUME: 'VOLUME',
-  MENU_COLOR: 'MENU_COLOR',
-  CONFIRM: 'CONFIRM',
-});
-
-/**
- * @typedef {keyof typeof TEXT_SPEED_OPTIONS} TextSpeedMenuOptions
- */
-
-/** @enum {TextSpeedMenuOptions} */
-const TEXT_SPEED_OPTIONS = Object.freeze({
-  SLOW: 'SLOW',
-  MID: 'MID',
-  FAST: 'FAST',
-});
-
-/**
- * @typedef {keyof typeof BATTLE_SCENE_OPTIONS} BattleSceneMenuOptions
- */
-
-/** @enum {BattleSceneMenuOptions} */
-const BATTLE_SCENE_OPTIONS = Object.freeze({
-  ON: 'ON',
-  OFF: 'OFF',
-});
-
-/**
- * @typedef {keyof typeof BATTLE_STYLE_OPTIONS} BattleStyleMenuOptions
- */
-
-/** @enum {BattleStyleMenuOptions} */
-const BATTLE_STYLE_OPTIONS = Object.freeze({
-  SET: 'SET',
-  SHIFT: 'SHIFT',
-});
-
-/**
- * @typedef {keyof typeof SOUND_OPTIONS} SoundMenuOptions
- */
-
-/** @enum {SoundMenuOptions} */
-const SOUND_OPTIONS = Object.freeze({
-  ON: 'ON',
-  OFF: 'OFF',
-});
-
-/**
- * @typedef {0 | 1 | 2 | 3 | 4} VolumeMenuOptions
- */
-
-/**
- * @typedef {0 | 1 | 2 } MenuColorOptions
- */
+import {
+  OPTION_MENU_OPTIONS,
+  TEXT_SPEED_OPTIONS,
+  BATTLE_SCENE_OPTIONS,
+  BATTLE_STYLE_OPTIONS,
+  SOUND_OPTIONS,
+} from '../common/options.js';
+import { dataManager, DATA_MANAGER_STORE_KEYS } from '../utils/data-manager.js';
 
 const TEXT_FONT_COLORS = Object.freeze({
   NOT_SELECTED: '#FFFFFF',
@@ -94,19 +38,19 @@ const OPTIONS_TEXT_STYLE = {
 };
 
 export class OptionsScene extends Phaser.Scene {
-  /** @type {OptionMenuOptions} */
+  /** @type {import('../common/options.js').OptionMenuOptions} */
   #selectedOptionMenu;
-  /** @type {TextSpeedMenuOptions} */
+  /** @type {import('../common/options.js').TextSpeedMenuOptions} */
   #selectedTextSpeedOption;
-  /** @type {BattleSceneMenuOptions} */
+  /** @type {import('../common/options.js').BattleSceneMenuOptions} */
   #selectedBattleSceneOption;
-  /** @type {BattleStyleMenuOptions} */
+  /** @type {import('../common/options.js').BattleStyleMenuOptions} */
   #selectedBattleStyleOption;
-  /** @type {SoundMenuOptions} */
+  /** @type {import('../common/options.js').SoundMenuOptions} */
   #selectedSoundMenuOption;
-  /** @type {VolumeMenuOptions} */
+  /** @type {import('../common/options.js').VolumeMenuOptions} */
   #selectedVolumeOption;
-  /** @type {MenuColorOptions} */
+  /** @type {import('../common/options.js').MenuColorOptions} */
   #selectedMenuColorOption;
   /** @type {Phaser.GameObjects.Container} */
   #mainContainer;
@@ -139,12 +83,12 @@ export class OptionsScene extends Phaser.Scene {
 
   init() {
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
-    this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
-    this.#selectedBattleSceneOption = BATTLE_SCENE_OPTIONS.ON;
-    this.#selectedBattleStyleOption = BATTLE_STYLE_OPTIONS.SHIFT;
-    this.#selectedSoundMenuOption = SOUND_OPTIONS.ON;
-    this.#selectedVolumeOption = 4;
-    this.#selectedMenuColorOption = 0;
+    this.#selectedTextSpeedOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    this.#selectedBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
+    this.#selectedBattleStyleOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE);
+    this.#selectedSoundMenuOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND);
+    this.#selectedVolumeOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME);
+    this.#selectedMenuColorOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
   }
 
   create() {
@@ -221,6 +165,7 @@ export class OptionsScene extends Phaser.Scene {
     this.#updateBattleSceneOptionGameObjects();
     this.#updateBattleStyleOptionGameObjects();
     this.#updateTextSpeedOptionGameObjects();
+    this.#updateVolumeSlider();
 
     this.#controls = new Controls(this);
 
@@ -242,6 +187,7 @@ export class OptionsScene extends Phaser.Scene {
 
     if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
       this.#controls.lockInput = true;
+      this.#updateOptionDataInDataManager();
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
@@ -250,6 +196,18 @@ export class OptionsScene extends Phaser.Scene {
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveOptionMenuCursor(selectedDirection);
     }
+  }
+
+  #updateOptionDataInDataManager() {
+    dataManager.store.set({
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: this.#selectedTextSpeedOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS]: this.#selectedBattleSceneOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE]: this.#selectedBattleStyleOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND]: this.#selectedSoundMenuOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: this.#selectedVolumeOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: this.#selectedMenuColorOption,
+    });
+    dataManager.saveData();
   }
 
   #updateMenuColorDisplayText() {
@@ -643,7 +601,9 @@ export class OptionsScene extends Phaser.Scene {
       return;
     }
     if (direction === DIRECTION.LEFT) {
-      this.#selectedVolumeOption = /** @type {VolumeMenuOptions} */ (this.#selectedVolumeOption - 1);
+      this.#selectedVolumeOption = /** @type {import('../common/options.js').VolumeMenuOptions} */ (
+        this.#selectedVolumeOption - 1
+      );
       return;
     }
 
@@ -651,7 +611,9 @@ export class OptionsScene extends Phaser.Scene {
       return;
     }
     if (direction === DIRECTION.RIGHT) {
-      this.#selectedVolumeOption = /** @type {VolumeMenuOptions} */ (this.#selectedVolumeOption + 1);
+      this.#selectedVolumeOption = /** @type {import('../common/options.js').VolumeMenuOptions} */ (
+        this.#selectedVolumeOption + 1
+      );
       return;
     }
 

@@ -1,5 +1,4 @@
 import Phaser from '../lib/phaser.js';
-import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { DIRECTION } from '../common/direction.js';
@@ -11,6 +10,7 @@ import { Background } from '../battle/background.js';
 import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
 import { Controls } from '../utils/controls.js';
+import { DataUtils } from '../utils/data-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -59,36 +59,17 @@ export class BattleScene extends Phaser.Scene {
     // create the player and enemy monsters
     this.#activeEnemyMonster = new EnemyBattleMonster({
       scene: this,
-      monsterDetails: {
-        name: MONSTER_ASSET_KEYS.CARNODUSK,
-        assetKey: MONSTER_ASSET_KEYS.CARNODUSK,
-        assetFrame: 0,
-        currentHp: 25,
-        maxHp: 25,
-        attackIds: [1],
-        baseAttack: 5,
-        currentLevel: 5,
-      },
+      monsterDetails: DataUtils.getCarnodusk(this),
       skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
     });
     this.#activePlayerMonster = new PlayerBattleMonster({
       scene: this,
-      monsterDetails: {
-        name: MONSTER_ASSET_KEYS.IGUANIGNITE,
-        assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
-        assetFrame: 0,
-        currentHp: 25,
-        maxHp: 25,
-        attackIds: [2],
-        baseAttack: 15,
-        currentLevel: 5,
-      },
+      monsterDetails: DataUtils.getIguanignite(this),
       skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
     });
 
     // render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
-    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
 
@@ -234,7 +215,7 @@ export class BattleScene extends Phaser.Scene {
   #transitionToNextScene() {
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+      this.scene.start(SCENE_KEYS.WORLD_SCENE);
     });
   }
 

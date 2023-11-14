@@ -83,30 +83,30 @@ export class WorldScene extends Phaser.Scene {
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
     if (!collisionTiles) {
-      console.log('encountered error while creating world data from tiled');
+      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
       return;
     }
     const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
     if (!collisionLayer) {
-      console.log('encountered error while creating collision layer using data from tiled');
+      console.log(`[${WorldScene.name}:create] encountered error while creating collision layer using data from tiled`);
       return;
     }
     collisionLayer.setAlpha(0);
     this.signLayer = map.getObjectLayer('Sign');
     if (!this.signLayer) {
-      console.log('encountered error while creating sign layer using data from tiled');
+      console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
       return;
     }
 
     // create collision layer for encounters
     const encounterTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
     if (!encounterTiles) {
-      console.log('encountered error while creating world data from tiled');
+      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
       return;
     }
     this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
     if (!this.#encounterLayer) {
-      console.log('encountered error while creating encounter layer using data from tiled');
+      console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
       return;
     }
     this.#encounterLayer.setAlpha(0);
@@ -117,7 +117,7 @@ export class WorldScene extends Phaser.Scene {
     // create npcs
     this.#createNPCs(map);
 
-    // create player
+    // create player and have camera focus on the player
     /** @type {import('../types/typedef.js').Coordinate} */
     const playerPosition = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION);
     this.#player = new Player({
@@ -131,11 +131,14 @@ export class WorldScene extends Phaser.Scene {
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
 
+    // update our collisions with npcs
     this.#npcs.forEach((npc) => {
       npc.addCharacterToCheckForCollisionsWith(this.#player);
     });
+
+    // create foreground for depth
+    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
 
     this.#controls = new Controls(this);
 
@@ -155,7 +158,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     const selectedDirection = this.#controls.getDirectionKeyPressedDown();
-    if (selectedDirection !== DIRECTION.NONE) {
+    if (selectedDirection !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirection);
     }
 
@@ -324,5 +327,9 @@ export class WorldScene extends Phaser.Scene {
         this.scene.start(SCENE_KEYS.BATTLE_SCENE);
       });
     }
+  }
+
+  #isPlayerInputLocked() {
+    return this.#dialogUi.isVisible;
   }
 }
