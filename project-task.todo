@@ -73,9 +73,18 @@ Tools Part 1:
     ☐ monster attacks
     ☐ animations
 
-Systems:
-  ☐ saving & loading data
-  ☐ inventory
+Saving & Loading:
+  ☐ add game menu with option to save game
+  ☐ update menu scene with continue option to load game
+  ☐ on new game, we should reset the player data (pos, monsters, etc)
+  ☐ update data manager to persist monster data and current stats
+
+Inventory:
+  ☐ create class for items and inventory
+  ☐ create ui screen for viewing items
+  ☐ update menu to have view bag
+  ☐ update battle scene to allow using items
+  ☐ update data manager to allow saving of inventory items
 
 Battle Scene Part 2:
   ☐ using items
@@ -90,7 +99,6 @@ World Scene Part 3:
   ☐ adding a game menu
     ☐ view inventory
     ☐ view monster party
-    ☐ saving game data
   ☐ buildings
   ☐ items in the field
 
