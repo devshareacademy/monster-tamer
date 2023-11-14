@@ -1,7 +1,8 @@
 import Phaser from '../lib/phaser.js';
-import { TILE_SIZE } from '../config.js';
+import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { DIRECTION } from '../common/direction.js';
 import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
+import { exhaustiveGuard } from './guard.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
@@ -110,6 +111,28 @@ class DataManager extends Phaser.Events.EventEmitter {
     }
     const dataToSave = this.#dataManagerDataToGlobalStateObject();
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+  }
+
+  /**
+   * @returns {number}
+   */
+  getAnimatedTextSpeed() {
+    /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
+    const chosenTextSpeed = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    if (chosenTextSpeed === undefined) {
+      return TEXT_SPEED.MEDIUM;
+    }
+
+    switch (chosenTextSpeed) {
+      case TEXT_SPEED_OPTIONS.FAST:
+        return TEXT_SPEED.FAST;
+      case TEXT_SPEED_OPTIONS.MID:
+        return TEXT_SPEED.MEDIUM;
+      case TEXT_SPEED_OPTIONS.SLOW:
+        return TEXT_SPEED.SLOW;
+      default:
+        exhaustiveGuard(chosenTextSpeed);
+    }
   }
 
   /**

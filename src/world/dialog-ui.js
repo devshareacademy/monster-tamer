@@ -108,7 +108,7 @@ export class DialogUi {
 
     this.#uiText.setText('').setAlpha(1);
     animateText(this.#scene, this.#uiText, this.#messagesToShow.shift(), {
-      delay: this.#getAnimatedTextSpeedFromDataManager(),
+      delay: dataManager.getAnimatedTextSpeed(),
       callback: () => {
         this.#textAnimationPlaying = false;
       },
@@ -161,28 +161,6 @@ export class DialogUi {
     });
     this.#userInputCursorTween.pause();
     this.#container.add(this.#userInputCursor);
-  }
-
-  /**
-   * @returns {number}
-   */
-  #getAnimatedTextSpeedFromDataManager() {
-    /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
-    const chosenTextSpeed = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
-    if (chosenTextSpeed === undefined) {
-      return TEXT_SPEED.MEDIUM;
-    }
-
-    switch (chosenTextSpeed) {
-      case TEXT_SPEED_OPTIONS.FAST:
-        return TEXT_SPEED.FAST;
-      case TEXT_SPEED_OPTIONS.MID:
-        return TEXT_SPEED.MEDIUM;
-      case TEXT_SPEED_OPTIONS.SLOW:
-        return TEXT_SPEED.SLOW;
-      default:
-        exhaustiveGuard(chosenTextSpeed);
-    }
   }
 
   /**
