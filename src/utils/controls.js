@@ -77,10 +77,10 @@ export class Controls {
       selectedDirection = DIRECTION.LEFT;
     } else if (this.#cursorKeys.right.isDown) {
       selectedDirection = DIRECTION.RIGHT;
-    } else if (this.#cursorKeys.down.isDown) {
-      selectedDirection = DIRECTION.DOWN;
     } else if (this.#cursorKeys.up.isDown) {
       selectedDirection = DIRECTION.UP;
+    } else if (this.#cursorKeys.down.isDown) {
+      selectedDirection = DIRECTION.DOWN;
     }
 
     return selectedDirection;

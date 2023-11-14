@@ -113,7 +113,7 @@ export class HealthBar {
 
   /**
    * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the health bar is
-   * @param {Object} [options] optional configuration options that can be provided for the animation
+   * @param {object} [options] optional configuration options that can be provided for the animation
    * @param {number} [options.duration=1000] the duration of the health bar animation
    * @param {() => void} [options.callback] an optional callback that will be called when the animation is complete
    * @param {boolean} [options.skipBattleAnimations=false] determines if we skip the health bar animation

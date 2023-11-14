@@ -98,7 +98,7 @@ export class BattleScene extends Phaser.Scene {
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
 
-      //check if the player selected an attack, and start battle sequence for the fight
+      // check if the player selected an attack, and start battle sequence for the fight
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
       }
@@ -185,7 +185,7 @@ export class BattleScene extends Phaser.Scene {
       // play monster fainted animation and wait for animation to finish
       this.#activeEnemyMonster.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`Wild ${this.#activeEnemyMonster.name} fainted`, 'You have gained some experience'],
+          [`Wild ${this.#activeEnemyMonster.name} fainted.`, 'You have gained some experience'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
           },

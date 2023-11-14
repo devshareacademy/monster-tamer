@@ -38,9 +38,9 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  */
 
 export class Character {
-  /** @protected @type {Phaser.Scene} */
+  /** @type {Phaser.Scene} */
   _scene;
-  /** @protected @type {Phaser.GameObjects.Sprite} */
+  /** @type {Phaser.GameObjects.Sprite} */
   _phaserGameObject;
   /** @protected @type {import('../../common/direction.js').Direction} */
   _direction;
@@ -180,10 +180,6 @@ export class Character {
     }
     this._isMoving = true;
 
-    // if (this._isPlayer) {
-    //   // customEmitter.emit(PLAYER_EVENTS.PLAYER_MOVEMENT_STARTED);
-    // }
-
     this.#handleSpriteMovement();
   }
 
@@ -232,9 +228,6 @@ export class Character {
         this._isMoving = false;
         // update previous and target positions
         this._previousTargetPosition = { ...this._targetPosition };
-        // if (this._isPlayer) {
-        //   //customEmitter.emit(PLAYER_EVENTS.PLAYER_MOVEMENT_FINISHED, this._direction);
-        // }
         if (this._isPlayer && this._spriteGridMovementFinishedCallback) {
           this._spriteGridMovementFinishedCallback();
         }

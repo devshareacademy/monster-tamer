@@ -1,6 +1,6 @@
 import Phaser from '../lib/phaser.js';
-import { SCENE_KEYS } from './scene-keys.js';
 import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
@@ -60,7 +60,9 @@ export class WorldScene extends Phaser.Scene {
   #dialogUi;
 
   constructor() {
-    super({ key: SCENE_KEYS.WORLD_SCENE });
+    super({
+      key: SCENE_KEYS.WORLD_SCENE,
+    });
   }
 
   init() {
@@ -68,7 +70,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   create() {
-    console.log(`[${WorldScene.name}:create] invoked`);
+    console.log(`[${WorldScene.name}:preload] invoked`);
 
     // update camera settings
     const x = 6 * TILE_SIZE;
@@ -171,6 +173,8 @@ export class WorldScene extends Phaser.Scene {
     this.#npcs.forEach((npc) => {
       npc.update(time);
     });
+
+    this.#controls = new Controls(this);
   }
 
   /**
