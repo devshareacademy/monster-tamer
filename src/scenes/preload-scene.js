@@ -27,7 +27,7 @@ export class PreloadScene extends Phaser.Scene {
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
     const pimenAssetPath = 'assets/images/pimen';
-    const axulartAssetPath = 'assets/images/axulart';
+    const axulArtAssetPath = 'assets/images/axulart';
     const pbGamesAssetPath = 'assets/images/parabellum-games';
 
     // battle backgrounds
@@ -94,7 +94,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
 
     // load character images
-    this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulartAssetPath}/character/custom.png`, {
+    this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
       frameWidth: 64,
       frameHeight: 88,
     });
@@ -106,6 +106,6 @@ export class PreloadScene extends Phaser.Scene {
 
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
-    this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 }
