@@ -5,7 +5,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
 
 /**
  * @typedef CharacterConfig
- * @type {Object}
+ * @type {object}
  * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
  * @property {string} assetKey the name of the asset key that should be used for this character
  * @property {number} [assetFrame=0] if the asset key is tied to a spritesheet, this frame will be used, defaults to 0

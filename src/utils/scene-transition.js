@@ -2,7 +2,7 @@ import Phaser from '../lib/phaser.js';
 
 /**
  * @param {Phaser.Scene} scene
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {() => void} [options.callback]
  * @param {boolean} [options.skipSceneTransition=false]
  */
