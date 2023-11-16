@@ -10,6 +10,7 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
+import { Menu } from '../world/menu/menu.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -58,6 +59,8 @@ export class WorldScene extends Phaser.Scene {
   #encounterLayer;
   /** @type {DialogUi} */
   #dialogUi;
+  /** @type {Menu} */
+  #menu;
 
   constructor() {
     super({
@@ -146,6 +149,8 @@ export class WorldScene extends Phaser.Scene {
 
     // create dialog ui
     this.#dialogUi = new DialogUi(this, MAX_WORLD_WIDTH);
+    // create menu
+    this.#menu = new Menu(this);
 
     this.cameras.main.fadeIn(1000, 0, 0, 0);
   }
@@ -164,8 +169,27 @@ export class WorldScene extends Phaser.Scene {
       this.#player.moveCharacter(selectedDirection);
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving && !this.#menu.isVisible) {
       this.#handlePlayerInteraction();
+    }
+
+    if (this.#controls.wasEnterKeyPressed()) {
+      if (this.#menu.isVisible) {
+        this.#menu.hide();
+        return;
+      }
+      this.#menu.show();
+    }
+    if (this.#menu.isVisible) {
+      if (selectedDirection !== DIRECTION.NONE) {
+        this.#menu.handlePlayerInput(selectedDirection);
+      }
+      if (this.#controls.wasSpaceKeyPressed()) {
+        this.#menu.handlePlayerInput('OK');
+      }
+      if (this.#controls.wasBackKeyPressed()) {
+        this.#menu.handlePlayerInput('CANCEL');
+      }
     }
 
     this.#player.update(time);
@@ -334,6 +358,6 @@ export class WorldScene extends Phaser.Scene {
   }
 
   #isPlayerInputLocked() {
-    return this.#dialogUi.isVisible;
+    return this.#dialogUi.isVisible || this.#menu.isVisible;
   }
 }
