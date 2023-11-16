@@ -164,12 +164,14 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyPressedDown();
-    if (selectedDirection !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-      this.#player.moveCharacter(selectedDirection);
+    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown = this.#controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
+    if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
+      this.#player.moveCharacter(selectedDirectionHeldDown);
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving && !this.#menu.isVisible) {
+    if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {
       this.#handlePlayerInteraction();
     }
 
@@ -180,11 +182,12 @@ export class WorldScene extends Phaser.Scene {
       }
       this.#menu.show();
     }
+
     if (this.#menu.isVisible) {
-      if (selectedDirection !== DIRECTION.NONE) {
-        this.#menu.handlePlayerInput(selectedDirection);
+      if (selectedDirectionPressedOnce !== DIRECTION.NONE) {
+        this.#menu.handlePlayerInput(selectedDirectionPressedOnce);
       }
-      if (this.#controls.wasSpaceKeyPressed()) {
+      if (wasSpaceKeyPressed) {
         this.#menu.handlePlayerInput('OK');
       }
       if (this.#controls.wasBackKeyPressed()) {

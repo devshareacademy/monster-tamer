@@ -1,9 +1,32 @@
 import Phaser from '../../lib/phaser.js';
-import { MENU_COLOR } from '../../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../../utils/data-manager.js';
 import { createNineSliceContainer, updateNineSliceContainerTexture } from '../../utils/nine-slice.js';
 import { UI_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
+import { MENU_COLOR } from '../../config.js';
+import { DIRECTION } from '../../common/direction.js';
+
+/**
+ * @typedef {keyof typeof MENU_OPTIONS} MenuOptions
+ */
+
+/** @enum {MenuOptions} */
+export const MENU_OPTIONS = Object.freeze({
+  MONSTERDEX: 'MONSTERDEX',
+  MONSTERS: 'MONSTERS',
+  BAG: 'BAG',
+  SAVE: 'SAVE',
+  OPTION: 'OPTION',
+  EXIT: 'EXIT',
+});
+
+/** @type {Phaser.Types.GameObjects.Text.TextStyle} */
+const MENU_TEXT_STYLE = {
+  fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+  color: '#FFFFFF',
+  fontSize: '32px',
+};
 
 export class Menu {
   /** @type {Phaser.Scene} */
@@ -14,39 +37,50 @@ export class Menu {
   #height;
   /** @type {number} */
   #padding;
+  /** @type {Phaser.GameObjects.Graphics} */
+  #graphics;
   /** @type {Phaser.GameObjects.Container} */
   #container;
   /** @type {boolean} */
   #isVisible;
-  /** @type {Phaser.GameObjects.Rectangle} */
-  #rectangleBackground;
+  /** @type {MenuOptions[]} */
+  #availableMenuOptions;
+  /** @type {Phaser.GameObjects.Text[]} */
+  #menuOptionsTextGameObjects;
+  /** @type {Phaser.GameObjects.Image} */
+  #userInputCursor;
+  /** @type {number} */
+  #selectedMenuOptionIndex;
 
   /**
    * @param {Phaser.Scene} scene
    */
   constructor(scene) {
     this.#scene = scene;
-
-    this.#width = 350;
-    this.#height = 400;
+    this.#availableMenuOptions = [MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
+    this.#menuOptionsTextGameObjects = [];
+    this.#selectedMenuOptionIndex = 0;
     this.#padding = 4;
+    this.#width = 300;
 
-    this.#container = createNineSliceContainer(this.#scene, UI_ASSET_KEYS.MENU_BACKGROUND, this.#width, this.#height)
-      .setAlpha(0)
-      .setDepth(2);
-    this.#updateMenuTexture();
+    // calculate height based on currently available options
+    this.#height = 10 + this.#padding * 2 + this.#availableMenuOptions.length * 50;
 
-    this.#rectangleBackground = this.#scene.add
-      .rectangle(
-        this.#padding,
-        this.#padding,
-        this.#width - this.#padding * 2,
-        this.#height - this.#padding * 2,
-        0x000000,
-        0.8
-      )
-      .setOrigin(0);
-    this.#container.add(this.#rectangleBackground);
+    this.#graphics = this.#createGraphics();
+    this.#container = this.#scene.add.container(0, 0, [this.#graphics]);
+
+    // update menu container with menu options
+    for (let i = 0; i < this.#availableMenuOptions.length; i += 1) {
+      const y = 10 + 50 * i + this.#padding;
+      const textObj = this.#scene.add.text(40 + this.#padding, y, this.#availableMenuOptions[i], MENU_TEXT_STYLE);
+      this.#menuOptionsTextGameObjects.push(textObj);
+      this.#container.add(textObj);
+    }
+
+    // add player input cursor
+    this.#userInputCursor = this.#scene.add.image(20 + this.#padding, 28 + this.#padding, UI_ASSET_KEYS.CURSOR_WHITE);
+    this.#userInputCursor.setScale(2.5);
+    this.#container.add(this.#userInputCursor);
   }
 
   /** @type {boolean} */
@@ -58,11 +92,9 @@ export class Menu {
    * @returns {void}
    */
   show() {
-    console.log(this.#scene.cameras.main.worldView);
     const { right, top } = this.#scene.cameras.main.worldView;
     const startX = right - this.#padding * 2 - this.#width;
     const startY = top + this.#padding * 2;
-    console.log(startX, startY);
 
     this.#container.setPosition(startX, startY);
     this.#container.setAlpha(1);
@@ -89,35 +121,81 @@ export class Menu {
 
     if (input === 'OK') {
       // TODO: handle selected option
+      console.log(this.#availableMenuOptions[this.#selectedMenuOptionIndex]);
       return;
     }
 
     // update selected menu option based on player input
-    // TODO
+    this.#moveMenuCursor(input);
   }
 
   /**
-   * @returns {void}
+   * @returns {Phaser.GameObjects.Graphics}
    */
-  #updateMenuTexture() {
-    /** @type {import('../../common/options').MenuColorOptions} */
+  #createGraphics() {
+    const g = this.#scene.add.graphics();
+    const menuColor = this.#getMenuColorsFromDataManager();
+
+    g.fillStyle(menuColor.main, 1);
+    g.fillRect(1, 0, this.#width - 1, this.#height - 1);
+    g.lineStyle(8, menuColor.border, 10);
+    g.strokeRect(0, 0, this.#width, this.#height);
+    g.setAlpha(0.9);
+
+    return g;
+  }
+
+  /**
+   * @returns {{ main: number; border: number}}
+   */
+  #getMenuColorsFromDataManager() {
+    /** @type {import('../../common/options.js').MenuColorOptions} */
     const chosenMenuColor = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
     if (chosenMenuColor === undefined) {
-      return;
+      return MENU_COLOR[1];
     }
 
     switch (chosenMenuColor) {
       case 0:
-        updateNineSliceContainerTexture(this.#scene, this.#container, UI_ASSET_KEYS.MENU_BACKGROUND);
-        break;
+        return MENU_COLOR[1];
       case 1:
-        updateNineSliceContainerTexture(this.#scene, this.#container, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
-        break;
+        return MENU_COLOR[2];
       case 2:
-        updateNineSliceContainerTexture(this.#scene, this.#container, UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE);
-        break;
+        return MENU_COLOR[3];
       default:
         exhaustiveGuard(chosenMenuColor);
     }
+  }
+
+  /**
+   * @param {import('../../common/direction.js').Direction} direction
+   * @returns {void}
+   */
+  #moveMenuCursor(direction) {
+    switch (direction) {
+      case DIRECTION.UP:
+        this.#selectedMenuOptionIndex -= 1;
+        if (this.#selectedMenuOptionIndex < 0) {
+          this.#selectedMenuOptionIndex = this.#availableMenuOptions.length - 1;
+        }
+        // update selected index & move obj position
+        break;
+      case DIRECTION.DOWN:
+        this.#selectedMenuOptionIndex += 1;
+        if (this.#selectedMenuOptionIndex > this.#availableMenuOptions.length - 1) {
+          this.#selectedMenuOptionIndex = 0;
+        }
+        break;
+      case DIRECTION.LEFT:
+      case DIRECTION.RIGHT:
+      case DIRECTION.NONE:
+        return;
+      default:
+        exhaustiveGuard(direction);
+    }
+    const x = 20 + this.#padding;
+    const y = 28 + this.#padding + this.#selectedMenuOptionIndex * 50;
+
+    this.#userInputCursor.setPosition(x, y);
   }
 }
