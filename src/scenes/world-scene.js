@@ -4,7 +4,7 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
-import { DISABLE_WILD_ENCOUNTERS, TILE_SIZE } from '../config.js';
+import { DISABLE_WILD_ENCOUNTERS, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { NPC } from '../world/characters/npc.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DialogUi } from '../world/dialog-ui.js';
@@ -79,6 +79,9 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.setZoom(0.8);
     this.cameras.main.centerOn(x, y);
 
+    // add world background
+    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+
     // create map and collision layer
     const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
@@ -93,7 +96,8 @@ export class WorldScene extends Phaser.Scene {
       console.log(`[${WorldScene.name}:create] encountered error while creating collision layer using data from tiled`);
       return;
     }
-    collisionLayer.setAlpha(0);
+    collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA);
+
     this.signLayer = map.getObjectLayer('Sign');
     if (!this.signLayer) {
       console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
@@ -101,7 +105,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     // create collision layer for encounters
-    const encounterTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+    const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
     if (!encounterTiles) {
       console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
       return;
@@ -111,10 +115,7 @@ export class WorldScene extends Phaser.Scene {
       console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
       return;
     }
-    this.#encounterLayer.setAlpha(0);
-
-    // add world background
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA);
 
     // create npcs
     this.#createNPCs(map);
