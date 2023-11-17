@@ -1,16 +1,28 @@
 import Phaser from '../../lib/phaser.js';
 import { DIRECTION } from '../../common/direction.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
+import { exhaustiveGuard } from '../../utils/guard.js';
+
+/**
+ * @typedef CharacterIdleFrameConfig
+ * @type {object}
+ * @property {number} LEFT
+ * @property {number} RIGHT
+ * @property {number} UP
+ * @property {number} DOWN
+ * @property {number} NONE
+ */
 
 /**
  * @typedef CharacterConfig
  * @type {object}
  * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
  * @property {string} assetKey the name of the asset key that should be used for this character
- * @property {number} [assetFrame=0] if the asset key is tied to a spritesheet, this frame will be used, defaults to 0
+ * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
  * @property {import('../../types/typedef.js').Coordinate} position the starting position of the character
  * @property {import('../../common/direction.js').Direction} direction the direction the character is currently facing
  * @property {() => void} [spriteGridMovementFinishedCallback] an optional callback that will be called after each step of the grid movement is complete
+ * @property {CharacterIdleFrameConfig} idleFrame
  */
 
 export class Character {
@@ -30,6 +42,10 @@ export class Character {
   _previousTargetPosition;
   /** @protected @type {() => void | undefined} */
   _spriteGridMovementFinishedCallback;
+  /** @protected @type {CharacterIdleFrameConfig} */
+  _idleFrameConfig;
+  /** @protected @type {import('../../types/typedef.js').Coordinate} */
+  _origin;
 
   /**
    * @param {CharacterConfig} config
@@ -45,9 +61,11 @@ export class Character {
     this._isMoving = false;
     this._targetPosition = { ...config.position };
     this._previousTargetPosition = { ...config.position };
+    this._idleFrameConfig = { ...config.idleFrame };
+    this._origin = config.origin ? { ...config.origin } : { x: 0, y: 0 };
     this._phaserGameObject = this._scene.add
-      .sprite(config.position.x, config.position.y, config.assetKey, config.assetFrame || 0)
-      .setOrigin(0);
+      .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
+      .setOrigin(this._origin.x, this._origin.y);
     this._spriteGridMovementFinishedCallback = config.spriteGridMovementFinishedCallback;
   }
 
@@ -71,27 +89,44 @@ export class Character {
     }
     this._direction = direction;
     this._moveSprite(this._direction);
+  }
 
-    /* // moves to grid utils function
-    switch (direction) {
+  /**
+   * @param {DOMHighResTimeStamp} time
+   * @returns {void}
+   */
+  update(time) {
+    if (this._isMoving) {
+      return;
+    }
+
+    // stop current animation and show idle frame
+    const idleFrame = this._phaserGameObject.anims.currentAnim?.frames[1].frame.name;
+    this._phaserGameObject.anims.stop();
+    if (!idleFrame) {
+      return;
+    }
+    switch (this._direction) {
       case DIRECTION.DOWN:
-        this._phaserGameObject.y += TILE_SIZE;
-        break;
-      case DIRECTION.UP:
-        this._phaserGameObject.y -= TILE_SIZE;
-        break;
       case DIRECTION.LEFT:
-        this._phaserGameObject.x -= TILE_SIZE;
-        break;
       case DIRECTION.RIGHT:
-        this._phaserGameObject.x += TILE_SIZE;
+      case DIRECTION.UP:
+        this._phaserGameObject.setFrame(idleFrame);
         break;
       case DIRECTION.NONE:
         break;
       default:
-        exhaustiveGuard(direction);
+        // We should never reach this default case
+        exhaustiveGuard(this._direction);
     }
-    */
+  }
+
+  /**
+   * @protected
+   * @returns {number}
+   */
+  _getIdleFrame() {
+    return this._idleFrameConfig[this._direction];
   }
 
   /**

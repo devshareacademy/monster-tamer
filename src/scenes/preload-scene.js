@@ -13,6 +13,8 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
+import { DIRECTION } from '../common/direction.js';
+import { WALK_FRAME_RATE } from '../config.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -106,6 +108,39 @@ export class PreloadScene extends Phaser.Scene {
 
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
+    this.#createAnimations();
     this.scene.start(SCENE_KEYS.WORLD_SCENE);
+  }
+
+  #createAnimations() {
+    // create player animations
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.DOWN}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [6, 7, 8] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.RIGHT}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [3, 4, 5] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.LEFT}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [9, 10, 11] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
+    this.anims.create({
+      key: `PLAYER_${DIRECTION.UP}`,
+      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [0, 1, 2] }),
+      frameRate: WALK_FRAME_RATE,
+      repeat: -1,
+      yoyo: true,
+    });
   }
 }
