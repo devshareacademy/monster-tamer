@@ -13,8 +13,7 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
-import { DIRECTION } from '../common/direction.js';
-import { WALK_FRAME_RATE } from '../config.js';
+import { DataUtils } from '../utils/data-utils.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -74,6 +73,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+    this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -113,34 +113,19 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   #createAnimations() {
-    // create player animations
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.DOWN}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [6, 7, 8] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.RIGHT}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [3, 4, 5] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.LEFT}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [9, 10, 11] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.UP}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [0, 1, 2] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
+    const animations = DataUtils.getAnimations(this);
+    animations.forEach((animation) => {
+      const frames = animation.frames
+        ? this.anims.generateFrameNumbers(animation.assetKey, { frames: animation.frames })
+        : this.anims.generateFrameNumbers(animation.assetKey);
+      this.anims.create({
+        key: animation.key,
+        frames: frames,
+        frameRate: animation.frameRate,
+        repeat: animation.repeat,
+        yoyo: animation.yoyo,
+        delay: animation.delay,
+      });
     });
   }
 }

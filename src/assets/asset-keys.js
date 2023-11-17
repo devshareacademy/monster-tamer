@@ -26,6 +26,7 @@ export const UI_ASSET_KEYS = Object.freeze({
 
 export const DATA_ASSET_KEYS = Object.freeze({
   ATTACKS: 'ATTACKS',
+  ANIMATIONS: 'ANIMATIONS',
 });
 
 export const ATTACK_ASSET_KEYS = Object.freeze({
