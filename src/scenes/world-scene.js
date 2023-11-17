@@ -173,8 +173,6 @@ export class WorldScene extends Phaser.Scene {
     this.#npcs.forEach((npc) => {
       npc.update(time);
     });
-
-    this.#controls = new Controls(this);
   }
 
   /**
