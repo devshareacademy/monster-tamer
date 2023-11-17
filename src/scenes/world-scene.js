@@ -8,9 +8,19 @@ import { TILE_SIZE } from '../config.js';
 
 /** @type {import('../types/typedef.js').Coordinate} */
 const PLAYER_POSITION = Object.freeze({
-  x: 1 * TILE_SIZE,
-  y: 1 * TILE_SIZE,
+  x: 6 * TILE_SIZE,
+  y: 21 * TILE_SIZE,
 });
+
+/*
+  Our scene will be 16 x 9 (1024 x 576 pixels)
+  each grid size will be 64 x 64 pixels
+*/
+
+// this value comes from the width of the level background image we are using
+// we set the max camera width to the size of our image in order to control what
+// is visible to the player, since the phaser game world is infinite.
+const MAX_WORLD_WIDTH = 1280;
 
 export class WorldScene extends Phaser.Scene {
   /** @type {Player} */
@@ -27,6 +37,13 @@ export class WorldScene extends Phaser.Scene {
   create() {
     console.log(`[${WorldScene.name}:preload] invoked`);
 
+    // update camera settings
+    const x = 6 * TILE_SIZE;
+    const y = 22 * TILE_SIZE;
+    this.cameras.main.setBounds(0, 0, MAX_WORLD_WIDTH, 2176);
+    this.cameras.main.setZoom(0.8);
+    this.cameras.main.centerOn(x, y);
+
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
     this.#player = new Player({
@@ -34,8 +51,11 @@ export class WorldScene extends Phaser.Scene {
       position: PLAYER_POSITION,
       direction: DIRECTION.DOWN,
     });
+    this.cameras.main.startFollow(this.#player.sprite);
 
     this.#controls = new Controls(this);
+
+    this.cameras.main.fadeIn(1000, 0, 0, 0);
   }
 
   /**
