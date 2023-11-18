@@ -5,12 +5,7 @@ import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
-
-/** @type {import('../types/typedef.js').Coordinate} */
-const PLAYER_POSITION = Object.freeze({
-  x: 6 * TILE_SIZE,
-  y: 21 * TILE_SIZE,
-});
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
@@ -86,8 +81,8 @@ export class WorldScene extends Phaser.Scene {
 
     this.#player = new Player({
       scene: this,
-      position: PLAYER_POSITION,
-      direction: DIRECTION.DOWN,
+      position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
+      direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
       collisionLayer: collisionLayer,
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
@@ -122,6 +117,14 @@ export class WorldScene extends Phaser.Scene {
   }
 
   #handlePlayerMovementUpdate() {
+    // update player position on global data store
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+      x: this.#player.sprite.x,
+      y: this.#player.sprite.y,
+    });
+    // update player direction on global data store
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
+
     if (!this.#encounterLayer) {
       return;
     }
