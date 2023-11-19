@@ -2,9 +2,8 @@ import Phaser from '../lib/phaser.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { animateText } from '../utils/text-utils.js';
-import { MENU_COLOR, TEXT_SPEED } from '../config.js';
+import { MENU_COLOR } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
-import { TEXT_SPEED_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
