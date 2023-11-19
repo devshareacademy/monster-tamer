@@ -60,6 +60,8 @@ export class WorldScene extends Phaser.Scene {
   #dialogUi;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #signLayer;
+  /** @type {NPC | undefined} */
+  #npcPlayerIsInteractingWith;
 
   constructor() {
     super({
@@ -247,13 +249,8 @@ export class WorldScene extends Phaser.Scene {
 
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
-      this.#npcs.some((npc) => {
-        if (npc.isTalkingToPlayer) {
-          npc.isTalkingToPlayer = false;
-          return true;
-        }
-        return false;
-      });
+      this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+      this.#npcPlayerIsInteractingWith = undefined;
       return;
     }
 
@@ -296,6 +293,7 @@ export class WorldScene extends Phaser.Scene {
     if (nearbyNpc) {
       nearbyNpc.facePlayer(this.#player.direction);
       nearbyNpc.isTalkingToPlayer = true;
+      this.#npcPlayerIsInteractingWith = nearbyNpc;
       this.#dialogUi.showDialogModal(nearbyNpc.messages);
       return;
     }
