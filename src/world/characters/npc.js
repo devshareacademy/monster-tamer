@@ -75,7 +75,7 @@ export class NPC extends Character {
 
   /** @type {string[]} */
   get messages() {
-    return this.#messages;
+    return [...this.#messages];
   }
 
   /** @type {boolean} */

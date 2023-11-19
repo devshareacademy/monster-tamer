@@ -159,6 +159,7 @@ export class WorldScene extends Phaser.Scene {
    */
   update(time) {
     if (this.#wildMonsterEncountered) {
+      this.#player.update(time);
       return;
     }
 
