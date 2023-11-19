@@ -58,6 +58,8 @@ export class WorldScene extends Phaser.Scene {
   #encounterLayer;
   /** @type {DialogUi} */
   #dialogUi;
+  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  #signLayer;
 
   constructor() {
     super({
@@ -98,8 +100,8 @@ export class WorldScene extends Phaser.Scene {
     }
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA);
 
-    this.signLayer = map.getObjectLayer('Sign');
-    if (!this.signLayer) {
+    this.#signLayer = map.getObjectLayer('Sign');
+    if (!this.#signLayer) {
       console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
       return;
     }
@@ -265,7 +267,7 @@ export class WorldScene extends Phaser.Scene {
     const targetPosition = getTargetPositionFromGameObjectPositionAndDirection({ x, y }, this.#player.direction);
 
     // check for sign, and display appropriate message if player is not facing up
-    const nearbySign = this.signLayer?.objects.find((object) => {
+    const nearbySign = this.#signLayer?.objects.find((object) => {
       if (!object.x || !object.y) {
         return false;
       }
