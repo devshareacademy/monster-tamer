@@ -6,6 +6,20 @@ import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
+import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
+
+/**
+ * @typedef TiledObjectProperty
+ * @type {object}
+ * @property {string} name
+ * @property {string} messages
+ * @property {any} value
+ */
+
+const TILED_SIGN_PROPERTY = Object.freeze({
+  MESSAGE: 'message',
+});
 
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
@@ -26,6 +40,8 @@ export class WorldScene extends Phaser.Scene {
   #encounterLayer;
   /** @type {boolean} */
   #wildMonsterEncountered;
+  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  #signLayer;
 
   constructor() {
     super({
@@ -63,6 +79,13 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+
+    // create interactive layer
+    this.#signLayer = map.getObjectLayer('Sign');
+    if (!this.#signLayer) {
+      console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
+      return;
+    }
 
     // create collision layer for encounters
     const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
@@ -113,7 +136,41 @@ export class WorldScene extends Phaser.Scene {
       this.#player.moveCharacter(selectedDirection);
     }
 
+    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+      this.#handlePlayerInteraction();
+    }
+
     this.#player.update(time);
+  }
+
+  #handlePlayerInteraction() {
+    console.log('start of interaction check');
+    // get players current direction and check 1 tile over in that direction to see if there is an object that can be interacted with
+    const { x, y } = this.#player.sprite;
+    const targetPosition = getTargetPositionFromGameObjectPositionAndDirection({ x, y }, this.#player.direction);
+
+    // check for sign, and display appropriate message if player is not facing up
+    const nearbySign = this.#signLayer.objects.find((object) => {
+      if (!object.x || !object.y) {
+        return false;
+      }
+      return object.x === targetPosition.x && object.y - TILE_SIZE === targetPosition.y;
+    });
+
+    if (nearbySign) {
+      /** @type {TiledObjectProperty[]} */
+      const props = nearbySign.properties;
+      /** @type {string} */
+      const msg = props.find((prop) => prop.name === TILED_SIGN_PROPERTY.MESSAGE)?.value;
+
+      const usePlaceholderText = this.#player.direction !== DIRECTION.UP;
+      let textToShow = CANNOT_READ_SIGN_TEXT;
+      if (!usePlaceholderText) {
+        textToShow = msg || SAMPLE_TEXT;
+      }
+      console.log(textToShow);
+      return;
+    }
   }
 
   #handlePlayerMovementUpdate() {

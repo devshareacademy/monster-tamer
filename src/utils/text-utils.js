@@ -30,3 +30,6 @@ export function animateText(scene, target, text, config) {
     delay: config?.delay || 25,
   });
 }
+
+export const CANNOT_READ_SIGN_TEXT = 'You cannot read the sign from this direction.';
+export const SAMPLE_TEXT = 'Make sure you talk to npcs for helpful tips!';
