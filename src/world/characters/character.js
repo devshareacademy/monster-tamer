@@ -24,6 +24,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {() => void} [spriteGridMovementFinishedCallback] an optional callback that will be called after each step of the grid movement is complete
  * @property {CharacterIdleFrameConfig} idleFrame
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
+ * @property {Character[]} [otherCharactersToCheckForCollisionWith=[]]
  */
 
 export class Character {
@@ -49,6 +50,8 @@ export class Character {
   _origin;
   /** @protected @type {Phaser.Tilemaps.TilemapLayer} */
   _collisionLayer;
+  /** @protected @type {Character[]} */
+  _otherCharactersToCheckForCollisionWith;
 
   /**
    * @param {CharacterConfig} config
@@ -67,6 +70,7 @@ export class Character {
     this._idleFrameConfig = { ...config.idleFrame };
     this._origin = config.origin ? { ...config.origin } : { x: 0, y: 0 };
     this._collisionLayer = config.collisionLayer;
+    this._otherCharactersToCheckForCollisionWith = config.otherCharactersToCheckForCollisionWith || [];
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
       .setOrigin(this._origin.x, this._origin.y);
@@ -98,6 +102,14 @@ export class Character {
     }
     this._direction = direction;
     this._moveSprite(this._direction);
+  }
+
+  /**
+   * @param {Character} character
+   * @returns {void}
+   */
+  addCharacterToCheckForCollisionsWith(character) {
+    this._otherCharactersToCheckForCollisionWith.push(character);
   }
 
   /**
@@ -171,7 +183,10 @@ export class Character {
     const targetPosition = { ...this._targetPosition };
     const updatedPosition = getTargetPositionFromGameObjectPositionAndDirection(targetPosition, this._direction);
 
-    return this.#doesPositionCollideWithCollisionLayer(updatedPosition);
+    return (
+      this.#doesPositionCollideWithCollisionLayer(updatedPosition) ||
+      this.#doesPositionCollideWithOtherCharacter(updatedPosition)
+    );
   }
 
   /**
@@ -225,5 +240,26 @@ export class Character {
     const tile = this._collisionLayer.getTileAtWorldXY(x, y, true);
 
     return tile.index !== -1;
+  }
+
+  /**
+   * @param {import('../../types/typedef.js').Coordinate} position
+   * @returns {boolean}
+   */
+  #doesPositionCollideWithOtherCharacter(position) {
+    const { x, y } = position;
+    if (this._otherCharactersToCheckForCollisionWith.length === 0) {
+      return false;
+    }
+
+    // checks if the new position that this character wants to move to is the same position that another
+    // character is currently at, or was previously at and is moving towards currently
+    const collidesWithACharacter = this._otherCharactersToCheckForCollisionWith.some((character) => {
+      return (
+        (character._targetPosition.x === x && character._targetPosition.y === y) ||
+        (character._previousTargetPosition.x === x && character._previousTargetPosition.y === y)
+      );
+    });
+    return collidesWithACharacter;
   }
 }
