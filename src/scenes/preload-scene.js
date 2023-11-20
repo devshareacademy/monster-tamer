@@ -13,6 +13,7 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
+import { DataUtils } from '../utils/data-utils.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -72,6 +73,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+    this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -106,6 +108,24 @@ export class PreloadScene extends Phaser.Scene {
 
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
+    this.#createAnimations();
     this.scene.start(SCENE_KEYS.WORLD_SCENE);
+  }
+
+  #createAnimations() {
+    const animations = DataUtils.getAnimations(this);
+    animations.forEach((animation) => {
+      const frames = animation.frames
+        ? this.anims.generateFrameNumbers(animation.assetKey, { frames: animation.frames })
+        : this.anims.generateFrameNumbers(animation.assetKey);
+      this.anims.create({
+        key: animation.key,
+        frames: frames,
+        frameRate: animation.frameRate,
+        repeat: animation.repeat,
+        delay: animation.delay,
+        yoyo: animation.yoyo,
+      });
+    });
   }
 }
