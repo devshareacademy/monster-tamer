@@ -22,7 +22,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {import('../../types/typedef.js').Coordinate} position the starting position of the character
  * @property {import('../../common/direction.js').Direction} direction the direction the character is currently facing
  * @property {() => void} [spriteGridMovementFinishedCallback] an optional callback that will be called after each step of the grid movement is complete
- * @property {CharacterIdleFrameConfig} idleFrame
+ * @property {CharacterIdleFrameConfig} idleFrameConfig
  */
 
 export class Character {
@@ -32,8 +32,6 @@ export class Character {
   _phaserGameObject;
   /** @protected @type {import('../../common/direction.js').Direction} */
   _direction;
-  /** @protected @type {import('../../common/direction.js').Direction} */
-  _inputDirection;
   /** @protected @type {boolean} */
   _isMoving;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
@@ -57,16 +55,20 @@ export class Character {
 
     this._scene = config.scene;
     this._direction = config.direction;
-    this._inputDirection = DIRECTION.NONE;
     this._isMoving = false;
     this._targetPosition = { ...config.position };
     this._previousTargetPosition = { ...config.position };
-    this._idleFrameConfig = { ...config.idleFrame };
+    this._idleFrameConfig = config.idleFrameConfig;
     this._origin = config.origin ? { ...config.origin } : { x: 0, y: 0 };
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
       .setOrigin(this._origin.x, this._origin.y);
     this._spriteGridMovementFinishedCallback = config.spriteGridMovementFinishedCallback;
+  }
+
+  /** @type {Phaser.GameObjects.Sprite} */
+  get sprite() {
+    return this._phaserGameObject;
   }
 
   /** @type {boolean} */
@@ -87,8 +89,7 @@ export class Character {
     if (this._isMoving) {
       return;
     }
-    this._direction = direction;
-    this._moveSprite(this._direction);
+    this._moveSprite(direction);
   }
 
   /**
@@ -135,17 +136,11 @@ export class Character {
    * @returns {void}
    */
   _moveSprite(direction) {
-    this._inputDirection = direction;
-    if (this._isMoving) {
-      return;
-    }
-    this._direction = this._inputDirection;
-
+    this._direction = direction;
     if (this._isBlockingTile()) {
       return;
     }
     this._isMoving = true;
-
     this.#handleSpriteMovement();
   }
 
@@ -191,7 +186,6 @@ export class Character {
       targets: this._phaserGameObject,
       onComplete: () => {
         this._isMoving = false;
-        // update previous and target positions
         this._previousTargetPosition = { ...this._targetPosition };
         if (this._spriteGridMovementFinishedCallback) {
           this._spriteGridMovementFinishedCallback();

@@ -13,8 +13,6 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
-import { DIRECTION } from '../common/direction.js';
-import { WALK_FRAME_RATE } from '../config.js';
 import { DataUtils } from '../utils/data-utils.js';
 
 export class PreloadScene extends Phaser.Scene {
@@ -75,6 +73,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+    this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -124,8 +123,8 @@ export class PreloadScene extends Phaser.Scene {
         frames: frames,
         frameRate: animation.frameRate,
         repeat: animation.repeat,
-        yoyo: animation.yoyo,
         delay: animation.delay,
+        yoyo: animation.yoyo,
       });
     });
   }
