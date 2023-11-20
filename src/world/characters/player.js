@@ -40,7 +40,7 @@ export class Player extends Character {
       case DIRECTION.UP:
         if (
           !this._phaserGameObject.anims.isPlaying ||
-          this._phaserGameObject.anims.currentAnim?.key !== `PLAYER_${this.direction}`
+          this._phaserGameObject.anims.currentAnim?.key !== `PLAYER_${this._direction}`
         ) {
           this._phaserGameObject.play(`PLAYER_${this._direction}`);
         }

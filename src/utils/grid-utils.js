@@ -26,6 +26,7 @@ export function getTargetPositionFromGameObjectPositionAndDirection(currentPosit
     case DIRECTION.NONE:
       break;
     default:
+      // We should never reach this default case
       exhaustiveGuard(direction);
   }
   return targetPosition;

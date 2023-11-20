@@ -122,6 +122,10 @@ export class Character {
     }
   }
 
+  /**
+   * @protected
+   * @returns {number}
+   */
   _getIdleFrame() {
     return this._idleFrameConfig[this._direction];
   }
@@ -146,7 +150,7 @@ export class Character {
    */
   _isBlockingTile() {
     if (this._direction === DIRECTION.NONE) {
-      return;
+      return false;
     }
 
     // TODO: add in collision logic
