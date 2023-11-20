@@ -3,7 +3,6 @@ import { TILE_SIZE } from '../config.js';
 import { exhaustiveGuard } from './guard.js';
 
 /**
- *
  * @param {import('../types/typedef').Coordinate} currentPosition
  * @param {import('../common/direction').Direction} direction
  * @returns {import('../types/typedef').Coordinate}
@@ -12,17 +11,17 @@ export function getTargetPositionFromGameObjectPositionAndDirection(currentPosit
   /** @type {import('../types/typedef').Coordinate} */
   const targetPosition = { ...currentPosition };
   switch (direction) {
-    case DIRECTION.RIGHT:
-      targetPosition.x += TILE_SIZE;
-      break;
     case DIRECTION.DOWN:
       targetPosition.y += TILE_SIZE;
+      break;
+    case DIRECTION.UP:
+      targetPosition.y -= TILE_SIZE;
       break;
     case DIRECTION.LEFT:
       targetPosition.x -= TILE_SIZE;
       break;
-    case DIRECTION.UP:
-      targetPosition.y -= TILE_SIZE;
+    case DIRECTION.RIGHT:
+      targetPosition.x += TILE_SIZE;
       break;
     case DIRECTION.NONE:
       break;

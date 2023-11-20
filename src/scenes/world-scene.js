@@ -40,11 +40,6 @@ const TILED_SIGN_PROPERTY = Object.freeze({
   each grid size will be 64 x 64 pixels
 */
 
-// this value comes from the width of the level background image we are using
-// we set the max camera width to the size of our image in order to control what
-// is visible to the player, since the phaser game world is infinite.
-const MAX_WORLD_WIDTH = 1280;
-
 export class WorldScene extends Phaser.Scene {
   /** @type {Player} */
   #player;
@@ -76,14 +71,16 @@ export class WorldScene extends Phaser.Scene {
   create() {
     console.log(`[${WorldScene.name}:preload] invoked`);
 
-    // update camera settings
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
-    this.cameras.main.setBounds(0, 0, MAX_WORLD_WIDTH, 2176);
+
+    // this value comes from the width of the level background image we are using
+    // we set the max camera width to the size of our image in order to control what
+    // is visible to the player, since the phaser game world is infinite.
+    this.cameras.main.setBounds(0, 0, 1280, 2176);
     this.cameras.main.setZoom(0.8);
     this.cameras.main.centerOn(x, y);
 
-    // add world background
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
     // create map and collision layer
@@ -143,6 +140,7 @@ export class WorldScene extends Phaser.Scene {
     this.#npcs.forEach((npc) => {
       npc.addCharacterToCheckForCollisionsWith(this.#player);
     });
+    this.cameras.main.startFollow(this.#player.sprite);
 
     // create foreground for depth
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
@@ -150,7 +148,7 @@ export class WorldScene extends Phaser.Scene {
     this.#controls = new Controls(this);
 
     // create dialog ui
-    this.#dialogUi = new DialogUi(this, MAX_WORLD_WIDTH);
+    this.#dialogUi = new DialogUi(this, 1280);
 
     this.cameras.main.fadeIn(1000, 0, 0, 0);
   }
