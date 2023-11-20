@@ -17,7 +17,7 @@ export class NPC extends Character {
       ...config,
       assetKey: CHARACTER_ASSET_KEYS.NPC,
       origin: new Phaser.Math.Vector2(0, 0),
-      idleFrame: {
+      idleFrameConfig: {
         DOWN: config.frame,
         UP: config.frame + 1,
         NONE: config.frame,
