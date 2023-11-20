@@ -37,10 +37,9 @@ export class WorldScene extends Phaser.Scene {
   create() {
     console.log(`[${WorldScene.name}:preload] invoked`);
 
-    // update camera settings
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
-    this.cameras.main.setBounds(0, 0, MAX_WORLD_WIDTH, 2176);
+    this.cameras.main.setBounds(0, 0, 1280, 2176);
     this.cameras.main.setZoom(0.8);
     this.cameras.main.centerOn(x, y);
 
@@ -63,7 +62,7 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
-    const selectedDirection = this.#controls.getDirectionKeyPressedDown();
+    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#player.moveCharacter(selectedDirection);
     }
