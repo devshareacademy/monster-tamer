@@ -50,6 +50,8 @@ export class Menu {
   #userInputCursor;
   /** @type {number} */
   #selectedMenuOptionIndex;
+  /** @type {MenuOptions} */
+  #selectedMenuOption;
 
   /**
    * @param {Phaser.Scene} scene
@@ -87,6 +89,14 @@ export class Menu {
     return this.#isVisible;
   }
 
+  /** @type {MenuOptions | undefined} */
+  get selectedMenuOption() {
+    if (this.#isVisible) {
+      return undefined;
+    }
+    return this.#selectedMenuOption;
+  }
+
   /**
    * @returns {void}
    */
@@ -105,6 +115,8 @@ export class Menu {
    */
   hide() {
     this.#container.setAlpha(0);
+    this.#selectedMenuOptionIndex = 0;
+    this.#moveMenuCursor(DIRECTION.NONE);
     this.#isVisible = false;
   }
 
@@ -119,8 +131,7 @@ export class Menu {
     }
 
     if (input === 'OK') {
-      // TODO: handle selected option
-      console.log(this.#availableMenuOptions[this.#selectedMenuOptionIndex]);
+      this.#handleSelectedMenuOption();
       return;
     }
 
@@ -187,8 +198,9 @@ export class Menu {
         break;
       case DIRECTION.LEFT:
       case DIRECTION.RIGHT:
-      case DIRECTION.NONE:
         return;
+      case DIRECTION.NONE:
+        break;
       default:
         exhaustiveGuard(direction);
     }
@@ -196,5 +208,33 @@ export class Menu {
     const y = 28 + this.#padding + this.#selectedMenuOptionIndex * 50;
 
     this.#userInputCursor.setPosition(x, y);
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleSelectedMenuOption() {
+    /** @type {MenuOptions} */
+    const selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
+
+    switch (selectedMenuOption) {
+      case MENU_OPTIONS.EXIT:
+        this.#selectedMenuOption = MENU_OPTIONS.EXIT;
+        this.hide();
+        break;
+      case MENU_OPTIONS.SAVE:
+        this.#selectedMenuOption = MENU_OPTIONS.SAVE;
+        dataManager.saveData();
+        this.hide();
+        break;
+      case MENU_OPTIONS.BAG:
+      case MENU_OPTIONS.MONSTERDEX:
+      case MENU_OPTIONS.MONSTERS:
+      case MENU_OPTIONS.OPTION:
+        // TODO: implement logic for other menu options
+        break;
+      default:
+        exhaustiveGuard(selectedMenuOption);
+    }
   }
 }

@@ -193,6 +193,9 @@ export class WorldScene extends Phaser.Scene {
       }
       if (wasSpaceKeyPressed) {
         this.#menu.handlePlayerInput('OK');
+        if (this.#menu.selectedMenuOption === 'SAVE') {
+          this.#dialogUi.showDialogModal(['Game progress has been saved.']);
+        }
       }
       if (this.#controls.wasBackKeyPressed()) {
         this.#menu.handlePlayerInput('CANCEL');
