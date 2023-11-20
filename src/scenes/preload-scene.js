@@ -15,6 +15,7 @@ import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { DIRECTION } from '../common/direction.js';
 import { WALK_FRAME_RATE } from '../config.js';
+import { DataUtils } from '../utils/data-utils.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -113,6 +114,23 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   #createAnimations() {
+    const animations = DataUtils.getAnimations(this);
+    animations.forEach((animation) => {
+      const frames = animation.frames
+        ? this.anims.generateFrameNumbers(animation.assetKey, { frames: animation.frames })
+        : this.anims.generateFrameNumbers(animation.assetKey);
+      this.anims.create({
+        key: animation.key,
+        frames: frames,
+        frameRate: animation.frameRate,
+        repeat: animation.repeat,
+        yoyo: animation.yoyo,
+        delay: animation.delay,
+      });
+    });
+  }
+
+  #createAnimations2() {
     // create player animations
     this.anims.create({
       key: `PLAYER_${DIRECTION.DOWN}`,

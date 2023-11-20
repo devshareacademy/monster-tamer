@@ -13,4 +13,6 @@ export class DataUtils {
     const data = scene.cache.json.get(DATA_ASSET_KEYS.ATTACKS);
     return data.find((attack) => attack.id === attackId);
   }
+
+  static getAnimations(scene) {}
 }
