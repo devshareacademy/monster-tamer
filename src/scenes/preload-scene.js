@@ -126,8 +126,8 @@ export class PreloadScene extends Phaser.Scene {
         frames: frames,
         frameRate: animation.frameRate,
         repeat: animation.repeat,
-        yoyo: animation.yoyo,
         delay: animation.delay,
+        yoyo: animation.yoyo,
       });
     });
   }
