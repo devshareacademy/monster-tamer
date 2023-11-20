@@ -129,36 +129,4 @@ export class PreloadScene extends Phaser.Scene {
       });
     });
   }
-
-  #createAnimations2() {
-    // create player animations
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.DOWN}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [6, 7, 8] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.RIGHT}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [3, 4, 5] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.LEFT}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [9, 10, 11] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `PLAYER_${DIRECTION.UP}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.PLAYER, { frames: [0, 1, 2] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-  }
 }
