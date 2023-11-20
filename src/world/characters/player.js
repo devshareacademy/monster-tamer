@@ -1,4 +1,6 @@
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
+import { DIRECTION } from '../../common/direction.js';
+import { exhaustiveGuard } from '../../utils/guard.js';
 import { Character } from './character.js';
 
 /**
@@ -15,5 +17,31 @@ export class Player extends Character {
       assetKey: CHARACTER_ASSET_KEYS.PLAYER,
       assetFrame: 7,
     });
+  }
+
+  /**
+   * @param {import('../../common/direction.js').Direction} direction
+   * @returns {void}
+   */
+  moveCharacter(direction) {
+    super.moveCharacter(direction);
+
+    switch (this._direction) {
+      case DIRECTION.DOWN:
+      case DIRECTION.LEFT:
+      case DIRECTION.RIGHT:
+      case DIRECTION.UP:
+        if (
+          !this._phaserGameObject.anims.isPlaying ||
+          this._phaserGameObject.anims.currentAnim?.key !== `PLAYER_${this.direction}`
+        ) {
+          this._phaserGameObject.play(`PLAYER_${this._direction}`);
+        }
+        break;
+      case DIRECTION.NONE:
+        break;
+      default:
+        exhaustiveGuard(this._direction);
+    }
   }
 }
