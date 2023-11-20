@@ -106,7 +106,7 @@ export class Character {
     if (this._isMoving) {
       return;
     }
-    this._moveSprite(this._direction);
+    this._moveSprite(direction);
   }
 
   /**

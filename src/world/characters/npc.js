@@ -53,9 +53,8 @@ export class NPC extends Character {
     super({
       ...config,
       assetKey: CHARACTER_ASSET_KEYS.NPC,
-      isPlayer: false,
       origin: new Phaser.Math.Vector2(0, 0),
-      idleFrame: {
+      idleFrameConfig: {
         DOWN: config.frame,
         UP: config.frame + 1,
         NONE: config.frame,
@@ -133,16 +132,16 @@ export class NPC extends Character {
   facePlayer(playerDirection) {
     switch (playerDirection) {
       case DIRECTION.DOWN:
-        this._phaserGameObject.setFrame(this._idleFrame.UP).setFlipX(false);
+        this._phaserGameObject.setFrame(this._idleFrameConfig.UP).setFlipX(false);
         break;
       case DIRECTION.LEFT:
-        this._phaserGameObject.setFrame(this._idleFrame.RIGHT).setFlipX(false);
+        this._phaserGameObject.setFrame(this._idleFrameConfig.RIGHT).setFlipX(false);
         break;
       case DIRECTION.RIGHT:
-        this._phaserGameObject.setFrame(this._idleFrame.LEFT).setFlipX(true);
+        this._phaserGameObject.setFrame(this._idleFrameConfig.LEFT).setFlipX(true);
         break;
       case DIRECTION.UP:
-        this._phaserGameObject.setFrame(this._idleFrame.DOWN).setFlipX(false);
+        this._phaserGameObject.setFrame(this._idleFrameConfig.DOWN).setFlipX(false);
         break;
       case DIRECTION.NONE:
         break;

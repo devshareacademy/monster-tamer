@@ -274,8 +274,10 @@ export class WorldScene extends Phaser.Scene {
 
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
-      this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
-      this.#npcPlayerIsInteractingWith = undefined;
+      if (this.#npcPlayerIsInteractingWith) {
+        this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+        this.#npcPlayerIsInteractingWith = undefined;
+      }
       return;
     }
 
