@@ -4,7 +4,7 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
-import { DISABLE_WILD_ENCOUNTERS, TILE_SIZE } from '../config.js';
+import { DISABLE_WILD_ENCOUNTERS, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { NPC } from '../world/characters/npc.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DialogUi } from '../world/dialog-ui.js';
@@ -41,11 +41,6 @@ const TILED_SIGN_PROPERTY = Object.freeze({
   each grid size will be 64 x 64 pixels
 */
 
-// this value comes from the width of the level background image we are using
-// we set the max camera width to the size of our image in order to control what
-// is visible to the player, since the phaser game world is infinite.
-const MAX_WORLD_WIDTH = 1280;
-
 export class WorldScene extends Phaser.Scene {
   /** @type {Player} */
   #player;
@@ -59,6 +54,10 @@ export class WorldScene extends Phaser.Scene {
   #encounterLayer;
   /** @type {DialogUi} */
   #dialogUi;
+  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  #signLayer;
+  /** @type {NPC | undefined} */
+  #npcPlayerIsInteractingWith;
   /** @type {Menu} */
   #menu;
 
@@ -75,12 +74,17 @@ export class WorldScene extends Phaser.Scene {
   create() {
     console.log(`[${WorldScene.name}:preload] invoked`);
 
-    // update camera settings
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
-    this.cameras.main.setBounds(0, 0, MAX_WORLD_WIDTH, 2176);
+
+    // this value comes from the width of the level background image we are using
+    // we set the max camera width to the size of our image in order to control what
+    // is visible to the player, since the phaser game world is infinite.
+    this.cameras.main.setBounds(0, 0, 1280, 2176);
     this.cameras.main.setZoom(0.8);
     this.cameras.main.centerOn(x, y);
+
+    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
     // create map and collision layer
     const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
@@ -96,15 +100,16 @@ export class WorldScene extends Phaser.Scene {
       console.log(`[${WorldScene.name}:create] encountered error while creating collision layer using data from tiled`);
       return;
     }
-    collisionLayer.setAlpha(0);
-    this.signLayer = map.getObjectLayer('Sign');
-    if (!this.signLayer) {
+    collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA);
+
+    this.#signLayer = map.getObjectLayer('Sign');
+    if (!this.#signLayer) {
       console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
       return;
     }
 
     // create collision layer for encounters
-    const encounterTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+    const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
     if (!encounterTiles) {
       console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
       return;
@@ -114,10 +119,7 @@ export class WorldScene extends Phaser.Scene {
       console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
       return;
     }
-    this.#encounterLayer.setAlpha(0);
-
-    // add world background
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA);
 
     // create npcs
     this.#createNPCs(map);
@@ -141,6 +143,7 @@ export class WorldScene extends Phaser.Scene {
     this.#npcs.forEach((npc) => {
       npc.addCharacterToCheckForCollisionsWith(this.#player);
     });
+    this.cameras.main.startFollow(this.#player.sprite);
 
     // create foreground for depth
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
@@ -148,7 +151,7 @@ export class WorldScene extends Phaser.Scene {
     this.#controls = new Controls(this);
 
     // create dialog ui
-    this.#dialogUi = new DialogUi(this, MAX_WORLD_WIDTH);
+    this.#dialogUi = new DialogUi(this, 1280);
     // create menu
     this.#menu = new Menu(this);
 
@@ -161,6 +164,7 @@ export class WorldScene extends Phaser.Scene {
    */
   update(time) {
     if (this.#wildMonsterEncountered) {
+      this.#player.update(time);
       return;
     }
 
@@ -200,8 +204,6 @@ export class WorldScene extends Phaser.Scene {
     this.#npcs.forEach((npc) => {
       npc.update(time);
     });
-
-    this.#controls = new Controls(this);
   }
 
   /**
@@ -272,13 +274,8 @@ export class WorldScene extends Phaser.Scene {
 
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
-      this.#npcs.some((npc) => {
-        if (npc.isTalkingToPlayer) {
-          npc.isTalkingToPlayer = false;
-          return true;
-        }
-        return false;
-      });
+      this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+      this.#npcPlayerIsInteractingWith = undefined;
       return;
     }
 
@@ -293,7 +290,7 @@ export class WorldScene extends Phaser.Scene {
     const targetPosition = getTargetPositionFromGameObjectPositionAndDirection({ x, y }, this.#player.direction);
 
     // check for sign, and display appropriate message if player is not facing up
-    const nearbySign = this.signLayer?.objects.find((object) => {
+    const nearbySign = this.#signLayer?.objects.find((object) => {
       if (!object.x || !object.y) {
         return false;
       }
@@ -321,6 +318,7 @@ export class WorldScene extends Phaser.Scene {
     if (nearbyNpc) {
       nearbyNpc.facePlayer(this.#player.direction);
       nearbyNpc.isTalkingToPlayer = true;
+      this.#npcPlayerIsInteractingWith = nearbyNpc;
       this.#dialogUi.showDialogModal(nearbyNpc.messages);
       return;
     }

@@ -4,7 +4,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
 import { Character } from './character.js';
 
 /**
- * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'assetFrame'>} PlayerConfig
+ * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'idleFrameConfig'>} PlayerConfig
  */
 
 export class Player extends Character {
@@ -14,10 +14,9 @@ export class Player extends Character {
   constructor(config) {
     super({
       ...config,
-      isPlayer: true,
       assetKey: CHARACTER_ASSET_KEYS.PLAYER,
       origin: { x: 0, y: 0.2 },
-      idleFrame: {
+      idleFrameConfig: {
         DOWN: 7,
         UP: 1,
         NONE: 7,

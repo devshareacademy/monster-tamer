@@ -29,8 +29,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @type {object}
  * @property {string} assetKey the name of the asset key that should be used for this character
  * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
- * @property {boolean} [isPlayer=false]
- * @property {CharacterIdleFrameConfig} idleFrame
+ * @property {CharacterIdleFrameConfig} idleFrameConfig
  */
 
 /**
@@ -44,8 +43,6 @@ export class Character {
   _phaserGameObject;
   /** @protected @type {import('../../common/direction.js').Direction} */
   _direction;
-  /** @protected @type {import('../../common/direction.js').Direction} */
-  _inputDirection;
   /** @protected @type {Phaser.Tilemaps.TilemapLayer} */
   _collisionLayer;
   /** @protected @type {boolean} */
@@ -54,16 +51,14 @@ export class Character {
   _targetPosition;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
   _previousTargetPosition;
-  /** @protected @type {boolean} */
-  _isPlayer;
-  /** @protected @type {import('../../types/typedef.js').Coordinate} */
-  _origin;
-  /** @protected @type {CharacterIdleFrameConfig} */
-  _idleFrame;
-  /** @protected @type {Character[]} */
-  _otherCharactersToCheckForCollisionWith;
   /** @protected @type {() => void | undefined} */
   _spriteGridMovementFinishedCallback;
+  /** @protected @type {CharacterIdleFrameConfig} */
+  _idleFrameConfig;
+  /** @protected @type {import('../../types/typedef.js').Coordinate} */
+  _origin;
+  /** @protected @type {Character[]} */
+  _otherCharactersToCheckForCollisionWith;
 
   /**
    * @param {CharacterConfig} config
@@ -75,14 +70,12 @@ export class Character {
 
     this._scene = config.scene;
     this._direction = config.direction;
-    this._inputDirection = DIRECTION.NONE;
-    this._collisionLayer = config.collisionLayer;
     this._isMoving = false;
     this._targetPosition = { ...config.position };
     this._previousTargetPosition = { ...config.position };
-    this._isPlayer = config.isPlayer || false;
+    this._idleFrameConfig = config.idleFrameConfig;
     this._origin = config.origin ? { ...config.origin } : { x: 0, y: 0 };
-    this._idleFrame = { ...config.idleFrame };
+    this._collisionLayer = config.collisionLayer;
     this._otherCharactersToCheckForCollisionWith = config.otherCharactersToCheckForCollisionWith || [];
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
@@ -113,7 +106,6 @@ export class Character {
     if (this._isMoving) {
       return;
     }
-    this._direction = direction;
     this._moveSprite(this._direction);
   }
 
@@ -160,7 +152,7 @@ export class Character {
    * @returns {number}
    */
   _getIdleFrame() {
-    return this._idleFrame[this._direction];
+    return this._idleFrameConfig[this._direction];
   }
 
   /**
@@ -169,21 +161,16 @@ export class Character {
    * @returns {void}
    */
   _moveSprite(direction) {
-    this._inputDirection = direction;
-    if (this._isMoving) {
-      return;
-    }
-    this._direction = this._inputDirection;
-
+    this._direction = direction;
     if (this._isBlockingTile()) {
       return;
     }
     this._isMoving = true;
-
     this.#handleSpriteMovement();
   }
 
   /**
+   * @protected
    * @returns {boolean}
    */
   _isBlockingTile() {
@@ -226,9 +213,8 @@ export class Character {
       targets: this._phaserGameObject,
       onComplete: () => {
         this._isMoving = false;
-        // update previous and target positions
         this._previousTargetPosition = { ...this._targetPosition };
-        if (this._isPlayer && this._spriteGridMovementFinishedCallback) {
+        if (this._spriteGridMovementFinishedCallback) {
           this._spriteGridMovementFinishedCallback();
         }
       },

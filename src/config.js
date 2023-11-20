@@ -1,3 +1,4 @@
+export const TILED_COLLISION_LAYER_ALPHA = 0.7;
 export const TILE_SIZE = 64;
 export const WALK_FRAME_RATE = 6;
 export const DISABLE_WILD_ENCOUNTERS = true;
