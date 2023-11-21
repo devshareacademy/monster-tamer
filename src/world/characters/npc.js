@@ -5,7 +5,7 @@ import { DIRECTION } from '../../common/direction.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 
 /**
- * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'assetFrame' | 'idleFrame'> & {frame: number}} NPCConfig
+ * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'assetFrame' | 'idleFrameConfig'> & {frame: number}} NPCConfig
  */
 
 export class NPC extends Character {
