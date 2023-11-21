@@ -154,7 +154,7 @@ export class WorldScene extends Phaser.Scene {
     this.#controls = new Controls(this);
 
     // create dialog ui
-    this.#dialogUi = new DialogUi(this, MAX_WORLD_WIDTH);
+    this.#dialogUi = new DialogUi(this, 1280);
 
     this.cameras.main.fadeIn(1000, 0, 0, 0);
   }
