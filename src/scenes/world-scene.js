@@ -47,13 +47,19 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     console.log(`[${WorldScene.name}:init] invoked`);
     this.#wildMonsterEncountered = false;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
-    console.log(`[${WorldScene.name}:preload] invoked`);
+    console.log(`[${WorldScene.name}:create] invoked`);
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -71,7 +77,7 @@ export class WorldScene extends Phaser.Scene {
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
     if (!collisionTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
+      console.log(`[${WorldScene.name}:create] encountered error while creating collision tiles from tiled`);
       return;
     }
     const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
@@ -91,7 +97,7 @@ export class WorldScene extends Phaser.Scene {
     // create collision layer for encounters
     const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
     if (!encounterTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
+      console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
       return;
     }
     this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
@@ -147,6 +153,9 @@ export class WorldScene extends Phaser.Scene {
     this.#player.update(time);
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerInteraction() {
     if (this.#dialogUi.isAnimationPlaying) {
       return;
@@ -190,6 +199,9 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerMovementUpdate() {
     // update player position on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
@@ -202,6 +214,7 @@ export class WorldScene extends Phaser.Scene {
     if (!this.#encounterLayer) {
       return;
     }
+
     const isInEncounterZone =
       this.#encounterLayer.getTileAtWorldXY(this.#player.sprite.x, this.#player.sprite.y, true).index !== -1;
     if (!isInEncounterZone) {
