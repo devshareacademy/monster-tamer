@@ -12,7 +12,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  */
 
 /**
- * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'assetFrame' | 'idleFrame'> & NPCConfigProps} NPCConfig
+ * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'assetFrame' | 'idleFrameConfig'> & NPCConfigProps} NPCConfig
  */
 
 export class NPC extends Character {
