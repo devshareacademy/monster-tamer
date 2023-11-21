@@ -4,7 +4,7 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
-import { TILE_SIZE } from '../config.js';
+import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 
 /** @type {import('../types/typedef.js').Coordinate} */
 const PLAYER_POSITION = Object.freeze({
@@ -42,14 +42,34 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.setZoom(0.8);
     this.cameras.main.centerOn(x, y);
 
+    // create map and collision layer
+    const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
+    // The first parameter is the name of the tileset in Tiled and the second parameter is the key
+    // of the tileset image used when loading the file in preload.
+    const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
+    if (!collisionTiles) {
+      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
+      return;
+    }
+    const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
+    if (!collisionLayer) {
+      console.log(`[${WorldScene.name}:create] encountered error while creating collision layer using data from tiled`);
+      return;
+    }
+    collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
     this.#player = new Player({
       scene: this,
       position: PLAYER_POSITION,
       direction: DIRECTION.DOWN,
+      collisionLayer: collisionLayer,
     });
     this.cameras.main.startFollow(this.#player.sprite);
+
+    // create foreground for depth
+    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
 
     this.#controls = new Controls(this);
 

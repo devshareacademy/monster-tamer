@@ -37,11 +37,11 @@ Battle System:
     ✔ custom fonts @done(23-11-10 21:19)
 
 World Scene:
-  ☐ load level background
-  ☐ create player
-  ☐ handle player input
-  ☐ camera movement
-  ☐ handle grid based movement
+  ✔ load level background @done(23-11-21 12:04)
+  ✔ create player @done(23-11-21 12:04)
+  ✔ handle player input @done(23-11-21 12:04)
+  ✔ camera movement @done(23-11-21 12:04)
+  ✔ handle grid based movement @done(23-11-21 12:04)
   ☐ handle collisions
   ☐ add wild monster encounter logic
   ☐ store player position in data manager
