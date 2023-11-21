@@ -46,12 +46,12 @@ export class WorldScene extends Phaser.Scene {
   #player;
   /** @type {Controls} */
   #controls;
-  /** @type {NPC[]} */
-  #npcs;
-  /** @type {boolean} */
-  #wildMonsterEncountered;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
   #encounterLayer;
+  /** @type {boolean} */
+  #wildMonsterEncountered;
+  /** @type {NPC[]} */
+  #npcs;
   /** @type {DialogUi} */
   #dialogUi;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
@@ -68,11 +68,12 @@ export class WorldScene extends Phaser.Scene {
   }
 
   init() {
+    console.log(`[${WorldScene.name}:init] invoked`);
     this.#wildMonsterEncountered = false;
   }
 
   create() {
-    console.log(`[${WorldScene.name}:preload] invoked`);
+    console.log(`[${WorldScene.name}:create] invoked`);
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -84,15 +85,13 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.setZoom(0.8);
     this.cameras.main.centerOn(x, y);
 
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
-
     // create map and collision layer
     const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
     if (!collisionTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
+      console.log(`[${WorldScene.name}:create] encountered error while creating collision tiles from tiled`);
       return;
     }
     const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
@@ -100,7 +99,7 @@ export class WorldScene extends Phaser.Scene {
       console.log(`[${WorldScene.name}:create] encountered error while creating collision layer using data from tiled`);
       return;
     }
-    collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA);
+    collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     this.#signLayer = map.getObjectLayer('Sign');
     if (!this.#signLayer) {
@@ -108,10 +107,9 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    // create collision layer for encounters
     const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
     if (!encounterTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
+      console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
       return;
     }
     this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
@@ -119,17 +117,17 @@ export class WorldScene extends Phaser.Scene {
       console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
       return;
     }
-    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA);
+    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+
+    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
     // create npcs
     this.#createNPCs(map);
 
     // create player and have camera focus on the player
-    /** @type {import('../types/typedef.js').Coordinate} */
-    const playerPosition = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION);
     this.#player = new Player({
       scene: this,
-      position: playerPosition,
+      position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
       collisionLayer: collisionLayer,
       direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
       otherCharactersToCheckForCollisionWith: this.#npcs,

@@ -37,14 +37,14 @@ Battle System:
     ✔ custom fonts @done(23-11-10 21:19)
 
 World Scene:
-  ☐ load level background
-  ☐ create player
-  ☐ handle player input
-  ☐ camera movement
-  ☐ handle grid based movement
-  ☐ handle collisions
-  ☐ add wild monster encounter logic
-  ☐ store player position in data manager
+  ✔ load level background @done(23-11-21 12:04)
+  ✔ create player @done(23-11-21 12:04)
+  ✔ handle player input @done(23-11-21 12:04)
+  ✔ camera movement @done(23-11-21 12:04)
+  ✔ handle grid based movement @done(23-11-21 12:04)
+  ✔ handle collisions @done(23-11-21 16:03)
+  ✔ add wild monster encounter logic @done(23-11-21 16:04)
+  ✔ store player position in data manager @done(23-11-21 16:04)
 
 Level Development With Tiled:
   ☐ Basic level design concepts

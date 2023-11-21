@@ -30,6 +30,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {string} assetKey the name of the asset key that should be used for this character
  * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
  * @property {CharacterIdleFrameConfig} idleFrameConfig
+ * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  */
 
 /**
@@ -43,8 +44,6 @@ export class Character {
   _phaserGameObject;
   /** @protected @type {import('../../common/direction.js').Direction} */
   _direction;
-  /** @protected @type {Phaser.Tilemaps.TilemapLayer} */
-  _collisionLayer;
   /** @protected @type {boolean} */
   _isMoving;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
@@ -59,6 +58,8 @@ export class Character {
   _origin;
   /** @protected @type {Character[]} */
   _otherCharactersToCheckForCollisionWith;
+  /** @protected @type {Phaser.Tilemaps.TilemapLayer | undefined} */
+  _collisionLayer;
 
   /**
    * @param {CharacterConfig} config
@@ -226,14 +227,13 @@ export class Character {
    * @returns {boolean}
    */
   #doesPositionCollideWithCollisionLayer(position) {
-    const { x, y } = position;
     if (!this._collisionLayer) {
       return false;
     }
+
+    const { x, y } = position;
     const tile = this._collisionLayer.getTileAtWorldXY(x, y, true);
-    if (tile === null) {
-      return false;
-    }
+
     return tile.index !== -1;
   }
 
