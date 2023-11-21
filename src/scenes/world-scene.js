@@ -5,12 +5,7 @@ import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
-
-/** @type {import('../types/typedef.js').Coordinate} */
-const PLAYER_POSITION = Object.freeze({
-  x: 6 * TILE_SIZE,
-  y: 21 * TILE_SIZE,
-});
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
@@ -22,6 +17,10 @@ export class WorldScene extends Phaser.Scene {
   #player;
   /** @type {Controls} */
   #controls;
+  /** @type {Phaser.Tilemaps.TilemapLayer} */
+  #encounterLayer;
+  /** @type {boolean} */
+  #wildMonsterEncountered;
 
   constructor() {
     super({
@@ -29,8 +28,13 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
+  init() {
+    console.log(`[${WorldScene.name}:init] invoked`);
+    this.#wildMonsterEncountered = false;
+  }
+
   create() {
-    console.log(`[${WorldScene.name}:preload] invoked`);
+    console.log(`[${WorldScene.name}:create] invoked`);
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -48,7 +52,7 @@ export class WorldScene extends Phaser.Scene {
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
     if (!collisionTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating world data from tiled`);
+      console.log(`[${WorldScene.name}:create] encountered error while creating collision tiles from tiled`);
       return;
     }
     const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
@@ -58,13 +62,28 @@ export class WorldScene extends Phaser.Scene {
     }
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
+    const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+    if (!encounterTiles) {
+      console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
+      return;
+    }
+    this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
+    if (!this.#encounterLayer) {
+      console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
+      return;
+    }
+    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
     this.#player = new Player({
       scene: this,
-      position: PLAYER_POSITION,
-      direction: DIRECTION.DOWN,
+      position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
+      direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
       collisionLayer: collisionLayer,
+      spriteGridMovementFinishedCallback: () => {
+        this.#handlePlayerMovementUpdate();
+      },
     });
     this.cameras.main.startFollow(this.#player.sprite);
 
@@ -81,11 +100,50 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    if (this.#wildMonsterEncountered) {
+      this.#player.update(time);
+      return;
+    }
+
+    const selectedDirection = this.#controls.getDirectionKeyPressedDown();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#player.moveCharacter(selectedDirection);
     }
 
     this.#player.update(time);
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handlePlayerMovementUpdate() {
+    // update player position on global data store
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+      x: this.#player.sprite.x,
+      y: this.#player.sprite.y,
+    });
+    // update player direction on global data store
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
+
+    if (!this.#encounterLayer) {
+      return;
+    }
+
+    const isInEncounterZone =
+      this.#encounterLayer.getTileAtWorldXY(this.#player.sprite.x, this.#player.sprite.y, true).index !== -1;
+    if (!isInEncounterZone) {
+      return;
+    }
+
+    console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
+    this.#wildMonsterEncountered = Math.random() < 0.2;
+    if (this.#wildMonsterEncountered) {
+      console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);
+      // TODO: add in a custom animation that is similar to the old games
+      this.cameras.main.fadeOut(2000);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+      });
+    }
   }
 }

@@ -45,7 +45,7 @@ export class Character {
   _idleFrameConfig;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
   _origin;
-  /** @protected @type {Phaser.Tilemaps.TilemapLayer} */
+  /** @protected @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   _collisionLayer;
 
   /**
@@ -157,7 +157,6 @@ export class Character {
       return false;
     }
 
-    // get the tile the player wants to head to based on their direction
     const targetPosition = { ...this._targetPosition };
     const updatedPosition = getTargetPositionFromGameObjectPositionAndDirection(targetPosition, this._direction);
 
