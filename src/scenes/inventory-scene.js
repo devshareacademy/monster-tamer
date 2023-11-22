@@ -7,6 +7,7 @@ export class InventoryScene extends Phaser.Scene {
   }
 
   create() {
+    console.log(`[${InventoryScene.name}:create] invoked`);
     // TODO
   }
 }
