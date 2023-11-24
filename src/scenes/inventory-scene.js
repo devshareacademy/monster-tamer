@@ -61,9 +61,9 @@ export class InventoryScene extends Phaser.Scene {
     this.add.image(0, 0, INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND).setOrigin(0);
     this.add.image(40, 120, INVENTORY_ASSET_KEYS.INVENTORY_BAG).setOrigin(0).setScale(0.5);
 
-    const conatiner = createNineSliceContainer(this, UI_ASSET_KEYS.MENU_BACKGROUND, 700, 360).setPosition(300, 20);
+    const container = createNineSliceContainer(this, UI_ASSET_KEYS.MENU_BACKGROUND, 700, 360).setPosition(300, 20);
     const containerBackground = this.add.rectangle(4, 4, 692, 352, 0xffff88).setOrigin(0).setAlpha(0.6);
-    conatiner.add(containerBackground);
+    container.add(containerBackground);
 
     const titleContainer = createNineSliceContainer(this, UI_ASSET_KEYS.MENU_BACKGROUND, 240, 64).setPosition(64, 20);
     const titleContainerBackground = this.add.rectangle(4, 4, 232, 56, 0xffff88).setOrigin(0).setAlpha(0.6);
@@ -90,7 +90,7 @@ export class InventoryScene extends Phaser.Scene {
         `${inventoryItem.quantity}`,
         INVENTORY_TEXT_STYLE
       );
-      conatiner.add([itemText, qtyText1, qtyText2]);
+      container.add([itemText, qtyText1, qtyText2]);
     });
 
     // create cancel text
@@ -100,11 +100,11 @@ export class InventoryScene extends Phaser.Scene {
       'Cancel',
       INVENTORY_TEXT_STYLE
     );
-    conatiner.add(cancelText);
+    container.add(cancelText);
 
     // create player input cursor
     this.#userInputCursor = this.add.image(30, 30, UI_ASSET_KEYS.CURSOR).setScale(3);
-    conatiner.add(this.#userInputCursor);
+    container.add(this.#userInputCursor);
 
     // create inventory description text
     this.#selectedInventoryDescriptionText = this.add.text(25, 420, '', {
@@ -114,12 +114,32 @@ export class InventoryScene extends Phaser.Scene {
     this.#updateItemDescriptionText();
 
     this.#controls = new Controls(this);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      // TODO: figure out what to do here
+    });
   }
 
   /**
    * @returns {void}
    */
   update() {
+    if (this.#controls.isInputLocked) {
+      return;
+    }
+
+    if (this.#controls.wasBackKeyPressed()) {
+      this.#controls.lockInput = true;
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      return;
+    }
+
+    if (this.#controls.wasSpaceKeyPressed() && this.#isCancelButtonSelected()) {
+      this.#controls.lockInput = true;
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      return;
+    }
+
     const selectedDirection = this.#controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
@@ -162,7 +182,7 @@ export class InventoryScene extends Phaser.Scene {
    * @returns {void}
    */
   #updateItemDescriptionText() {
-    if (this.#selectedInventoryOptionIndex === this.#inventory.length) {
+    if (this.#isCancelButtonSelected()) {
       this.#selectedInventoryDescriptionText.setText(CANCEL_TEXT_DESCRIPTION);
       return;
     }
@@ -170,5 +190,9 @@ export class InventoryScene extends Phaser.Scene {
     this.#selectedInventoryDescriptionText.setText(
       this.#inventory[this.#selectedInventoryOptionIndex].item.description
     );
+  }
+
+  #isCancelButtonSelected() {
+    return this.#selectedInventoryOptionIndex === this.#inventory.length;
   }
 }
