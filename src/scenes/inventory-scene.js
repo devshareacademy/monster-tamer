@@ -134,9 +134,18 @@ export class InventoryScene extends Phaser.Scene {
       return;
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && this.#isCancelButtonSelected()) {
+    const spaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    if (spaceKeyPressed && this.#isCancelButtonSelected()) {
       this.#controls.lockInput = true;
       this.cameras.main.fadeOut(500, 0, 0, 0);
+      return;
+    }
+
+    if (spaceKeyPressed) {
+      console.log(this.#inventory[this.#selectedInventoryOptionIndex].item);
+      // TODO: use the item
+      // in a future update
+      // TODO: add submenu for accept/cancel after picking an item
       return;
     }
 
