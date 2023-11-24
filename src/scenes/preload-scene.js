@@ -6,6 +6,7 @@ import {
   CHARACTER_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
+  INVENTORY_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
@@ -72,6 +73,8 @@ export class PreloadScene extends Phaser.Scene {
     // monster assets
     this.load.image(MONSTER_ASSET_KEYS.CARNODUSK, `${monsterTamerAssetPath}/monsters/carnodusk.png`);
     this.load.image(MONSTER_ASSET_KEYS.IGUANIGNITE, `${monsterTamerAssetPath}/monsters/iguanignite.png`);
+    this.load.image(MONSTER_ASSET_KEYS.JIVY, `${monsterTamerAssetPath}/monsters/jivy.png`);
+    this.load.image(MONSTER_ASSET_KEYS.PARAZOID, `${monsterTamerAssetPath}/monsters/parazoid.png`);
 
     // ui assets
     this.load.image(UI_ASSET_KEYS.CURSOR, `${monsterTamerAssetPath}/ui/cursor.png`);
@@ -126,6 +129,13 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(TITLE_ASSET_KEYS.BACKGROUND, `${monsterTamerAssetPath}/ui/title/background.png`);
     this.load.image(TITLE_ASSET_KEYS.PANEL, `${monsterTamerAssetPath}/ui/title/title_background.png`);
     this.load.image(TITLE_ASSET_KEYS.TITLE, `${monsterTamerAssetPath}/ui/title/title_text.png`);
+
+    // ui components for inventory
+    this.load.image(
+      INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
+    );
+    this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
   }
 
   create() {

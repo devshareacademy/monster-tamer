@@ -29,7 +29,7 @@ export class TestScene extends Phaser.Scene {
     background.showForest();
 
     const playerMonster = this.add.image(256, 316, MONSTER_ASSET_KEYS.IGUANIGNITE, 0).setFlipX(true);
-    const enemyMonster = this.add.image(768, 144, MONSTER_ASSET_KEYS.CARNODUSK, 0).setFlipX(false);
+    const enemyMonster = this.add.image(768, 144, MONSTER_ASSET_KEYS.JIVY, 0).setFlipX(false);
 
     this.#iceShardAttack = new IceShard(this, { x: 256, y: 344 });
     this.#slashAttack = new Slash(this, { x: 745, y: 140 });

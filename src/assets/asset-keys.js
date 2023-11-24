@@ -5,6 +5,8 @@ export const BATTLE_BACKGROUND_ASSET_KEYS = Object.freeze({
 export const MONSTER_ASSET_KEYS = Object.freeze({
   IGUANIGNITE: 'IGUANIGNITE',
   CARNODUSK: 'CARNODUSK',
+  JIVY: 'JIVY',
+  PARAZOID: 'PARAZOID',
 });
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
@@ -57,4 +59,9 @@ export const TITLE_ASSET_KEYS = Object.freeze({
   BACKGROUND: 'BACKGROUND',
   TITLE: 'TITLE',
   PANEL: 'PANEL',
+});
+
+export const INVENTORY_ASSET_KEYS = Object.freeze({
+  INVENTORY_BACKGROUND: 'INVENTORY_BACKGROUND',
+  INVENTORY_BAG: 'INVENTORY_BAG',
 });

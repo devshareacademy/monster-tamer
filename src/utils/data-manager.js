@@ -22,6 +22,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').VolumeMenuOptions} options.volume
  * @property {import('../common/options.js').VolumeMenuOptions} options.menuColor
  * @property {boolean} gameStarted
+ * @property {import('../types/typedef.js').Inventory} inventory
  */
 
 /** @type {GlobalState} */
@@ -42,6 +43,7 @@ const initialState = {
     menuColor: 0,
   },
   gameStarted: false,
+  inventory: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -54,6 +56,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   OPTIONS_VOLUME: 'OPTIONS_VOLUME',
   OPTIONS_MENU_COLOR: 'OPTIONS_MENU_COLOR',
   GAME_STARTED: 'GAME_STARTED',
+  INVENTORY: 'INVENTORY',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -124,6 +127,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.PLAYER_POSITION]: initialState.player.position,
       [DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION]: initialState.player.direction,
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: initialState.gameStarted,
+      [DATA_MANAGER_STORE_KEYS.INVENTORY]: initialState.inventory,
     });
     this.saveData();
   }
@@ -165,6 +169,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: data.options.volume,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
+      [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
     });
   }
 
@@ -189,6 +194,7 @@ class DataManager extends Phaser.Events.EventEmitter {
         menuColor: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR),
       },
       gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
+      inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
     };
   }
 }

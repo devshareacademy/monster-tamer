@@ -188,7 +188,6 @@ export class Menu {
         if (this.#selectedMenuOptionIndex < 0) {
           this.#selectedMenuOptionIndex = this.#availableMenuOptions.length - 1;
         }
-        // update selected index & move obj position
         break;
       case DIRECTION.DOWN:
         this.#selectedMenuOptionIndex += 1;
