@@ -20,10 +20,16 @@ export class TestScene extends Phaser.Scene {
     super({ key: SCENE_KEYS.TEST_SCENE });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     this.#selectedAttack = ATTACK_KEYS.SLASH;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     const background = new Background(this);
     background.showForest();
@@ -37,6 +43,9 @@ export class TestScene extends Phaser.Scene {
     this.#addDataGui();
   }
 
+  /**
+   * @returns {void}
+   */
   #addDataGui() {
     const PARAMS = {
       attack: this.#selectedAttack,

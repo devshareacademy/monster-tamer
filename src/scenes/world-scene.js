@@ -67,11 +67,17 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     console.log(`[${WorldScene.name}:init] invoked`);
     this.#wildMonsterEncountered = false;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${WorldScene.name}:create] invoked`);
 
@@ -269,6 +275,9 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerInteraction() {
     if (this.#dialogUi.isAnimationPlaying) {
       return;
@@ -328,6 +337,9 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerMovementUpdate() {
     // update player position on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
@@ -362,6 +374,9 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {boolean}
+   */
   #isPlayerInputLocked() {
     return this.#dialogUi.isVisible || this.#menu.isVisible;
   }

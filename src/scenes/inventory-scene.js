@@ -40,6 +40,9 @@ export class InventoryScene extends Phaser.Scene {
     super({ key: SCENE_KEYS.INVENTORY_SCENE });
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${InventoryScene.name}:create] invoked`);
 
@@ -113,6 +116,9 @@ export class InventoryScene extends Phaser.Scene {
     this.#controls = new Controls(this);
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     const selectedDirection = this.#controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
@@ -152,6 +158,9 @@ export class InventoryScene extends Phaser.Scene {
     this.#userInputCursor.setY(y);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateItemDescriptionText() {
     if (this.#selectedInventoryOptionIndex === this.#inventory.length) {
       this.#selectedInventoryDescriptionText.setText(CANCEL_TEXT_DESCRIPTION);

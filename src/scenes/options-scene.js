@@ -81,6 +81,9 @@ export class OptionsScene extends Phaser.Scene {
     super({ key: SCENE_KEYS.OPTIONS_SCENE });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
     this.#selectedTextSpeedOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
@@ -91,6 +94,9 @@ export class OptionsScene extends Phaser.Scene {
     this.#selectedMenuColorOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     const { width, height } = this.scale;
     const optionMenuWidth = width - 200;
@@ -174,6 +180,9 @@ export class OptionsScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     if (this.#controls.isInputLocked) {
       return;
@@ -198,6 +207,9 @@ export class OptionsScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #updateOptionDataInDataManager() {
     dataManager.store.set({
       [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: this.#selectedTextSpeedOption,
@@ -210,6 +222,9 @@ export class OptionsScene extends Phaser.Scene {
     dataManager.saveData();
   }
 
+  /**
+   * @returns {void}
+   */
   #updateMenuColorDisplayText() {
     switch (this.#selectedMenuColorOption) {
       case 0:
@@ -232,6 +247,9 @@ export class OptionsScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #updateSoundOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (this.#soundOptionTextGameObjects.getChildren());
 
@@ -252,6 +270,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(this.#selectedSoundMenuOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateBattleSceneOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleSceneOptionTextGameObjects.getChildren()
@@ -274,6 +295,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(this.#selectedBattleSceneOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateBattleStyleOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleStyleOptionTextGameObjects.getChildren()
@@ -296,6 +320,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(this.#selectedBattleStyleOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateTextSpeedOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#textSpeedOptionTextGameObjects.getChildren()
@@ -565,6 +592,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateVolumeSlider() {
     switch (this.#selectedVolumeOption) {
       case 0:

@@ -28,6 +28,9 @@ export class PreloadScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   preload() {
     console.log(`[${PreloadScene.name}:preload] invoked`);
 
@@ -138,6 +141,9 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
 
@@ -177,6 +183,9 @@ export class PreloadScene extends Phaser.Scene {
     this.scene.start(SCENE_KEYS.INVENTORY_SCENE);
   }
 
+  /**
+   * @returns {void}
+   */
   #createAnimations() {
     const animations = DataUtils.getAnimations(this);
     animations.forEach((animation) => {
