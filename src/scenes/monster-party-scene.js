@@ -44,6 +44,8 @@ export class MonsterPartyScene extends Phaser.Scene {
   #monsters;
   /** @type {Controls} */
   #controls;
+  /** @type {Phaser.GameObjects.Text} */
+  #infoTextGameObject;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
@@ -80,7 +82,15 @@ export class MonsterPartyScene extends Phaser.Scene {
     buttonContainer.add([this.#cancelButton, cancelButtonText]);
 
     // create info container
-    const infoContainer = this.add.container(4, this.scale.height - 69, [this.#createGraphics()]);
+    const infoContainer = this.add.container(4, this.scale.height - 69, []);
+    const infoDisplay = this.add.rectangle(0, 0, 867, 65, 0xede4f3, 1).setOrigin(0).setStrokeStyle(8, 0x905ac2, 1);
+    this.#infoTextGameObject = this.add.text(15, 14, '', {
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      color: '#000000',
+      fontSize: '32px',
+    });
+    infoContainer.add([infoDisplay, this.#infoTextGameObject]);
+    this.#updateInfoContainerText();
 
     // create monsters in party
     this.#monsters.forEach((monster, index) => {
@@ -120,21 +130,23 @@ export class MonsterPartyScene extends Phaser.Scene {
       return;
     }
 
+    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    if (wasSpaceKeyPressed) {
+      if (this.#selectedPartyMonsterIndex === -1) {
+        this.#controls.lockInput = true;
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        return;
+      }
+
+      // TODO: handle input based on what player intention was (use item, view monster details, select monster to switch to)
+      return;
+    }
+
     const selectedDirection = this.#controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
       this.#updateInfoContainerText();
     }
-  }
-
-  /**
-   * @returns {Phaser.GameObjects.Rectangle}
-   */
-  #createGraphics() {
-    const width = 867;
-    const height = 65;
-
-    return this.add.rectangle(0, 0, width, height, 0xede4f3, 1).setOrigin(0).setStrokeStyle(8, 0x905ac2, 1);
   }
 
   /**
@@ -244,5 +256,11 @@ export class MonsterPartyScene extends Phaser.Scene {
   /**
    * @returns {void}
    */
-  #updateInfoContainerText() {}
+  #updateInfoContainerText() {
+    if (this.#selectedPartyMonsterIndex === -1) {
+      this.#infoTextGameObject.setText('Go back to previous menu');
+      return;
+    }
+    this.#infoTextGameObject.setText('Choose a monster');
+  }
 }
