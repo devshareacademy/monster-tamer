@@ -8,6 +8,7 @@ import {
   HEALTH_BAR_ASSET_KEYS,
   INVENTORY_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
+  MONSTER_PARTY_ASSET_KEYS,
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
@@ -88,6 +89,8 @@ export class PreloadScene extends Phaser.Scene {
       `${kenneysAssetPath}/ui-space-expansion/glassPanel_purple.png`
     );
     this.load.image(UI_ASSET_KEYS.MENU_BACKGROUND_GREEN, `${kenneysAssetPath}/ui-space-expansion/glassPanel_green.png`);
+    this.load.image(UI_ASSET_KEYS.BLUE_BUTTON, `${kenneysAssetPath}/ui-pack/blue_button00.png`);
+    this.load.image(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, `${kenneysAssetPath}/ui-pack/blue_button01.png`);
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
@@ -139,6 +142,12 @@ export class PreloadScene extends Phaser.Scene {
       `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
     );
     this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
+
+    // ui components for monster party
+    this.load.image(
+      MONSTER_PARTY_ASSET_KEYS.PARTY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/monster-party/background.png`
+    );
   }
 
   /**
@@ -180,7 +189,7 @@ export class PreloadScene extends Phaser.Scene {
     dataManager.loadData();
 
     this.#createAnimations();
-    this.scene.start(SCENE_KEYS.INVENTORY_SCENE);
+    this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE);
   }
 
   /**
