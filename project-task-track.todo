@@ -47,12 +47,12 @@ World Scene:
   ✔ store player position in data manager @done(23-11-21 16:04)
 
 Level Development With Tiled:
-  ☐ Basic level design concepts
-  ☐ Add collision layer
-  ☐ Add custom types to Tiled
-  ☐ Add game objects
-  ☐ Add npcs
-  ☐ Exporting level images and JSON
+  ✔ Basic level design concepts @done(23-11-27 09:25)
+  ✔ Add collision layer @done(23-11-27 09:26)
+  ✔ Add custom types to Tiled @done(23-11-27 09:26)
+  ✔ Add game objects @done(23-11-27 09:26)
+  ✔ Add npcs @done(23-11-27 09:26)
+  ✔ Exporting level images and JSON @done(23-11-27 09:26)
 
 World Scene Part 2:
   ✔ add interactive game objects @done(23-11-18 20:35)
