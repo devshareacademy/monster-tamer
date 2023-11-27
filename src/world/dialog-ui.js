@@ -1,15 +1,15 @@
 import Phaser from '../lib/phaser.js';
-import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text-utils.js';
+import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
-const UI_TEXT_STYLE = {
+const UI_TEXT_STYLE = Object.freeze({
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: 'black',
   fontSize: '32px',
   wordWrap: { width: 0 },
-};
+});
 
 export class DialogUi {
   /** @type {Phaser.Scene} */
@@ -129,7 +129,8 @@ export class DialogUi {
     const y = this.#height - 24;
     this.#userInputCursor = this.#scene.add.image(this.#width - 16, y, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursor.setAngle(90).setScale(4.5, 2);
-    this.#userInputCursorTween = this.#scene.tweens.add({
+
+    this.#userInputCursorTween = this.#scene.add.tween({
       delay: 0,
       duration: 500,
       repeat: -1,
