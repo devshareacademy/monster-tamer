@@ -17,6 +17,10 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
  * @property {any} value
  */
 
+const TILED_SIGN_PROPERTY = Object.freeze({
+  MESSAGE: 'message',
+});
+
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
   each grid size will be 64 x 64 pixels
@@ -152,7 +156,7 @@ export class WorldScene extends Phaser.Scene {
     // check for sign, and display appropriate message if player is not facing up
     const nearbySign = this.#signLayer.objects.find((object) => {
       if (!object.x || !object.y) {
-        return;
+        return false;
       }
 
       // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
@@ -163,7 +167,7 @@ export class WorldScene extends Phaser.Scene {
       /** @type {TiledObjectProperty[]} */
       const props = nearbySign.properties;
       /** @type {string} */
-      const msg = props.find((prop) => prop.name === 'message')?.value;
+      const msg = props.find((prop) => prop.name === TILED_SIGN_PROPERTY.MESSAGE)?.value;
 
       const usePlaceholderText = this.#player.direction !== DIRECTION.UP;
       let textToShow = CANNOT_READ_SIGN_TEXT;
