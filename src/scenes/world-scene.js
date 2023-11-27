@@ -147,9 +147,6 @@ export class WorldScene extends Phaser.Scene {
     this.#player.update(time);
   }
 
-  /**
-   * @returns {void}
-   */
   #handlePlayerInteraction() {
     console.log('start of interaction check');
     // get players current direction and check 1 tile over in that direction to see if there is an object that can be interacted with
