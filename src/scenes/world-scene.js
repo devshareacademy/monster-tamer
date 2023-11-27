@@ -15,7 +15,7 @@ import { NPC } from '../world/characters/npc.js';
  * @typedef TiledObjectProperty
  * @type {object}
  * @property {string} name
- * @property {string} messages
+ * @property {string} type
  * @property {any} value
  */
 
@@ -176,9 +176,6 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  /**
-   * @returns {void}
-   */
   #handlePlayerInteraction() {
     if (this.#dialogUi.isAnimationPlaying) {
       return;
@@ -203,6 +200,8 @@ export class WorldScene extends Phaser.Scene {
       if (!object.x || !object.y) {
         return false;
       }
+
+      // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       return object.x === targetPosition.x && object.y - TILE_SIZE === targetPosition.y;
     });
 
