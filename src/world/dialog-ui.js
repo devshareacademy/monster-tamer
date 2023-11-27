@@ -22,8 +22,6 @@ export class DialogUi {
   #height;
   /** @type {Phaser.GameObjects.Container} */
   #container;
-  /** @type {Phaser.GameObjects.Graphics} */
-  #graphics;
   /** @type {boolean} */
   #isVisible;
   /** @type {Phaser.GameObjects.Image} */
@@ -49,8 +47,11 @@ export class DialogUi {
     this.#textAnimationPlaying = false;
     this.#messagesToShow = [];
 
-    this.#graphics = this.#createGraphics();
-    this.#container = this.#scene.add.container(0, 0, [this.#graphics]);
+    const panel = this.#scene.add
+      .rectangle(0, 0, this.#width, this.#height, 0xede4f3, 0.9)
+      .setOrigin(0)
+      .setStrokeStyle(8, 0x905ac2, 1);
+    this.#container = this.#scene.add.container(0, 0, [panel]);
     this.#uiText = this.#scene.add.text(18, 12, CANNOT_READ_SIGN_TEXT, {
       ...UI_TEXT_STYLE,
       ...{ wordWrap: { width: this.#width - 18 } },
@@ -119,21 +120,6 @@ export class DialogUi {
     this.#container.setAlpha(0);
     this.#userInputCursorTween.pause();
     this.#isVisible = false;
-  }
-
-  /**
-   * @returns {Phaser.GameObjects.Graphics}
-   */
-  #createGraphics() {
-    const g = this.#scene.add.graphics();
-
-    g.fillStyle(0xede4f3, 1);
-    g.fillRect(1, 0, this.#width - 1, this.#height - 1);
-    g.lineStyle(8, 0x905ac2, 10);
-    g.strokeRect(0, 0, this.#width, this.#height);
-    g.setAlpha(0.9);
-
-    return g;
   }
 
   /**

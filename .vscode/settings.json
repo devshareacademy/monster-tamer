@@ -30,5 +30,6 @@
     "webfontloader",
     "xdeviruchi",
     "yoyo"
-  ]
+  ],
+  "liveServer.settings.port": 5501
 }
