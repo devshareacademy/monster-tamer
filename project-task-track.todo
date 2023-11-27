@@ -55,7 +55,7 @@ Level Development With Tiled:
   ✔ Exporting level images and JSON @done(23-11-27 09:26)
 
 World Scene Part 2:
-  ☐ add interactive game objects
+  ✔ add interactive game objects @done(23-11-27 10:28)
   ☐ dialog ui component
   ☐ add npcs
   ☐ add npc dialog
