@@ -91,11 +91,8 @@ export class Menu {
     return this.#isVisible;
   }
 
-  /** @type {MenuOptions | undefined} */
+  /** @type {MenuOptions} */
   get selectedMenuOption() {
-    if (this.#isVisible) {
-      return undefined;
-    }
     return this.#selectedMenuOption;
   }
 
@@ -217,7 +214,7 @@ export class Menu {
   #handleSelectedMenuOption() {
     /** @type {MenuOptions} */
     const selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
-
+    console.log(selectedMenuOption);
     switch (selectedMenuOption) {
       case MENU_OPTIONS.EXIT:
         this.#selectedMenuOption = MENU_OPTIONS.EXIT;
@@ -229,13 +226,19 @@ export class Menu {
         this.hide();
         break;
       case MENU_OPTIONS.BAG:
-      case MENU_OPTIONS.MONSTERDEX:
+        this.#selectedMenuOption = MENU_OPTIONS.BAG;
+        break;
       case MENU_OPTIONS.MONSTERS:
+        this.#selectedMenuOption = MENU_OPTIONS.MONSTERS;
+        break;
+      case MENU_OPTIONS.MONSTERDEX:
       case MENU_OPTIONS.OPTION:
         // TODO: implement logic for other menu options
         break;
       default:
         exhaustiveGuard(selectedMenuOption);
     }
+
+    console.log(this.#selectedMenuOption);
   }
 }

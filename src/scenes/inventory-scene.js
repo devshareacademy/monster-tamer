@@ -24,6 +24,18 @@ const INVENTORY_ITEM_POSITION = Object.freeze({
 
 const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
 
+/**
+ * @typedef InventorySceneData
+ * @type {object}
+ * @property {string} previousSceneName
+ */
+
+/**
+ * @typedef InventorySceneResumeData
+ * @type {object}
+ * @property {boolean} itemUsed
+ */
+
 export class InventoryScene extends Phaser.Scene {
   /** @type {Phaser.GameObjects.Image} */
   #userInputCursor;
@@ -35,17 +47,21 @@ export class InventoryScene extends Phaser.Scene {
   #selectedInventoryOptionIndex;
   /** @type {Controls} */
   #controls;
+  /** @type {InventorySceneData} */
+  #sceneData;
 
   constructor() {
     super({ key: SCENE_KEYS.INVENTORY_SCENE });
   }
 
   /**
+   * @param {InventorySceneData} data
    * @returns {void}
    */
-  init() {
-    console.log(`[${InventoryScene.name}:init] invoked`);
+  init(data) {
+    console.log(`[${InventoryScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
 
+    this.#sceneData = data;
     this.#inventory = dataManager.store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
     this.#selectedInventoryOptionIndex = 0;
     if (this.#inventory.length === 0) {
@@ -124,9 +140,7 @@ export class InventoryScene extends Phaser.Scene {
 
     this.#controls = new Controls(this);
 
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      // TODO: figure out what to do here
-    });
+    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
   /**
@@ -138,28 +152,28 @@ export class InventoryScene extends Phaser.Scene {
     }
 
     if (this.#controls.wasBackKeyPressed()) {
-      this.#controls.lockInput = true;
-      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.#goBackToPreviousScene();
       return;
     }
 
     const spaceKeyPressed = this.#controls.wasSpaceKeyPressed();
     if (spaceKeyPressed && this.#isCancelButtonSelected()) {
-      this.#controls.lockInput = true;
-      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.#goBackToPreviousScene();
       return;
     }
 
     if (spaceKeyPressed) {
       // TODO: use the item
       this.#controls.lockInput = true;
-      this.cameras.main.fadeOut(500, 0, 0, 0, () => {
-        this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE, {
-          itemSelected: this.#inventory[this.#selectedInventoryOptionIndex].item,
-          previousSceneName: SCENE_KEYS.INVENTORY_SCENE,
-          inBattle: false,
-        });
-      });
+      // pause this scene and launch the monster party scene
+      /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+      const sceneDataToPass = {
+        previousSceneName: SCENE_KEYS.INVENTORY_SCENE,
+        itemSelected: this.#inventory[this.#selectedInventoryOptionIndex].item,
+      };
+      this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+      this.scene.pause(SCENE_KEYS.INVENTORY_SCENE);
+
       // in a future update
       // TODO: add submenu for accept/cancel after picking an item
       return;
@@ -219,5 +233,28 @@ export class InventoryScene extends Phaser.Scene {
 
   #isCancelButtonSelected() {
     return this.#selectedInventoryOptionIndex === this.#inventory.length;
+  }
+
+  /**
+   * @returns {void}
+   */
+  #goBackToPreviousScene() {
+    this.#controls.lockInput = true;
+    this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
+    this.scene.resume(this.#sceneData.previousSceneName);
+  }
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {InventorySceneResumeData} data
+   * @returns {void}
+   */
+  #handleSceneResume(sys, data) {
+    console.log(
+      `[${InventoryScene.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
+    );
+    this.#controls.lockInput = false;
+
+    // TODO: handle any item that was used
   }
 }

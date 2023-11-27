@@ -22,11 +22,10 @@ const UI_TEXT_STYLE = {
 };
 
 /**
- * @typedef SceneData
+ * @typedef MonsterPartySceneData
  * @type {object}
  * @property {string} previousSceneName
- * @property {import('../types/typedef.js').Item} itemSelected
- * @property {boolean} inBattle
+ * @property {import('../types/typedef.js').Item} [itemSelected]
  */
 
 const MONSTER_PARTY_POSITIONS = Object.freeze({
@@ -54,7 +53,7 @@ export class MonsterPartyScene extends Phaser.Scene {
   #controls;
   /** @type {Phaser.GameObjects.Text} */
   #infoTextGameObject;
-  /** @type {SceneData} */
+  /** @type {MonsterPartySceneData} */
   #sceneData;
 
   constructor() {
@@ -62,7 +61,7 @@ export class MonsterPartyScene extends Phaser.Scene {
   }
 
   /**
-   * @param {SceneData} data
+   * @param {MonsterPartySceneData} data
    * @returns {void}
    */
   init(data) {
@@ -122,12 +121,6 @@ export class MonsterPartyScene extends Phaser.Scene {
     // this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
 
     this.#controls = new Controls(this);
-
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      // TODO: figure out what to do here
-      console.log(this.#sceneData.previousSceneName);
-      this.scene.start(this.#sceneData.previousSceneName);
-    });
   }
 
   /**
@@ -139,16 +132,14 @@ export class MonsterPartyScene extends Phaser.Scene {
     }
 
     if (this.#controls.wasBackKeyPressed()) {
-      this.#controls.lockInput = true;
-      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.#goBackToPreviousScene();
       return;
     }
 
     const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (this.#selectedPartyMonsterIndex === -1) {
-        this.#controls.lockInput = true;
-        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.#goBackToPreviousScene();
         return;
       }
 
@@ -249,7 +240,7 @@ export class MonsterPartyScene extends Phaser.Scene {
         break;
       case DIRECTION.DOWN:
         this.#selectedPartyMonsterIndex = -1;
-        // TODO: fix the ui button so it is more noticable
+        // TODO: fix the ui button so it is more noticeable
         this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, 0);
         break;
       case DIRECTION.LEFT:
@@ -276,5 +267,24 @@ export class MonsterPartyScene extends Phaser.Scene {
       return;
     }
     this.#infoTextGameObject.setText('Choose a monster');
+  }
+
+  /**
+   * @returns {void}
+   */
+  #goBackToPreviousScene() {
+    this.#controls.lockInput = true;
+    this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
+
+    if (this.#sceneData.previousSceneName === SCENE_KEYS.WORLD_SCENE) {
+      this.scene.resume(SCENE_KEYS.WORLD_SCENE);
+      return;
+    }
+
+    /** @type {import('./inventory-scene.js').InventorySceneResumeData} */
+    const sceneDataToPass = {
+      itemUsed: false,
+    };
+    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
   }
 }
