@@ -21,6 +21,14 @@ const UI_TEXT_STYLE = {
   fontSize: '24px',
 };
 
+/**
+ * @typedef SceneData
+ * @type {object}
+ * @property {string} previousSceneName
+ * @property {import('../types/typedef.js').Item} itemSelected
+ * @property {boolean} inBattle
+ */
+
 const MONSTER_PARTY_POSITIONS = Object.freeze({
   EVEN: {
     x: 0,
@@ -46,21 +54,25 @@ export class MonsterPartyScene extends Phaser.Scene {
   #controls;
   /** @type {Phaser.GameObjects.Text} */
   #infoTextGameObject;
+  /** @type {SceneData} */
+  #sceneData;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
   }
 
   /**
+   * @param {SceneData} data
    * @returns {void}
    */
-  init() {
-    console.log(`[${MonsterPartyScene.name}:init] invoked`);
+  init(data) {
+    console.log(`[${MonsterPartyScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
 
     this.#selectedPartyMonsterIndex = 0;
     this.#monsters = [];
     this.#monsters.push(DataUtils.getIguanignite(this));
     this.#monsterPartyBackgrounds = [];
+    this.#sceneData = data;
   }
 
   /**
@@ -113,6 +125,8 @@ export class MonsterPartyScene extends Phaser.Scene {
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       // TODO: figure out what to do here
+      console.log(this.#sceneData.previousSceneName);
+      this.scene.start(this.#sceneData.previousSceneName);
     });
   }
 

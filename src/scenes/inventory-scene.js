@@ -43,20 +43,29 @@ export class InventoryScene extends Phaser.Scene {
   /**
    * @returns {void}
    */
-  create() {
-    console.log(`[${InventoryScene.name}:create] invoked`);
+  init() {
+    console.log(`[${InventoryScene.name}:init] invoked`);
 
     this.#inventory = dataManager.store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
     this.#selectedInventoryOptionIndex = 0;
-    this.#inventory.push({
-      item: {
-        id: 1,
-        name: 'potion',
-        effect: ITEM_EFFECT.HEAL_30,
-        description: 'A basic healing item that will heal 30 HP from a single monster.',
-      },
-      quantity: 10,
-    });
+    if (this.#inventory.length === 0) {
+      this.#inventory.push({
+        item: {
+          id: 1,
+          name: 'potion',
+          effect: ITEM_EFFECT.HEAL_30,
+          description: 'A basic healing item that will heal 30 HP from a single monster.',
+        },
+        quantity: 10,
+      });
+    }
+  }
+
+  /**
+   * @returns {void}
+   */
+  create() {
+    console.log(`[${InventoryScene.name}:create] invoked`);
 
     this.add.image(0, 0, INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND).setOrigin(0);
     this.add.image(40, 120, INVENTORY_ASSET_KEYS.INVENTORY_BAG).setOrigin(0).setScale(0.5);
@@ -142,8 +151,15 @@ export class InventoryScene extends Phaser.Scene {
     }
 
     if (spaceKeyPressed) {
-      console.log(this.#inventory[this.#selectedInventoryOptionIndex].item);
       // TODO: use the item
+      this.#controls.lockInput = true;
+      this.cameras.main.fadeOut(500, 0, 0, 0, () => {
+        this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE, {
+          itemSelected: this.#inventory[this.#selectedInventoryOptionIndex].item,
+          previousSceneName: SCENE_KEYS.INVENTORY_SCENE,
+          inBattle: false,
+        });
+      });
       // in a future update
       // TODO: add submenu for accept/cancel after picking an item
       return;

@@ -58,7 +58,7 @@ export class Menu {
    */
   constructor(scene) {
     this.#scene = scene;
-    this.#availableMenuOptions = [MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
+    this.#availableMenuOptions = [MENU_OPTIONS.MONSTERS, MENU_OPTIONS.BAG, MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
     this.#menuOptionsTextGameObjects = [];
     this.#selectedMenuOptionIndex = 0;
     this.#padding = 4;
@@ -82,6 +82,8 @@ export class Menu {
     this.#userInputCursor = this.#scene.add.image(20 + this.#padding, 28 + this.#padding, UI_ASSET_KEYS.CURSOR_WHITE);
     this.#userInputCursor.setScale(2.5);
     this.#container.add(this.#userInputCursor);
+
+    this.hide();
   }
 
   /** @type {boolean} */

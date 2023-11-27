@@ -189,7 +189,7 @@ export class PreloadScene extends Phaser.Scene {
     dataManager.loadData();
 
     this.#createAnimations();
-    this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
   /**
