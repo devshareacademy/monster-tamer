@@ -25,8 +25,6 @@ export class DialogUi {
   #height;
   /** @type {Phaser.GameObjects.Container} */
   #container;
-  /** @type {Phaser.GameObjects.Graphics} */
-  #graphics;
   /** @type {boolean} */
   #isVisible;
   /** @type {Phaser.GameObjects.Image} */
@@ -52,8 +50,12 @@ export class DialogUi {
     this.#textAnimationPlaying = false;
     this.#messagesToShow = [];
 
-    this.#graphics = this.#createGraphics();
-    this.#container = this.#scene.add.container(0, 0, [this.#graphics]);
+    const menuColor = this.#getMenuColorsFromDataManager();
+    const panel = this.#scene.add
+      .rectangle(0, 0, this.#width, this.#height, menuColor.main, 0.9)
+      .setOrigin(0)
+      .setStrokeStyle(8, menuColor.border, 1);
+    this.#container = this.#scene.add.container(0, 0, [panel]);
     this.#uiText = this.#scene.add.text(18, 12, '', {
       ...UI_TEXT_STYLE,
       ...{ wordWrap: { width: this.#width - 18 } },
@@ -125,29 +127,14 @@ export class DialogUi {
   }
 
   /**
-   * @returns {Phaser.GameObjects.Graphics}
-   */
-  #createGraphics() {
-    const g = this.#scene.add.graphics();
-    const menuColor = this.#getMenuColorsFromDataManager();
-
-    g.fillStyle(menuColor.main, 1);
-    g.fillRect(1, 0, this.#width - 1, this.#height - 1);
-    g.lineStyle(8, menuColor.border, 10);
-    g.strokeRect(0, 0, this.#width, this.#height);
-    g.setAlpha(0.9);
-
-    return g;
-  }
-
-  /**
    * @returns {void}
    */
   #createPlayerInputCursor() {
     const y = this.#height - 24;
     this.#userInputCursor = this.#scene.add.image(this.#width - 16, y, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursor.setAngle(90).setScale(4.5, 2);
-    this.#userInputCursorTween = this.#scene.tweens.add({
+
+    this.#userInputCursorTween = this.#scene.add.tween({
       delay: 0,
       duration: 500,
       repeat: -1,

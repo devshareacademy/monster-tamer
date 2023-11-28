@@ -7,16 +7,16 @@ import { DIRECTION } from '../common/direction.js';
 import { DISABLE_WILD_ENCOUNTERS, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { NPC } from '../world/characters/npc.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
-import { DialogUi } from '../world/dialog-ui.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
+import { DialogUi } from '../world/dialog-ui.js';
 import { Menu } from '../world/menu/menu.js';
 
 /**
  * @typedef TiledObjectProperty
  * @type {object}
  * @property {string} name
- * @property {string} messages
+ * @property {string} type
  * @property {any} value
  */
 
@@ -50,12 +50,13 @@ export class WorldScene extends Phaser.Scene {
   #encounterLayer;
   /** @type {boolean} */
   #wildMonsterEncountered;
-  /** @type {NPC[]} */
-  #npcs;
-  /** @type {DialogUi} */
-  #dialogUi;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #signLayer;
+  /** @type {DialogUi} */
+  #dialogUi;
+
+  /** @type {NPC[]} */
+  #npcs;
   /** @type {NPC | undefined} */
   #npcPlayerIsInteractingWith;
   /** @type {Menu} */
@@ -107,12 +108,14 @@ export class WorldScene extends Phaser.Scene {
     }
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
+    // create interactive layer
     this.#signLayer = map.getObjectLayer('Sign');
     if (!this.#signLayer) {
       console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
       return;
     }
 
+    // create collision layer for encounters
     const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
     if (!encounterTiles) {
       console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
@@ -226,6 +229,10 @@ export class WorldScene extends Phaser.Scene {
       if (this.#controls.wasBackKeyPressed()) {
         this.#menu.handlePlayerInput('CANCEL');
       }
+    }
+
+    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+      this.#handlePlayerInteraction();
     }
 
     this.#player.update(time);
