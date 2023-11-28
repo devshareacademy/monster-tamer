@@ -1,0 +1,27 @@
+{
+  "name": "monster-tamer",
+  "version": "1.0.0",
+  "description": "![License](https://img.shields.io/badge/license-MIT-green)",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite --config config/vite.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devshareacademy/monster-tamer.git"
+  },
+  "author": "scottwestover",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devshareacademy/monster-tamer/issues"
+  },
+  "homepage": "https://github.com/devshareacademy/monster-tamer#readme",
+  "dependencies": {
+    "vite": "5.0.3"
+  },
+  "volta": {
+    "node": "18.18.2",
+    "pnpm": "8.11.0"
+  }
+}
