@@ -6,6 +6,10 @@ import { WorldScene } from './scenes/world-scene.js';
 import { TitleScene } from './scenes/title-scene.js';
 import { OptionsScene } from './scenes/options-scene.js';
 
+const testDiv = document.createElement('div');
+testDiv.setAttribute('data-testid', 'loading');
+document.body.appendChild(testDiv);
+
 const game = new Phaser.Game({
   type: Phaser.CANVAS,
   pixelArt: false,
