@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 const { defineConfig } = require('cypress');
 const { addMatchImageSnapshotPlugin } = require('@simonsmith/cypress-image-snapshot/plugin');
 
