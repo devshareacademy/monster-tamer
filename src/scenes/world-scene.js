@@ -55,6 +55,8 @@ export class WorldScene extends Phaser.Scene {
   #dialogUi;
   /** @type {NPC[]} */
   #npcs;
+  /** @type {NPC | undefined} */
+  #npcPlayerIsInteractingWith;
 
   constructor() {
     super({
@@ -68,6 +70,7 @@ export class WorldScene extends Phaser.Scene {
   init() {
     console.log(`[${WorldScene.name}:init] invoked`);
     this.#wildMonsterEncountered = false;
+    this.#npcPlayerIsInteractingWith = undefined;
   }
 
   /**
@@ -189,6 +192,10 @@ export class WorldScene extends Phaser.Scene {
 
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
+      if (this.#npcPlayerIsInteractingWith) {
+        this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+        this.#npcPlayerIsInteractingWith = undefined;
+      }
       return;
     }
 
@@ -224,6 +231,16 @@ export class WorldScene extends Phaser.Scene {
       }
       this.#dialogUi.showDialogModal([textToShow]);
       return;
+    }
+
+    const nearbyNpc = this.#npcs.find((npc) => {
+      return npc.sprite.x === targetPosition.x && npc.sprite.y === targetPosition.y;
+    });
+    if (nearbyNpc) {
+      nearbyNpc.facePlayer(this.#player.direction);
+      nearbyNpc.isTalkingToPlayer = true;
+      this.#npcPlayerIsInteractingWith = nearbyNpc;
+      this.#dialogUi.showDialogModal(nearbyNpc.messages);
     }
   }
 
@@ -287,6 +304,12 @@ export class WorldScene extends Phaser.Scene {
         /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
           (property) => property.name === TILED_NPC_PROPERTY.FRAME
         )?.value || '0';
+      /** @type {string} */
+      const npcMessagesString =
+        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
+        )?.value || '';
+      const npcMessages = npcMessagesString.split('::');
 
       // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       const npc = new NPC({
@@ -294,6 +317,7 @@ export class WorldScene extends Phaser.Scene {
         position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
         direction: DIRECTION.DOWN,
         frame: parseInt(npcFrame, 10),
+        messages: npcMessages,
       });
       this.#npcs.push(npc);
     });
