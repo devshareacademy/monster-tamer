@@ -127,6 +127,7 @@ export class WorldScene extends Phaser.Scene {
     // create npcs
     this.#createNPCs(map);
 
+    // create player and have camera focus on the player
     this.#player = new Player({
       scene: this,
       position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
@@ -169,6 +170,10 @@ export class WorldScene extends Phaser.Scene {
     }
 
     this.#player.update(time);
+
+    this.#npcs.forEach((npc) => {
+      npc.update(time);
+    });
   }
 
   #handlePlayerInteraction() {
@@ -271,9 +276,13 @@ export class WorldScene extends Phaser.Scene {
         return;
       }
 
+      /** @type {string} */
       const npcFrame =
-        npcObject.properties.find((property) => property.name === TILED_NPC_PROPERTY.FRAME)?.value || '0';
+        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+          (property) => property.name === TILED_NPC_PROPERTY.FRAME
+        )?.value || '0';
 
+      // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       const npc = new NPC({
         scene: this,
         position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
