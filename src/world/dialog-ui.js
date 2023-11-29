@@ -35,6 +35,10 @@ export class DialogUi {
   /** @type {string[]} */
   #messagesToShow;
 
+  /**
+   * @param {Phaser.Scene} scene
+   * @param {number} width
+   */
   constructor(scene, width) {
     this.#scene = scene;
     this.#padding = 90;

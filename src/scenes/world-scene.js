@@ -142,7 +142,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     const selectedDirection = this.#controls.getDirectionKeyPressedDown();
-    if (selectedDirection !== DIRECTION.NONE) {
+    if (selectedDirection !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirection);
     }
 
@@ -168,7 +168,6 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    console.log('start of interaction check');
     // get players current direction and check 1 tile over in that direction to see if there is an object that can be interacted with
     const { x, y } = this.#player.sprite;
     const targetPosition = getTargetPositionFromGameObjectPositionAndDirection({ x, y }, this.#player.direction);
@@ -231,5 +230,9 @@ export class WorldScene extends Phaser.Scene {
         this.scene.start(SCENE_KEYS.BATTLE_SCENE);
       });
     }
+  }
+
+  #isPlayerInputLocked() {
+    return this.#dialogUi.isVisible;
   }
 }
