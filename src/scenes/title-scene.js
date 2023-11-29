@@ -10,7 +10,14 @@ const MENU_TEXT_STYLE = {
   fontSize: '30px',
 };
 
+const PLAYER_INPUT_CURSOR_POSITION = Object.freeze({
+  x: 150,
+});
+
 export class TitleScene extends Phaser.Scene {
+  /** @type {Phaser.GameObjects.Image} */
+  #mainMenuCursorPhaserImageGameObject;
+
   constructor() {
     super({ key: SCENE_KEYS.TITLE_SCENE });
   }
@@ -32,17 +39,35 @@ export class TitleScene extends Phaser.Scene {
     // create menu
     const menuBgWidth = 500;
     // TODO: replace with a nineslice image
-    const menuBg = this.add.image(145, 0, UI_ASSET_KEYS.MENU_BACKGROUND).setOrigin(0).setScale(2, 2);
+    const menuBg = this.add.image(125, 0, UI_ASSET_KEYS.MENU_BACKGROUND).setOrigin(0).setScale(2.4, 2);
+    const menuBgContainer = this.add.container(0, 0, [menuBg]);
     const newGameText = this.add.text(menuBgWidth / 2, 40, 'New Game', MENU_TEXT_STYLE).setOrigin(0.5);
     const continueText = this.add
       .text(menuBgWidth / 2, 90, 'Continue', MENU_TEXT_STYLE)
       .setOrigin(0.5)
       .setAlpha(0.5);
     const optionText = this.add.text(menuBgWidth / 2, 140, 'Options', MENU_TEXT_STYLE).setOrigin(0.5);
-    const menuContainer = this.add.container(0, 0, [menuBg, newGameText, continueText, optionText]);
+    const menuContainer = this.add.container(0, 0, [menuBgContainer, newGameText, continueText, optionText]);
     menuContainer.setPosition(this.scale.width / 2 - menuBgWidth / 2, 300);
 
     // create cursors
+    this.#mainMenuCursorPhaserImageGameObject = this.add
+      .image(PLAYER_INPUT_CURSOR_POSITION.x, 41, UI_ASSET_KEYS.CURSOR)
+      .setOrigin(0.5)
+      .setScale(2.5);
+    menuBgContainer.add(this.#mainMenuCursorPhaserImageGameObject);
+    this.tweens.add({
+      delay: 0,
+      duration: 500,
+      repeat: -1,
+      x: {
+        from: PLAYER_INPUT_CURSOR_POSITION.x,
+        start: PLAYER_INPUT_CURSOR_POSITION.x,
+        to: PLAYER_INPUT_CURSOR_POSITION.x + 3,
+      },
+      targets: this.#mainMenuCursorPhaserImageGameObject,
+    });
+
     // add in fade affects
   }
 }
