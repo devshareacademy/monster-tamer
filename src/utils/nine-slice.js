@@ -37,6 +37,7 @@ export class NineSlice {
    */
   constructor(config) {
     this.#cornerCutSize = config.cornerCutSize;
+    this.#assetKey = config.assetKey;
     this.#createNineSliceTextures(config.textureManager, config.assetKey);
   }
 
@@ -58,6 +59,12 @@ export class NineSlice {
     // get the original frame so we can the image dimensions
     if (!texture.frames['__BASE']) {
       console.warn(`[${NineSlice.name}:${methodName}] the provided texture asset key does not have a base texture`);
+      return;
+    }
+
+    // check to see if the texture already has more frames than the original base frame
+    if (texture.getFrameNames(false).length !== 0) {
+      console.debug(`[${NineSlice.name}:${methodName}] the provided texture asset key already has additional frames`);
       return;
     }
 
@@ -209,7 +216,6 @@ export class NineSlice {
     });
 
     // finally, create a container to group our new game objects together in
-    const container = scene.add.container(0, 0, [tl, tm, tr, ml, mm, mr, bl, bm, br]);
-    return container;
+    return scene.add.container(0, 0, [tl, tm, tr, ml, mm, mr, bl, bm, br]);
   }
 }
