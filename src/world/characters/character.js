@@ -240,6 +240,8 @@ export class Character {
       return false;
     }
 
+    // checks if the new position that this character wants to move to is the same position that another
+    // character is currently at, or was previously at and is moving towards currently
     const collidesWithACharacter = this._otherCharactersToCheckForCollisionsWith.some((character) => {
       return (
         (character._targetPosition.x === x && character._targetPosition.y === y) ||

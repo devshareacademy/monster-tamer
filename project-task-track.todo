@@ -57,7 +57,7 @@ Level Development With Tiled:
 World Scene Part 2:
   ✔ add interactive game objects @done(23-11-18 20:35)
   ✔ dialog ui component @done(23-11-18 20:35)
-  ☐ add npcs
+  ✔ add npcs @done(23-11-18 20:59)
   ☐ add npc dialog
   ☐ add npc movement
 
