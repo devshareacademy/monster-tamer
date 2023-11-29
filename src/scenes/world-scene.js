@@ -9,6 +9,7 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
+import { NPC } from '../world/characters/npc.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -20,6 +21,18 @@ import { DialogUi } from '../world/dialog-ui.js';
 
 const TILED_SIGN_PROPERTY = Object.freeze({
   MESSAGE: 'message',
+});
+
+const CUSTOM_TILED_TYPES = Object.freeze({
+  NPC: 'npc',
+  NPC_PATH: 'npc_path',
+});
+
+const TILED_NPC_PROPERTY = Object.freeze({
+  IS_SPAWN_POINT: 'is_spawn_point',
+  MOVEMENT_PATTERN: 'movement_pattern',
+  MESSAGES: 'messages',
+  FRAME: 'frame',
 });
 
 /*
@@ -40,6 +53,8 @@ export class WorldScene extends Phaser.Scene {
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
+  /** @type {NPC[]} */
+  #npcs;
 
   constructor() {
     super({
@@ -108,6 +123,9 @@ export class WorldScene extends Phaser.Scene {
     this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+
+    // create npcs
+    this.#createNPCs(map);
 
     this.#player = new Player({
       scene: this,
@@ -234,5 +252,35 @@ export class WorldScene extends Phaser.Scene {
 
   #isPlayerInputLocked() {
     return this.#dialogUi.isVisible;
+  }
+
+  /**
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createNPCs(map) {
+    this.#npcs = [];
+
+    const npcLayers = map.getObjectLayerNames().filter((layerName) => layerName.includes('NPC'));
+    npcLayers.forEach((layerName) => {
+      const layer = map.getObjectLayer(layerName);
+      const npcObject = layer.objects.find((obj) => {
+        return obj.type === CUSTOM_TILED_TYPES.NPC;
+      });
+      if (!npcObject || npcObject.x === undefined || npcObject.y === undefined) {
+        return;
+      }
+
+      const npcFrame =
+        npcObject.properties.find((property) => property.name === TILED_NPC_PROPERTY.FRAME)?.value || '0';
+
+      const npc = new NPC({
+        scene: this,
+        position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
+        direction: DIRECTION.DOWN,
+        frame: parseInt(npcFrame, 10),
+      });
+      this.#npcs.push(npc);
+    });
   }
 }
