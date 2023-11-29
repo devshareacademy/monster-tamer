@@ -139,7 +139,7 @@ export class WorldScene extends Phaser.Scene {
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
       },
-      otherCharactersToCheckForCollisionWith: this.#npcs,
+      otherCharactersToCheckForCollisionsWith: this.#npcs,
     });
     this.cameras.main.startFollow(this.#player.sprite);
 
@@ -334,7 +334,7 @@ export class WorldScene extends Phaser.Scene {
       // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       const npc = new NPC({
         scene: this,
-        position: new Phaser.Math.Vector2(npcObject.x, npcObject.y - TILE_SIZE),
+        position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
         direction: DIRECTION.DOWN,
         frame: parseInt(npcFrame, 10),
         messages: npcMessages,
