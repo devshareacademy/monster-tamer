@@ -1,6 +1,14 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
-import { TITLE_ASSET_KEYS } from '../assets/asset-keys.js';
+import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+
+/** @type {Phaser.Types.GameObjects.Text.TextStyle} */
+const MENU_TEXT_STYLE = {
+  fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+  color: '#4D4A49',
+  fontSize: '30px',
+};
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -22,6 +30,18 @@ export class TitleScene extends Phaser.Scene {
       .setAlpha(0.5);
 
     // create menu
+    const menuBgWidth = 500;
+    // TODO: replace with a nineslice image
+    const menuBg = this.add.image(145, 0, UI_ASSET_KEYS.MENU_BACKGROUND).setOrigin(0).setScale(2, 2);
+    const newGameText = this.add.text(menuBgWidth / 2, 40, 'New Game', MENU_TEXT_STYLE).setOrigin(0.5);
+    const continueText = this.add
+      .text(menuBgWidth / 2, 90, 'Continue', MENU_TEXT_STYLE)
+      .setOrigin(0.5)
+      .setAlpha(0.5);
+    const optionText = this.add.text(menuBgWidth / 2, 140, 'Options', MENU_TEXT_STYLE).setOrigin(0.5);
+    const menuContainer = this.add.container(0, 0, [menuBg, newGameText, continueText, optionText]);
+    menuContainer.setPosition(this.scale.width / 2 - menuBgWidth / 2, 300);
+
     // create cursors
     // add in fade affects
   }
