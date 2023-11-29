@@ -92,11 +92,48 @@ export class TitleScene extends Phaser.Scene {
     });
 
     // add in fade affects
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
+        // TODO: enhance with logic to reset game once we implement saving/loading data
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        return;
+      }
+
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
+        // TODO: connect to options scene
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        return;
+      }
+
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE) {
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        return;
+      }
+
+      exhaustiveGuard(this.#selectedMenuOption);
+    });
 
     this.#controls = new Controls(this);
   }
 
   update() {
+    if (this.#controls.isInputLocked) {
+      return;
+    }
+
+    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    if (wasSpaceKeyPressed) {
+      if (
+        this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME ||
+        this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS ||
+        this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE
+      ) {
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.#controls.lockInput = true;
+        return;
+      }
+    }
+
     const selectedDirection = this.#controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveMenuSelectCursor(selectedDirection);
