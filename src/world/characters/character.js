@@ -24,7 +24,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {() => void} [spriteGridMovementFinishedCallback] an optional callback that will be called after each step of the grid movement is complete
  * @property {CharacterIdleFrameConfig} idleFrameConfig
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
- * @property {Character[]} [otherCharactersToCheckForCollisionWith=[]]
+ * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
  */
 
 export class Character {
@@ -49,7 +49,7 @@ export class Character {
   /** @protected @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   _collisionLayer;
   /** @protected @type {Character[]} */
-  _otherCharactersToCheckForCollisionWith;
+  _otherCharactersToCheckForCollisionsWith;
 
   /**
    * @param {CharacterConfig} config
@@ -67,7 +67,7 @@ export class Character {
     this._idleFrameConfig = config.idleFrameConfig;
     this._origin = config.origin ? { ...config.origin } : { x: 0, y: 0 };
     this._collisionLayer = config.collisionLayer;
-    this._otherCharactersToCheckForCollisionWith = config.otherCharactersToCheckForCollisionWith || [];
+    this._otherCharactersToCheckForCollisionsWith = config.otherCharactersToCheckForCollisionsWith || [];
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
       .setOrigin(this._origin.x, this._origin.y);
@@ -105,7 +105,7 @@ export class Character {
    * @returns {void}
    */
   addCharacterToCheckForCollisionsWith(character) {
-    this._otherCharactersToCheckForCollisionWith.push(character);
+    this._otherCharactersToCheckForCollisionsWith.push(character);
   }
 
   /**
@@ -236,13 +236,13 @@ export class Character {
    */
   #doesPositionCollideWithOtherCharacter(position) {
     const { x, y } = position;
-    if (this._otherCharactersToCheckForCollisionWith.length === 0) {
+    if (this._otherCharactersToCheckForCollisionsWith.length === 0) {
       return false;
     }
 
     // checks if the new position that this character wants to move to is the same position that another
     // character is currently at, or was previously at and is moving towards currently
-    const collidesWithACharacter = this._otherCharactersToCheckForCollisionWith.some((character) => {
+    const collidesWithACharacter = this._otherCharactersToCheckForCollisionsWith.some((character) => {
       return (
         (character._targetPosition.x === x && character._targetPosition.y === y) ||
         (character._previousTargetPosition.x === x && character._previousTargetPosition.y === y)

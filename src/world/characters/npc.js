@@ -1,4 +1,3 @@
-import Phaser from '../../lib/phaser.js';
 import { Character } from './character.js';
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
@@ -12,7 +11,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  */
 
 /**
- * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'assetFrame' | 'idleFrameConfig'> & NPCConfigProps} NPCConfig
+ * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'idleFrameConfig'> & NPCConfigProps} NPCConfig
  */
 
 export class NPC extends Character {
@@ -28,7 +27,7 @@ export class NPC extends Character {
     super({
       ...config,
       assetKey: CHARACTER_ASSET_KEYS.NPC,
-      origin: new Phaser.Math.Vector2(0, 0),
+      origin: { x: 0, y: 0 },
       idleFrameConfig: {
         DOWN: config.frame,
         UP: config.frame + 1,
