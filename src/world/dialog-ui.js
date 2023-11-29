@@ -1,15 +1,15 @@
 import Phaser from '../lib/phaser.js';
-import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text-utils.js';
+import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
-const UI_TEXT_STYLE = {
+const UI_TEXT_STYLE = Object.freeze({
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: 'black',
   fontSize: '32px',
   wordWrap: { width: 0 },
-};
+});
 
 export class DialogUi {
   /** @type {Phaser.Scene} */
@@ -22,8 +22,6 @@ export class DialogUi {
   #height;
   /** @type {Phaser.GameObjects.Container} */
   #container;
-  /** @type {Phaser.GameObjects.Graphics} */
-  #graphics;
   /** @type {boolean} */
   #isVisible;
   /** @type {Phaser.GameObjects.Image} */
@@ -49,8 +47,11 @@ export class DialogUi {
     this.#textAnimationPlaying = false;
     this.#messagesToShow = [];
 
-    this.#graphics = this.#createGraphics();
-    this.#container = this.#scene.add.container(0, 0, [this.#graphics]);
+    const panel = this.#scene.add
+      .rectangle(0, 0, this.#width, this.#height, 0xede4f3, 0.9)
+      .setOrigin(0)
+      .setStrokeStyle(8, 0x905ac2, 1);
+    this.#container = this.#scene.add.container(0, 0, [panel]);
     this.#uiText = this.#scene.add.text(18, 12, CANNOT_READ_SIGN_TEXT, {
       ...UI_TEXT_STYLE,
       ...{ wordWrap: { width: this.#width - 18 } },
@@ -122,28 +123,14 @@ export class DialogUi {
   }
 
   /**
-   * @returns {Phaser.GameObjects.Graphics}
-   */
-  #createGraphics() {
-    const g = this.#scene.add.graphics();
-
-    g.fillStyle(0xede4f3, 1);
-    g.fillRect(1, 0, this.#width - 1, this.#height - 1);
-    g.lineStyle(8, 0x905ac2, 10);
-    g.strokeRect(0, 0, this.#width, this.#height);
-    g.setAlpha(0.9);
-
-    return g;
-  }
-
-  /**
    * @returns {void}
    */
   #createPlayerInputCursor() {
     const y = this.#height - 24;
     this.#userInputCursor = this.#scene.add.image(this.#width - 16, y, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursor.setAngle(90).setScale(4.5, 2);
-    this.#userInputCursorTween = this.#scene.tweens.add({
+
+    this.#userInputCursorTween = this.#scene.add.tween({
       delay: 0,
       duration: 500,
       repeat: -1,
