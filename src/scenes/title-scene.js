@@ -8,5 +8,10 @@ export class TitleScene extends Phaser.Scene {
 
   create() {
     console.log(`[${TitleScene.name}:create] invoked`);
+
+    // create title screen background
+    // create menu
+    // create cursors
+    // add in fade affects
   }
 }
