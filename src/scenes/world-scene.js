@@ -241,6 +241,7 @@ export class WorldScene extends Phaser.Scene {
       nearbyNpc.isTalkingToPlayer = true;
       this.#npcPlayerIsInteractingWith = nearbyNpc;
       this.#dialogUi.showDialogModal(nearbyNpc.messages);
+      return;
     }
   }
 
