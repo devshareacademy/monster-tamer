@@ -47,3 +47,9 @@ export const CHARACTER_ASSET_KEYS = Object.freeze({
   PLAYER: 'PLAYER',
   NPC: 'NPC',
 });
+
+export const TITLE_ASSET_KEYS = Object.freeze({
+  BACKGROUND: 'BACKGROUND',
+  TITLE: 'TITLE',
+  PANEL: 'PANEL',
+});

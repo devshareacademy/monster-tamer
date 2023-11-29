@@ -7,6 +7,7 @@ import {
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
+  TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
 } from '../assets/asset-keys.js';
@@ -108,6 +109,11 @@ export class PreloadScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16,
     });
+
+    // ui components for title
+    this.load.image(TITLE_ASSET_KEYS.BACKGROUND, `${monsterTamerAssetPath}/ui/title/background.png`);
+    this.load.image(TITLE_ASSET_KEYS.PANEL, `${monsterTamerAssetPath}/ui/title/title_background.png`);
+    this.load.image(TITLE_ASSET_KEYS.TITLE, `${monsterTamerAssetPath}/ui/title/title_text.png`);
   }
 
   create() {
