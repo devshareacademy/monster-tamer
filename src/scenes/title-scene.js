@@ -111,8 +111,7 @@ export class TitleScene extends Phaser.Scene {
       }
 
       if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
-        // TODO: connect to options scene
-        this.scene.start(SCENE_KEYS.TITLE_SCENE);
+        this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
         return;
       }
 
