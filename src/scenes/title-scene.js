@@ -45,7 +45,7 @@ export class TitleScene extends Phaser.Scene {
     super({ key: SCENE_KEYS.TITLE_SCENE });
   }
 
-  preload() {
+  init() {
     console.log(`[${TitleScene.name}:init] invoked`);
 
     this.#nineSliceMenu = new NineSlice({
