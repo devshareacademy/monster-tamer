@@ -23,22 +23,21 @@ const ASSET_CUT_FRAMES = Object.freeze({
  * @type {object}
  * @property {number} cornerCutSize the width and height of the corner pieces that will be created from the image
  * @property {Phaser.Textures.TextureManager} textureManager the Phaser 3 Texture Manger instance that will be used for getting textures from
- * @property {string} assetKey the name of the asset to pull from the Phaser 3 Texture Manager
+ * @property {string[]} assetKeys the name of the asset to pull from the Phaser 3 Texture Manager
  */
 
 export class NineSlice {
   /** @type {number} */
   #cornerCutSize;
-  /** @type {string} */
-  #assetKey;
 
   /**
    * @param {NineSliceConfig} config
    */
   constructor(config) {
     this.#cornerCutSize = config.cornerCutSize;
-    this.#assetKey = config.assetKey;
-    this.#createNineSliceTextures(config.textureManager, config.assetKey);
+    config.assetKeys.forEach((assetKey) => {
+      this.#createNineSliceTextures(config.textureManager, assetKey);
+    });
   }
 
   /**
@@ -56,7 +55,7 @@ export class NineSlice {
       return;
     }
 
-    // get the original frame so we can the image dimensions
+    // get the original frame so we can use the image dimensions
     if (!texture.frames['__BASE']) {
       console.warn(`[${NineSlice.name}:${methodName}] the provided texture asset key does not have a base texture`);
       return;
@@ -155,67 +154,102 @@ export class NineSlice {
    * @param {Phaser.Scene} scene the Phaser 3 Scene that the image and container game objects will be added to
    * @param {number} targetWidth the width of the new nine slice image that the original image should be scaled to
    * @param {number} targetHeight the height of the new nine slice image that the original image should be scaled to
+   * @param {string} assetKey the name of the asset to pull from the Phaser 3 Texture Manager
    * @returns {Phaser.GameObjects.Container}
    */
-  createNineSliceContainer(scene, targetWidth, targetHeight) {
-    const tl = scene.add.image(0, 0, this.#assetKey, ASSET_CUT_FRAMES.TL).setOrigin(0);
+  createNineSliceContainer(scene, targetWidth, targetHeight, assetKey) {
+    const tl = scene.add.image(0, 0, assetKey, ASSET_CUT_FRAMES.TL).setOrigin(0);
     tl.setData({
       assetCutFrame: ASSET_CUT_FRAMES.TL,
     });
 
-    const tm = scene.add.image(tl.displayWidth, 0, this.#assetKey, ASSET_CUT_FRAMES.TM).setOrigin(0);
+    const tm = scene.add.image(tl.displayWidth, 0, assetKey, ASSET_CUT_FRAMES.TM).setOrigin(0);
     tm.displayWidth = targetWidth - this.#cornerCutSize * 2;
     tm.setData({
       assetCutFrame: ASSET_CUT_FRAMES.TM,
     });
 
-    const tr = scene.add.image(tl.displayWidth + tm.displayWidth, 0, this.#assetKey, ASSET_CUT_FRAMES.TR).setOrigin(0);
+    const tr = scene.add.image(tl.displayWidth + tm.displayWidth, 0, assetKey, ASSET_CUT_FRAMES.TR).setOrigin(0);
     tr.setData({
       assetCutFrame: ASSET_CUT_FRAMES.TR,
     });
 
-    const ml = scene.add.image(0, tl.displayHeight, this.#assetKey, ASSET_CUT_FRAMES.ML).setOrigin(0);
+    const ml = scene.add.image(0, tl.displayHeight, assetKey, ASSET_CUT_FRAMES.ML).setOrigin(0);
     ml.displayHeight = targetHeight - this.#cornerCutSize * 2;
     ml.setData({
       assetCutFrame: ASSET_CUT_FRAMES.ML,
     });
 
-    const mm = scene.add.image(ml.displayWidth, ml.y, this.#assetKey, ASSET_CUT_FRAMES.MM).setOrigin(0);
+    const mm = scene.add.image(ml.displayWidth, ml.y, assetKey, ASSET_CUT_FRAMES.MM).setOrigin(0);
     mm.displayHeight = targetHeight - this.#cornerCutSize * 2;
     mm.displayWidth = targetWidth - this.#cornerCutSize * 2;
     mm.setData({
       assetCutFrame: ASSET_CUT_FRAMES.MM,
     });
 
-    const mr = scene.add
-      .image(ml.displayWidth + mm.displayWidth, ml.y, this.#assetKey, ASSET_CUT_FRAMES.MR)
-      .setOrigin(0);
+    const mr = scene.add.image(ml.displayWidth + mm.displayWidth, ml.y, assetKey, ASSET_CUT_FRAMES.MR).setOrigin(0);
     mr.displayHeight = mm.displayHeight;
     mr.setData({
       assetCutFrame: ASSET_CUT_FRAMES.MR,
     });
 
-    const bl = scene.add
-      .image(0, tl.displayHeight + ml.displayHeight, this.#assetKey, ASSET_CUT_FRAMES.BL)
-      .setOrigin(0);
+    const bl = scene.add.image(0, tl.displayHeight + ml.displayHeight, assetKey, ASSET_CUT_FRAMES.BL).setOrigin(0);
     bl.setData({
       assetCutFrame: ASSET_CUT_FRAMES.BL,
     });
 
-    const bm = scene.add.image(bl.displayWidth, bl.y, this.#assetKey, ASSET_CUT_FRAMES.BM).setOrigin(0);
+    const bm = scene.add.image(bl.displayWidth, bl.y, assetKey, ASSET_CUT_FRAMES.BM).setOrigin(0);
     bm.displayWidth = tm.displayWidth;
     bm.setData({
       assetCutFrame: ASSET_CUT_FRAMES.BM,
     });
 
-    const br = scene.add
-      .image(bl.displayWidth + bm.displayWidth, bl.y, this.#assetKey, ASSET_CUT_FRAMES.BR)
-      .setOrigin(0);
+    const br = scene.add.image(bl.displayWidth + bm.displayWidth, bl.y, assetKey, ASSET_CUT_FRAMES.BR).setOrigin(0);
     br.setData({
       assetCutFrame: ASSET_CUT_FRAMES.BR,
     });
 
     // finally, create a container to group our new game objects together in
     return scene.add.container(0, 0, [tl, tm, tr, ml, mm, mr, bl, bm, br]);
+  }
+
+  /**
+   * Updates the nine image game objects in the provided Phaser 3 container to use another nine slice texture that was previously created and stored
+   * in the Phaser 3 Texture Manager.
+   * @param {Phaser.Textures.TextureManager} textureManager the Phaser 3 Texture Manger instance that will be used for getting textures from
+   * @param {Phaser.GameObjects.Container} container the Phaser 3 container that was created as a result of calling the createNineSliceContainer method, or
+   * a Phaser 3 container game object that has nine game objects that each have a saved data attribute called `assetCutFrame` which has the value
+   * of one of the unique ASSET_CUT_FRAMES values.
+   * @param {string} assetKey the name of the asset to pull from the Phaser 3 Texture Manager
+   * @returns {void}
+   */
+  updateNineSliceContainerTexture(textureManager, container, assetKey) {
+    const methodName = 'updateNineSliceContainerTexture';
+
+    // validate we have the provided texture for the given asset key
+    const texture = textureManager.get(assetKey);
+    if (texture.key === '__MISSING') {
+      console.warn(`[${NineSlice.name}:${methodName}] the provided texture asset key was not found`);
+      return;
+    }
+    // check to see if the texture has more than the base frames defined
+    if (texture.getFrameNames(false).length === 0) {
+      console.warn(
+        `[${NineSlice.name}:${methodName}] the provided texture asset key does not have the required nine slice frames`
+      );
+      return;
+    }
+
+    container.each((gameObject) => {
+      /** @type {Phaser.GameObjects.Image} */
+      const phaserImageGameObject = gameObject;
+      if (gameObject.type !== 'Image') {
+        return;
+      }
+      if (phaserImageGameObject.getData('assetCutFrame') === undefined) {
+        return;
+      }
+      phaserImageGameObject.setTexture(assetKey, phaserImageGameObject.getData('assetCutFrame'));
+    });
   }
 }
