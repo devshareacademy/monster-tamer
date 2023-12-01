@@ -141,5 +141,24 @@
   ],
   "in-progress": [],
   "testing": [],
-  "done": []
+  "done": [
+    {
+      "assignedTo": {
+        "name": "Scott Westover"
+      },
+      "creation_time": "2023-12-01T18:39:13.333Z",
+      "description": {
+        "content": "when battle scene starts, block input during animations",
+        "mime": "text/markdown"
+      },
+      "details": {
+        "content": "When the battle scene starts, while we are playing animations, players can press input which will mess up the text animations that are being shown in the game. We need to block input, except when expecting input to move the text.\n\nTied to https://github.com/devshareacademy/monster-tamer/issues/37",
+        "mime": "text/markdown"
+      },
+      "id": "9",
+      "references": [],
+      "title": "Battle Scene - block input at scene start",
+      "type": "bug"
+    }
+  ]
 }
