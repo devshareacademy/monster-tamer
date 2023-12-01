@@ -214,7 +214,7 @@ export class Menu {
   #handleSelectedMenuOption() {
     /** @type {MenuOptions} */
     const selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
-    console.log(selectedMenuOption);
+
     switch (selectedMenuOption) {
       case MENU_OPTIONS.EXIT:
         this.#selectedMenuOption = MENU_OPTIONS.EXIT;
@@ -238,7 +238,5 @@ export class Menu {
       default:
         exhaustiveGuard(selectedMenuOption);
     }
-
-    console.log(this.#selectedMenuOption);
   }
 }

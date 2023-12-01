@@ -36,12 +36,29 @@ const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
  * @property {boolean} itemUsed
  */
 
+/**
+ * @typedef InventoryItemGameObjects
+ * @type {object}
+ * @property {Phaser.GameObjects.Text} [itemName]
+ * @property {Phaser.GameObjects.Text} [quantitySign]
+ * @property {Phaser.GameObjects.Text} [quantity]
+ */
+
+/**
+ * @typedef {import('../types/typedef.js').InventoryItem & { gameObjects: InventoryItemGameObjects }} InventoryItemWithGameObjects
+ */
+
+/**
+ * @typedef CustomInventory
+ * @type {InventoryItemWithGameObjects[]}
+ */
+
 export class InventoryScene extends Phaser.Scene {
   /** @type {Phaser.GameObjects.Image} */
   #userInputCursor;
   /** @type {Phaser.GameObjects.Text} */
   #selectedInventoryDescriptionText;
-  /** @type {import('../types/typedef.js').Inventory} */
+  /** @type {CustomInventory} */
   #inventory;
   /** @type {number} */
   #selectedInventoryOptionIndex;
@@ -73,6 +90,7 @@ export class InventoryScene extends Phaser.Scene {
           description: 'A basic healing item that will heal 30 HP from a single monster.',
         },
         quantity: 10,
+        gameObjects: {},
       });
     }
   }
@@ -116,6 +134,11 @@ export class InventoryScene extends Phaser.Scene {
         INVENTORY_TEXT_STYLE
       );
       container.add([itemText, qtyText1, qtyText2]);
+      inventoryItem.gameObjects = {
+        itemName: itemText,
+        quantity: qtyText2,
+        quantitySign: qtyText1,
+      };
     });
 
     // create cancel text
@@ -163,7 +186,6 @@ export class InventoryScene extends Phaser.Scene {
     }
 
     if (spaceKeyPressed) {
-      // TODO: use the item
       this.#controls.lockInput = true;
       // pause this scene and launch the monster party scene
       /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
@@ -231,6 +253,9 @@ export class InventoryScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * @returns {boolean}
+   */
   #isCancelButtonSelected() {
     return this.#selectedInventoryOptionIndex === this.#inventory.length;
   }
@@ -255,6 +280,15 @@ export class InventoryScene extends Phaser.Scene {
     );
     this.#controls.lockInput = false;
 
-    // TODO: handle any item that was used
+    if (!data) {
+      return;
+    }
+
+    if (data.itemUsed) {
+      const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
+      selectedItem.quantity -= 1;
+      selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
+      // TODO: add logic to handle when the last of an item was just used
+    }
   }
 }

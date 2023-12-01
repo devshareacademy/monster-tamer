@@ -13,6 +13,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { ITEM_EFFECT } from '../types/typedef.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -55,6 +56,10 @@ export class MonsterPartyScene extends Phaser.Scene {
   #infoTextGameObject;
   /** @type {MonsterPartySceneData} */
   #sceneData;
+  /** @type {boolean} */
+  #waitingForInput;
+  /** @type {HealthBar[]} */
+  #healthBars;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
@@ -72,6 +77,8 @@ export class MonsterPartyScene extends Phaser.Scene {
     this.#monsters.push(DataUtils.getIguanignite(this));
     this.#monsterPartyBackgrounds = [];
     this.#sceneData = data;
+    this.#waitingForInput = false;
+    this.#healthBars = [];
   }
 
   /**
@@ -81,6 +88,7 @@ export class MonsterPartyScene extends Phaser.Scene {
     console.log(`[${MonsterPartyScene.name}:create] invoked`);
 
     // create custom background
+    this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x000000, 1).setOrigin(0);
     this.add
       .tileSprite(0, 0, this.scale.width, this.scale.height, MONSTER_PARTY_ASSET_KEYS.PARTY_BACKGROUND, 0)
       .setOrigin(0)
@@ -88,7 +96,7 @@ export class MonsterPartyScene extends Phaser.Scene {
 
     // create back button
     const buttonContainer = this.add.container(883, 519, []);
-    this.#cancelButton = this.add.image(0, 0, UI_ASSET_KEYS.BLUE_BUTTON, 0).setOrigin(0).setScale(0.7, 1);
+    this.#cancelButton = this.add.image(0, 0, UI_ASSET_KEYS.BLUE_BUTTON, 0).setOrigin(0).setScale(0.7, 1).setAlpha(0.7);
     const cancelButtonText = this.add.text(66.5, 20.5, 'cancel', UI_TEXT_STYLE).setOrigin(0.5);
     buttonContainer.add([this.#cancelButton, cancelButtonText]);
 
@@ -132,18 +140,39 @@ export class MonsterPartyScene extends Phaser.Scene {
     }
 
     if (this.#controls.wasBackKeyPressed()) {
-      this.#goBackToPreviousScene();
+      if (this.#waitingForInput) {
+        this.#updateInfoContainerText();
+        this.#waitingForInput = false;
+        return;
+      }
+
+      this.#goBackToPreviousScene(false);
       return;
     }
 
     const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
-      if (this.#selectedPartyMonsterIndex === -1) {
-        this.#goBackToPreviousScene();
+      if (this.#waitingForInput) {
+        this.#updateInfoContainerText();
+        this.#waitingForInput = false;
         return;
       }
 
-      // TODO: handle input based on what player intention was (use item, view monster details, select monster to switch to)
+      if (this.#selectedPartyMonsterIndex === -1) {
+        this.#goBackToPreviousScene(false);
+        return;
+      }
+
+      // handle input based on what player intention was (use item, view monster details, select monster to switch to)
+      if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
+        this.#handleItemUsed();
+        return;
+      }
+      // TODO: show monster details view
+      return;
+    }
+
+    if (this.#waitingForInput) {
       return;
     }
 
@@ -181,6 +210,8 @@ export class MonsterPartyScene extends Phaser.Scene {
       .setAlpha(0.5);
 
     const healthBar = new HealthBar(this, 100, 40, 240);
+    healthBar.setMeterPercentageAnimated(currentHp / maxHp, { duration: 0 });
+    this.#healthBars.push(healthBar);
 
     const monsterHpText = this.add.text(164, 66, 'HP', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
@@ -236,12 +267,11 @@ export class MonsterPartyScene extends Phaser.Scene {
       case DIRECTION.UP:
         this.#selectedPartyMonsterIndex = 0;
         this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex].setAlpha(1);
-        this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON, 0);
+        this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON, 0).setAlpha(0.7);
         break;
       case DIRECTION.DOWN:
         this.#selectedPartyMonsterIndex = -1;
-        // TODO: fix the ui button so it is more noticeable
-        this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, 0);
+        this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, 0).setAlpha(1);
         break;
       case DIRECTION.LEFT:
       case DIRECTION.RIGHT:
@@ -270,9 +300,10 @@ export class MonsterPartyScene extends Phaser.Scene {
   }
 
   /**
+   * @param {boolean} itemUsed
    * @returns {void}
    */
-  #goBackToPreviousScene() {
+  #goBackToPreviousScene(itemUsed) {
     this.#controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
 
@@ -283,8 +314,65 @@ export class MonsterPartyScene extends Phaser.Scene {
 
     /** @type {import('./inventory-scene.js').InventorySceneResumeData} */
     const sceneDataToPass = {
-      itemUsed: false,
+      itemUsed,
     };
     this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleItemUsed() {
+    switch (this.#sceneData.itemSelected.effect) {
+      case ITEM_EFFECT.HEAL_30:
+        this.#handleHealItemUsed(30);
+        break;
+      default:
+        exhaustiveGuard(this.#sceneData.itemSelected.effect);
+    }
+  }
+
+  /**
+   * @param {number} amount the amount of health to heal the monster by
+   * @returns {void}
+   */
+  #handleHealItemUsed(amount) {
+    console.log(this.#sceneData.itemSelected);
+    // validate that the monster is not fainted
+    if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
+      this.#infoTextGameObject.setText('Cannot heal fainted monster');
+      this.#waitingForInput = true;
+      return;
+    }
+
+    // validate that the monster is not already fully healed
+    if (
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp ===
+      this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+    ) {
+      this.#infoTextGameObject.setText('Monster is already fully healed');
+      this.#waitingForInput = true;
+      return;
+    }
+
+    // otherwise, heal monster by the amount if we are not in a battle and show animation
+    this.#controls.lockInput = true;
+    this.#monsters[this.#selectedPartyMonsterIndex].currentHp += amount;
+    if (
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp > this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+    ) {
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp = this.#monsters[this.#selectedPartyMonsterIndex].maxHp;
+    }
+    this.#infoTextGameObject.setText(`Healed monster by ${amount} HP`);
+    this.#healthBars[this.#selectedPartyMonsterIndex].setMeterPercentageAnimated(
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp / this.#monsters[this.#selectedPartyMonsterIndex].maxHp,
+      {
+        callback: () => {
+          this.time.delayedCall(300, () => {
+            this.#goBackToPreviousScene(true);
+          });
+        },
+      }
+    );
   }
 }
