@@ -188,10 +188,15 @@ export class WorldScene extends Phaser.Scene {
     }
 
     if (this.#controls.wasEnterKeyPressed()) {
+      if (this.#dialogUi.isVisible) {
+        return;
+      }
+
       if (this.#menu.isVisible) {
         this.#menu.hide();
         return;
       }
+
       this.#menu.show();
     }
 
