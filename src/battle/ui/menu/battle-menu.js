@@ -6,6 +6,7 @@ import { ACTIVE_BATTLE_MENU, ATTACK_MOVE_OPTIONS, BATTLE_MENU_OPTIONS } from './
 import { BATTLE_UI_TEXT_STYLE } from './battle-menu-config.js';
 import { BattleMonster } from '../../monsters/battle-monster.js';
 import { animateText } from '../../../utils/text-utils.js';
+import { dataManager } from '../../../utils/data-manager.js';
 
 const BATTLE_MENU_CURSOR_POS = Object.freeze({
   x: 42,
@@ -188,7 +189,7 @@ export class BattleMenu {
     }
 
     animateText(this.#scene, this.#battleTextGameObjectLine1, message, {
-      delay: 50,
+      delay: dataManager.getAnimatedTextSpeed(),
       callback: () => {
         this.#waitingForPlayerInput = false;
         if (callback) {
@@ -237,7 +238,7 @@ export class BattleMenu {
 
     this.#queuedMessageAnimationPlaying = true;
     animateText(this.#scene, this.#battleTextGameObjectLine1, messageToDisplay, {
-      delay: 50,
+      delay: dataManager.getAnimatedTextSpeed(),
       callback: () => {
         this.playInputCursorAnimation();
         this.#waitingForPlayerInput = true;

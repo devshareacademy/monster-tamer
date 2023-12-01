@@ -2,6 +2,7 @@ import Phaser from '../lib/phaser.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text-utils.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = Object.freeze({
@@ -105,7 +106,7 @@ export class DialogUi {
 
     this.#uiText.setText('').setAlpha(1);
     animateText(this.#scene, this.#uiText, this.#messagesToShow.shift(), {
-      delay: 50,
+      delay: dataManager.getAnimatedTextSpeed(),
       callback: () => {
         this.#textAnimationPlaying = false;
       },
