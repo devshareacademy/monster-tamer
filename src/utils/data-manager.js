@@ -3,6 +3,8 @@ import { DIRECTION } from '../common/direction.js';
 import { TILE_SIZE } from '../config.js';
 import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
 
+const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
+
 /**
  * @typedef GlobalState
  * @type {object}
@@ -67,6 +69,50 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @returns {void}
+   */
+  loadData() {
+    // attempt to load data from browser storage and populate the data manager
+    if (typeof Storage === 'undefined') {
+      console.warn(
+        `[${DataManager.name}:loadData] localStorage is not supported, will not be able to save and load data.`
+      );
+      return;
+    }
+
+    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedData === null) {
+      return;
+    }
+    try {
+      // TODO: we should add error handling and data validation at this step to make sure we get the data we expect.
+      /** @type {GlobalState} */
+      const parsedData = JSON.parse(savedData);
+      // update the state with the saved data
+      this.#updateDataManger(parsedData);
+    } catch (error) {
+      console.warn(
+        `[${DataManager.name}:loadData] encountered an error while attempting to load and parse saved data.`
+      );
+    }
+  }
+
+  /**
+   * @returns {void}
+   */
+  saveData() {
+    // attempt to storage data in browser storage from data manager
+    if (typeof Storage === 'undefined') {
+      console.warn(
+        `[${DataManager.name}:saveData] localStorage is not supported, will not be able to save and load data.`
+      );
+      return;
+    }
+    const dataToSave = this.#dataManagerDataToGlobalStateObject();
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -81,6 +127,29 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: data.options.volume,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
     });
+  }
+
+  /**
+   * @returns {GlobalState}
+   */
+  #dataManagerDataToGlobalStateObject() {
+    return {
+      player: {
+        position: {
+          x: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).x,
+          y: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).y,
+        },
+        direction: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
+      },
+      options: {
+        textSpeed: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED),
+        battleSceneAnimations: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS),
+        battleStyle: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE),
+        sound: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND),
+        volume: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME),
+        menuColor: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR),
+      },
+    };
   }
 }
 
