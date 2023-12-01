@@ -4,42 +4,6 @@
       "assignedTo": {
         "name": "Scott Westover"
       },
-      "creation_time": "2023-12-01T15:33:58.766Z",
-      "description": {
-        "content": "cannot provide 0 for a delay value",
-        "mime": "text/markdown"
-      },
-      "details": {
-        "content": "In the health bar class, when you use the `setMeterPercentageAnimated` method, you have an option to pass a delay, which is used for the length of time the animation will play for. If you pass `0` for this value, the code treats this as if a value was not provided and the default value is used. \nTo fix this, we need to check if that value is undefined, or add fallback logic if a `0` was provided. Example: \n```\nduration: options?.duration || options?.duration === 0 ? 0 : 1000,\n```\n",
-        "mime": "text/markdown"
-      },
-      "id": "7",
-      "references": [],
-      "title": "Health Bar - animation of health bar does not honor 0 for delay",
-      "type": "bug"
-    },
-    {
-      "assignedTo": {
-        "name": "Scott Westover"
-      },
-      "creation_time": "2023-12-01T13:43:37.813Z",
-      "description": {
-        "content": "Prevent menu from being opened when dialog is on screen",
-        "mime": "text/markdown"
-      },
-      "id": "1",
-      "references": [],
-      "title": "Prevent menu from being opened when dialog is on screen",
-      "type": "bug",
-      "details": {
-        "content": "When the dialog ui is on the screen (talking to npc or when saving game progress), user can hit the `enter` key and open the menu and navigate it. This input should be blocked until the user closes the dialog menu.",
-        "mime": "text/markdown"
-      }
-    },
-    {
-      "assignedTo": {
-        "name": "Scott Westover"
-      },
       "creation_time": "2023-12-01T15:28:48.588Z",
       "description": {
         "content": "add logic to handle when the fully qty of item is used",
@@ -139,7 +103,26 @@
       "title": "Plan out inventory and party scene video chapters"
     }
   ],
-  "in-progress": [],
+  "in-progress": [
+    {
+      "assignedTo": {
+        "name": "Scott Westover"
+      },
+      "creation_time": "2023-12-01T13:43:37.813Z",
+      "description": {
+        "content": "Prevent menu from being opened when dialog is on screen",
+        "mime": "text/markdown"
+      },
+      "id": "1",
+      "references": [],
+      "title": "Prevent menu from being opened when dialog is on screen",
+      "type": "bug",
+      "details": {
+        "content": "When the dialog ui is on the screen (talking to npc or when saving game progress), user can hit the `enter` key and open the menu and navigate it. This input should be blocked until the user closes the dialog menu.\n\nGitHub issue: https://github.com/devshareacademy/monster-tamer/issues/61",
+        "mime": "text/markdown"
+      }
+    }
+  ],
   "testing": [],
   "done": [
     {
@@ -158,6 +141,24 @@
       "id": "9",
       "references": [],
       "title": "Battle Scene - block input at scene start",
+      "type": "bug"
+    },
+    {
+      "assignedTo": {
+        "name": "Scott Westover"
+      },
+      "creation_time": "2023-12-01T15:33:58.766Z",
+      "description": {
+        "content": "cannot provide 0 for a delay value",
+        "mime": "text/markdown"
+      },
+      "details": {
+        "content": "In the health bar class, when you use the `setMeterPercentageAnimated` method, you have an option to pass a delay, which is used for the length of time the animation will play for. If you pass `0` for this value, the code treats this as if a value was not provided and the default value is used. \nTo fix this, we need to check if that value is undefined, or add fallback logic if a `0` was provided. Example: \n```\nduration: options?.duration || options?.duration === 0 ? 0 : 1000,\n```\n\nGitHub Issue: https://github.com/devshareacademy/monster-tamer/issues/60",
+        "mime": "text/markdown"
+      },
+      "id": "7",
+      "references": [],
+      "title": "Health Bar - animation of health bar does not honor 0 for delay",
       "type": "bug"
     }
   ]
