@@ -204,7 +204,28 @@ export class WorldScene extends Phaser.Scene {
         if (this.#menu.selectedMenuOption === 'SAVE') {
           this.#dialogUi.showDialogModal(['Game progress has been saved.']);
         }
+
+        if (this.#menu.selectedMenuOption === 'BAG') {
+          // pause this scene and launch the inventory scene
+          /** @type {import('./inventory-scene.js').InventorySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
+
+        if (this.#menu.selectedMenuOption === 'MONSTERS') {
+          // pause this scene and launch the monster party scene
+          /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
       }
+
       if (this.#controls.wasBackKeyPressed()) {
         this.#menu.handlePlayerInput('CANCEL');
       }
@@ -282,6 +303,9 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerInteraction() {
     if (this.#dialogUi.isAnimationPlaying) {
       return;
@@ -341,6 +365,9 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerMovementUpdate() {
     // update player position on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
@@ -375,6 +402,9 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {boolean}
+   */
   #isPlayerInputLocked() {
     return this.#dialogUi.isVisible || this.#menu.isVisible;
   }

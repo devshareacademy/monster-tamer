@@ -49,6 +49,9 @@ export class BattleScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     this.#activePlayerAttackIndex = -1;
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
@@ -60,6 +63,9 @@ export class BattleScene extends Phaser.Scene {
     this.#skipAnimations = true;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${BattleScene.name}:create] invoked`);
     // create main background
@@ -86,6 +92,9 @@ export class BattleScene extends Phaser.Scene {
     this.#controls = new Controls(this);
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     this.#battleStateMachine.update();
 
@@ -137,6 +146,9 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #playerAttack() {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
@@ -160,6 +172,9 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * @returns {void}
+   */
   #enemyAttack() {
     if (this.#activeEnemyMonster.isFainted) {
       this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
@@ -188,6 +203,9 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * @returns {void}
+   */
   #postBattleSequenceCheck() {
     if (this.#activeEnemyMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
@@ -218,6 +236,9 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
   }
 
+  /**
+   * @returns {void}
+   */
   #transitionToNextScene() {
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
@@ -225,6 +246,9 @@ export class BattleScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #createBattleStateMachine() {
     /**
      * General state flow for battle scene

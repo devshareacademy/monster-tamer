@@ -44,6 +44,9 @@ export class TitleScene extends Phaser.Scene {
     super({ key: SCENE_KEYS.TITLE_SCENE });
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${TitleScene.name}:create] invoked`);
 
@@ -117,6 +120,9 @@ export class TitleScene extends Phaser.Scene {
     this.#controls = new Controls(this);
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     if (this.#controls.isInputLocked) {
       return;

@@ -58,7 +58,7 @@ export class Menu {
    */
   constructor(scene) {
     this.#scene = scene;
-    this.#availableMenuOptions = [MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
+    this.#availableMenuOptions = [MENU_OPTIONS.MONSTERS, MENU_OPTIONS.BAG, MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
     this.#menuOptionsTextGameObjects = [];
     this.#selectedMenuOptionIndex = 0;
     this.#padding = 4;
@@ -82,6 +82,8 @@ export class Menu {
     this.#userInputCursor = this.#scene.add.image(20 + this.#padding, 28 + this.#padding, UI_ASSET_KEYS.CURSOR_WHITE);
     this.#userInputCursor.setScale(2.5);
     this.#container.add(this.#userInputCursor);
+
+    this.hide();
   }
 
   /** @type {boolean} */
@@ -89,11 +91,8 @@ export class Menu {
     return this.#isVisible;
   }
 
-  /** @type {MenuOptions | undefined} */
+  /** @type {MenuOptions} */
   get selectedMenuOption() {
-    if (this.#isVisible) {
-      return undefined;
-    }
     return this.#selectedMenuOption;
   }
 
@@ -188,7 +187,6 @@ export class Menu {
         if (this.#selectedMenuOptionIndex < 0) {
           this.#selectedMenuOptionIndex = this.#availableMenuOptions.length - 1;
         }
-        // update selected index & move obj position
         break;
       case DIRECTION.DOWN:
         this.#selectedMenuOptionIndex += 1;
@@ -228,8 +226,12 @@ export class Menu {
         this.hide();
         break;
       case MENU_OPTIONS.BAG:
-      case MENU_OPTIONS.MONSTERDEX:
+        this.#selectedMenuOption = MENU_OPTIONS.BAG;
+        break;
       case MENU_OPTIONS.MONSTERS:
+        this.#selectedMenuOption = MENU_OPTIONS.MONSTERS;
+        break;
+      case MENU_OPTIONS.MONSTERDEX:
       case MENU_OPTIONS.OPTION:
         // TODO: implement logic for other menu options
         break;
