@@ -59,13 +59,13 @@ World Scene Part 2:
   ✔ dialog ui component @done(23-11-18 20:35)
   ✔ add npcs @done(23-11-18 20:59)
   ✔ add npc dialog @done(23-11-18 21:46)
-  ☐ add npc movement
+  ✔ add npc movement @done(23-11-30 23:37)
 
 Title Screen:
-  ☐ create basic title screen
-  ☐ add options menu
-  ☐ save & loading options
-  ☐ connecting option data to battle scene
+  ✔ create basic title screen @done(23-11-30 23:37)
+  ✔ add options menu @done(23-11-30 23:37)
+  ✔ save & loading options @done(23-11-30 23:37)
+  ✔ connecting option data to battle scene @done(23-11-30 23:37)
 
 Tools Part 1:
   ☐ using tweakpane for testing
