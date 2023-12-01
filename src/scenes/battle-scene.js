@@ -174,8 +174,7 @@ export class BattleScene extends Phaser.Scene {
             }
           );
         });
-      },
-      this.#skipAnimations
+      }
     );
   }
 
@@ -203,8 +202,7 @@ export class BattleScene extends Phaser.Scene {
             }
           );
         });
-      },
-      this.#skipAnimations
+      }
     );
   }
 
@@ -216,8 +214,7 @@ export class BattleScene extends Phaser.Scene {
           [`Wild ${this.#activeEnemyMonster.name} fainted.`, 'You have gained some experience'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          this.#skipAnimations
+          }
         );
       });
       return;
@@ -230,8 +227,7 @@ export class BattleScene extends Phaser.Scene {
           [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          this.#skipAnimations
+          }
         );
       });
       return;
@@ -289,8 +285,7 @@ export class BattleScene extends Phaser.Scene {
             () => {
               // wait for text animation to complete and move to next state
               this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
-            },
-            this.#skipAnimations
+            }
           );
         });
       },
@@ -302,16 +297,12 @@ export class BattleScene extends Phaser.Scene {
         // wait for player monster to appear on the screen and notify the player about monster
         this.#activePlayerMonster.playMonsterAppearAnimation(() => {
           this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => undefined);
-          this.#battleMenu.updateInfoPaneMessageNoInputRequired(
-            `go ${this.#activePlayerMonster.name}!`,
-            () => {
-              // wait for text animation to complete and move to next state
-              this.time.delayedCall(1200, () => {
-                this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
-              });
-            },
-            this.#skipAnimations
-          );
+          this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
+            // wait for text animation to complete and move to next state
+            this.time.delayedCall(1200, () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            });
+          });
         });
       },
     });
@@ -363,13 +354,9 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          ['You got away safely!'],
-          () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          this.#skipAnimations
-        );
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
+          this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+        });
       },
     });
 
