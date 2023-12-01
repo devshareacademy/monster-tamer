@@ -148,6 +148,10 @@ export class PreloadScene extends Phaser.Scene {
       MONSTER_PARTY_ASSET_KEYS.PARTY_BACKGROUND,
       `${monsterTamerAssetPath}/ui/monster-party/background.png`
     );
+    this.load.image(
+      MONSTER_PARTY_ASSET_KEYS.MONSTER_DETAILS_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/monster-party/monster-details-background.png`
+    );
   }
 
   /**
@@ -189,7 +193,7 @@ export class PreloadScene extends Phaser.Scene {
     dataManager.loadData();
 
     this.#createAnimations();
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
   /**

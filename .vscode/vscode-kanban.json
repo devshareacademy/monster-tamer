@@ -57,6 +57,23 @@
       "assignedTo": {
         "name": "Scott Westover"
       },
+      "creation_time": "2023-12-01T18:18:04.596Z",
+      "description": {
+        "content": "need to support selecting monsters in party scene",
+        "mime": "text/markdown"
+      },
+      "details": {
+        "content": "In the current implementation of the monster party scene, when you try to navigate between the monsters in the party (if there is more than 1), the navigation does not work. Instead, you can only select the 1st monster in your party or the cancel button.\nWe need to add logic to support navigating between more than one monster.",
+        "mime": "text/markdown"
+      },
+      "id": "8",
+      "references": [],
+      "title": "Monster Party Scene - add logic for navigating between monsters"
+    },
+    {
+      "assignedTo": {
+        "name": "Scott Westover"
+      },
       "creation_time": "2023-12-01T14:08:00.649Z",
       "description": {
         "content": "add monster details view",

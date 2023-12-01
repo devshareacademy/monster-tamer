@@ -74,7 +74,14 @@ export class MonsterPartyScene extends Phaser.Scene {
 
     this.#selectedPartyMonsterIndex = 0;
     this.#monsters = [];
-    this.#monsters.push(DataUtils.getIguanignite(this));
+
+    // added for testing from preload scene
+    // TODO: need to add logic to grab monster party data from the data manager
+    if (this.#monsters.length === 0) {
+      this.#monsters.push(DataUtils.getIguanignite(this));
+      // this.#monsters.push(DataUtils.getCarnodusk(this));
+    }
+
     this.#monsterPartyBackgrounds = [];
     this.#sceneData = data;
     this.#waitingForInput = false;
@@ -118,7 +125,7 @@ export class MonsterPartyScene extends Phaser.Scene {
       const y =
         (isEven ? MONSTER_PARTY_POSITIONS.EVEN.y : MONSTER_PARTY_POSITIONS.ODD.y) +
         MONSTER_PARTY_POSITIONS.increment * (index / 2);
-      this.#createMonster(x, y, monster.currentLevel, monster.name, monster.currentHp, monster.maxHp);
+      this.#createMonster(x, y, monster);
     });
 
     // this.#createMonster(0, 10, 5, 'Apple', 25, 25);
@@ -129,6 +136,7 @@ export class MonsterPartyScene extends Phaser.Scene {
     // this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
 
     this.#controls = new Controls(this);
+    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
   /**
@@ -168,7 +176,16 @@ export class MonsterPartyScene extends Phaser.Scene {
         this.#handleItemUsed();
         return;
       }
-      // TODO: show monster details view
+
+      this.#controls.lockInput = true;
+      // pause this scene and launch the monster details scene
+      /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
+      const sceneDataToPass = {
+        monster: this.#monsters[this.#selectedPartyMonsterIndex],
+      };
+      this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
+      this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+
       return;
     }
 
@@ -186,13 +203,10 @@ export class MonsterPartyScene extends Phaser.Scene {
   /**
    * @param {number} x
    * @param {number} y
-   * @param {number} level
-   * @param {string} name
-   * @param {number} currentHp
-   * @param {number} maxHp
+   * @param {import('../types/typedef.js').Monster} monsterDetails
    * @returns {Phaser.GameObjects.Container}
    */
-  #createMonster(x, y, level, name, currentHp, maxHp) {
+  #createMonster(x, y, monsterDetails) {
     const container = this.add.container(x, y, []);
 
     const background = this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
@@ -210,7 +224,7 @@ export class MonsterPartyScene extends Phaser.Scene {
       .setAlpha(0.5);
 
     const healthBar = new HealthBar(this, 100, 40, 240);
-    healthBar.setMeterPercentageAnimated(currentHp / maxHp, { duration: 0 });
+    healthBar.setMeterPercentageAnimated(monsterDetails.currentHp / monsterDetails.maxHp, { duration: 0 });
     this.#healthBars.push(healthBar);
 
     const monsterHpText = this.add.text(164, 66, 'HP', {
@@ -220,27 +234,27 @@ export class MonsterPartyScene extends Phaser.Scene {
       fontStyle: 'italic',
     });
 
-    const monsterHealthBarLevelText = this.add.text(26, 116, `Lv. ${level}`, {
+    const monsterHealthBarLevelText = this.add.text(26, 116, `Lv. ${monsterDetails.currentLevel}`, {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#ffffff',
       fontSize: '22px',
     });
 
-    const monsterNameGameText = this.add.text(162, 36, name, {
+    const monsterNameGameText = this.add.text(162, 36, monsterDetails.name, {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#ffffff',
       fontSize: '30px',
     });
 
     const healthBarTextGameObject = this.add
-      .text(458, 95, `${currentHp} / ${maxHp}`, {
+      .text(458, 95, `${monsterDetails.currentHp} / ${monsterDetails.maxHp}`, {
         fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
         color: '#ffffff',
         fontSize: '38px',
       })
       .setOrigin(1, 0);
 
-    const monsterImage = this.add.image(35, 20, MONSTER_ASSET_KEYS.CARNODUSK).setOrigin(0).setScale(0.35);
+    const monsterImage = this.add.image(35, 20, monsterDetails.assetKey).setOrigin(0).setScale(0.35);
 
     container.add([
       background,
@@ -374,5 +388,13 @@ export class MonsterPartyScene extends Phaser.Scene {
         },
       }
     );
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleSceneResume() {
+    console.log(`[${MonsterPartyScene.name}:handleSceneResume] scene has been resumed`);
+    this.#controls.lockInput = false;
   }
 }
