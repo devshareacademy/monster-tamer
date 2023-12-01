@@ -202,6 +202,7 @@ export class OptionsScene extends Phaser.Scene {
 
     if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
       this.#controls.lockInput = true;
+      // TODO: add logic for saving recent values from options
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
