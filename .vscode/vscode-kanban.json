@@ -4,6 +4,24 @@
       "assignedTo": {
         "name": "Scott Westover"
       },
+      "creation_time": "2023-12-01T15:33:58.766Z",
+      "description": {
+        "content": "cannot provide 0 for a delay value",
+        "mime": "text/markdown"
+      },
+      "details": {
+        "content": "In the health bar class, when you use the `setMeterPercentageAnimated` method, you have an option to pass a delay, which is used for the length of time the animation will play for. If you pass `0` for this value, the code treats this as if a value was not provided and the default value is used. \nTo fix this, we need to check if that value is undefined, or add fallback logic if a `0` was provided. Example: \n```\nduration: options?.duration || options?.duration === 0 ? 0 : 1000,\n```\n",
+        "mime": "text/markdown"
+      },
+      "id": "7",
+      "references": [],
+      "title": "Health Bar - animation of health bar does not honor 0 for delay",
+      "type": "bug"
+    },
+    {
+      "assignedTo": {
+        "name": "Scott Westover"
+      },
       "creation_time": "2023-12-01T13:43:37.813Z",
       "description": {
         "content": "Prevent menu from being opened when dialog is on screen",
@@ -96,30 +114,12 @@
         "mime": "text/markdown"
       },
       "details": {
-        "content": "After working on the inventory scene, it became very coupled to the logic in the monster party scene, needed in order to select monster to use items on. In order to make this more approachable, need to review code and the order these elements are created in. We might be able to create party scene first, and then move to inventory scene.",
+        "content": "After working on the inventory scene, it became very coupled to the logic in the monster party scene, needed in order to select monster to use items on. In order to make this more approachable, need to review code and the order these elements are created in. We might be able to create party scene first, and then move to inventory scene.\n\nNotes:\n* For testing various scenarios we can modify the monster data to have various hp levels.\n* We will likely need just a review video that will go over the scene at a high level and review the components we will need to create in order to make everything work.\n* In review video, we should go over how passing data will work in order to make everything function.\n* For these scenes, these have no tie in to the battle scene for the time being, just from the menu in the world scene.",
         "mime": "text/markdown"
       },
       "id": "3",
       "references": [],
       "title": "Plan out inventory and party scene video chapters"
-    },
-    {
-      "assignedTo": {
-        "name": "Scott Westover"
-      },
-      "creation_time": "2023-12-01T15:33:58.766Z",
-      "description": {
-        "content": "cannot provide 0 for a delay value",
-        "mime": "text/markdown"
-      },
-      "details": {
-        "content": "In the health bar class, when you use the `setMeterPercentageAnimated` method, you have an option to pass a delay, which is used for the length of time the animation will play for. If you pass `0` for this value, the code treats this as if a value was not provided and the default value is used. \nTo fix this, we need to check if that value is undefined, or add fallback logic if a `0` was provided. Example: \n```\nduration: options?.duration || options?.duration === 0 ? 0 : 1000,\n```\n",
-        "mime": "text/markdown"
-      },
-      "id": "7",
-      "references": [],
-      "title": "Health Bar - animation of health bar does not honor 0 for delay",
-      "type": "bug"
     }
   ],
   "in-progress": [],
