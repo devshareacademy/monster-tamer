@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { MONSTER_ASSET_KEYS, MONSTER_PARTY_ASSET_KEYS } from '../assets/asset-keys.js';
+import { MONSTER_PARTY_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DataUtils } from '../utils/data-utils.js';
