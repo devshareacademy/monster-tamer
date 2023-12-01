@@ -42,6 +42,8 @@ export class BattleScene extends Phaser.Scene {
   #attackManager;
   /** @type {boolean} */
   #skipAnimations;
+  /** @type {number} */
+  #activeEnemyAttackIndex;
 
   constructor() {
     super({
@@ -187,13 +189,15 @@ export class BattleScene extends Phaser.Scene {
     }
 
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
-      `foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
+      `foe ${this.#activeEnemyMonster.name} used ${
+        this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].name
+      }`,
       () => {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
           this.#attackManager.playAttackAnimation(
-            this.#activeEnemyMonster.attacks[0].animationName,
+            this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].animationName,
             ATTACK_TARGET.PLAYER,
             () => {
               this.#activePlayerMonster.playTakeDamageAnimation(() => {
@@ -329,8 +333,8 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.ENEMY_INPUT,
       onEnter: () => {
-        // TODO: add feature in a future update
         // pick a random move for the enemy monster, and in the future implement some type of AI behavior
+        this.#activeEnemyAttackIndex = this.#activeEnemyMonster.pickRandomMove();
         this.#battleStateMachine.setState(BATTLE_STATES.BATTLE);
       },
     });
