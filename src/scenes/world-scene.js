@@ -11,6 +11,7 @@ import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/gr
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { Menu } from '../world/menu/menu.js';
+import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -54,6 +55,8 @@ export class WorldScene extends Phaser.Scene {
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
+  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  #entranceLayer;
 
   /** @type {NPC[]} */
   #npcs;
@@ -115,6 +118,15 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
+    // create layer for building entrances
+    this.#entranceLayer = map.getObjectLayer('Building-Entrances');
+    if (!this.#entranceLayer) {
+      console.log(
+        `[${WorldScene.name}:create] encountered error while creating building entrance layer using data from tiled`
+      );
+      return;
+    }
+
     // create collision layer for encounters
     const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
     if (!encounterTiles) {
@@ -145,6 +157,10 @@ export class WorldScene extends Phaser.Scene {
       },
       spriteChangedDirectionCallback: () => {
         this.#handlePlayerDirectionUpdate();
+      },
+      entranceLayer: this.#entranceLayer,
+      enterBuildingCallback: (buildingName) => {
+        this.#handlePlayerEnterBuilding(buildingName);
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
@@ -420,6 +436,20 @@ export class WorldScene extends Phaser.Scene {
    * @returns {boolean}
    */
   #isPlayerInputLocked() {
-    return this.#dialogUi.isVisible || this.#menu.isVisible;
+    return this.#controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+  }
+
+  /**
+   * @param {string} buildingName
+   * @returns {void}
+   */
+  #handlePlayerEnterBuilding(buildingName) {
+    this.#controls.lockInput = true;
+    console.log(buildingName);
+    createBuildingSceneTransition(this, {
+      callback: () => {
+        // TODO: start the building scene
+      },
+    });
   }
 }

@@ -120,6 +120,18 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
+    this.load.image(
+      WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_foreground.png`
+    );
+    this.load.image(
+      WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_background.png`
+    );
+    this.load.tilemapTiledJSON(
+      WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL,
+      `${monsterTamerAssetPath}/map/buildings/building_1.json`
+    );
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
@@ -193,7 +205,7 @@ export class PreloadScene extends Phaser.Scene {
     dataManager.loadData();
 
     this.#createAnimations();
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
   /**
