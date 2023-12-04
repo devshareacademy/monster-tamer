@@ -3,6 +3,7 @@ import {
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
+  BUILDING_ASSET_KEYS,
   CHARACTER_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
@@ -121,15 +122,15 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
     this.load.image(
-      WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE,
+      BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
       `${monsterTamerAssetPath}/map/buildings/building_1_level_foreground.png`
     );
     this.load.image(
-      WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE,
+      BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
       `${monsterTamerAssetPath}/map/buildings/building_1_level_background.png`
     );
     this.load.tilemapTiledJSON(
-      WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL,
+      BUILDING_ASSET_KEYS.BUILDING_1_LEVEL,
       `${monsterTamerAssetPath}/map/buildings/building_1.json`
     );
 

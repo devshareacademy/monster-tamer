@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { TITLE_ASSET_KEYS, UI_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { Controls } from '../utils/controls.js';
 import { exhaustiveGuard } from '../utils/guard.js';
@@ -98,9 +98,16 @@ export class TitleScene extends Phaser.Scene {
 
     // add in fade affects
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      /** @type {import('./world-scene.js').WorldSceneData} */
+      const dataToPass = {
+        levelBackgroundAssetName: WORLD_ASSET_KEYS.WORLD_BACKGROUND,
+        levelForegroundAssetName: WORLD_ASSET_KEYS.WORLD_FOREGROUND,
+        levelJsonAssetName: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL,
+      };
+
       if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
         dataManager.startNewGame();
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
         return;
       }
 
@@ -110,7 +117,7 @@ export class TitleScene extends Phaser.Scene {
       }
 
       if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE) {
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
         return;
       }
 

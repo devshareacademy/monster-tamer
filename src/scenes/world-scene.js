@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { BUILDING_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
@@ -12,6 +12,14 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { Menu } from '../world/menu/menu.js';
 import { createBuildingSceneTransition } from '../utils/scene-transition.js';
+
+/**
+ * @typedef WorldSceneData
+ * @type {object}
+ * @property {string} levelJsonAssetName
+ * @property {string} levelBackgroundAssetName
+ * @property {string} levelForegroundAssetName
+ */
 
 /**
  * @typedef TiledObjectProperty
@@ -57,7 +65,6 @@ export class WorldScene extends Phaser.Scene {
   #dialogUi;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
-
   /** @type {NPC[]} */
   #npcs;
   /** @type {NPC | undefined} */
@@ -72,10 +79,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
+   * @param {WorldSceneData} data
    * @returns {void}
    */
-  init() {
-    console.log(`[${WorldScene.name}:init] invoked`);
+  init(data) {
+    console.log(`[${WorldScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
     this.#wildMonsterEncountered = false;
   }
 
@@ -445,10 +453,15 @@ export class WorldScene extends Phaser.Scene {
    */
   #handlePlayerEnterBuilding(buildingName) {
     this.#controls.lockInput = true;
-    console.log(buildingName);
     createBuildingSceneTransition(this, {
       callback: () => {
-        // TODO: start the building scene
+        /** @type {WorldSceneData} */
+        const dataToPass = {
+          levelBackgroundAssetName: BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
+          levelForegroundAssetName: BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
+          levelJsonAssetName: BUILDING_ASSET_KEYS.BUILDING_1_LEVEL,
+        };
+        this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
       },
     });
   }
