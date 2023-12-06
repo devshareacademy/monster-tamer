@@ -37,7 +37,7 @@ export class OptionsScene extends Phaser.Scene {
   /** @type {Phaser.GameObjects.Rectangle} */
   #volumeOptionsMenuCursor;
   /** @type {Phaser.GameObjects.Text} */
-  #volumeOptionValueText;
+  #volumeOptionsValueText;
   /** @type {Phaser.GameObjects.Text} */
   #selectedMenuColorTextGameObject;
   /** @type {Phaser.GameObjects.Container} */
@@ -48,7 +48,9 @@ export class OptionsScene extends Phaser.Scene {
   #optionsMenuCursor;
 
   constructor() {
-    super({ key: SCENE_KEYS.OPTIONS_SCENE });
+    super({
+      key: SCENE_KEYS.OPTIONS_SCENE,
+    });
   }
 
   init() {
@@ -73,15 +75,15 @@ export class OptionsScene extends Phaser.Scene {
 
     // create main option sections
     this.add.text(width / 2, 40, 'Options', OPTIONS_TEXT_STYLE).setOrigin(0.5);
-    const menuOptions = ['Text Speed', 'Battle Scene', 'Battle Style', 'Sound', 'Volume', 'Menu Color', 'Close'];
-    const menuOptionPosition = {
+    const menuOptionsPosition = {
       x: 25,
       yStart: 55,
       yIncrement: 55,
     };
+    const menuOptions = ['Text Speed', 'Battle Scene', 'Battle Style', 'Sound', 'Volume', 'Menu Color', 'Close'];
     menuOptions.forEach((option, index) => {
-      const x = menuOptionPosition.x;
-      const y = menuOptionPosition.yStart + menuOptionPosition.yIncrement * index;
+      const x = menuOptionsPosition.x;
+      const y = menuOptionsPosition.yStart + menuOptionsPosition.yIncrement * index;
       const textGameObject = this.add.text(x, y, option, OPTIONS_TEXT_STYLE);
       this.#mainContainer.add(textGameObject);
     });
@@ -114,12 +116,12 @@ export class OptionsScene extends Phaser.Scene {
     // volume options
     this.add.rectangle(420, 312, 300, 4, 0xffffff, 1).setOrigin(0, 0.5);
     this.#volumeOptionsMenuCursor = this.add.rectangle(710, 312, 10, 25, 0xff2222, 1).setOrigin(0, 0.5);
-    this.#volumeOptionValueText = this.add.text(760, 295, '100%', OPTIONS_TEXT_STYLE);
+    this.#volumeOptionsValueText = this.add.text(760, 295, '100%', OPTIONS_TEXT_STYLE);
 
     // frame options
     this.#selectedMenuColorTextGameObject = this.add.text(590, 350, '', OPTIONS_TEXT_STYLE);
-    this.add.image(660, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(0, 0).setScale(2.5);
     this.add.image(530, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(1, 0).setScale(2.5).setFlipX(true);
+    this.add.image(660, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(0, 0).setScale(2.5);
 
     // option details container
     this.#infoContainer = this.#nineSliceMainContainer.createNineSliceContainer(this, optionMenuWidth, 100);
