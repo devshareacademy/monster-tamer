@@ -7,19 +7,20 @@ import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
-const MENU_TEXT_STYLE = {
+export const MENU_TEXT_STYLE = Object.freeze({
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: '#4D4A49',
   fontSize: '30px',
-};
+});
+
+const PLAYER_INPUT_CURSOR_POSITION = Object.freeze({
+  x: 150,
+  y: 41,
+});
 
 /**
  * @typedef {keyof typeof MAIN_MENU_OPTIONS} MainMenuOptions
  */
-
-const PLAYER_INPUT_CURSOR_POSITION = Object.freeze({
-  x: 150,
-});
 
 /** @enum {MainMenuOptions} */
 const MAIN_MENU_OPTIONS = Object.freeze({
@@ -31,24 +32,26 @@ const MAIN_MENU_OPTIONS = Object.freeze({
 export class TitleScene extends Phaser.Scene {
   /** @type {Phaser.GameObjects.Image} */
   #mainMenuCursorPhaserImageGameObject;
-  /** @type {MainMenuOptions} */
-  #selectedMenuOption;
   /** @type {Controls} */
   #controls;
+  /** @type {MainMenuOptions} */
+  #selectedMenuOption;
   /** @type {boolean} */
   #isContinueButtonEnabled;
 
   constructor() {
-    super({ key: SCENE_KEYS.TITLE_SCENE });
+    super({
+      key: SCENE_KEYS.TITLE_SCENE,
+    });
   }
 
   create() {
     console.log(`[${TitleScene.name}:create] invoked`);
 
-    this.#isContinueButtonEnabled = false;
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
+    this.#isContinueButtonEnabled = false;
 
-    // create title screen background
+    // create title scene background
     this.add.image(0, 0, TITLE_ASSET_KEYS.BACKGROUND).setOrigin(0).setScale(0.58);
     this.add
       .image(this.scale.width / 2, 150, TITLE_ASSET_KEYS.PANEL)
@@ -75,7 +78,7 @@ export class TitleScene extends Phaser.Scene {
 
     // create cursors
     this.#mainMenuCursorPhaserImageGameObject = this.add
-      .image(PLAYER_INPUT_CURSOR_POSITION.x, 41, UI_ASSET_KEYS.CURSOR)
+      .image(PLAYER_INPUT_CURSOR_POSITION.x, PLAYER_INPUT_CURSOR_POSITION.y, UI_ASSET_KEYS.CURSOR)
       .setOrigin(0.5)
       .setScale(2.5);
     menuBgContainer.add(this.#mainMenuCursorPhaserImageGameObject);
@@ -91,16 +94,10 @@ export class TitleScene extends Phaser.Scene {
       targets: this.#mainMenuCursorPhaserImageGameObject,
     });
 
-    // add in fade affects
+    // add in fade effects
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
         // TODO: enhance with logic to reset game once we implement saving/loading data
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
-        return;
-      }
-
-      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
-        // TODO: connect to options scene
         this.scene.start(SCENE_KEYS.WORLD_SCENE);
         return;
       }
@@ -110,7 +107,11 @@ export class TitleScene extends Phaser.Scene {
         return;
       }
 
-      exhaustiveGuard(this.#selectedMenuOption);
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
+        // TODO: connect to options scene
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        return;
+      }
     });
 
     this.#controls = new Controls(this);
@@ -123,15 +124,9 @@ export class TitleScene extends Phaser.Scene {
 
     const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
-      if (
-        this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME ||
-        this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS ||
-        this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE
-      ) {
-        this.cameras.main.fadeOut(500, 0, 0, 0);
-        this.#controls.lockInput = true;
-        return;
-      }
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.#controls.lockInput = true;
+      return;
     }
 
     const selectedDirection = this.#controls.getDirectionKeyJustPressed();
@@ -148,7 +143,7 @@ export class TitleScene extends Phaser.Scene {
     this.#updateSelectedMenuOptionFromInput(direction);
     switch (this.#selectedMenuOption) {
       case MAIN_MENU_OPTIONS.NEW_GAME:
-        this.#mainMenuCursorPhaserImageGameObject.setY(41);
+        this.#mainMenuCursorPhaserImageGameObject.setY(PLAYER_INPUT_CURSOR_POSITION.y);
         break;
       case MAIN_MENU_OPTIONS.CONTINUE:
         this.#mainMenuCursorPhaserImageGameObject.setY(91);
