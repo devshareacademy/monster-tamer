@@ -116,10 +116,10 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     // load world assets
-    this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
-    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL, `assets/data/level.json`);
+    this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/main_1_level_background.png`);
+    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL, `assets/data/main_1.json`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
-    this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/level_foreground.png`);
+    this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/main_1_level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
     this.load.image(
       BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
@@ -129,10 +129,7 @@ export class PreloadScene extends Phaser.Scene {
       BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
       `${monsterTamerAssetPath}/map/buildings/building_1_level_background.png`
     );
-    this.load.tilemapTiledJSON(
-      BUILDING_ASSET_KEYS.BUILDING_1_LEVEL,
-      `${monsterTamerAssetPath}/map/buildings/building_1.json`
-    );
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_1_LEVEL, `assets/data/building_1.json`);
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {

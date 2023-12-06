@@ -557,7 +557,7 @@
         {
          "draworder":"topdown",
          "id":23,
-         "name":"Building-Entrances",
+         "name":"Scene-Transitions",
          "objects":[
                 {
                  "gid":194,
@@ -568,7 +568,12 @@
                         {
                          "name":"connects_to",
                          "type":"string",
-                         "value":"building1"
+                         "value":"building_1"
+                        }, 
+                        {
+                         "name":"entranceId",
+                         "type":"string",
+                         "value":"1"
                         }],
                  "rotation":0,
                  "type":"entrance",
@@ -586,7 +591,12 @@
                         {
                          "name":"connects_to",
                          "type":"string",
-                         "value":"building1"
+                         "value":"building_2"
+                        }, 
+                        {
+                         "name":"entranceId",
+                         "type":"string",
+                         "value":"1"
                         }],
                  "rotation":0,
                  "type":"entrance",

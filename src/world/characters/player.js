@@ -10,7 +10,7 @@ import { Character } from './character.js';
  * @type {object}
  * @property {Phaser.Tilemaps.TilemapLayer} collisionLayer
  * @property {Phaser.Tilemaps.ObjectLayer} entranceLayer
- * @property {(buildingName: string) => void} enterBuildingCallback
+ * @property {(entranceName: string, entranceId: string) => void} enterEntranceCallback
  */
 
 /**
@@ -20,8 +20,8 @@ import { Character } from './character.js';
 export class Player extends Character {
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
-  /** @type {(buildingName: string) => void | undefined} */
-  #enterBuildingCallback;
+  /** @type {(entranceName: string, entranceId: string) => void | undefined} */
+  #enterEntranceCallback;
 
   /**
    * @param {PlayerConfig} config
@@ -40,7 +40,7 @@ export class Player extends Character {
       },
     });
     this.#entranceLayer = config.entranceLayer;
-    this.#enterBuildingCallback = config.enterBuildingCallback;
+    this.#enterEntranceCallback = config.enterEntranceCallback;
   }
 
   /**
@@ -87,7 +87,9 @@ export class Player extends Character {
       }
 
       // entrance is nearby and the player is trying to enter that location
-      this.#enterBuildingCallback(nearbyEntrance.properties[0].value);
+      const entranceName = nearbyEntrance.properties.find((property) => property.name === 'connects_to').value;
+      const entranceId = nearbyEntrance.properties.find((property) => property.name === 'entranceId').value;
+      this.#enterEntranceCallback(entranceName, entranceId);
     }
   }
 }

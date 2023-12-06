@@ -71,6 +71,8 @@ export class WorldScene extends Phaser.Scene {
   #npcPlayerIsInteractingWith;
   /** @type {Menu} */
   #menu;
+  /** @type {WorldSceneData} */
+  #sceneData;
 
   constructor() {
     super({
@@ -85,6 +87,14 @@ export class WorldScene extends Phaser.Scene {
   init(data) {
     console.log(`[${WorldScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
     this.#wildMonsterEncountered = false;
+    this.#sceneData = data;
+    if (!this.#sceneData || !this.#sceneData.levelJsonAssetName) {
+      this.#sceneData = {
+        levelBackgroundAssetName: WORLD_ASSET_KEYS.WORLD_BACKGROUND,
+        levelForegroundAssetName: WORLD_ASSET_KEYS.WORLD_FOREGROUND,
+        levelJsonAssetName: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL,
+      };
+    }
   }
 
   /**
@@ -92,19 +102,17 @@ export class WorldScene extends Phaser.Scene {
    */
   create() {
     console.log(`[${WorldScene.name}:create] invoked`);
-
-    const x = 6 * TILE_SIZE;
-    const y = 22 * TILE_SIZE;
+    console.log(this.#sceneData.levelBackgroundAssetName);
 
     // this value comes from the width of the level background image we are using
     // we set the max camera width to the size of our image in order to control what
     // is visible to the player, since the phaser game world is infinite.
+    // TODO
     this.cameras.main.setBounds(0, 0, 1280, 2176);
     this.cameras.main.setZoom(0.8);
-    this.cameras.main.centerOn(x, y);
 
     // create map and collision layer
-    const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
+    const map = this.make.tilemap({ key: this.#sceneData.levelJsonAssetName });
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
@@ -120,35 +128,43 @@ export class WorldScene extends Phaser.Scene {
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
-    this.#signLayer = map.getObjectLayer('Sign');
-    if (!this.#signLayer) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
-      return;
+    const hasSignLayer = map.tilesets.some((tileset) => tileset.name === 'Sign');
+    if (hasSignLayer) {
+      this.#signLayer = map.getObjectLayer('Sign');
+      if (!this.#signLayer) {
+        console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
+        return;
+      }
     }
 
-    // create layer for building entrances
-    this.#entranceLayer = map.getObjectLayer('Building-Entrances');
+    // create layer for scene transitions entrances
+    this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
     if (!this.#entranceLayer) {
       console.log(
-        `[${WorldScene.name}:create] encountered error while creating building entrance layer using data from tiled`
+        `[${WorldScene.name}:create] encountered error while creating scene entrances layer using data from tiled`
       );
       return;
     }
 
     // create collision layer for encounters
-    const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
-    if (!encounterTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
-      return;
+    const hasEncounterLayer = map.tilesets.some((tileset) => tileset.name === 'encounter');
+    if (hasEncounterLayer) {
+      const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+      if (!encounterTiles) {
+        console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
+        return;
+      }
+      this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
+      if (!this.#encounterLayer) {
+        console.log(
+          `[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`
+        );
+        return;
+      }
+      this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
     }
-    this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
-    if (!this.#encounterLayer) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
-      return;
-    }
-    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+    this.add.image(0, 0, this.#sceneData.levelBackgroundAssetName, 0).setOrigin(0);
 
     // create npcs
     this.#createNPCs(map);
@@ -167,8 +183,8 @@ export class WorldScene extends Phaser.Scene {
         this.#handlePlayerDirectionUpdate();
       },
       entranceLayer: this.#entranceLayer,
-      enterBuildingCallback: (buildingName) => {
-        this.#handlePlayerEnterBuilding(buildingName);
+      enterEntranceCallback: (entranceName, entranceId) => {
+        this.#handleOnEntranceEnteredCallback(entranceName, entranceId);
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
@@ -180,7 +196,7 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.#player.sprite);
 
     // create foreground for depth
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
+    this.add.image(0, 0, this.#sceneData.levelForegroundAssetName, 0).setOrigin(0);
 
     this.#controls = new Controls(this);
 
@@ -448,11 +464,16 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * @param {string} buildingName
+   * @param {string} entranceId
+   * @param {string} entranceName
    * @returns {void}
    */
-  #handlePlayerEnterBuilding(buildingName) {
+  #handleOnEntranceEnteredCallback(entranceName, entranceId) {
+    console.log(entranceName, entranceId);
     this.#controls.lockInput = true;
+
+    // TODO: update player position to match the new entrance data
+
     createBuildingSceneTransition(this, {
       callback: () => {
         /** @type {WorldSceneData} */
