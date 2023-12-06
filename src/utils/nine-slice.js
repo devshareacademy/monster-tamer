@@ -1,11 +1,5 @@
 import Phaser from '../lib/phaser.js';
 
-/**
- * @typedef PhaserTextureFrame
- * @type {object}
- * @property {Phaser.Textures.Frame} __BASE
- */
-
 const ASSET_CUT_FRAMES = Object.freeze({
   TL: 'TL',
   TM: 'TM',
@@ -50,6 +44,7 @@ export class NineSlice {
    */
   #createNineSliceTextures(textureManager, assetKey) {
     const methodName = 'createNineSliceTextures';
+
     const texture = textureManager.get(assetKey);
     if (texture.key === '__MISSING') {
       console.warn(`[${NineSlice.name}:${methodName}] the provided texture asset key was not found`);
@@ -159,61 +154,28 @@ export class NineSlice {
    */
   createNineSliceContainer(scene, targetWidth, targetHeight) {
     const tl = scene.add.image(0, 0, this.#assetKey, ASSET_CUT_FRAMES.TL).setOrigin(0);
-    tl.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.TL,
-    });
-
     const tm = scene.add.image(tl.displayWidth, 0, this.#assetKey, ASSET_CUT_FRAMES.TM).setOrigin(0);
     tm.displayWidth = targetWidth - this.#cornerCutSize * 2;
-    tm.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.TM,
-    });
-
     const tr = scene.add.image(tl.displayWidth + tm.displayWidth, 0, this.#assetKey, ASSET_CUT_FRAMES.TR).setOrigin(0);
-    tr.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.TR,
-    });
 
     const ml = scene.add.image(0, tl.displayHeight, this.#assetKey, ASSET_CUT_FRAMES.ML).setOrigin(0);
     ml.displayHeight = targetHeight - this.#cornerCutSize * 2;
-    ml.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.ML,
-    });
-
     const mm = scene.add.image(ml.displayWidth, ml.y, this.#assetKey, ASSET_CUT_FRAMES.MM).setOrigin(0);
     mm.displayHeight = targetHeight - this.#cornerCutSize * 2;
     mm.displayWidth = targetWidth - this.#cornerCutSize * 2;
-    mm.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.MM,
-    });
-
     const mr = scene.add
       .image(ml.displayWidth + mm.displayWidth, ml.y, this.#assetKey, ASSET_CUT_FRAMES.MR)
       .setOrigin(0);
     mr.displayHeight = mm.displayHeight;
-    mr.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.MR,
-    });
 
     const bl = scene.add
       .image(0, tl.displayHeight + ml.displayHeight, this.#assetKey, ASSET_CUT_FRAMES.BL)
       .setOrigin(0);
-    bl.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.BL,
-    });
-
     const bm = scene.add.image(bl.displayWidth, bl.y, this.#assetKey, ASSET_CUT_FRAMES.BM).setOrigin(0);
     bm.displayWidth = tm.displayWidth;
-    bm.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.BM,
-    });
-
     const br = scene.add
       .image(bl.displayWidth + bm.displayWidth, bl.y, this.#assetKey, ASSET_CUT_FRAMES.BR)
       .setOrigin(0);
-    br.setData({
-      assetCutFrame: ASSET_CUT_FRAMES.BR,
-    });
 
     // finally, create a container to group our new game objects together in
     return scene.add.container(0, 0, [tl, tm, tr, ml, mm, mr, bl, bm, br]);
