@@ -65,7 +65,6 @@ export class NineSlice {
 
     /** @type {Phaser.Textures.Frame} */
     const baseFrame = texture.frames['__BASE'];
-    console.log(baseFrame.width, baseFrame.height);
 
     // start in the top left corner for our first cut
     texture.add(ASSET_CUT_FRAMES.TL, 0, 0, 0, this.#cornerCutSize, this.#cornerCutSize);
