@@ -1,22 +1,22 @@
-import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
-import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import Phaser from '../lib/phaser.js';
-import { NineSlice } from '../utils/nine-slice.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { NineSlice } from '../utils/nine-slice.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
-const OPTIONS_TEXT_STYLE = Object.freeze({
+const OPTIONS_TEXT_STYLE = {
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: '#FFFFFF',
   fontSize: '30px',
-});
+};
 
 const OPTION_MENU_OPTION_INFO_MSG = Object.freeze({
-  TEXT_SPEED: 'Choose one fo three text display speeds.',
-  BATTLE_SCENE: 'Chose to display battle animations and effects or not.',
+  TEXT_SPEED: 'Choose one of three text display speeds.',
+  BATTLE_SCENE: 'Choose to display battle animations and effects or not.',
   BATTLE_STYLE: 'Choose to allow your monster to be recalled between rounds.',
   SOUND: 'Choose to enable or disable the sound.',
-  VOLUME: 'Choose the volume for the music and sound effects of the game.',
+  VOLUME: 'Choose the volume of the music and sound effects of the game.',
   MENU_COLOR: 'Choose one of the three menu color options.',
   CONFIRM: 'Save your changes and go back to the main menu.',
 });
@@ -74,6 +74,7 @@ export class OptionsScene extends Phaser.Scene {
     this.#mainContainer.setX(100).setY(20);
 
     // create main option sections
+    this.add.text(width / 2, 40, 'Options', OPTIONS_TEXT_STYLE).setOrigin(0.5);
     const menuOptionsPosition = {
       x: 25,
       yStart: 55,
@@ -106,7 +107,7 @@ export class OptionsScene extends Phaser.Scene {
       this.add.text(590, 185, 'Shift', OPTIONS_TEXT_STYLE),
     ]);
 
-    // create sounds options
+    // create sound options
     this.#soundOptionTextGameObjects = this.add.group([
       this.add.text(420, 240, 'On', OPTIONS_TEXT_STYLE),
       this.add.text(590, 240, 'Off', OPTIONS_TEXT_STYLE),
