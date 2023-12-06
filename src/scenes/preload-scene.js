@@ -71,6 +71,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // ui assets
     this.load.image(UI_ASSET_KEYS.CURSOR, `${monsterTamerAssetPath}/ui/cursor.png`);
+    this.load.image(UI_ASSET_KEYS.CURSOR_WHITE, `${monsterTamerAssetPath}/ui/cursor_white.png`);
     this.load.image(UI_ASSET_KEYS.MENU_BACKGROUND, `${kenneysAssetPath}/ui-space-expansion/glassPanel.png`);
 
     // load json data
@@ -120,7 +121,7 @@ export class PreloadScene extends Phaser.Scene {
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
     this.#createAnimations();
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
   }
 
   #createAnimations() {
