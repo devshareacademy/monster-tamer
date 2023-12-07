@@ -107,9 +107,6 @@ export class WorldScene extends Phaser.Scene {
     // this value comes from the width of the level background image we are using
     // we set the max camera width to the size of our image in order to control what
     // is visible to the player, since the phaser game world is infinite.
-    // TODO
-    this.cameras.main.setBounds(0, 0, 1280, 2176);
-    this.cameras.main.setZoom(0.8);
 
     // create map and collision layer
     const map = this.make.tilemap({ key: this.#sceneData.levelJsonAssetName });
@@ -163,6 +160,11 @@ export class WorldScene extends Phaser.Scene {
       }
       this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
     }
+
+    console.log(map.widthInPixels, map.heightInPixels);
+    console.log(this.scale.width, this.scale.height);
+    //this.cameras.main.setBounds(0, 0, 1280, 2176);
+    this.cameras.main.setZoom(0.8);
 
     this.add.image(0, 0, this.#sceneData.levelBackgroundAssetName, 0).setOrigin(0);
 
@@ -472,10 +474,26 @@ export class WorldScene extends Phaser.Scene {
     console.log(entranceName, entranceId);
     this.#controls.lockInput = true;
 
-    // TODO: update player position to match the new entrance data
+    // update player position to match the new entrance data
+    // create tilemap using the provided entrance data
+    const map = this.make.tilemap({ key: `${entranceName.toUpperCase()}_LEVEL` });
+    // get the position of the entrance object using the entrance id
+    const entranceObjectLayer = map.getObjectLayer('Scene-Transitions');
+    const entranceObject = entranceObjectLayer.objects.find((object) => object.name === entranceId);
+    // create position player will be placed at and update based on players facing direction
+    let x = entranceObject.x - TILE_SIZE;
+    let y = entranceObject.y - TILE_SIZE;
+    if (this.#player.direction === DIRECTION.UP) {
+      y -= TILE_SIZE;
+    }
 
     createBuildingSceneTransition(this, {
       callback: () => {
+        dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+          x,
+          y,
+        });
+
         /** @type {WorldSceneData} */
         const dataToPass = {
           levelBackgroundAssetName: BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
