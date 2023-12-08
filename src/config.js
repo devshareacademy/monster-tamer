@@ -1,3 +1,4 @@
+export const SHOW_SOCIAL_LINKS = true;
 export const TILED_COLLISION_LAYER_ALPHA = 0.0;
 export const TILE_SIZE = 64;
 export const WALK_FRAME_RATE = 6;

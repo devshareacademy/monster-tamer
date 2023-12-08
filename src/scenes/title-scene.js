@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { EXTERNAL_LINKS_ASSET_KEYS, TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { Controls } from '../utils/controls.js';
 import { exhaustiveGuard } from '../utils/guard.js';
@@ -7,6 +7,7 @@ import { createNineSliceContainer } from '../utils/nine-slice.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { SHOW_SOCIAL_LINKS } from '../config.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = {
@@ -95,6 +96,112 @@ export class TitleScene extends Phaser.Scene {
       },
       targets: this.#mainMenuCursorPhaserImageGameObject,
     });
+
+    // add in social links
+    if (SHOW_SOCIAL_LINKS) {
+      const githubImage = this.add
+        .image(this.scale.width, 0, EXTERNAL_LINKS_ASSET_KEYS.GITHUB_BANNER, 0)
+        .setOrigin(1, 0)
+        .setInteractive({
+          useHandCursor: true,
+        });
+      githubImage.on(Phaser.Input.Events.POINTER_DOWN, () => {
+        window.open('https://github.com/devshareacademy/monster-tamer', '_blank').focus();
+      });
+
+      const containerPosition = {
+        maximized: this.scale.height - 235,
+        minimized: this.scale.height - 26,
+      };
+      const container = this.add.container(20, containerPosition.minimized, []);
+      container.on(Phaser.Input.Events.POINTER_OVER, () => {
+        container.y -= 1;
+      });
+
+      let containerTween = this.add
+        .tween({
+          delay: 0,
+          duration: 400,
+          y: {
+            from: container.y,
+            start: container.y,
+            to: containerPosition.maximized,
+          },
+          targets: container,
+        })
+        .pause();
+
+      const bg = this.add
+        .image(0, 0, EXTERNAL_LINKS_ASSET_KEYS.LEARN_MORE_BACKGROUND, 0)
+        .setOrigin(0)
+        .setScale(1.2, 1)
+        .setInteractive({
+          useHandCursor: true,
+        });
+      bg.on(Phaser.Input.Events.POINTER_DOWN, () => {
+        window.open('https://www.youtube.com/playlist?list=PLmcXe0-sfoSgq-pyXrFx0GZjHbvoVUW8t', '_blank').focus();
+      });
+      bg.on(Phaser.Input.Events.POINTER_OVER, () => {
+        if (containerTween.isDestroyed()) {
+          containerTween = this.add.tween({
+            delay: 0,
+            duration: 400,
+            y: {
+              from: container.y,
+              start: container.y,
+              to: containerPosition.maximized,
+            },
+            targets: container,
+          });
+          return;
+        }
+        if (containerTween.isPaused()) {
+          containerTween.resume();
+        }
+        containerTween.updateTo('y', containerPosition.maximized, true);
+      });
+      bg.on(Phaser.Input.Events.POINTER_OUT, () => {
+        if (containerTween.isDestroyed()) {
+          containerTween = this.add.tween({
+            delay: 0,
+            duration: 400,
+            y: {
+              from: container.y,
+              start: container.y,
+              to: containerPosition.minimized,
+            },
+            targets: container,
+          });
+          return;
+        }
+        if (containerTween.isPaused()) {
+          containerTween.resume();
+        }
+        containerTween.updateTo('y', containerPosition.minimized, true);
+      });
+      container.add(bg);
+
+      const sideBarText = this.add
+        .text(20, 5, 'Learn To Build This Game!', {
+          fontSize: '18px',
+        })
+        .setOrigin(0, 0);
+      container.add(sideBarText);
+
+      container.add(
+        this.add.image(153, 90, EXTERNAL_LINKS_ASSET_KEYS.YOUTUBE_THUMB_NAIL, 0).setScale(0.65).setAlpha(0.9)
+      );
+      const youTubeLogo = this.add.image(150, 80, EXTERNAL_LINKS_ASSET_KEYS.YOUTUBE_BUTTON, 0).setScale(0.4);
+      container.add(youTubeLogo);
+
+      const moreInfoText = this.add
+        .text(20, 155, 'In this free series, learn how to build this Pokemon like RPG from scratch!', {
+          fontSize: '20px',
+          wordWrap: { width: 300 },
+        })
+        .setOrigin(0, 0);
+      container.add(moreInfoText);
+    }
 
     // add in fade affects
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
