@@ -84,6 +84,9 @@ export class OptionsScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     console.log(`[${OptionsScene.name}:init] invoked`);
 
@@ -102,6 +105,9 @@ export class OptionsScene extends Phaser.Scene {
     this.#selectedMenuColorOption = 0;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${OptionsScene.name}:create] invoked`);
 
@@ -191,6 +197,9 @@ export class OptionsScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     if (this.#controls.isInputLocked) {
       return;
@@ -204,6 +213,7 @@ export class OptionsScene extends Phaser.Scene {
 
     if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
       this.#controls.lockInput = true;
+      // TODO: add logic for saving recent values from options
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
@@ -395,8 +405,8 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   /**
-   *
    * @param {'LEFT' | 'RIGHT'} direction
+   * @returns {void}
    */
   #updateTextSpeedOption(direction) {
     if (direction === DIRECTION.LEFT) {
@@ -434,6 +444,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateTextSpeedGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#textSpeedOptionTextGameObjects.getChildren()
@@ -462,8 +475,8 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   /**
-   *
    * @param {'LEFT' | 'RIGHT'} direction
+   * @returns {void}
    */
   #updateBattleSceneOption(direction) {
     if (direction === DIRECTION.LEFT && this.#selectedBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
@@ -484,6 +497,10 @@ export class OptionsScene extends Phaser.Scene {
 
     exhaustiveGuard(direction);
   }
+
+  /**
+   * @returns {void}
+   */
   #updateBattleSceneOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleSceneOptionTextGameObjects.getChildren()
@@ -507,8 +524,8 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   /**
-   *
    * @param {'LEFT' | 'RIGHT'} direction
+   * @returns {void}
    */
   #updateBattleStyleOption(direction) {
     if (direction === DIRECTION.LEFT && this.#selectedBattleStyleOption === BATTLE_STYLE_OPTIONS.SET) {
@@ -529,6 +546,10 @@ export class OptionsScene extends Phaser.Scene {
 
     exhaustiveGuard(direction);
   }
+
+  /**
+   * @returns {void}
+   */
   #updateBattleStyleOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleStyleOptionTextGameObjects.getChildren()
@@ -552,8 +573,8 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   /**
-   *
    * @param {'LEFT' | 'RIGHT'} direction
+   * @returns {void}
    */
   #updateSoundOption(direction) {
     if (direction === DIRECTION.LEFT && this.#selectedSoundMenuOption === SOUND_OPTIONS.ON) {
@@ -574,6 +595,10 @@ export class OptionsScene extends Phaser.Scene {
 
     exhaustiveGuard(direction);
   }
+
+  /**
+   * @returns {void}
+   */
   #updateSoundOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (this.#soundOptionTextGameObjects.getChildren());
 
@@ -595,8 +620,8 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   /**
-   *
    * @param {'LEFT' | 'RIGHT'} direction
+   * @returns {void}
    */
   #updateVolumeOption(direction) {
     if (direction === DIRECTION.LEFT && this.#selectedVolumeOption === 0) {
@@ -619,6 +644,10 @@ export class OptionsScene extends Phaser.Scene {
       return;
     }
   }
+
+  /**
+   * @returns {void}
+   */
   #updateVolumeSlider() {
     switch (this.#selectedVolumeOption) {
       case 0:
@@ -647,8 +676,8 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   /**
-   *
    * @param {'LEFT' | 'RIGHT'} direction
+   * @returns {void}
    */
   #updateMenuColorOption(direction) {
     if (direction === DIRECTION.LEFT && this.#selectedMenuColorOption === 0) {
@@ -669,16 +698,23 @@ export class OptionsScene extends Phaser.Scene {
     }
     exhaustiveGuard(direction);
   }
+
+  /**
+   * @returns {void}
+   */
   #updateMenuColorDisplayText() {
     switch (this.#selectedMenuColorOption) {
       case 0:
         this.#selectedMenuColorTextGameObject.setText('1');
+        // TODO
         break;
       case 1:
         this.#selectedMenuColorTextGameObject.setText('2');
+        // TODO
         break;
       case 2:
         this.#selectedMenuColorTextGameObject.setText('3');
+        // TODO
         break;
       default:
         exhaustiveGuard(this.#selectedMenuColorOption);
