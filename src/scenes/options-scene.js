@@ -641,23 +641,23 @@ export class OptionsScene extends Phaser.Scene {
     switch (this.#selectedVolumeOption) {
       case 0:
         this.#volumeOptionsMenuCursor.setX(420);
-        this.#volumeOptionValueText.setText('0%');
+        this.#volumeOptionsValueText.setText('0%');
         break;
       case 1:
         this.#volumeOptionsMenuCursor.setX(490);
-        this.#volumeOptionValueText.setText('25%');
+        this.#volumeOptionsValueText.setText('25%');
         break;
       case 2:
         this.#volumeOptionsMenuCursor.setX(560);
-        this.#volumeOptionValueText.setText('50%');
+        this.#volumeOptionsValueText.setText('50%');
         break;
       case 3:
         this.#volumeOptionsMenuCursor.setX(630);
-        this.#volumeOptionValueText.setText('75%');
+        this.#volumeOptionsValueText.setText('75%');
         break;
       case 4:
         this.#volumeOptionsMenuCursor.setX(710);
-        this.#volumeOptionValueText.setText('100%');
+        this.#volumeOptionsValueText.setText('100%');
         break;
       default:
         exhaustiveGuard(this.#selectedVolumeOption);
