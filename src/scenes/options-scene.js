@@ -4,7 +4,13 @@ import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { Controls } from '../utils/controls.js';
-import { OPTION_MENU_OPTIONS } from '../common/options.js';
+import {
+  BATTLE_SCENE_OPTIONS,
+  BATTLE_STYLE_OPTIONS,
+  OPTION_MENU_OPTIONS,
+  SOUND_OPTIONS,
+  TEXT_SPEED_OPTIONS,
+} from '../common/options.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 
@@ -23,6 +29,11 @@ const OPTION_MENU_OPTION_INFO_MSG = Object.freeze({
   VOLUME: 'Choose the volume of the music and sound effects of the game.',
   MENU_COLOR: 'Choose one of the three menu color options.',
   CONFIRM: 'Save your changes and go back to the main menu.',
+});
+
+const TEXT_FONT_COLORS = Object.freeze({
+  NOT_SELECTED: '#FFFFFF',
+  SELECTED: '#FF2222',
 });
 
 export class OptionsScene extends Phaser.Scene {
@@ -54,6 +65,18 @@ export class OptionsScene extends Phaser.Scene {
   #controls;
   /** @type {import('../common/options.js').OptionMenuOptions} */
   #selectedOptionMenu;
+  /** @type {import('../common/options.js').TextSpeedMenuOptions} */
+  #selectedTextSpeedOption;
+  /** @type {import('../common/options.js').BattleSceneMenuOptions} */
+  #selectedBattleSceneOption;
+  /** @type {import('../common/options.js').BattleStyleMenuOptions} */
+  #selectedBattleStyleOption;
+  /** @type {import('../common/options.js').SoundMenuOptions} */
+  #selectedSoundMenuOption;
+  /** @type {import('../common/options.js').VolumeMenuOptions} */
+  #selectedVolumeOption;
+  /** @type {import('../common/options.js').MenuColorOptions} */
+  #selectedMenuColorOption;
 
   constructor() {
     super({
@@ -69,7 +92,14 @@ export class OptionsScene extends Phaser.Scene {
       textureManager: this.sys.textures,
       assetKey: UI_ASSET_KEYS.MENU_BACKGROUND,
     });
+
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
+    this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
+    this.#selectedBattleSceneOption = BATTLE_SCENE_OPTIONS.ON;
+    this.#selectedBattleStyleOption = BATTLE_STYLE_OPTIONS.SHIFT;
+    this.#selectedSoundMenuOption = SOUND_OPTIONS.ON;
+    this.#selectedVolumeOption = 4;
+    this.#selectedMenuColorOption = 0;
   }
 
   create() {
@@ -146,6 +176,13 @@ export class OptionsScene extends Phaser.Scene {
       .rectangle(110, 70, optionMenuWidth - 20, 40, 0xffffff, 0)
       .setOrigin(0)
       .setStrokeStyle(4, 0xe4434a, 1);
+
+    this.#updateTextSpeedGameObjects();
+    this.#updateBattleSceneOptionGameObjects();
+    this.#updateBattleStyleOptionGameObjects();
+    this.#updateSoundOptionGameObjects();
+    this.#updateVolumeSlider();
+    this.#updateMenuColorDisplayText();
 
     this.#controls = new Controls(this);
 
@@ -233,7 +270,8 @@ export class OptionsScene extends Phaser.Scene {
           return;
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
-          // TODO;
+          this.#updateTextSpeedOption(direction);
+          this.#updateTextSpeedGameObjects();
           return;
         default:
           exhaustiveGuard(direction);
@@ -251,7 +289,8 @@ export class OptionsScene extends Phaser.Scene {
           return;
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
-          // TODO;
+          this.#updateBattleSceneOption(direction);
+          this.#updateBattleSceneOptionGameObjects();
           return;
         default:
           exhaustiveGuard(direction);
@@ -269,7 +308,8 @@ export class OptionsScene extends Phaser.Scene {
           return;
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
-          // TODO;
+          this.#updateBattleStyleOption(direction);
+          this.#updateBattleStyleOptionGameObjects();
           return;
         default:
           exhaustiveGuard(direction);
@@ -287,7 +327,8 @@ export class OptionsScene extends Phaser.Scene {
           return;
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
-          // TODO;
+          this.#updateSoundOption(direction);
+          this.#updateSoundOptionGameObjects();
           return;
         default:
           exhaustiveGuard(direction);
@@ -305,7 +346,8 @@ export class OptionsScene extends Phaser.Scene {
           return;
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
-          // TODO;
+          this.#updateVolumeOption(direction);
+          this.#updateVolumeSlider();
           return;
         default:
           exhaustiveGuard(direction);
@@ -323,7 +365,8 @@ export class OptionsScene extends Phaser.Scene {
           return;
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
-          // TODO;
+          this.#updateMenuColorOption(direction);
+          this.#updateMenuColorDisplayText();
           return;
         default:
           exhaustiveGuard(direction);
@@ -341,7 +384,6 @@ export class OptionsScene extends Phaser.Scene {
           return;
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
-          // TODO;
           return;
         default:
           exhaustiveGuard(direction);
@@ -350,5 +392,296 @@ export class OptionsScene extends Phaser.Scene {
     }
 
     exhaustiveGuard(this.#selectedOptionMenu);
+  }
+
+  /**
+   *
+   * @param {'LEFT' | 'RIGHT'} direction
+   */
+  #updateTextSpeedOption(direction) {
+    if (direction === DIRECTION.LEFT) {
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.SLOW;
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
+        return;
+      }
+      exhaustiveGuard(this.#selectedTextSpeedOption);
+      return;
+    }
+
+    if (direction === DIRECTION.RIGHT) {
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.FAST;
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
+        return;
+      }
+      exhaustiveGuard(this.#selectedTextSpeedOption);
+      return;
+    }
+
+    exhaustiveGuard(direction);
+  }
+
+  #updateTextSpeedGameObjects() {
+    const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
+      this.#textSpeedOptionTextGameObjects.getChildren()
+    );
+
+    textGameObjects.forEach((obj) => {
+      obj.setColor(TEXT_FONT_COLORS.NOT_SELECTED);
+    });
+
+    if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
+      textGameObjects[0].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
+      textGameObjects[1].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
+      textGameObjects[2].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    exhaustiveGuard(this.#selectedTextSpeedOption);
+  }
+
+  /**
+   *
+   * @param {'LEFT' | 'RIGHT'} direction
+   */
+  #updateBattleSceneOption(direction) {
+    if (direction === DIRECTION.LEFT && this.#selectedBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
+      return;
+    }
+    if (direction === DIRECTION.LEFT) {
+      this.#selectedBattleSceneOption = BATTLE_SCENE_OPTIONS.ON;
+      return;
+    }
+
+    if (direction === DIRECTION.RIGHT && this.#selectedBattleSceneOption === BATTLE_SCENE_OPTIONS.OFF) {
+      return;
+    }
+    if (direction === DIRECTION.RIGHT) {
+      this.#selectedBattleSceneOption = BATTLE_SCENE_OPTIONS.OFF;
+      return;
+    }
+
+    exhaustiveGuard(direction);
+  }
+  #updateBattleSceneOptionGameObjects() {
+    const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
+      this.#battleSceneOptionTextGameObjects.getChildren()
+    );
+
+    textGameObjects.forEach((obj) => {
+      obj.setColor(TEXT_FONT_COLORS.NOT_SELECTED);
+    });
+
+    if (this.#selectedBattleSceneOption === BATTLE_SCENE_OPTIONS.OFF) {
+      textGameObjects[1].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    if (this.#selectedBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
+      textGameObjects[0].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    exhaustiveGuard(this.#selectedBattleSceneOption);
+  }
+
+  /**
+   *
+   * @param {'LEFT' | 'RIGHT'} direction
+   */
+  #updateBattleStyleOption(direction) {
+    if (direction === DIRECTION.LEFT && this.#selectedBattleStyleOption === BATTLE_STYLE_OPTIONS.SET) {
+      return;
+    }
+    if (direction === DIRECTION.LEFT) {
+      this.#selectedBattleStyleOption = BATTLE_STYLE_OPTIONS.SET;
+      return;
+    }
+
+    if (direction === DIRECTION.RIGHT && this.#selectedBattleStyleOption === BATTLE_STYLE_OPTIONS.SHIFT) {
+      return;
+    }
+    if (direction === DIRECTION.RIGHT) {
+      this.#selectedBattleStyleOption = BATTLE_STYLE_OPTIONS.SHIFT;
+      return;
+    }
+
+    exhaustiveGuard(direction);
+  }
+  #updateBattleStyleOptionGameObjects() {
+    const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
+      this.#battleStyleOptionTextGameObjects.getChildren()
+    );
+
+    textGameObjects.forEach((obj) => {
+      obj.setColor(TEXT_FONT_COLORS.NOT_SELECTED);
+    });
+
+    if (this.#selectedBattleStyleOption === BATTLE_STYLE_OPTIONS.SHIFT) {
+      textGameObjects[1].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    if (this.#selectedBattleStyleOption === BATTLE_STYLE_OPTIONS.SET) {
+      textGameObjects[0].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    exhaustiveGuard(this.#selectedBattleStyleOption);
+  }
+
+  /**
+   *
+   * @param {'LEFT' | 'RIGHT'} direction
+   */
+  #updateSoundOption(direction) {
+    if (direction === DIRECTION.LEFT && this.#selectedSoundMenuOption === SOUND_OPTIONS.ON) {
+      return;
+    }
+    if (direction === DIRECTION.LEFT) {
+      this.#selectedSoundMenuOption = SOUND_OPTIONS.ON;
+      return;
+    }
+
+    if (direction === DIRECTION.RIGHT && this.#selectedSoundMenuOption === SOUND_OPTIONS.OFF) {
+      return;
+    }
+    if (direction === DIRECTION.RIGHT) {
+      this.#selectedSoundMenuOption = SOUND_OPTIONS.OFF;
+      return;
+    }
+
+    exhaustiveGuard(direction);
+  }
+  #updateSoundOptionGameObjects() {
+    const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (this.#soundOptionTextGameObjects.getChildren());
+
+    textGameObjects.forEach((obj) => {
+      obj.setColor(TEXT_FONT_COLORS.NOT_SELECTED);
+    });
+
+    if (this.#selectedSoundMenuOption === SOUND_OPTIONS.OFF) {
+      textGameObjects[1].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    if (this.#selectedSoundMenuOption === SOUND_OPTIONS.ON) {
+      textGameObjects[0].setColor(TEXT_FONT_COLORS.SELECTED);
+      return;
+    }
+
+    exhaustiveGuard(this.#selectedSoundMenuOption);
+  }
+
+  /**
+   *
+   * @param {'LEFT' | 'RIGHT'} direction
+   */
+  #updateVolumeOption(direction) {
+    if (direction === DIRECTION.LEFT && this.#selectedVolumeOption === 0) {
+      return;
+    }
+    if (direction === DIRECTION.LEFT) {
+      this.#selectedVolumeOption = /** @type {import('../common/options.js').VolumeMenuOptions} */ (
+        this.#selectedVolumeOption - 1
+      );
+      return;
+    }
+
+    if (direction === DIRECTION.RIGHT && this.#selectedVolumeOption === 4) {
+      return;
+    }
+    if (direction === DIRECTION.RIGHT) {
+      this.#selectedVolumeOption = /** @type {import('../common/options.js').VolumeMenuOptions} */ (
+        this.#selectedVolumeOption + 1
+      );
+      return;
+    }
+  }
+  #updateVolumeSlider() {
+    switch (this.#selectedVolumeOption) {
+      case 0:
+        this.#volumeOptionsMenuCursor.setX(420);
+        this.#volumeOptionsValueText.setText('0%');
+        break;
+      case 1:
+        this.#volumeOptionsMenuCursor.setX(490);
+        this.#volumeOptionsValueText.setText('25%');
+        break;
+      case 2:
+        this.#volumeOptionsMenuCursor.setX(560);
+        this.#volumeOptionsValueText.setText('50%');
+        break;
+      case 3:
+        this.#volumeOptionsMenuCursor.setX(630);
+        this.#volumeOptionsValueText.setText('75%');
+        break;
+      case 4:
+        this.#volumeOptionsMenuCursor.setX(710);
+        this.#volumeOptionsValueText.setText('100%');
+        break;
+      default:
+        exhaustiveGuard(this.#selectedVolumeOption);
+    }
+  }
+
+  /**
+   *
+   * @param {'LEFT' | 'RIGHT'} direction
+   */
+  #updateMenuColorOption(direction) {
+    if (direction === DIRECTION.LEFT && this.#selectedMenuColorOption === 0) {
+      this.#selectedMenuColorOption = 2;
+      return;
+    }
+    if (direction === DIRECTION.RIGHT && this.#selectedMenuColorOption === 2) {
+      this.#selectedMenuColorOption = 0;
+      return;
+    }
+    if (direction === DIRECTION.LEFT) {
+      this.#selectedMenuColorOption -= 1;
+      return;
+    }
+    if (direction === DIRECTION.RIGHT) {
+      this.#selectedMenuColorOption += 1;
+      return;
+    }
+    exhaustiveGuard(direction);
+  }
+  #updateMenuColorDisplayText() {
+    switch (this.#selectedMenuColorOption) {
+      case 0:
+        this.#selectedMenuColorTextGameObject.setText('1');
+        break;
+      case 1:
+        this.#selectedMenuColorTextGameObject.setText('2');
+        break;
+      case 2:
+        this.#selectedMenuColorTextGameObject.setText('3');
+        break;
+      default:
+        exhaustiveGuard(this.#selectedMenuColorOption);
+    }
   }
 }
