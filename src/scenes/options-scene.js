@@ -3,6 +3,10 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { Controls } from '../utils/controls.js';
+import { OPTION_MENU_OPTIONS } from '../common/options.js';
+import { DIRECTION } from '../common/direction.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const OPTIONS_TEXT_STYLE = {
@@ -46,6 +50,10 @@ export class OptionsScene extends Phaser.Scene {
   #selectedOptionInfoMsgTextGameObject;
   /** @type {Phaser.GameObjects.Rectangle} */
   #optionsMenuCursor;
+  /** @type {Controls} */
+  #controls;
+  /** @type {import('../common/options.js').OptionMenuOptions} */
+  #selectedOptionMenu;
 
   constructor() {
     super({
@@ -61,6 +69,7 @@ export class OptionsScene extends Phaser.Scene {
       textureManager: this.sys.textures,
       assetKey: UI_ASSET_KEYS.MENU_BACKGROUND,
     });
+    this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
   }
 
   create() {
@@ -137,5 +146,209 @@ export class OptionsScene extends Phaser.Scene {
       .rectangle(110, 70, optionMenuWidth - 20, 40, 0xffffff, 0)
       .setOrigin(0)
       .setStrokeStyle(4, 0xe4434a, 1);
+
+    this.#controls = new Controls(this);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    });
+  }
+
+  update() {
+    if (this.#controls.isInputLocked) {
+      return;
+    }
+
+    if (this.#controls.wasBackKeyPressed()) {
+      this.#controls.lockInput = true;
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      return;
+    }
+
+    if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
+      this.#controls.lockInput = true;
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      return;
+    }
+
+    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#moveOptionMenuCursor(selectedDirection);
+    }
+  }
+
+  /**
+   * @param {import('../common/direction.js').Direction} direction
+   */
+  #moveOptionMenuCursor(direction) {
+    if (direction === DIRECTION.NONE) {
+      return;
+    }
+
+    this.#updateSelectedOptionMenuFromInput(direction);
+
+    switch (this.#selectedOptionMenu) {
+      case OPTION_MENU_OPTIONS.TEXT_SPEED:
+        this.#optionsMenuCursor.setY(70);
+        break;
+      case OPTION_MENU_OPTIONS.BATTLE_SCENE:
+        this.#optionsMenuCursor.setY(125);
+        break;
+      case OPTION_MENU_OPTIONS.BATTLE_STYLE:
+        this.#optionsMenuCursor.setY(180);
+        break;
+      case OPTION_MENU_OPTIONS.SOUND:
+        this.#optionsMenuCursor.setY(235);
+        break;
+      case OPTION_MENU_OPTIONS.VOLUME:
+        this.#optionsMenuCursor.setY(290);
+        break;
+      case OPTION_MENU_OPTIONS.MENU_COLOR:
+        this.#optionsMenuCursor.setY(345);
+        break;
+      case OPTION_MENU_OPTIONS.CONFIRM:
+        this.#optionsMenuCursor.setY(400);
+        break;
+      default:
+        exhaustiveGuard(this.#selectedOptionMenu);
+    }
+    this.#selectedOptionInfoMsgTextGameObject.setText(OPTION_MENU_OPTION_INFO_MSG[this.#selectedOptionMenu]);
+  }
+
+  /**
+   * @param {import('../common/direction.js').Direction} direction
+   */
+  #updateSelectedOptionMenuFromInput(direction) {
+    if (direction === DIRECTION.NONE) {
+      return;
+    }
+
+    if (this.#selectedOptionMenu === OPTION_MENU_OPTIONS.TEXT_SPEED) {
+      switch (direction) {
+        case DIRECTION.DOWN:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.BATTLE_SCENE;
+          return;
+        case DIRECTION.UP:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.CONFIRM;
+          return;
+        case DIRECTION.LEFT:
+        case DIRECTION.RIGHT:
+          // TODO;
+          return;
+        default:
+          exhaustiveGuard(direction);
+      }
+      return;
+    }
+
+    if (this.#selectedOptionMenu === OPTION_MENU_OPTIONS.BATTLE_SCENE) {
+      switch (direction) {
+        case DIRECTION.DOWN:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.BATTLE_STYLE;
+          return;
+        case DIRECTION.UP:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
+          return;
+        case DIRECTION.LEFT:
+        case DIRECTION.RIGHT:
+          // TODO;
+          return;
+        default:
+          exhaustiveGuard(direction);
+      }
+      return;
+    }
+
+    if (this.#selectedOptionMenu === OPTION_MENU_OPTIONS.BATTLE_STYLE) {
+      switch (direction) {
+        case DIRECTION.DOWN:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.SOUND;
+          return;
+        case DIRECTION.UP:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.BATTLE_SCENE;
+          return;
+        case DIRECTION.LEFT:
+        case DIRECTION.RIGHT:
+          // TODO;
+          return;
+        default:
+          exhaustiveGuard(direction);
+      }
+      return;
+    }
+
+    if (this.#selectedOptionMenu === OPTION_MENU_OPTIONS.SOUND) {
+      switch (direction) {
+        case DIRECTION.DOWN:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.VOLUME;
+          return;
+        case DIRECTION.UP:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.BATTLE_STYLE;
+          return;
+        case DIRECTION.LEFT:
+        case DIRECTION.RIGHT:
+          // TODO;
+          return;
+        default:
+          exhaustiveGuard(direction);
+      }
+      return;
+    }
+
+    if (this.#selectedOptionMenu === OPTION_MENU_OPTIONS.VOLUME) {
+      switch (direction) {
+        case DIRECTION.DOWN:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.MENU_COLOR;
+          return;
+        case DIRECTION.UP:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.SOUND;
+          return;
+        case DIRECTION.LEFT:
+        case DIRECTION.RIGHT:
+          // TODO;
+          return;
+        default:
+          exhaustiveGuard(direction);
+      }
+      return;
+    }
+
+    if (this.#selectedOptionMenu === OPTION_MENU_OPTIONS.MENU_COLOR) {
+      switch (direction) {
+        case DIRECTION.DOWN:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.CONFIRM;
+          return;
+        case DIRECTION.UP:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.VOLUME;
+          return;
+        case DIRECTION.LEFT:
+        case DIRECTION.RIGHT:
+          // TODO;
+          return;
+        default:
+          exhaustiveGuard(direction);
+      }
+      return;
+    }
+
+    if (this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
+      switch (direction) {
+        case DIRECTION.DOWN:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
+          return;
+        case DIRECTION.UP:
+          this.#selectedOptionMenu = OPTION_MENU_OPTIONS.MENU_COLOR;
+          return;
+        case DIRECTION.LEFT:
+        case DIRECTION.RIGHT:
+          // TODO;
+          return;
+        default:
+          exhaustiveGuard(direction);
+      }
+      return;
+    }
+
+    exhaustiveGuard(this.#selectedOptionMenu);
   }
 }
