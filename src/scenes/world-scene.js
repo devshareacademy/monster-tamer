@@ -16,9 +16,8 @@ import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 /**
  * @typedef WorldSceneData
  * @type {object}
- * @property {string} levelJsonAssetName
- * @property {string} levelBackgroundAssetName
- * @property {string} levelForegroundAssetName
+ * @property {string} area
+ * @property {boolean} isInterior
  */
 
 /**
@@ -88,13 +87,23 @@ export class WorldScene extends Phaser.Scene {
     console.log(`[${WorldScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
     this.#wildMonsterEncountered = false;
     this.#sceneData = data;
-    if (!this.#sceneData || !this.#sceneData.levelJsonAssetName) {
+
+    if (!this.#sceneData || !this.#sceneData.area) {
+      /** @type {string} */
+      const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
+
       this.#sceneData = {
-        levelBackgroundAssetName: WORLD_ASSET_KEYS.WORLD_BACKGROUND,
-        levelForegroundAssetName: WORLD_ASSET_KEYS.WORLD_FOREGROUND,
-        levelJsonAssetName: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL,
+        area,
+        isInterior: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior,
       };
     }
+    dataManager.store.set(
+      DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION,
+      /** @type {import('../utils/data-manager.js').PlayerLocation} */ ({
+        area: this.#sceneData.area,
+        isInterior: this.#sceneData.isInterior,
+      })
+    );
   }
 
   /**
@@ -102,14 +111,13 @@ export class WorldScene extends Phaser.Scene {
    */
   create() {
     console.log(`[${WorldScene.name}:create] invoked`);
-    console.log(this.#sceneData.levelBackgroundAssetName);
 
     // this value comes from the width of the level background image we are using
     // we set the max camera width to the size of our image in order to control what
     // is visible to the player, since the phaser game world is infinite.
 
     // create map and collision layer
-    const map = this.make.tilemap({ key: this.#sceneData.levelJsonAssetName });
+    const map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
@@ -161,12 +169,12 @@ export class WorldScene extends Phaser.Scene {
       this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
     }
 
-    console.log(map.widthInPixels, map.heightInPixels);
-    console.log(this.scale.width, this.scale.height);
-    //this.cameras.main.setBounds(0, 0, 1280, 2176);
+    if (!this.#sceneData.isInterior) {
+      this.cameras.main.setBounds(0, 0, 1280, 2176);
+    }
     this.cameras.main.setZoom(0.8);
 
-    this.add.image(0, 0, this.#sceneData.levelBackgroundAssetName, 0).setOrigin(0);
+    this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
     // create npcs
     this.#createNPCs(map);
@@ -185,8 +193,8 @@ export class WorldScene extends Phaser.Scene {
         this.#handlePlayerDirectionUpdate();
       },
       entranceLayer: this.#entranceLayer,
-      enterEntranceCallback: (entranceName, entranceId) => {
-        this.#handleOnEntranceEnteredCallback(entranceName, entranceId);
+      enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
+        this.#handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
@@ -198,7 +206,7 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.#player.sprite);
 
     // create foreground for depth
-    this.add.image(0, 0, this.#sceneData.levelForegroundAssetName, 0).setOrigin(0);
+    this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_FOREGROUND`, 0).setOrigin(0);
 
     this.#controls = new Controls(this);
 
@@ -468,10 +476,10 @@ export class WorldScene extends Phaser.Scene {
   /**
    * @param {string} entranceId
    * @param {string} entranceName
+   * @param {boolean} isBuildingEntrance
    * @returns {void}
    */
-  #handleOnEntranceEnteredCallback(entranceName, entranceId) {
-    console.log(entranceName, entranceId);
+  #handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance) {
     this.#controls.lockInput = true;
 
     // update player position to match the new entrance data
@@ -479,12 +487,21 @@ export class WorldScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: `${entranceName.toUpperCase()}_LEVEL` });
     // get the position of the entrance object using the entrance id
     const entranceObjectLayer = map.getObjectLayer('Scene-Transitions');
-    const entranceObject = entranceObjectLayer.objects.find((object) => object.name === entranceId);
+
+    const entranceObject = entranceObjectLayer.objects.find((object) => {
+      const tempEntranceName = object.properties.find((property) => property.name === 'connects_to').value;
+      const tempEntranceId = object.properties.find((property) => property.name === 'entrance_id').value;
+
+      return tempEntranceName === this.#sceneData.area && tempEntranceId === entranceId;
+    });
     // create position player will be placed at and update based on players facing direction
-    let x = entranceObject.x - TILE_SIZE;
+    let x = entranceObject.x;
     let y = entranceObject.y - TILE_SIZE;
     if (this.#player.direction === DIRECTION.UP) {
       y -= TILE_SIZE;
+    }
+    if (this.#player.direction === DIRECTION.DOWN) {
+      y += TILE_SIZE;
     }
 
     createBuildingSceneTransition(this, {
@@ -496,9 +513,8 @@ export class WorldScene extends Phaser.Scene {
 
         /** @type {WorldSceneData} */
         const dataToPass = {
-          levelBackgroundAssetName: BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
-          levelForegroundAssetName: BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
-          levelJsonAssetName: BUILDING_ASSET_KEYS.BUILDING_1_LEVEL,
+          area: entranceName,
+          isInterior: isBuildingEntrance,
         };
         this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
       },

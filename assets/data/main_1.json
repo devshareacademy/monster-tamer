@@ -571,9 +571,14 @@
                          "value":"building_1"
                         }, 
                         {
-                         "name":"entranceId",
+                         "name":"entrance_id",
                          "type":"string",
                          "value":"1"
+                        }, 
+                        {
+                         "name":"is_building",
+                         "type":"bool",
+                         "value":true
                         }],
                  "rotation":0,
                  "type":"entrance",
@@ -594,9 +599,14 @@
                          "value":"building_2"
                         }, 
                         {
-                         "name":"entranceId",
+                         "name":"entrance_id",
                          "type":"string",
                          "value":"1"
+                        }, 
+                        {
+                         "name":"is_building",
+                         "type":"bool",
+                         "value":true
                         }],
                  "rotation":0,
                  "type":"entrance",
@@ -882,7 +892,7 @@
         {
          "columns":8,
          "firstgid":1,
-         "image":"monster_tamer_tiled_project\/BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
          "imageheight":512,
          "imagewidth":512,
          "margin":0,
@@ -895,7 +905,7 @@
         {
          "columns":15,
          "firstgid":65,
-         "image":"monster_tamer_tiled_project\/Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
          "imageheight":512,
          "imagewidth":960,
          "margin":0,
@@ -908,7 +918,7 @@
         {
          "columns":2,
          "firstgid":185,
-         "image":"monster_tamer_tiled_project\/grass.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/grass.png",
          "imageheight":128,
          "imagewidth":128,
          "margin":0,
@@ -921,7 +931,7 @@
         {
          "columns":1,
          "firstgid":189,
-         "image":"monster_tamer_tiled_project\/collision.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/collision.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -934,7 +944,7 @@
         {
          "columns":2,
          "firstgid":190,
-         "image":"monster_tamer_tiled_project\/bushes.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/bushes.png",
          "imageheight":128,
          "imagewidth":128,
          "margin":0,
@@ -947,7 +957,7 @@
         {
          "columns":1,
          "firstgid":194,
-         "image":"monster_tamer_tiled_project\/encounter.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/encounter.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -967,7 +977,7 @@
         {
          "columns":4,
          "firstgid":195,
-         "image":"monster_tamer_tiled_project\/house2_scaled_4x_pngcrushed.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/house2_scaled_4x_pngcrushed.png",
          "imageheight":192,
          "imagewidth":256,
          "margin":0,
@@ -981,7 +991,7 @@
          "class":"npc",
          "columns":1,
          "firstgid":207,
-         "image":"monster_tamer_tiled_project\/encounter.png",
+         "image":"..\/..\/..\/..\/..\/..\/Desktop\/monster_tamer_tiled_project\/encounter.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,

@@ -20,7 +20,7 @@ import { Character } from './character.js';
 export class Player extends Character {
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
-  /** @type {(entranceName: string, entranceId: string) => void | undefined} */
+  /** @type {(entranceName: string, entranceId: string, isBuildingEntrance: boolean) => void | undefined} */
   #enterEntranceCallback;
 
   /**
@@ -88,8 +88,9 @@ export class Player extends Character {
 
       // entrance is nearby and the player is trying to enter that location
       const entranceName = nearbyEntrance.properties.find((property) => property.name === 'connects_to').value;
-      const entranceId = nearbyEntrance.properties.find((property) => property.name === 'entranceId').value;
-      this.#enterEntranceCallback(entranceName, entranceId);
+      const entranceId = nearbyEntrance.properties.find((property) => property.name === 'entrance_id').value;
+      const isBuildingEntrance = nearbyEntrance.properties.find((property) => property.name === 'is_building').value;
+      this.#enterEntranceCallback(entranceName, entranceId, isBuildingEntrance);
     }
   }
 }
