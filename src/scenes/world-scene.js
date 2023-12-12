@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { BUILDING_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { Controls } from '../utils/controls.js';
@@ -174,6 +174,7 @@ export class WorldScene extends Phaser.Scene {
     }
     this.cameras.main.setZoom(0.8);
 
+    const bgRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
     // create npcs
@@ -215,7 +216,14 @@ export class WorldScene extends Phaser.Scene {
     // create menu
     this.#menu = new Menu(this);
 
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
+    let isBgRectUpdated = false;
+    this.cameras.main.fadeIn(1000, 0, 0, 0, () => {
+      if (!isBgRectUpdated && this.cameras.main.worldView.width !== 0) {
+        bgRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
+        bgRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
+        isBgRectUpdated = true;
+      }
+    });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
   }
 
