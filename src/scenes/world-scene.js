@@ -132,10 +132,6 @@ export class WorldScene extends BaseScene {
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
-    // TODO: this needs to be addressed in the bugfix video
-    // we should use the getObjectLayerNames method to lookup object layers, instead of the tilesets
-    // const hasSignLayer = map.tilesets.some((tileset) => tileset.name === 'Sign');
-    // TODO: review, this might have been introduced as part of this feature
     const hasSignLayer = map.getObjectLayer('Sign') !== null;
     if (hasSignLayer) {
       this.#signLayer = map.getObjectLayer('Sign');
