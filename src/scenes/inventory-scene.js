@@ -8,6 +8,7 @@ import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { Controls } from '../utils/controls.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
+import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const INVENTORY_TEXT_STYLE = {
@@ -53,7 +54,7 @@ const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
  * @type {InventoryItemWithGameObjects[]}
  */
 
-export class InventoryScene extends Phaser.Scene {
+export class InventoryScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image} */
   #userInputCursor;
   /** @type {Phaser.GameObjects.Text} */
@@ -62,8 +63,6 @@ export class InventoryScene extends Phaser.Scene {
   #inventory;
   /** @type {number} */
   #selectedInventoryOptionIndex;
-  /** @type {Controls} */
-  #controls;
   /** @type {InventorySceneData} */
   #sceneData;
 
@@ -76,7 +75,7 @@ export class InventoryScene extends Phaser.Scene {
    * @returns {void}
    */
   init(data) {
-    console.log(`[${InventoryScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
+    super.init(data);
 
     this.#sceneData = data;
     this.#inventory = dataManager.store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
@@ -99,7 +98,7 @@ export class InventoryScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${InventoryScene.name}:create] invoked`);
+    super.create();
 
     this.add.image(0, 0, INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND).setOrigin(0);
     this.add.image(40, 120, INVENTORY_ASSET_KEYS.INVENTORY_BAG).setOrigin(0).setScale(0.5);
@@ -161,8 +160,6 @@ export class InventoryScene extends Phaser.Scene {
     });
     this.#updateItemDescriptionText();
 
-    this.#controls = new Controls(this);
-
     this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
@@ -170,23 +167,25 @@ export class InventoryScene extends Phaser.Scene {
    * @returns {void}
    */
   update() {
-    if (this.#controls.isInputLocked) {
+    super.update();
+
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
+    if (this._controls.wasBackKeyPressed()) {
       this.#goBackToPreviousScene();
       return;
     }
 
-    const spaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const spaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (spaceKeyPressed && this.#isCancelButtonSelected()) {
       this.#goBackToPreviousScene();
       return;
     }
 
     if (spaceKeyPressed) {
-      this.#controls.lockInput = true;
+      this._controls.lockInput = true;
       // pause this scene and launch the monster party scene
       /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
       const sceneDataToPass = {
@@ -201,7 +200,7 @@ export class InventoryScene extends Phaser.Scene {
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
       this.#updateItemDescriptionText();
@@ -264,7 +263,7 @@ export class InventoryScene extends Phaser.Scene {
    * @returns {void}
    */
   #goBackToPreviousScene() {
-    this.#controls.lockInput = true;
+    this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
     this.scene.resume(this.#sceneData.previousSceneName);
   }
@@ -278,7 +277,7 @@ export class InventoryScene extends Phaser.Scene {
     console.log(
       `[${InventoryScene.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
     );
-    this.#controls.lockInput = false;
+    this._controls.lockInput = false;
 
     if (!data) {
       return;

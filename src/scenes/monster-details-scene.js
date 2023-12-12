@@ -3,7 +3,7 @@ import { MONSTER_PARTY_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { Controls } from '../utils/controls.js';
+import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -25,13 +25,11 @@ const MONSTER_MOVE_TEXT_STYLE = {
  * @property {import('../types/typedef.js').Monster} monster
  */
 
-export class MonsterDetailsScene extends Phaser.Scene {
+export class MonsterDetailsScene extends BaseScene {
   /** @type {import('../types/typedef.js').Monster} */
   #monsterDetails;
   /** @type {import('../types/typedef.js').Attack[]} */
   #monsterAttacks;
-  /** @type {Controls} */
-  #controls;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_DETAILS_SCENE });
@@ -42,7 +40,7 @@ export class MonsterDetailsScene extends Phaser.Scene {
    * @returns {void}
    */
   init(data) {
-    console.log(`[${MonsterDetailsScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
+    super.init(data);
 
     this.#monsterDetails = data.monster;
     // added for testing from preload scene directly
@@ -63,7 +61,7 @@ export class MonsterDetailsScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${MonsterDetailsScene.name}:create] invoked`);
+    super.create();
 
     // create main background and title
     this.add.image(0, 0, MONSTER_PARTY_ASSET_KEYS.MONSTER_DETAILS_BACKGROUND).setOrigin(0);
@@ -98,22 +96,22 @@ export class MonsterDetailsScene extends Phaser.Scene {
     if (this.#monsterAttacks[3] !== undefined) {
       this.add.text(560, 322, this.#monsterAttacks[3].name, MONSTER_MOVE_TEXT_STYLE);
     }
-
-    this.#controls = new Controls(this);
   }
 
   /**
    * @returns {void}
    */
   update() {
-    if (this.#controls.isInputLocked) {
+    super.update();
+
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
+    if (this._controls.wasBackKeyPressed()) {
       this.#goBackToPreviousScene();
     }
-    if (this.#controls.wasSpaceKeyPressed()) {
+    if (this._controls.wasSpaceKeyPressed()) {
       this.#goBackToPreviousScene();
     }
   }
@@ -122,7 +120,7 @@ export class MonsterDetailsScene extends Phaser.Scene {
    * @returns {void}
    */
   #goBackToPreviousScene() {
-    this.#controls.lockInput = true;
+    this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_DETAILS_SCENE);
     this.scene.resume(SCENE_KEYS.MONSTER_PARTY_SCENE);
   }

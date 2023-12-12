@@ -1,4 +1,3 @@
-import Phaser from '../lib/phaser.js';
 import {
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
@@ -22,8 +21,9 @@ import { DIRECTION } from '../common/direction.js';
 import { WALK_FRAME_RATE } from '../config.js';
 import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { BaseScene } from './base-scene.js';
 
-export class PreloadScene extends Phaser.Scene {
+export class PreloadScene extends BaseScene {
   constructor() {
     super({
       key: SCENE_KEYS.PRELOAD_SCENE,
@@ -34,7 +34,7 @@ export class PreloadScene extends Phaser.Scene {
    * @returns {void}
    */
   preload() {
-    console.log(`[${PreloadScene.name}:preload] invoked`);
+    super.preload();
 
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
@@ -168,7 +168,7 @@ export class PreloadScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${PreloadScene.name}:create] invoked`);
+    super.create();
 
     // TODO: move to animations file
     // create npc animations
