@@ -2,7 +2,6 @@ import Phaser from '../lib/phaser.js';
 import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
-import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { DISABLE_WILD_ENCOUNTERS, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { NPC } from '../world/characters/npc.js';
@@ -11,6 +10,15 @@ import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/gr
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { Menu } from '../world/menu/menu.js';
+import { createBuildingSceneTransition } from '../utils/scene-transition.js';
+import { BaseScene } from './base-scene.js';
+
+/**
+ * @typedef WorldSceneData
+ * @type {object}
+ * @property {string} area
+ * @property {boolean} isInterior
+ */
 
 /**
  * @typedef TiledObjectProperty
@@ -41,11 +49,9 @@ const TILED_SIGN_PROPERTY = Object.freeze({
   each grid size will be 64 x 64 pixels
 */
 
-export class WorldScene extends Phaser.Scene {
+export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Controls} */
-  #controls;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
   #encounterLayer;
   /** @type {boolean} */
@@ -54,13 +60,16 @@ export class WorldScene extends Phaser.Scene {
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
-
+  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  #entranceLayer;
   /** @type {NPC[]} */
   #npcs;
   /** @type {NPC | undefined} */
   #npcPlayerIsInteractingWith;
   /** @type {Menu} */
   #menu;
+  /** @type {WorldSceneData} */
+  #sceneData;
 
   constructor() {
     super({
@@ -69,31 +78,45 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
+   * @param {WorldSceneData} data
    * @returns {void}
    */
-  init() {
-    console.log(`[${WorldScene.name}:init] invoked`);
+  init(data) {
+    super.init(data);
+
     this.#wildMonsterEncountered = false;
+    this.#sceneData = data;
+
+    if (!this.#sceneData || !this.#sceneData.area) {
+      /** @type {string} */
+      const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
+
+      this.#sceneData = {
+        area,
+        isInterior: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior,
+      };
+    }
+    dataManager.store.set(
+      DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION,
+      /** @type {import('../utils/data-manager.js').PlayerLocation} */ ({
+        area: this.#sceneData.area,
+        isInterior: this.#sceneData.isInterior,
+      })
+    );
   }
 
   /**
    * @returns {void}
    */
   create() {
-    console.log(`[${WorldScene.name}:create] invoked`);
-
-    const x = 6 * TILE_SIZE;
-    const y = 22 * TILE_SIZE;
+    super.create();
 
     // this value comes from the width of the level background image we are using
     // we set the max camera width to the size of our image in order to control what
     // is visible to the player, since the phaser game world is infinite.
-    this.cameras.main.setBounds(0, 0, 1280, 2176);
-    this.cameras.main.setZoom(0.8);
-    this.cameras.main.centerOn(x, y);
 
     // create map and collision layer
-    const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
+    const map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
@@ -109,26 +132,49 @@ export class WorldScene extends Phaser.Scene {
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
-    this.#signLayer = map.getObjectLayer('Sign');
-    if (!this.#signLayer) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
+    const hasSignLayer = map.getObjectLayer('Sign') !== null;
+    if (hasSignLayer) {
+      this.#signLayer = map.getObjectLayer('Sign');
+      if (!this.#signLayer) {
+        console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
+        return;
+      }
+    }
+
+    // create layer for scene transitions entrances
+    this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
+    if (!this.#entranceLayer) {
+      console.log(
+        `[${WorldScene.name}:create] encountered error while creating scene entrances layer using data from tiled`
+      );
       return;
     }
 
     // create collision layer for encounters
-    const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
-    if (!encounterTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
-      return;
+    const hasEncounterLayer = map.tilesets.some((tileset) => tileset.name === 'encounter');
+    if (hasEncounterLayer) {
+      const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+      if (!encounterTiles) {
+        console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
+        return;
+      }
+      this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
+      if (!this.#encounterLayer) {
+        console.log(
+          `[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`
+        );
+        return;
+      }
+      this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
     }
-    this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
-    if (!this.#encounterLayer) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
-      return;
-    }
-    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+    if (!this.#sceneData.isInterior) {
+      this.cameras.main.setBounds(0, 0, 1280, 2176);
+    }
+    this.cameras.main.setZoom(0.8);
+
+    const bgRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
+    this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
     // create npcs
     this.#createNPCs(map);
@@ -146,6 +192,10 @@ export class WorldScene extends Phaser.Scene {
       spriteChangedDirectionCallback: () => {
         this.#handlePlayerDirectionUpdate();
       },
+      entranceLayer: this.#entranceLayer,
+      enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
+        this.#handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
+      },
     });
     this.cameras.main.startFollow(this.#player.sprite);
 
@@ -156,16 +206,21 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.#player.sprite);
 
     // create foreground for depth
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
-
-    this.#controls = new Controls(this);
+    this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_FOREGROUND`, 0).setOrigin(0);
 
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
     // create menu
     this.#menu = new Menu(this);
 
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
+    let isBgRectUpdated = false;
+    this.cameras.main.fadeIn(1000, 0, 0, 0, () => {
+      if (!isBgRectUpdated && this.cameras.main.worldView.width !== 0) {
+        bgRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
+        bgRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
+        isBgRectUpdated = true;
+      }
+    });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
   }
 
@@ -174,14 +229,16 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
+    super.update(time);
+
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
-    const selectedDirectionHeldDown = this.#controls.getDirectionKeyPressedDown();
-    const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirectionHeldDown);
     }
@@ -190,7 +247,7 @@ export class WorldScene extends Phaser.Scene {
       this.#handlePlayerInteraction();
     }
 
-    if (this.#controls.wasEnterKeyPressed()) {
+    if (this._controls.wasEnterKeyPressed()) {
       if (this.#dialogUi.isVisible) {
         return;
       }
@@ -234,12 +291,12 @@ export class WorldScene extends Phaser.Scene {
         }
       }
 
-      if (this.#controls.wasBackKeyPressed()) {
+      if (this._controls.wasBackKeyPressed()) {
         this.#menu.handlePlayerInput('CANCEL');
       }
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+    if (this._controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
       this.#handlePlayerInteraction();
     }
 
@@ -420,6 +477,54 @@ export class WorldScene extends Phaser.Scene {
    * @returns {boolean}
    */
   #isPlayerInputLocked() {
-    return this.#dialogUi.isVisible || this.#menu.isVisible;
+    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+  }
+
+  /**
+   * @param {string} entranceId
+   * @param {string} entranceName
+   * @param {boolean} isBuildingEntrance
+   * @returns {void}
+   */
+  #handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance) {
+    this._controls.lockInput = true;
+
+    // update player position to match the new entrance data
+    // create tilemap using the provided entrance data
+    const map = this.make.tilemap({ key: `${entranceName.toUpperCase()}_LEVEL` });
+    // get the position of the entrance object using the entrance id
+    const entranceObjectLayer = map.getObjectLayer('Scene-Transitions');
+
+    const entranceObject = entranceObjectLayer.objects.find((object) => {
+      const tempEntranceName = object.properties.find((property) => property.name === 'connects_to').value;
+      const tempEntranceId = object.properties.find((property) => property.name === 'entrance_id').value;
+
+      return tempEntranceName === this.#sceneData.area && tempEntranceId === entranceId;
+    });
+    // create position player will be placed at and update based on players facing direction
+    let x = entranceObject.x;
+    let y = entranceObject.y - TILE_SIZE;
+    if (this.#player.direction === DIRECTION.UP) {
+      y -= TILE_SIZE;
+    }
+    if (this.#player.direction === DIRECTION.DOWN) {
+      y += TILE_SIZE;
+    }
+
+    createBuildingSceneTransition(this, {
+      callback: () => {
+        dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+          x,
+          y,
+        });
+
+        /** @type {WorldSceneData} */
+        const dataToPass = {
+          area: entranceName,
+          isInterior: isBuildingEntrance,
+        };
+        this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
+      },
+    });
   }
 }

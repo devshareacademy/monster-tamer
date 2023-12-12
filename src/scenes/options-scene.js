@@ -1,6 +1,5 @@
 import Phaser from '../lib/phaser.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
-import { Controls } from '../utils/controls.js';
 import { createNineSliceContainer, updateNineSliceContainerTexture } from '../utils/nine-slice.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { exhaustiveGuard } from '../utils/guard.js';
@@ -14,6 +13,7 @@ import {
   SOUND_OPTIONS,
 } from '../common/options.js';
 import { dataManager, DATA_MANAGER_STORE_KEYS } from '../utils/data-manager.js';
+import { BaseScene } from './base-scene.js';
 
 const TEXT_FONT_COLORS = Object.freeze({
   NOT_SELECTED: '#FFFFFF',
@@ -37,7 +37,7 @@ const OPTIONS_TEXT_STYLE = {
   fontSize: '30px',
 };
 
-export class OptionsScene extends Phaser.Scene {
+export class OptionsScene extends BaseScene {
   /** @type {import('../common/options.js').OptionMenuOptions} */
   #selectedOptionMenu;
   /** @type {import('../common/options.js').TextSpeedMenuOptions} */
@@ -74,8 +74,6 @@ export class OptionsScene extends Phaser.Scene {
   #battleStyleOptionTextGameObjects;
   /** @type {Phaser.GameObjects.Group} */
   #textSpeedOptionTextGameObjects;
-  /** @type {Controls} */
-  #controls;
 
   constructor() {
     super({ key: SCENE_KEYS.OPTIONS_SCENE });
@@ -85,6 +83,8 @@ export class OptionsScene extends Phaser.Scene {
    * @returns {void}
    */
   init() {
+    super.init();
+
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
     this.#selectedTextSpeedOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
     this.#selectedBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
@@ -98,6 +98,8 @@ export class OptionsScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
+    super.create();
+
     const { width, height } = this.scale;
     const optionMenuWidth = width - 200;
 
@@ -173,8 +175,6 @@ export class OptionsScene extends Phaser.Scene {
     this.#updateTextSpeedOptionGameObjects();
     this.#updateVolumeSlider();
 
-    this.#controls = new Controls(this);
-
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start(SCENE_KEYS.TITLE_SCENE);
     });
@@ -184,24 +184,26 @@ export class OptionsScene extends Phaser.Scene {
    * @returns {void}
    */
   update() {
-    if (this.#controls.isInputLocked) {
+    super.update();
+
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
-      this.#controls.lockInput = true;
+    if (this._controls.wasBackKeyPressed()) {
+      this._controls.lockInput = true;
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
-      this.#controls.lockInput = true;
+    if (this._controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
+      this._controls.lockInput = true;
       this.#updateOptionDataInDataManager();
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveOptionMenuCursor(selectedDirection);
     }

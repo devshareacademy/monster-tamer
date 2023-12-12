@@ -1,8 +1,8 @@
-import Phaser from '../lib/phaser.js';
 import {
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
+  BUILDING_ASSET_KEYS,
   CHARACTER_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
@@ -21,8 +21,9 @@ import { DIRECTION } from '../common/direction.js';
 import { WALK_FRAME_RATE } from '../config.js';
 import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { BaseScene } from './base-scene.js';
 
-export class PreloadScene extends Phaser.Scene {
+export class PreloadScene extends BaseScene {
   constructor() {
     super({
       key: SCENE_KEYS.PRELOAD_SCENE,
@@ -33,7 +34,7 @@ export class PreloadScene extends Phaser.Scene {
    * @returns {void}
    */
   preload() {
-    console.log(`[${PreloadScene.name}:preload] invoked`);
+    super.preload();
 
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
@@ -115,11 +116,20 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     // load world assets
-    this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
-    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL, `assets/data/level.json`);
+    this.load.image(WORLD_ASSET_KEYS.MAIN_1_BACKGROUND, `${monsterTamerAssetPath}/map/main_1_level_background.png`);
+    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.MAIN_1_LEVEL, `assets/data/main_1.json`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
-    this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/level_foreground.png`);
+    this.load.image(WORLD_ASSET_KEYS.MAIN_1_FOREGROUND, `${monsterTamerAssetPath}/map/main_1_level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_foreground.png`
+    );
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_background.png`
+    );
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_1_LEVEL, `assets/data/building_1.json`);
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
@@ -158,7 +168,7 @@ export class PreloadScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${PreloadScene.name}:create] invoked`);
+    super.create();
 
     // TODO: move to animations file
     // create npc animations

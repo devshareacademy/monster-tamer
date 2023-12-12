@@ -1,12 +1,12 @@
 import Phaser from '../lib/phaser.js';
 import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
-import { Controls } from '../utils/controls.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { createNineSliceContainer } from '../utils/nine-slice.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = {
@@ -30,13 +30,11 @@ const MAIN_MENU_OPTIONS = Object.freeze({
   OPTIONS: 'OPTIONS',
 });
 
-export class TitleScene extends Phaser.Scene {
+export class TitleScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image} */
   #mainMenuCursorPhaserImageGameObject;
   /** @type {MainMenuOptions} */
   #selectedMenuOption;
-  /** @type {Controls} */
-  #controls;
   /** @type {boolean} */
   #isContinueButtonEnabled;
 
@@ -48,7 +46,7 @@ export class TitleScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${TitleScene.name}:create] invoked`);
+    super.create();
 
     this.#isContinueButtonEnabled = dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false;
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
@@ -98,37 +96,38 @@ export class TitleScene extends Phaser.Scene {
 
     // add in fade affects
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
-        dataManager.startNewGame();
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
-        return;
-      }
-
       if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
         this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
         return;
       }
 
-      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE) {
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
-        return;
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
+        dataManager.startNewGame();
       }
 
-      exhaustiveGuard(this.#selectedMenuOption);
-    });
+      /** @type {import('../utils/data-manager.js').PlayerLocation} */
+      const playerLocation = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION);
+      /** @type {import('./world-scene.js').WorldSceneData} */
+      const dataToPass = {
+        area: playerLocation.area,
+        isInterior: playerLocation.isInterior,
+      };
 
-    this.#controls = new Controls(this);
+      this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
+    });
   }
 
   /**
    * @returns {void}
    */
   update() {
-    if (this.#controls.isInputLocked) {
+    super.update();
+
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (
         this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME ||
@@ -136,12 +135,12 @@ export class TitleScene extends Phaser.Scene {
         this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE
       ) {
         this.cameras.main.fadeOut(500, 0, 0, 0);
-        this.#controls.lockInput = true;
+        this._controls.lockInput = true;
         return;
       }
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveMenuSelectCursor(selectedDirection);
     }

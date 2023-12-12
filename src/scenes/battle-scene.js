@@ -8,10 +8,10 @@ import { StateMachine } from '../utils/state-machine.js';
 import { Background } from '../battle/background.js';
 import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
-import { Controls } from '../utils/controls.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
+import { BaseScene } from './base-scene.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -25,11 +25,9 @@ const BATTLE_STATES = Object.freeze({
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
 });
 
-export class BattleScene extends Phaser.Scene {
+export class BattleScene extends BaseScene {
   /** @type {BattleMenu} */
   #battleMenu;
-  /** @type {Controls} */
-  #controls;
   /** @type {EnemyBattleMonster} */
   #activeEnemyMonster;
   /** @type {PlayerBattleMonster} */
@@ -55,6 +53,8 @@ export class BattleScene extends Phaser.Scene {
    * @returns {void}
    */
   init() {
+    super.init();
+
     this.#activePlayerAttackIndex = -1;
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
@@ -69,7 +69,8 @@ export class BattleScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${BattleScene.name}:create] invoked`);
+    super.create();
+
     // create main background
     const background = new Background(this);
     background.showForest();
@@ -91,21 +92,22 @@ export class BattleScene extends Phaser.Scene {
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
 
-    this.#controls = new Controls(this);
-    this.#controls.lockInput = true;
+    this._controls.lockInput = true;
   }
 
   /**
    * @returns {void}
    */
   update() {
+    super.update();
+
     this.#battleStateMachine.update();
 
-    if (this.#controls.isInputLocked) {
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     // limit input based on the current battle state we are in
     // if we are not in the right battle state, return early and do not process input
     if (
@@ -142,12 +144,12 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
+    if (this._controls.wasBackKeyPressed()) {
       this.#battleMenu.handlePlayerInput('CANCEL');
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
     }
@@ -297,7 +299,7 @@ export class BattleScene extends Phaser.Scene {
         // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
           this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
-          this.#controls.lockInput = false;
+          this._controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
             () => {
