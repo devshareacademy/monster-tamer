@@ -24,10 +24,10 @@ const game = new Phaser.Game({
 });
 
 game.scene.add(SCENE_KEYS.PRELOAD_SCENE, PreloadScene);
-game.scene.add(SCENE_KEYS.TITLE_SCENE, TitleScene);
-game.scene.add(SCENE_KEYS.OPTIONS_SCENE, OptionsScene);
 game.scene.add(SCENE_KEYS.WORLD_SCENE, WorldScene);
 game.scene.add(SCENE_KEYS.BATTLE_SCENE, BattleScene);
+game.scene.add(SCENE_KEYS.TITLE_SCENE, TitleScene);
+game.scene.add(SCENE_KEYS.OPTIONS_SCENE, OptionsScene);
 game.scene.add(SCENE_KEYS.INVENTORY_SCENE, InventoryScene);
 game.scene.add(SCENE_KEYS.MONSTER_PARTY_SCENE, MonsterPartyScene);
 game.scene.add(SCENE_KEYS.MONSTER_DETAILS_SCENE, MonsterDetailsScene);

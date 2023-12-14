@@ -60,8 +60,6 @@ export class WorldScene extends BaseScene {
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
-  /** @type {Phaser.Tilemaps.ObjectLayer} */
-  #entranceLayer;
   /** @type {NPC[]} */
   #npcs;
   /** @type {NPC | undefined} */
@@ -70,6 +68,8 @@ export class WorldScene extends BaseScene {
   #menu;
   /** @type {WorldSceneData} */
   #sceneData;
+  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  #entranceLayer;
 
   constructor() {
     super({
@@ -103,6 +103,7 @@ export class WorldScene extends BaseScene {
         isInterior: this.#sceneData.isInterior,
       })
     );
+    this.#npcPlayerIsInteractingWith = undefined;
   }
 
   /**
@@ -185,10 +186,10 @@ export class WorldScene extends BaseScene {
       position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
       collisionLayer: collisionLayer,
       direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
-      otherCharactersToCheckForCollisionWith: this.#npcs,
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
       },
+      otherCharactersToCheckForCollisionsWith: this.#npcs,
       spriteChangedDirectionCallback: () => {
         this.#handlePlayerDirectionUpdate();
       },
@@ -308,67 +309,6 @@ export class WorldScene extends BaseScene {
   }
 
   /**
-   * @param {Phaser.Tilemaps.Tilemap} map
-   * @returns {void}
-   */
-  #createNPCs(map) {
-    this.#npcs = [];
-
-    const npcLayers = map.getObjectLayerNames().filter((layerName) => layerName.includes('NPC'));
-    npcLayers.forEach((layerName) => {
-      const layer = map.getObjectLayer(layerName);
-      const npcObject = layer.objects.find((obj) => {
-        return obj.type === CUSTOM_TILED_TYPES.NPC;
-      });
-      if (!npcObject || npcObject.x === undefined || npcObject.y === undefined) {
-        return;
-      }
-      // get the path objects for this npc
-      const pathObjects = layer.objects.filter((obj) => {
-        return obj.type === CUSTOM_TILED_TYPES.NPC_PATH;
-      });
-      /** @type {import('../world/characters/npc.js').NPCPath} */
-      const npcPath = {
-        0: new Phaser.Math.Vector2(npcObject.x, npcObject.y - TILE_SIZE),
-      };
-      pathObjects.forEach((obj) => {
-        if (obj.x === undefined || obj.y === undefined) {
-          return;
-        }
-        npcPath[parseInt(obj.name, 10)] = new Phaser.Math.Vector2(obj.x, obj.y - TILE_SIZE);
-      });
-
-      /** @type {string} */
-      const npcFrame =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.FRAME
-        )?.value || '0';
-      /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
-      const npcMovement = /** @type {TiledObjectProperty[]} */ npcObject.properties.find(
-        (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
-      )?.value;
-      /** @type {string} */
-      const npcMessagesString =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
-        )?.value || '';
-      const npcMessages = npcMessagesString.split('::');
-
-      // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
-      const npc = new NPC({
-        scene: this,
-        position: new Phaser.Math.Vector2(npcObject.x, npcObject.y - TILE_SIZE),
-        direction: DIRECTION.DOWN,
-        frame: parseInt(npcFrame, 10),
-        messages: npcMessages,
-        npcPath,
-        movementPattern: npcMovement,
-      });
-      this.#npcs.push(npc);
-    });
-  }
-
-  /**
    * @returns {void}
    */
   #handlePlayerInteraction() {
@@ -390,7 +330,6 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    // console.log('start of interaction check');
     // get players current direction and check 1 tile over in that direction to see if there is an object that can be interacted with
     const { x, y } = this.#player.sprite;
     const targetPosition = getTargetPositionFromGameObjectPositionAndDirection({ x, y }, this.#player.direction);
@@ -466,18 +405,80 @@ export class WorldScene extends BaseScene {
   }
 
   /**
+   * @returns {boolean}
+   */
+  #isPlayerInputLocked() {
+    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+  }
+
+  /**
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createNPCs(map) {
+    this.#npcs = [];
+
+    const npcLayers = map.getObjectLayerNames().filter((layerName) => layerName.includes('NPC'));
+    npcLayers.forEach((layerName) => {
+      const layer = map.getObjectLayer(layerName);
+      const npcObject = layer.objects.find((obj) => {
+        return obj.type === CUSTOM_TILED_TYPES.NPC;
+      });
+      if (!npcObject || npcObject.x === undefined || npcObject.y === undefined) {
+        return;
+      }
+      // get the path objects for this npc
+      const pathObjects = layer.objects.filter((obj) => {
+        return obj.type === CUSTOM_TILED_TYPES.NPC_PATH;
+      });
+      /** @type {import('../world/characters/npc.js').NPCPath} */
+      const npcPath = {
+        0: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
+      };
+      pathObjects.forEach((obj) => {
+        if (obj.x === undefined || obj.y === undefined) {
+          return;
+        }
+        npcPath[parseInt(obj.name, 10)] = { x: obj.x, y: obj.y - TILE_SIZE };
+      });
+
+      /** @type {string} */
+      const npcFrame =
+        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+          (property) => property.name === TILED_NPC_PROPERTY.FRAME
+        )?.value || '0';
+      /** @type {string} */
+      const npcMessagesString =
+        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
+        )?.value || '';
+      const npcMessages = npcMessagesString.split('::');
+      /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
+      const npcMovement =
+        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+          (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
+        )?.value || 'IDLE';
+
+      // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
+      const npc = new NPC({
+        scene: this,
+        position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
+        direction: DIRECTION.DOWN,
+        frame: parseInt(npcFrame, 10),
+        messages: npcMessages,
+        npcPath,
+        movementPattern: npcMovement,
+      });
+      this.#npcs.push(npc);
+    });
+  }
+
+  /**
    * @returns {void}
    */
   #handlePlayerDirectionUpdate() {
     // update player direction on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
-  }
-
-  /**
-   * @returns {boolean}
-   */
-  #isPlayerInputLocked() {
-    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
   }
 
   /**

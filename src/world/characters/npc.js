@@ -35,6 +35,8 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
 export class NPC extends Character {
   /** @type {string[]} */
   #messages;
+  /** @type {boolean} */
+  #talkingToPlayer;
   /** @type {NPCPath} */
   #npcPath;
   /** @type {number} */
@@ -42,9 +44,7 @@ export class NPC extends Character {
   /** @type {NpcMovementPattern} */
   #movementPattern;
   /** @type {number} */
-  #lastMoveMentTime;
-  /** @type {boolean} */
-  #talkingToPlayer;
+  #lastMovementTime;
 
   /**
    * @param {NPCConfig} config
@@ -53,7 +53,7 @@ export class NPC extends Character {
     super({
       ...config,
       assetKey: CHARACTER_ASSET_KEYS.NPC,
-      origin: new Phaser.Math.Vector2(0, 0),
+      origin: { x: 0, y: 0 },
       idleFrameConfig: {
         DOWN: config.frame,
         UP: config.frame + 1,
@@ -64,11 +64,11 @@ export class NPC extends Character {
     });
 
     this.#messages = config.messages;
+    this.#talkingToPlayer = false;
     this.#npcPath = config.npcPath;
     this.#currentPathIndex = 0;
     this.#movementPattern = config.movementPattern;
-    this.#lastMoveMentTime = Phaser.Math.Between(3500, 5000);
-    this.#talkingToPlayer = false;
+    this.#lastMovementTime = Phaser.Math.Between(3500, 5000);
     this._phaserGameObject.setScale(4);
   }
 
@@ -87,42 +87,6 @@ export class NPC extends Character {
    */
   set isTalkingToPlayer(val) {
     this.#talkingToPlayer = val;
-  }
-
-  /**
-   * @param {import('../../common/direction.js').Direction} direction
-   * @returns {void}
-   */
-  moveCharacter(direction) {
-    super.moveCharacter(direction);
-
-    switch (this._direction) {
-      case DIRECTION.DOWN:
-      case DIRECTION.RIGHT:
-      case DIRECTION.UP:
-        if (
-          !this._phaserGameObject.anims.isPlaying ||
-          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${this._direction}`
-        ) {
-          this._phaserGameObject.play(`NPC_1_${this._direction}`);
-          this._phaserGameObject.setFlipX(false);
-        }
-        break;
-      case DIRECTION.LEFT:
-        if (
-          !this._phaserGameObject.anims.isPlaying ||
-          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${DIRECTION.RIGHT}`
-        ) {
-          this._phaserGameObject.play(`NPC_1_${DIRECTION.RIGHT}`);
-          this._phaserGameObject.setFlipX(true);
-        }
-        break;
-      case DIRECTION.NONE:
-        break;
-      default:
-        // We should never reach this default case
-        exhaustiveGuard(this._direction);
-    }
   }
 
   /**
@@ -167,7 +131,7 @@ export class NPC extends Character {
       return;
     }
 
-    if (this.#lastMoveMentTime < time) {
+    if (this.#lastMovementTime < time) {
       /** @type {import('../../common/direction.js').Direction} */
       let characterDirection = DIRECTION.NONE;
       let nextPosition = this.#npcPath[this.#currentPathIndex + 1];
@@ -196,7 +160,43 @@ export class NPC extends Character {
       }
 
       this.moveCharacter(characterDirection);
-      this.#lastMoveMentTime = time + Phaser.Math.Between(2000, 5000);
+      this.#lastMovementTime = time + Phaser.Math.Between(2000, 5000);
+    }
+  }
+
+  /**
+   * @param {import('../../common/direction.js').Direction} direction
+   * @returns {void}
+   */
+  moveCharacter(direction) {
+    super.moveCharacter(direction);
+
+    switch (this._direction) {
+      case DIRECTION.DOWN:
+      case DIRECTION.RIGHT:
+      case DIRECTION.UP:
+        if (
+          !this._phaserGameObject.anims.isPlaying ||
+          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${this._direction}`
+        ) {
+          this._phaserGameObject.play(`NPC_1_${this._direction}`);
+          this._phaserGameObject.setFlipX(false);
+        }
+        break;
+      case DIRECTION.LEFT:
+        if (
+          !this._phaserGameObject.anims.isPlaying ||
+          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${DIRECTION.RIGHT}`
+        ) {
+          this._phaserGameObject.play(`NPC_1_${DIRECTION.RIGHT}`);
+          this._phaserGameObject.setFlipX(true);
+        }
+        break;
+      case DIRECTION.NONE:
+        break;
+      default:
+        // We should never reach this default case
+        exhaustiveGuard(this._direction);
     }
   }
 }

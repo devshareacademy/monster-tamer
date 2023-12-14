@@ -1,22 +1,23 @@
 import Phaser from '../lib/phaser.js';
+import { SCENE_KEYS } from './scene-keys.js';
 import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { createNineSliceContainer } from '../utils/nine-slice.js';
-import { SCENE_KEYS } from './scene-keys.js';
-import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { NineSlice } from '../utils/nine-slice.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
-const MENU_TEXT_STYLE = {
+const MENU_TEXT_STYLE = Object.freeze({
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
   color: '#4D4A49',
   fontSize: '30px',
-};
+});
 
 const PLAYER_INPUT_CURSOR_POSITION = Object.freeze({
   x: 150,
+  y: 41,
 });
 
 /**
@@ -37,9 +38,21 @@ export class TitleScene extends BaseScene {
   #selectedMenuOption;
   /** @type {boolean} */
   #isContinueButtonEnabled;
+  /** @type {NineSlice} */
+  #nineSliceMenu;
 
   constructor() {
     super({ key: SCENE_KEYS.TITLE_SCENE });
+  }
+
+  init() {
+    super.init();
+
+    this.#nineSliceMenu = new NineSlice({
+      cornerCutSize: 32,
+      textureManager: this.sys.textures,
+      assetKeys: [UI_ASSET_KEYS.MENU_BACKGROUND],
+    });
   }
 
   /**
@@ -64,21 +77,24 @@ export class TitleScene extends BaseScene {
 
     // create menu
     const menuBgWidth = 500;
-    const menuBgContainer = createNineSliceContainer(this, UI_ASSET_KEYS.MENU_BACKGROUND, menuBgWidth, 200);
+    const menuBgContainer = this.#nineSliceMenu.createNineSliceContainer(
+      this,
+      menuBgWidth,
+      200,
+      UI_ASSET_KEYS.MENU_BACKGROUND
+    );
     const newGameText = this.add.text(menuBgWidth / 2, 40, 'New Game', MENU_TEXT_STYLE).setOrigin(0.5);
     const continueText = this.add.text(menuBgWidth / 2, 90, 'Continue', MENU_TEXT_STYLE).setOrigin(0.5);
-
     if (!this.#isContinueButtonEnabled) {
       continueText.setAlpha(0.5);
     }
-
     const optionText = this.add.text(menuBgWidth / 2, 140, 'Options', MENU_TEXT_STYLE).setOrigin(0.5);
     const menuContainer = this.add.container(0, 0, [menuBgContainer, newGameText, continueText, optionText]);
     menuContainer.setPosition(this.scale.width / 2 - menuBgWidth / 2, 300);
 
     // create cursors
     this.#mainMenuCursorPhaserImageGameObject = this.add
-      .image(PLAYER_INPUT_CURSOR_POSITION.x, 41, UI_ASSET_KEYS.CURSOR)
+      .image(PLAYER_INPUT_CURSOR_POSITION.x, PLAYER_INPUT_CURSOR_POSITION.y, UI_ASSET_KEYS.CURSOR)
       .setOrigin(0.5)
       .setScale(2.5);
     menuBgContainer.add(this.#mainMenuCursorPhaserImageGameObject);
@@ -129,15 +145,9 @@ export class TitleScene extends BaseScene {
 
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
-      if (
-        this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME ||
-        this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS ||
-        this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE
-      ) {
-        this.cameras.main.fadeOut(500, 0, 0, 0);
-        this._controls.lockInput = true;
-        return;
-      }
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this._controls.lockInput = true;
+      return;
     }
 
     const selectedDirection = this._controls.getDirectionKeyJustPressed();
@@ -154,7 +164,7 @@ export class TitleScene extends BaseScene {
     this.#updateSelectedMenuOptionFromInput(direction);
     switch (this.#selectedMenuOption) {
       case MAIN_MENU_OPTIONS.NEW_GAME:
-        this.#mainMenuCursorPhaserImageGameObject.setY(41);
+        this.#mainMenuCursorPhaserImageGameObject.setY(PLAYER_INPUT_CURSOR_POSITION.y);
         break;
       case MAIN_MENU_OPTIONS.CONTINUE:
         this.#mainMenuCursorPhaserImageGameObject.setY(91);
