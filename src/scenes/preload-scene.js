@@ -16,7 +16,6 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { createNineSliceTextures } from '../utils/nine-slice.js';
 import { DIRECTION } from '../common/direction.js';
 import { WALK_FRAME_RATE } from '../config.js';
 import { dataManager } from '../utils/data-manager.js';
@@ -170,39 +169,12 @@ export class PreloadScene extends BaseScene {
   create() {
     super.create();
 
-    // TODO: move to animations file
-    // create npc animations
-    this.anims.create({
-      key: `NPC_1_${DIRECTION.DOWN}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [24, 20, 25] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `NPC_1_${DIRECTION.UP}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [26, 21, 27] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `NPC_1_${DIRECTION.RIGHT}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [28, 22, 29] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-
-    // create nineslice textures
-    createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND);
-    createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
-    createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE);
-
     // attempt to populate data manager with saved data
     dataManager.loadData();
 
+    // create animations from json file
     this.#createAnimations();
+
     this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 

@@ -1,14 +1,13 @@
 import Phaser from '../lib/phaser.js';
 import { INVENTORY_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
-import { createNineSliceContainer } from '../utils/nine-slice.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { Controls } from '../utils/controls.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
 import { BaseScene } from './base-scene.js';
+import { NineSlice } from '../utils/nine-slice.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const INVENTORY_TEXT_STYLE = {
@@ -65,6 +64,8 @@ export class InventoryScene extends BaseScene {
   #selectedInventoryOptionIndex;
   /** @type {InventorySceneData} */
   #sceneData;
+  /** @type {NineSlice} */
+  #nineSliceMainContainer;
 
   constructor() {
     super({ key: SCENE_KEYS.INVENTORY_SCENE });
@@ -92,6 +93,12 @@ export class InventoryScene extends BaseScene {
         gameObjects: {},
       });
     }
+
+    this.#nineSliceMainContainer = new NineSlice({
+      cornerCutSize: 32,
+      textureManager: this.sys.textures,
+      assetKeys: [UI_ASSET_KEYS.MENU_BACKGROUND],
+    });
   }
 
   /**
@@ -103,11 +110,15 @@ export class InventoryScene extends BaseScene {
     this.add.image(0, 0, INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND).setOrigin(0);
     this.add.image(40, 120, INVENTORY_ASSET_KEYS.INVENTORY_BAG).setOrigin(0).setScale(0.5);
 
-    const container = createNineSliceContainer(this, UI_ASSET_KEYS.MENU_BACKGROUND, 700, 360).setPosition(300, 20);
+    const container = this.#nineSliceMainContainer
+      .createNineSliceContainer(this, 700, 360, UI_ASSET_KEYS.MENU_BACKGROUND)
+      .setPosition(300, 20);
     const containerBackground = this.add.rectangle(4, 4, 692, 352, 0xffff88).setOrigin(0).setAlpha(0.6);
     container.add(containerBackground);
 
-    const titleContainer = createNineSliceContainer(this, UI_ASSET_KEYS.MENU_BACKGROUND, 240, 64).setPosition(64, 20);
+    const titleContainer = this.#nineSliceMainContainer
+      .createNineSliceContainer(this, 240, 64, UI_ASSET_KEYS.MENU_BACKGROUND)
+      .setPosition(64, 20);
     const titleContainerBackground = this.add.rectangle(4, 4, 232, 56, 0xffff88).setOrigin(0).setAlpha(0.6);
     titleContainer.add(titleContainerBackground);
 

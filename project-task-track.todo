@@ -55,11 +55,11 @@ Level Development With Tiled:
   ✔ Exporting level images and JSON @done(23-11-27 09:26)
 
 World Scene Part 2:
-  ✔ add interactive game objects @done(23-11-27 10:28)
-  ☐ dialog ui component
-  ☐ add npcs
-  ☐ add npc dialog
-  ☐ add npc movement
+  ✔ add interactive game objects @done(23-11-18 20:35)
+  ✔ dialog ui component @done(23-11-18 20:35)
+  ✔ add npcs @done(23-11-18 20:59)
+  ✔ add npc dialog @done(23-11-18 21:46)
+  ✔ add npc movement @done(23-11-18 22:07)
 
 Title Screen:
   ☐ create basic title screen
