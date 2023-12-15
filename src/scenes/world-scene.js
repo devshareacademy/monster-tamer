@@ -156,10 +156,11 @@ export class WorldScene extends Phaser.Scene {
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
     this.cameras.main.fadeIn(1000, 0, 0, 0);
+
     this.cameras.main.on(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
-      const element = document.querySelector("[data-testid='loading']");
+      const element = document.querySelector("[data-test-id='loaded']");
       if (element) {
-        element.setAttribute('data-testid', 'loaded');
+        element.setAttribute('data-test-scene-id', SCENE_KEYS.WORLD_SCENE);
       }
     });
   }

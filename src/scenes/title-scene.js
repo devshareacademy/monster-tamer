@@ -125,6 +125,14 @@ export class TitleScene extends Phaser.Scene {
     });
 
     this.#controls = new Controls(this);
+
+    this.events.once(Phaser.Scenes.Events.CREATE, () => {
+      const element = document.querySelector("[data-test-id='loading']");
+      if (element) {
+        element.setAttribute('data-test-id', 'loaded');
+        element.setAttribute('data-test-scene-id', SCENE_KEYS.TITLE_SCENE);
+      }
+    });
   }
 
   update() {

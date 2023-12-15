@@ -195,6 +195,13 @@ export class OptionsScene extends Phaser.Scene {
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start(SCENE_KEYS.TITLE_SCENE);
     });
+
+    this.events.once(Phaser.Scenes.Events.CREATE, () => {
+      const element = document.querySelector("[data-test-id='loaded']");
+      if (element) {
+        element.setAttribute('data-test-scene-id', SCENE_KEYS.OPTIONS_SCENE);
+      }
+    });
   }
 
   /**

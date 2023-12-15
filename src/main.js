@@ -7,7 +7,7 @@ import { TitleScene } from './scenes/title-scene.js';
 import { OptionsScene } from './scenes/options-scene.js';
 
 const testDiv = document.createElement('div');
-testDiv.setAttribute('data-testid', 'loading');
+testDiv.setAttribute('data-test-id', 'loading');
 document.body.appendChild(testDiv);
 
 const game = new Phaser.Game({
