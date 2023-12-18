@@ -54,7 +54,7 @@ export class TitleScene extends Phaser.Scene {
     this.#nineSliceMenu = new NineSlice({
       cornerCutSize: 32,
       textureManager: this.sys.textures,
-      assetKey: UI_ASSET_KEYS.MENU_BACKGROUND,
+      assetKeys: [UI_ASSET_KEYS.MENU_BACKGROUND],
     });
   }
 
@@ -77,7 +77,12 @@ export class TitleScene extends Phaser.Scene {
 
     // create menu
     const menuBgWidth = 500;
-    const menuBgContainer = this.#nineSliceMenu.createNineSliceContainer(this, menuBgWidth, 200);
+    const menuBgContainer = this.#nineSliceMenu.createNineSliceContainer(
+      this,
+      menuBgWidth,
+      200,
+      UI_ASSET_KEYS.MENU_BACKGROUND
+    );
     const newGameText = this.add.text(menuBgWidth / 2, 40, 'New Game', MENU_TEXT_STYLE).setOrigin(0.5);
     const continueText = this.add.text(menuBgWidth / 2, 90, 'Continue', MENU_TEXT_STYLE).setOrigin(0.5);
     if (!this.#isContinueButtonEnabled) {

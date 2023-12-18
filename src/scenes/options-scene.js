@@ -93,7 +93,11 @@ export class OptionsScene extends Phaser.Scene {
     this.#nineSliceMainContainer = new NineSlice({
       cornerCutSize: 32,
       textureManager: this.sys.textures,
-      assetKey: UI_ASSET_KEYS.MENU_BACKGROUND,
+      assetKeys: [
+        UI_ASSET_KEYS.MENU_BACKGROUND,
+        UI_ASSET_KEYS.MENU_BACKGROUND_GREEN,
+        UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE,
+      ],
     });
 
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
@@ -115,7 +119,12 @@ export class OptionsScene extends Phaser.Scene {
     const optionMenuWidth = width - 200;
 
     // main options container
-    this.#mainContainer = this.#nineSliceMainContainer.createNineSliceContainer(this, optionMenuWidth, 432);
+    this.#mainContainer = this.#nineSliceMainContainer.createNineSliceContainer(
+      this,
+      optionMenuWidth,
+      432,
+      UI_ASSET_KEYS.MENU_BACKGROUND
+    );
     this.#mainContainer.setX(100).setY(20);
 
     // create main option sections
@@ -169,7 +178,12 @@ export class OptionsScene extends Phaser.Scene {
     this.add.image(660, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(0, 0).setScale(2.5);
 
     // option details container
-    this.#infoContainer = this.#nineSliceMainContainer.createNineSliceContainer(this, optionMenuWidth, 100);
+    this.#infoContainer = this.#nineSliceMainContainer.createNineSliceContainer(
+      this,
+      optionMenuWidth,
+      100,
+      UI_ASSET_KEYS.MENU_BACKGROUND
+    );
     this.#infoContainer.setX(100).setY(height - 110);
     this.#selectedOptionInfoMsgTextGameObject = this.add.text(125, 480, OPTION_MENU_OPTION_INFO_MSG.TEXT_SPEED, {
       ...OPTIONS_TEXT_STYLE,
@@ -706,15 +720,42 @@ export class OptionsScene extends Phaser.Scene {
     switch (this.#selectedMenuColorOption) {
       case 0:
         this.#selectedMenuColorTextGameObject.setText('1');
-        // TODO
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#mainContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND
+        );
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#infoContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND
+        );
         break;
       case 1:
         this.#selectedMenuColorTextGameObject.setText('2');
-        // TODO
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#mainContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_GREEN
+        );
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#infoContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_GREEN
+        );
         break;
       case 2:
         this.#selectedMenuColorTextGameObject.setText('3');
-        // TODO
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#mainContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE
+        );
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#infoContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE
+        );
         break;
       default:
         exhaustiveGuard(this.#selectedMenuColorOption);
