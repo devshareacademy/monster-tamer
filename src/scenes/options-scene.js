@@ -211,6 +211,9 @@ export class OptionsScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     if (this.#controls.isInputLocked) {
       return;
