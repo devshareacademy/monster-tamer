@@ -84,6 +84,9 @@ export class OptionsScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     console.log(`[${OptionsScene.name}:init] invoked`);
 
@@ -106,6 +109,9 @@ export class OptionsScene extends Phaser.Scene {
     this.#selectedMenuColorOption = 0;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${OptionsScene.name}:create] invoked`);
 
@@ -191,7 +197,7 @@ export class OptionsScene extends Phaser.Scene {
       .setOrigin(0)
       .setStrokeStyle(4, 0xe4434a, 1);
 
-    this.#updateTextSpeedOptionGameObjects();
+    this.#updateTextSpeedGameObjects();
     this.#updateBattleSceneOptionGameObjects();
     this.#updateBattleStyleOptionGameObjects();
     this.#updateSoundOptionGameObjects();
@@ -288,7 +294,7 @@ export class OptionsScene extends Phaser.Scene {
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
           this.#updateTextSpeedOption(direction);
-          this.#updateTextSpeedOptionGameObjects();
+          this.#updateTextSpeedGameObjects();
           return;
         default:
           exhaustiveGuard(direction);
@@ -416,37 +422,45 @@ export class OptionsScene extends Phaser.Scene {
    * @returns {void}
    */
   #updateTextSpeedOption(direction) {
-    if (direction === DIRECTION.LEFT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
-      return;
-    }
-    if (direction === DIRECTION.RIGHT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
-      return;
-    }
-
-    if (direction === DIRECTION.LEFT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.SLOW;
-      return;
-    }
-    if (direction === DIRECTION.LEFT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
-      return;
-    }
-
-    if (direction === DIRECTION.RIGHT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
-      return;
-    }
-    if (direction === DIRECTION.RIGHT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.FAST;
+    if (direction === DIRECTION.LEFT) {
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.SLOW;
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
+        return;
+      }
+      exhaustiveGuard(this.#selectedTextSpeedOption);
       return;
     }
 
     if (direction === DIRECTION.RIGHT) {
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.FAST;
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
+        return;
+      }
+      exhaustiveGuard(this.#selectedTextSpeedOption);
       return;
     }
+
+    exhaustiveGuard(direction);
   }
 
-  #updateTextSpeedOptionGameObjects() {
+  /**
+   * @returns {void}
+   */
+  #updateTextSpeedGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#textSpeedOptionTextGameObjects.getChildren()
     );
@@ -497,6 +511,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateBattleSceneOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleSceneOptionTextGameObjects.getChildren()
@@ -543,6 +560,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateBattleStyleOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleStyleOptionTextGameObjects.getChildren()
@@ -589,6 +609,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateSoundOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (this.#soundOptionTextGameObjects.getChildren());
 
@@ -637,6 +660,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateVolumeSlider() {
     switch (this.#selectedVolumeOption) {
       case 0:
@@ -685,10 +711,12 @@ export class OptionsScene extends Phaser.Scene {
       this.#selectedMenuColorOption += 1;
       return;
     }
-
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateMenuColorDisplayText() {
     switch (this.#selectedMenuColorOption) {
       case 0:
