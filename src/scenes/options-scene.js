@@ -240,6 +240,7 @@ export class OptionsScene extends Phaser.Scene {
 
   /**
    * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
    */
   #moveOptionMenuCursor(direction) {
     if (direction === DIRECTION.NONE) {
@@ -278,6 +279,7 @@ export class OptionsScene extends Phaser.Scene {
 
   /**
    * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
    */
   #updateSelectedOptionMenuFromInput(direction) {
     if (direction === DIRECTION.NONE) {
@@ -657,6 +659,8 @@ export class OptionsScene extends Phaser.Scene {
       );
       return;
     }
+
+    exhaustiveGuard(direction);
   }
 
   /**

@@ -205,13 +205,13 @@ export class NineSlice {
   updateNineSliceContainerTexture(textureManager, container, assetKey) {
     const methodName = 'updateNineSliceContainerTexture';
 
+    // validate we have the provided texture for the given asset key
     const texture = textureManager.get(assetKey);
     if (texture.key === '__MISSING') {
       console.warn(`[${NineSlice.name}:${methodName}] the provided texture asset key was not found`);
       return;
     }
-
-    // check to see if the texture already has more frames than the original base frame
+    // check to see if the texture has more than the base frames defined
     if (texture.getFrameNames(false).length === 0) {
       console.warn(
         `[${NineSlice.name}:${methodName}] the provided texture asset key does not have the required nine slice frames`
@@ -229,7 +229,7 @@ export class NineSlice {
       if (frameName === undefined) {
         return;
       }
-      phaserImageGameObject.setTexture(assetKey, phaserImageGameObject.getData(ASSET_CUT_FRAME_DATA_MANAGER_NAME));
+      phaserImageGameObject.setTexture(assetKey, frameName);
     });
   }
 }
