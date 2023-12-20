@@ -6,11 +6,12 @@ import { DIRECTION } from '../common/direction.js';
 import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { StateMachine } from '../utils/state-machine.js';
-import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
 import { Background } from '../battle/background.js';
 import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
 import { Controls } from '../utils/controls.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -39,6 +40,8 @@ export class BattleScene extends Phaser.Scene {
   #battleStateMachine;
   /** @type {AttackManager} */
   #attackManager;
+  /** @type {boolean} */
+  #skipAnimations;
 
   constructor() {
     super({
@@ -48,6 +51,12 @@ export class BattleScene extends Phaser.Scene {
 
   init() {
     this.#activePlayerAttackIndex = -1;
+    const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
+    if (chosenBattleSceneOption === undefined || chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
+      this.#skipAnimations = false;
+      return;
+    }
+    this.#skipAnimations = true;
   }
 
   create() {
@@ -69,7 +78,7 @@ export class BattleScene extends Phaser.Scene {
         baseAttack: 5,
         currentLevel: 5,
       },
-      skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
+      skipBattleAnimations: this.#skipAnimations,
     });
     this.#activePlayerMonster = new PlayerBattleMonster({
       scene: this,
@@ -83,13 +92,13 @@ export class BattleScene extends Phaser.Scene {
         baseAttack: 15,
         currentLevel: 5,
       },
-      skipBattleAnimations: SKIP_BATTLE_ANIMATIONS,
+      skipBattleAnimations: this.#skipAnimations,
     });
 
     // render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
+    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
     this.#createBattleStateMachine();
-    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
+    this.#attackManager = new AttackManager(this, this.#skipAnimations);
 
     this.#controls = new Controls(this);
   }
@@ -164,8 +173,7 @@ export class BattleScene extends Phaser.Scene {
             }
           );
         });
-      },
-      SKIP_BATTLE_ANIMATIONS
+      }
     );
   }
 
@@ -193,8 +201,7 @@ export class BattleScene extends Phaser.Scene {
             }
           );
         });
-      },
-      SKIP_BATTLE_ANIMATIONS
+      }
     );
   }
 
@@ -206,8 +213,7 @@ export class BattleScene extends Phaser.Scene {
           [`Wild ${this.#activeEnemyMonster.name} fainted.`, 'You have gained some experience'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          SKIP_BATTLE_ANIMATIONS
+          }
         );
       });
       return;
@@ -220,8 +226,7 @@ export class BattleScene extends Phaser.Scene {
           [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          SKIP_BATTLE_ANIMATIONS
+          }
         );
       });
       return;
@@ -260,7 +265,7 @@ export class BattleScene extends Phaser.Scene {
       onEnter: () => {
         // wait for any scene setup and transitions to complete
         createSceneTransition(this, {
-          skipSceneTransition: SKIP_BATTLE_ANIMATIONS,
+          skipSceneTransition: this.#skipAnimations,
           callback: () => {
             this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
           },
@@ -279,8 +284,7 @@ export class BattleScene extends Phaser.Scene {
             () => {
               // wait for text animation to complete and move to next state
               this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
-            },
-            SKIP_BATTLE_ANIMATIONS
+            }
           );
         });
       },
@@ -292,16 +296,12 @@ export class BattleScene extends Phaser.Scene {
         // wait for player monster to appear on the screen and notify the player about monster
         this.#activePlayerMonster.playMonsterAppearAnimation(() => {
           this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => undefined);
-          this.#battleMenu.updateInfoPaneMessageNoInputRequired(
-            `go ${this.#activePlayerMonster.name}!`,
-            () => {
-              // wait for text animation to complete and move to next state
-              this.time.delayedCall(1200, () => {
-                this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
-              });
-            },
-            SKIP_BATTLE_ANIMATIONS
-          );
+          this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
+            // wait for text animation to complete and move to next state
+            this.time.delayedCall(1200, () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            });
+          });
         });
       },
     });
@@ -353,13 +353,9 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          ['You got away safely!'],
-          () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          SKIP_BATTLE_ANIMATIONS
-        );
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
+          this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+        });
       },
     });
 

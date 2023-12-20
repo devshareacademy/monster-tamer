@@ -62,9 +62,9 @@ World Scene Part 2:
   ✔ add npc movement @done(23-11-18 22:07)
 
 Title Screen:
-  ☐ create basic title screen
-  ☐ add options menu
-  ☐ save & loading options
+  ✔ create basic title screen @done(23-12-20 10:23)
+  ✔ add options menu @done(23-12-20 10:23)
+  ✔ save & loading options @done(23-12-20 10:23)
   ☐ connecting option data to battle scene
 
 Tools Part 1:
