@@ -53,7 +53,7 @@ export class OptionsScene extends Phaser.Scene {
   /** @type {Phaser.GameObjects.Rectangle} */
   #volumeOptionsMenuCursor;
   /** @type {Phaser.GameObjects.Text} */
-  #volumeOptionValueText;
+  #volumeOptionsValueText;
   /** @type {Phaser.GameObjects.Text} */
   #selectedMenuColorTextGameObject;
   /** @type {Phaser.GameObjects.Container} */
@@ -80,9 +80,14 @@ export class OptionsScene extends Phaser.Scene {
   #selectedMenuColorOption;
 
   constructor() {
-    super({ key: SCENE_KEYS.OPTIONS_SCENE });
+    super({
+      key: SCENE_KEYS.OPTIONS_SCENE,
+    });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     console.log(`[${OptionsScene.name}:init] invoked`);
 
@@ -105,6 +110,9 @@ export class OptionsScene extends Phaser.Scene {
     this.#selectedMenuColorOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     console.log(`[${OptionsScene.name}:create] invoked`);
 
@@ -122,15 +130,15 @@ export class OptionsScene extends Phaser.Scene {
 
     // create main option sections
     this.add.text(width / 2, 40, 'Options', OPTIONS_TEXT_STYLE).setOrigin(0.5);
-    const menuOptions = ['Text Speed', 'Battle Scene', 'Battle Style', 'Sound', 'Volume', 'Menu Color', 'Close'];
-    const menuOptionPosition = {
+    const menuOptionsPosition = {
       x: 25,
       yStart: 55,
       yIncrement: 55,
     };
+    const menuOptions = ['Text Speed', 'Battle Scene', 'Battle Style', 'Sound', 'Volume', 'Menu Color', 'Close'];
     menuOptions.forEach((option, index) => {
-      const x = menuOptionPosition.x;
-      const y = menuOptionPosition.yStart + menuOptionPosition.yIncrement * index;
+      const x = menuOptionsPosition.x;
+      const y = menuOptionsPosition.yStart + menuOptionsPosition.yIncrement * index;
       const textGameObject = this.add.text(x, y, option, OPTIONS_TEXT_STYLE);
       this.#mainContainer.add(textGameObject);
     });
@@ -163,12 +171,12 @@ export class OptionsScene extends Phaser.Scene {
     // volume options
     this.add.rectangle(420, 312, 300, 4, 0xffffff, 1).setOrigin(0, 0.5);
     this.#volumeOptionsMenuCursor = this.add.rectangle(710, 312, 10, 25, 0xff2222, 1).setOrigin(0, 0.5);
-    this.#volumeOptionValueText = this.add.text(760, 295, '100%', OPTIONS_TEXT_STYLE);
+    this.#volumeOptionsValueText = this.add.text(760, 295, '100%', OPTIONS_TEXT_STYLE);
 
     // frame options
     this.#selectedMenuColorTextGameObject = this.add.text(590, 350, '', OPTIONS_TEXT_STYLE);
-    this.add.image(660, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(0, 0).setScale(2.5);
     this.add.image(530, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(1, 0).setScale(2.5).setFlipX(true);
+    this.add.image(660, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(0, 0).setScale(2.5);
 
     // option details container
     this.#infoContainer = this.#nineSliceMainContainer.createNineSliceContainer(
@@ -190,7 +198,7 @@ export class OptionsScene extends Phaser.Scene {
       .setOrigin(0)
       .setStrokeStyle(4, 0xe4434a, 1);
 
-    this.#updateTextSpeedOptionGameObjects();
+    this.#updateTextSpeedGameObjects();
     this.#updateBattleSceneOptionGameObjects();
     this.#updateBattleStyleOptionGameObjects();
     this.#updateSoundOptionGameObjects();
@@ -204,6 +212,9 @@ export class OptionsScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     if (this.#controls.isInputLocked) {
       return;
@@ -299,7 +310,7 @@ export class OptionsScene extends Phaser.Scene {
         case DIRECTION.LEFT:
         case DIRECTION.RIGHT:
           this.#updateTextSpeedOption(direction);
-          this.#updateTextSpeedOptionGameObjects();
+          this.#updateTextSpeedGameObjects();
           return;
         default:
           exhaustiveGuard(direction);
@@ -427,37 +438,45 @@ export class OptionsScene extends Phaser.Scene {
    * @returns {void}
    */
   #updateTextSpeedOption(direction) {
-    if (direction === DIRECTION.LEFT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
-      return;
-    }
-    if (direction === DIRECTION.RIGHT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
-      return;
-    }
-
-    if (direction === DIRECTION.LEFT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.SLOW;
-      return;
-    }
-    if (direction === DIRECTION.LEFT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
-      return;
-    }
-
-    if (direction === DIRECTION.RIGHT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
-      return;
-    }
-    if (direction === DIRECTION.RIGHT && this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
-      this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.FAST;
+    if (direction === DIRECTION.LEFT) {
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.SLOW;
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
+        return;
+      }
+      exhaustiveGuard(this.#selectedTextSpeedOption);
       return;
     }
 
     if (direction === DIRECTION.RIGHT) {
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.FAST) {
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.MID) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.FAST;
+        return;
+      }
+      if (this.#selectedTextSpeedOption === TEXT_SPEED_OPTIONS.SLOW) {
+        this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
+        return;
+      }
+      exhaustiveGuard(this.#selectedTextSpeedOption);
       return;
     }
+
+    exhaustiveGuard(direction);
   }
 
-  #updateTextSpeedOptionGameObjects() {
+  /**
+   * @returns {void}
+   */
+  #updateTextSpeedGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#textSpeedOptionTextGameObjects.getChildren()
     );
@@ -508,6 +527,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateBattleSceneOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleSceneOptionTextGameObjects.getChildren()
@@ -554,6 +576,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateBattleStyleOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (
       this.#battleStyleOptionTextGameObjects.getChildren()
@@ -600,6 +625,9 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateSoundOptionGameObjects() {
     const textGameObjects = /** @type {Phaser.GameObjects.Text[]} */ (this.#soundOptionTextGameObjects.getChildren());
 
@@ -648,27 +676,30 @@ export class OptionsScene extends Phaser.Scene {
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateVolumeSlider() {
     switch (this.#selectedVolumeOption) {
       case 0:
         this.#volumeOptionsMenuCursor.setX(420);
-        this.#volumeOptionValueText.setText('0%');
+        this.#volumeOptionsValueText.setText('0%');
         break;
       case 1:
         this.#volumeOptionsMenuCursor.setX(490);
-        this.#volumeOptionValueText.setText('25%');
+        this.#volumeOptionsValueText.setText('25%');
         break;
       case 2:
         this.#volumeOptionsMenuCursor.setX(560);
-        this.#volumeOptionValueText.setText('50%');
+        this.#volumeOptionsValueText.setText('50%');
         break;
       case 3:
         this.#volumeOptionsMenuCursor.setX(630);
-        this.#volumeOptionValueText.setText('75%');
+        this.#volumeOptionsValueText.setText('75%');
         break;
       case 4:
         this.#volumeOptionsMenuCursor.setX(710);
-        this.#volumeOptionValueText.setText('100%');
+        this.#volumeOptionsValueText.setText('100%');
         break;
       default:
         exhaustiveGuard(this.#selectedVolumeOption);
@@ -696,10 +727,12 @@ export class OptionsScene extends Phaser.Scene {
       this.#selectedMenuColorOption += 1;
       return;
     }
-
     exhaustiveGuard(direction);
   }
 
+  /**
+   * @returns {void}
+   */
   #updateMenuColorDisplayText() {
     switch (this.#selectedMenuColorOption) {
       case 0:
