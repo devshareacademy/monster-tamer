@@ -1,7 +1,7 @@
 import Phaser from '../lib/phaser.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILE_SIZE } from '../config.js';
-import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
+import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
@@ -19,7 +19,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').BattleStyleMenuOptions} options.battleStyle
  * @property {import('../common/options.js').SoundMenuOptions} options.sound
  * @property {import('../common/options.js').VolumeMenuOptions} options.volume
- * @property {import('../common/options.js').VolumeMenuOptions} options.menuColor
+ * @property {import('../common/options.js').MenuColorOptions} options.menuColor
  */
 
 /** @type {GlobalState} */
