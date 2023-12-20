@@ -72,9 +72,10 @@ class DataManager extends Phaser.Events.EventEmitter {
    * @returns {void}
    */
   loadData() {
+    // attempt to load data from browser storage and populate the data manager
     if (typeof Storage === 'undefined') {
       console.warn(
-        `[${DataManager.name}:loadData] localStorage is not supported, will not be able to save and load data`
+        `[${DataManager.name}:loadData] localStorage is not supported, will not be able to save and load data.`
       );
       return;
     }
@@ -100,9 +101,10 @@ class DataManager extends Phaser.Events.EventEmitter {
    * @returns {void}
    */
   saveData() {
+    // attempt to storage data in browser storage from data manager
     if (typeof Storage === 'undefined') {
       console.warn(
-        `[${DataManager.name}:saveData] localStorage is not supported, will not be able to save and load data`
+        `[${DataManager.name}:saveData] localStorage is not supported, will not be able to save and load data.`
       );
       return;
     }
