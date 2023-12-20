@@ -113,6 +113,9 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
+  /**
+   * @returns {number}
+   */
   getAnimatedTextSpeed() {
     /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
     const chosenTextSpeed = this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);

@@ -65,7 +65,7 @@ Title Screen:
   ✔ create basic title screen @done(23-12-20 10:23)
   ✔ add options menu @done(23-12-20 10:23)
   ✔ save & loading options @done(23-12-20 10:23)
-  ☐ connecting option data to battle scene
+  ✔ connecting option data to battle scene @done(23-12-20 11:10)
 
 Tools Part 1:
   ☐ using tweakpane for testing

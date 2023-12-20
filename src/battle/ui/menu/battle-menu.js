@@ -66,6 +66,7 @@ export class BattleMenu {
    *
    * @param {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
    * @param {BattleMonster} activePlayerMonster the players current active monster in the current battle
+   * @param {boolean} [skipBattleAnimations=false] used to skip all animations tied to the battle
    */
   constructor(scene, activePlayerMonster, skipBattleAnimations = false) {
     this.#scene = scene;

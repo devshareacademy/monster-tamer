@@ -51,6 +51,7 @@ export class BattleScene extends Phaser.Scene {
 
   init() {
     this.#activePlayerAttackIndex = -1;
+    /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
     if (chosenBattleSceneOption === undefined || chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
       this.#skipAnimations = false;
