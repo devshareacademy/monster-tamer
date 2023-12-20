@@ -239,6 +239,9 @@ export class OptionsScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #updateOptionDataInDataManager() {
     dataManager.store.set({
       [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: this.#selectedTextSpeedOption,

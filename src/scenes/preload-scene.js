@@ -127,6 +127,8 @@ export class PreloadScene extends Phaser.Scene {
   create() {
     console.log(`[${PreloadScene.name}:create] invoked`);
     this.#createAnimations();
+    // attempt to populate data manager with saved data
+    dataManager.loadData();
     this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
   }
 
@@ -145,8 +147,5 @@ export class PreloadScene extends Phaser.Scene {
         yoyo: animation.yoyo,
       });
     });
-
-    // attempt to populate data manager with saved data
-    dataManager.loadData();
   }
 }
