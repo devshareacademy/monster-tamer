@@ -113,31 +113,12 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
-  getAnimatedTextSpeed() {
-    /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
-    const chosenTextSpeed = this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
-    if (chosenTextSpeed === undefined) {
-      return TEXT_SPEED.MEDIUM;
-    }
-
-    switch (chosenTextSpeed) {
-      case TEXT_SPEED_OPTIONS.FAST:
-        return TEXT_SPEED.FAST;
-      case TEXT_SPEED_OPTIONS.MID:
-        return TEXT_SPEED.MEDIUM;
-      case TEXT_SPEED_OPTIONS.SLOW:
-        return TEXT_SPEED.SLOW;
-      default:
-        exhaustiveGuard(chosenTextSpeed);
-    }
-  }
-
   /**
    * @returns {number}
    */
   getAnimatedTextSpeed() {
     /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
-    const chosenTextSpeed = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    const chosenTextSpeed = this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
     if (chosenTextSpeed === undefined) {
       return TEXT_SPEED.MEDIUM;
     }
