@@ -67,12 +67,6 @@ Title Screen:
   ✔ save & loading options @done(23-12-20 10:23)
   ✔ connecting option data to battle scene @done(23-12-20 11:10)
 
-Tools Part 1:
-  ☐ using tweakpane for testing
-    ☐ positioning game objects
-    ☐ monster attacks
-    ☐ animations
-
 Saving & Loading:
   ☐ add game menu with option to save game
   ☐ update menu scene with continue option to load game
@@ -102,6 +96,12 @@ World Scene Part 3:
     ☐ saving game data
   ☐ buildings
   ☐ items in the field
+
+Tools Part 1:
+  ☐ using tweakpane for testing
+    ☐ positioning game objects
+    ☐ monster attacks
+    ☐ animations
 
 -------------------------------
 
