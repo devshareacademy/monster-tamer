@@ -31,7 +31,8 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').VolumeMenuOptions} options.menuColor
  * @property {boolean} gameStarted
  * @property {import('../types/typedef.js').Inventory} inventory
- * @property {import('../types/typedef.js').BaseMonster[]} monsters
+ * @property {object} monsters
+ * @property {import('../types/typedef.js').BaseMonster[]} monsters.inParty
  */
 
 /** @type {GlobalState} */
@@ -57,15 +58,17 @@ const initialState = {
   },
   gameStarted: false,
   inventory: [],
-  monsters: [
-    {
-      id: 1,
-      currentHp: 25,
-      maxHp: 25,
-      baseAttack: 5,
-      currentLevel: 5,
-    },
-  ],
+  monsters: {
+    inParty: [
+      {
+        id: 1,
+        currentHp: 25,
+        maxHp: 25,
+        baseAttack: 5,
+        currentLevel: 5,
+      },
+    ],
+  },
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -154,7 +157,9 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.player.location = { ...initialState.player.location };
     existingData.gameStarted = initialState.gameStarted;
     existingData.inventory = initialState.inventory;
-    existingData.monsters = [...initialState.monsters];
+    existingData.monsters = {
+      inParty: [...initialState.monsters.inParty],
+    };
 
     this.#store.reset();
     this.#updateDataManger(existingData);
@@ -224,7 +229,9 @@ class DataManager extends Phaser.Events.EventEmitter {
       },
       gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
-      monsters: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS)],
+      monsters: {
+        inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS)],
+      },
     };
   }
 }

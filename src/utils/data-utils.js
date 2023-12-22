@@ -44,4 +44,34 @@ export class DataUtils {
     const data = scene.cache.json.get(DATA_ASSET_KEYS.ANIMATIONS);
     return data;
   }
+
+  /**
+   * Utility function for retrieving the Animation objects from the animations.json data file.
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {import('../types/typedef.js').BaseMonster[]} baseMonsters the base monsters that need to be populated with data
+   * @returns {import('../types/typedef.js').Monster[]}
+   */
+  static createMonstersFromBaseMonsters(scene, baseMonsters) {
+    /** @type { import('../types/typedef.js').Monster[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
+
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monsters = [];
+
+    baseMonsters.forEach((baseMonster) => {
+      const monsterData = data.find((monster) => monster.id === baseMonster.id);
+      if (!monsterData) {
+        return;
+      }
+      monsters.push({
+        ...baseMonster,
+        name: monsterData.name,
+        assetKey: monsterData.assetKey,
+        assetFrame: monsterData.assetFrame,
+        attackIds: [...monsterData.attackIds],
+      });
+    });
+
+    return monsters;
+  }
 }
