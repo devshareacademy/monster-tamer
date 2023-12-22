@@ -6,6 +6,7 @@ import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
+import { dataManager, DATA_MANAGER_STORE_KEYS } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = Object.freeze({
@@ -62,7 +63,7 @@ export class TitleScene extends Phaser.Scene {
     console.log(`[${TitleScene.name}:create] invoked`);
 
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
-    this.#isContinueButtonEnabled = false;
+    this.#isContinueButtonEnabled = dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false;
 
     // create title scene background
     this.add.image(0, 0, TITLE_ASSET_KEYS.BACKGROUND).setOrigin(0).setScale(0.58);
@@ -112,21 +113,16 @@ export class TitleScene extends Phaser.Scene {
 
     // add in fade effects
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
-        // TODO: enhance with logic to reset game once we implement saving/loading data
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
-        return;
-      }
-
-      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE) {
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
-        return;
-      }
-
       if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
         this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
         return;
       }
+
+      if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
+        dataManager.startNewGame();
+      }
+
+      this.scene.start(SCENE_KEYS.WORLD_SCENE);
     });
 
     this.#controls = new Controls(this);
