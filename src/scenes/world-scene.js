@@ -248,7 +248,7 @@ export class WorldScene extends BaseScene {
       this.#handlePlayerInteraction();
     }
 
-    if (this._controls.wasEnterKeyPressed()) {
+    if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
       if (this.#dialogUi.isVisible) {
         return;
       }
@@ -297,9 +297,10 @@ export class WorldScene extends BaseScene {
       }
     }
 
-    if (this._controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
-      this.#handlePlayerInteraction();
-    }
+    // TODO: see if this can be cleaned up
+    // if (this._controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+    //   this.#handlePlayerInteraction();
+    // }
 
     this.#player.update(time);
 
