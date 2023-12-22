@@ -16,8 +16,8 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { DIRECTION } from '../common/direction.js';
-import { WALK_FRAME_RATE } from '../config.js';
+// import { DIRECTION } from '../common/direction.js';
+// import { WALK_FRAME_RATE } from '../config.js';
 import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { BaseScene } from './base-scene.js';
@@ -175,7 +175,7 @@ export class PreloadScene extends BaseScene {
     // create animations from json file
     this.#createAnimations();
 
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.BATTLE_SCENE);
   }
 
   /**
