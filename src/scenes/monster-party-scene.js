@@ -8,12 +8,11 @@ import {
 } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
-import { DataUtils } from '../utils/data-utils.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
 import { BaseScene } from './base-scene.js';
-import { dataManager } from '../utils/data-manager.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -71,7 +70,7 @@ export class MonsterPartyScene extends BaseScene {
     super.init(data);
 
     this.#selectedPartyMonsterIndex = 0;
-    this.#monsters = dataManager.getMonstersInParty(this);
+    this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
 
     this.#monsterPartyBackgrounds = [];
     this.#sceneData = data;

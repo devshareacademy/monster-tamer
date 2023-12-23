@@ -13,6 +13,7 @@ import Phaser from '../lib/phaser.js';
  * @typedef BaseMonster
  * @type {object}
  * @property {number} id the unique identifier for this monster
+ * @property {number} monsterId the unique identifier for this monster type
  * @property {number} currentLevel the current level of this monster
  * @property {number} maxHp the max health of this monster
  * @property {number} currentHp the max health of this monster

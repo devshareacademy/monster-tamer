@@ -3,7 +3,6 @@ import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { DIRECTION } from '../common/direction.js';
 import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
-import { DataUtils } from './data-utils.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
@@ -17,7 +16,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 /**
  * @typedef MonsterData
  * @type {object}
- * @property {import('../types/typedef.js').BaseMonster[]} monsters.inParty
+ * @property {import('../types/typedef.js').Monster[]} monsters.inParty
  */
 
 /**
@@ -68,10 +67,15 @@ const initialState = {
     inParty: [
       {
         id: 1,
+        monsterId: 1,
         currentHp: 25,
         maxHp: 25,
         baseAttack: 20,
         currentLevel: 5,
+        assetKey: 'IGUANIGNITE',
+        name: 'iguanignite',
+        assetFrame: 0,
+        attackIds: [2],
       },
     ],
   },
@@ -192,34 +196,6 @@ class DataManager extends Phaser.Events.EventEmitter {
       default:
         exhaustiveGuard(chosenTextSpeed);
     }
-  }
-
-  /**
-   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @returns {import('../types/typedef.js').Monster[]}
-   */
-  getMonstersInParty(scene) {
-    return DataUtils.createMonstersFromBaseMonsters(scene, this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY));
-  }
-
-  /**
-   * @param {import('../types/typedef.js').Monster[]} monsters
-   */
-  updateMonstersInPartyDetails(monsters) {
-    this.#store.set(
-      DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY,
-      monsters.map((monster) => {
-        /** @type {import('../types/typedef.js').BaseMonster} */
-        const baseMonster = {
-          currentHp: monster.currentHp,
-          id: monster.id,
-          currentLevel: monster.currentLevel,
-          baseAttack: monster.baseAttack,
-          maxHp: monster.maxHp,
-        };
-        return baseMonster;
-      })
-    );
   }
 
   /**
