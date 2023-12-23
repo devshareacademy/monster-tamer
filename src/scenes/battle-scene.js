@@ -52,6 +52,8 @@ export class BattleScene extends BaseScene {
   #activeEnemyAttackIndex;
   /** @type {BattleSceneData} */
   #sceneData;
+  /** @type {number} */
+  #activePlayerMonsterPartyIndex;
 
   constructor() {
     super({
@@ -83,6 +85,7 @@ export class BattleScene extends BaseScene {
       return;
     }
     this.#skipAnimations = true;
+    this.#activePlayerMonsterPartyIndex = 0;
   }
 
   /**
@@ -227,6 +230,9 @@ export class BattleScene extends BaseScene {
             ATTACK_TARGET.PLAYER,
             () => {
               this.#activePlayerMonster.playTakeDamageAnimation(() => {
+                this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp =
+                  this.#activePlayerMonster.currentHp;
+                dataManager.updateMonstersInPartyDetails(this.#sceneData.playerMonsters);
                 this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
                   callback();
                 });

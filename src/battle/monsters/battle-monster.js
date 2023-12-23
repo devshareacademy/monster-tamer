@@ -52,6 +52,11 @@ export class BattleMonster {
     });
   }
 
+  /** @type {number} */
+  get currentHp() {
+    return this._currentHealth;
+  }
+
   /** @type {boolean} */
   get isFainted() {
     return this._currentHealth <= 0;

@@ -404,7 +404,7 @@ export class WorldScene extends BaseScene {
         /** @type {import('./battle-scene.js').BattleSceneData} */
         const dataToPass = {
           enemyMonsters: [DataUtils.getCarnodusk(this)],
-          playerMonsters: [DataUtils.getIguanignite(this)], // TODO: pull this from data manager
+          playerMonsters: dataManager.getMonstersInParty(this),
         };
 
         this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);

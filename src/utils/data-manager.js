@@ -3,6 +3,7 @@ import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { DIRECTION } from '../common/direction.js';
 import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
+import { DataUtils } from './data-utils.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
@@ -11,6 +12,12 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @type {object}
  * @property {string} area
  * @property {boolean} isInterior
+ */
+
+/**
+ * @typedef MonsterData
+ * @type {object}
+ * @property {import('../types/typedef.js').BaseMonster[]} monsters.inParty
  */
 
 /**
@@ -31,8 +38,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').VolumeMenuOptions} options.menuColor
  * @property {boolean} gameStarted
  * @property {import('../types/typedef.js').Inventory} inventory
- * @property {object} monsters
- * @property {import('../types/typedef.js').BaseMonster[]} monsters.inParty
+ * @property {MonsterData} monsters
  */
 
 /** @type {GlobalState} */
@@ -64,7 +70,7 @@ const initialState = {
         id: 1,
         currentHp: 25,
         maxHp: 25,
-        baseAttack: 5,
+        baseAttack: 20,
         currentLevel: 5,
       },
     ],
@@ -83,7 +89,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   OPTIONS_MENU_COLOR: 'OPTIONS_MENU_COLOR',
   GAME_STARTED: 'GAME_STARTED',
   INVENTORY: 'INVENTORY',
-  MONSTERS: 'MONSTERS',
+  MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -189,6 +195,34 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @returns {import('../types/typedef.js').Monster[]}
+   */
+  getMonstersInParty(scene) {
+    return DataUtils.createMonstersFromBaseMonsters(scene, this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY));
+  }
+
+  /**
+   * @param {import('../types/typedef.js').Monster[]} monsters
+   */
+  updateMonstersInPartyDetails(monsters) {
+    this.#store.set(
+      DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY,
+      monsters.map((monster) => {
+        /** @type {import('../types/typedef.js').BaseMonster} */
+        const baseMonster = {
+          currentHp: monster.currentHp,
+          id: monster.id,
+          currentLevel: monster.currentLevel,
+          baseAttack: monster.baseAttack,
+          maxHp: monster.maxHp,
+        };
+        return baseMonster;
+      })
+    );
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -205,7 +239,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
-      [DATA_MANAGER_STORE_KEYS.MONSTERS]: data.monsters,
+      [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
     });
   }
 
@@ -230,7 +264,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
       monsters: {
-        inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS)],
+        inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
       },
     };
   }

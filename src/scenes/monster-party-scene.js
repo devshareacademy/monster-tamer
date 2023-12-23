@@ -13,6 +13,7 @@ import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
 import { BaseScene } from './base-scene.js';
+import { dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -70,14 +71,7 @@ export class MonsterPartyScene extends BaseScene {
     super.init(data);
 
     this.#selectedPartyMonsterIndex = 0;
-    this.#monsters = [];
-
-    // added for testing from preload scene
-    // TODO: need to add logic to grab monster party data from the data manager
-    if (this.#monsters.length === 0) {
-      this.#monsters.push(DataUtils.getIguanignite(this));
-      // this.#monsters.push(DataUtils.getCarnodusk(this));
-    }
+    this.#monsters = dataManager.getMonstersInParty(this);
 
     this.#monsterPartyBackgrounds = [];
     this.#sceneData = data;
