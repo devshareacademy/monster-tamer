@@ -57,6 +57,8 @@ export class MonsterPartyScene extends BaseScene {
   #waitingForInput;
   /** @type {HealthBar[]} */
   #healthBars;
+  /** @type {Phaser.GameObjects.Text[]} */
+  #healthBarTextGameObjects;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
@@ -76,6 +78,7 @@ export class MonsterPartyScene extends BaseScene {
     this.#sceneData = data;
     this.#waitingForInput = false;
     this.#healthBars = [];
+    this.#healthBarTextGameObjects = [];
   }
 
   /**
@@ -244,6 +247,7 @@ export class MonsterPartyScene extends BaseScene {
         fontSize: '38px',
       })
       .setOrigin(1, 0);
+    this.#healthBarTextGameObjects.push(healthBarTextGameObject);
 
     const monsterImage = this.add.image(35, 20, monsterDetails.assetKey).setOrigin(0).setScale(0.35);
 
@@ -373,6 +377,11 @@ export class MonsterPartyScene extends BaseScene {
       this.#monsters[this.#selectedPartyMonsterIndex].currentHp / this.#monsters[this.#selectedPartyMonsterIndex].maxHp,
       {
         callback: () => {
+          this.#healthBarTextGameObjects[this.#selectedPartyMonsterIndex].setText(
+            `${this.#monsters[this.#selectedPartyMonsterIndex].currentHp} / ${
+              this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+            }`
+          );
           this.time.delayedCall(300, () => {
             this.#goBackToPreviousScene(true);
           });

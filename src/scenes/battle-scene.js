@@ -228,10 +228,10 @@ export class BattleScene extends BaseScene {
             ATTACK_TARGET.PLAYER,
             () => {
               this.#activePlayerMonster.playTakeDamageAnimation(() => {
-                this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp =
-                  this.#activePlayerMonster.currentHp;
-                dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
                 this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+                  this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp =
+                    this.#activePlayerMonster.currentHp;
+                  dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
                   callback();
                 });
               });
