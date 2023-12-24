@@ -8,11 +8,11 @@ import {
 } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
-import { DataUtils } from '../utils/data-utils.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
 import { BaseScene } from './base-scene.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -57,6 +57,8 @@ export class MonsterPartyScene extends BaseScene {
   #waitingForInput;
   /** @type {HealthBar[]} */
   #healthBars;
+  /** @type {Phaser.GameObjects.Text[]} */
+  #healthBarTextGameObjects;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
@@ -70,19 +72,13 @@ export class MonsterPartyScene extends BaseScene {
     super.init(data);
 
     this.#selectedPartyMonsterIndex = 0;
-    this.#monsters = [];
-
-    // added for testing from preload scene
-    // TODO: need to add logic to grab monster party data from the data manager
-    if (this.#monsters.length === 0) {
-      this.#monsters.push(DataUtils.getIguanignite(this));
-      // this.#monsters.push(DataUtils.getCarnodusk(this));
-    }
+    this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
 
     this.#monsterPartyBackgrounds = [];
     this.#sceneData = data;
     this.#waitingForInput = false;
     this.#healthBars = [];
+    this.#healthBarTextGameObjects = [];
   }
 
   /**
@@ -251,6 +247,7 @@ export class MonsterPartyScene extends BaseScene {
         fontSize: '38px',
       })
       .setOrigin(1, 0);
+    this.#healthBarTextGameObjects.push(healthBarTextGameObject);
 
     const monsterImage = this.add.image(35, 20, monsterDetails.assetKey).setOrigin(0).setScale(0.35);
 
@@ -349,7 +346,6 @@ export class MonsterPartyScene extends BaseScene {
    * @returns {void}
    */
   #handleHealItemUsed(amount) {
-    console.log(this.#sceneData.itemSelected);
     // validate that the monster is not fainted
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
       this.#infoTextGameObject.setText('Cannot heal fainted monster');
@@ -380,6 +376,12 @@ export class MonsterPartyScene extends BaseScene {
       this.#monsters[this.#selectedPartyMonsterIndex].currentHp / this.#monsters[this.#selectedPartyMonsterIndex].maxHp,
       {
         callback: () => {
+          this.#healthBarTextGameObjects[this.#selectedPartyMonsterIndex].setText(
+            `${this.#monsters[this.#selectedPartyMonsterIndex].currentHp} / ${
+              this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+            }`
+          );
+          dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
           this.time.delayedCall(300, () => {
             this.#goBackToPreviousScene(true);
           });

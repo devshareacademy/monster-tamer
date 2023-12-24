@@ -12,6 +12,7 @@ import { DialogUi } from '../world/dialog-ui.js';
 import { Menu } from '../world/menu/menu.js';
 import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 import { BaseScene } from './base-scene.js';
+import { DataUtils } from '../utils/data-utils.js';
 
 /**
  * @typedef WorldSceneData
@@ -400,7 +401,14 @@ export class WorldScene extends BaseScene {
       // add in a custom animation that is similar to the old games
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+        // TODO: add logic to determine monster that was encountered
+        /** @type {import('./battle-scene.js').BattleSceneData} */
+        const dataToPass = {
+          enemyMonsters: [DataUtils.getCarnodusk(this)],
+          playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
+        };
+
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
       });
     }
   }
