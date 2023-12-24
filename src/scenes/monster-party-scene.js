@@ -346,7 +346,6 @@ export class MonsterPartyScene extends BaseScene {
    * @returns {void}
    */
   #handleHealItemUsed(amount) {
-    console.log(this.#sceneData.itemSelected);
     // validate that the monster is not fainted
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
       this.#infoTextGameObject.setText('Cannot heal fainted monster');
@@ -382,6 +381,7 @@ export class MonsterPartyScene extends BaseScene {
               this.#monsters[this.#selectedPartyMonsterIndex].maxHp
             }`
           );
+          dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
           this.time.delayedCall(300, () => {
             this.#goBackToPreviousScene(true);
           });
