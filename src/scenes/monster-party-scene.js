@@ -226,7 +226,10 @@ export class MonsterPartyScene extends BaseScene {
       .setAlpha(0.5);
 
     const healthBar = new HealthBar(this, 100, 40, 240);
-    healthBar.setMeterPercentageAnimated(monsterDetails.currentHp / monsterDetails.maxHp, { duration: 0 });
+    healthBar.setMeterPercentageAnimated(monsterDetails.currentHp / monsterDetails.maxHp, {
+      duration: 0,
+      skipBattleAnimations: true,
+    });
     this.#healthBars.push(healthBar);
 
     const monsterHpText = this.add.text(164, 66, 'HP', {

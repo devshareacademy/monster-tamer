@@ -72,7 +72,7 @@ export class BattleScene extends BaseScene {
     if (Object.keys(data).length === 0) {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getCarnodusk(this)],
-        playerMonsters: [DataUtils.getIguanignite(this)],
+        playerMonsters: [dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0]],
       };
     }
 
