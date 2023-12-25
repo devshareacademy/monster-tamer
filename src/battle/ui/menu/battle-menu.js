@@ -64,6 +64,8 @@ export class BattleMenu {
   #queuedMessageAnimationPlaying;
   /** @type {boolean} */
   #usedItem;
+  /** @type {boolean} */
+  #fleeAttempt;
 
   /**
    *
@@ -99,7 +101,7 @@ export class BattleMenu {
     );
   }
 
-  /** @types {number | undefined} */
+  /** @type {number | undefined} */
   get selectedAttack() {
     if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
       return this.#selectedAttackIndex;
@@ -107,9 +109,14 @@ export class BattleMenu {
     return undefined;
   }
 
-  /** @types {boolean} */
+  /** @type {boolean} */
   get wasItemUsed() {
     return this.#usedItem;
+  }
+
+  /** @type {boolean} */
+  get isAttemptingToFlee() {
+    return this.#fleeAttempt;
   }
 
   showMainBattleMenu() {
@@ -123,6 +130,7 @@ export class BattleMenu {
     this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(BATTLE_MENU_CURSOR_POS.x, BATTLE_MENU_CURSOR_POS.y);
     this.#selectedAttackIndex = undefined;
     this.#usedItem = false;
+    this.#fleeAttempt = false;
   }
 
   hideMainBattleMenu() {
@@ -572,11 +580,6 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.ITEM) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player having no items
-        and allow the player to navigate back to the main menu
-      */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_ITEM;
 
       // pause this scene and launch the inventory scene
@@ -607,15 +610,7 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player successfully running away
-        and then restart the Phaser scene after doing a screen fade out
-      */
-      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
-      this.updateInfoPaneMessagesAndWaitForInput(['You fail to run away...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.#fleeAttempt = true;
       return;
     }
 
@@ -680,9 +675,7 @@ export class BattleMenu {
 
     if (data.itemUsed) {
       this.#usedItem = true;
-      this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`], () => {
-        // update battle monster data
-      });
+      this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
     }
   }
 }
