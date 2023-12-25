@@ -387,6 +387,7 @@ export class BattleScene extends BaseScene {
 
         // if item was used, only have enemy attack
         if (this.#battleMenu.wasItemUsed) {
+          // TODO: enhance once we can switch monsters
           this.#activePlayerMonster.updateMonsterHealth(
             /** @type {import('../types/typedef.js').Monster[]} */ (
               dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
