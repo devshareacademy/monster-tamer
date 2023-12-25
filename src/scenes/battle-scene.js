@@ -149,6 +149,12 @@ export class BattleScene extends BaseScene {
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
 
+      // check if the player used an item
+      if (this.#battleMenu.wasItemUsed) {
+        this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+        return;
+      }
+
       // check if the player selected an attack, and start battle sequence for the fight
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
@@ -378,6 +384,21 @@ export class BattleScene extends BaseScene {
         // then play damage animation, brief pause
         // then play health bar animation, brief pause
         // then repeat the steps above for the other monster
+
+        // if item was used, only have enemy attack
+        if (this.#battleMenu.wasItemUsed) {
+          this.#activePlayerMonster.updateMonsterHealth(
+            /** @type {import('../types/typedef.js').Monster[]} */ (
+              dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
+            )[0].currentHp
+          );
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+          return;
+        }
 
         const randomNumber = Phaser.Math.Between(0, 1);
         if (randomNumber === 0) {

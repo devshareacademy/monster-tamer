@@ -175,7 +175,7 @@ export class PreloadScene extends BaseScene {
     // create animations from json file
     this.#createAnimations();
 
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.BATTLE_SCENE);
   }
 
   /**
