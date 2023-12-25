@@ -34,6 +34,7 @@ const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
  * @typedef InventorySceneResumeData
  * @type {object}
  * @property {boolean} itemUsed
+ * @property {import('../types/typedef.js').Item} [item]
  */
 
 /**
@@ -177,6 +178,14 @@ export class InventoryScene extends BaseScene {
   /**
    * @returns {void}
    */
+  cleanup() {
+    super.cleanup();
+    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+  }
+
+  /**
+   * @returns {void}
+   */
   update() {
     super.update();
 
@@ -185,13 +194,13 @@ export class InventoryScene extends BaseScene {
     }
 
     if (this._controls.wasBackKeyPressed()) {
-      this.#goBackToPreviousScene();
+      this.#goBackToPreviousScene(false);
       return;
     }
 
     const spaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (spaceKeyPressed && this.#isCancelButtonSelected()) {
-      this.#goBackToPreviousScene();
+      this.#goBackToPreviousScene(false);
       return;
     }
 
@@ -271,12 +280,19 @@ export class InventoryScene extends BaseScene {
   }
 
   /**
+   * @param {boolean} wasItemUsed
+   * @param {import('../types/typedef.js').Item} [item]
    * @returns {void}
    */
-  #goBackToPreviousScene() {
+  #goBackToPreviousScene(wasItemUsed, item) {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
-    this.scene.resume(this.#sceneData.previousSceneName);
+    /** @type {InventorySceneResumeData} */
+    const sceneDataToPass = {
+      itemUsed: wasItemUsed,
+      item,
+    };
+    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
   }
 
   /**
@@ -299,6 +315,11 @@ export class InventoryScene extends BaseScene {
       selectedItem.quantity -= 1;
       selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
       // TODO: add logic to handle when the last of an item was just used
+
+      // if previous scene was battle scene, switch back to that scene
+      if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+        this.#goBackToPreviousScene(true, selectedItem.item);
+      }
     }
   }
 }
