@@ -89,3 +89,8 @@ export const ITEM_EFFECT = Object.freeze({
  * @typedef Inventory
  * @type {InventoryItem[]}
  */
+
+/**
+ * @typedef EncounterData
+ * @type {Object.<string, number[][]>}
+ */

@@ -79,6 +79,9 @@ export class PreloadScene extends BaseScene {
     this.load.image(MONSTER_ASSET_KEYS.IGUANIGNITE, `${monsterTamerAssetPath}/monsters/iguanignite.png`);
     this.load.image(MONSTER_ASSET_KEYS.JIVY, `${monsterTamerAssetPath}/monsters/jivy.png`);
     this.load.image(MONSTER_ASSET_KEYS.PARAZOID, `${monsterTamerAssetPath}/monsters/parazoid.png`);
+    this.load.image(MONSTER_ASSET_KEYS.AQUAVALOR, `${monsterTamerAssetPath}/monsters/aquavalor.png`);
+    this.load.image(MONSTER_ASSET_KEYS.FROSTSABER, `${monsterTamerAssetPath}/monsters/frostsaber.png`);
+    this.load.image(MONSTER_ASSET_KEYS.IGNIVOLT, `${monsterTamerAssetPath}/monsters/ignivolt.png`);
 
     // ui assets
     this.load.image(UI_ASSET_KEYS.CURSOR, `${monsterTamerAssetPath}/ui/cursor.png`);
@@ -96,6 +99,7 @@ export class PreloadScene extends BaseScene {
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
     this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
     this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
+    this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -175,7 +179,7 @@ export class PreloadScene extends BaseScene {
     // create animations from json file
     this.#createAnimations();
 
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
   /**

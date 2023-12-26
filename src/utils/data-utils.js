@@ -45,33 +45,55 @@ export class DataUtils {
     return data;
   }
 
+  // /**
+  //  * Utility function for retrieving the Animation objects from the animations.json data file.
+  //  * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+  //  * @param {import('../types/typedef.js').BaseMonster[]} baseMonsters the base monsters that need to be populated with data
+  //  * @returns {import('../types/typedef.js').Monster[]}
+  //  */
+  // static createMonstersFromBaseMonsters(scene, baseMonsters) {
+  //   /** @type { import('../types/typedef.js').Monster[]} */
+  //   const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
+
+  //   /** @type {import('../types/typedef.js').Monster[]} */
+  //   const monsters = [];
+
+  //   baseMonsters.forEach((baseMonster) => {
+  //     const monsterData = data.find((monster) => monster.id === baseMonster.id);
+  //     if (!monsterData) {
+  //       return;
+  //     }
+  //     monsters.push({
+  //       ...baseMonster,
+  //       name: monsterData.name,
+  //       assetKey: monsterData.assetKey,
+  //       assetFrame: monsterData.assetFrame,
+  //       attackIds: [...monsterData.attackIds],
+  //     });
+  //   });
+
+  //   return monsters;
+  // }
+
   /**
-   * Utility function for retrieving the Animation objects from the animations.json data file.
    * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {import('../types/typedef.js').BaseMonster[]} baseMonsters the base monsters that need to be populated with data
-   * @returns {import('../types/typedef.js').Monster[]}
+   * @param {number} area
+   * @returns {number[][]}
    */
-  static createMonstersFromBaseMonsters(scene, baseMonsters) {
+  static getEncounterAreaDetails(scene, area) {
+    /** @type {import('../types/typedef.js').EncounterData} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.ENCOUNTERS);
+    return data[area];
+  }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} monsterId
+   * @returns {import('../types/typedef.js').Monster}
+   */
+  static getMonsterById(scene, monsterId) {
     /** @type { import('../types/typedef.js').Monster[]} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
-
-    /** @type {import('../types/typedef.js').Monster[]} */
-    const monsters = [];
-
-    baseMonsters.forEach((baseMonster) => {
-      const monsterData = data.find((monster) => monster.id === baseMonster.id);
-      if (!monsterData) {
-        return;
-      }
-      monsters.push({
-        ...baseMonster,
-        name: monsterData.name,
-        assetKey: monsterData.assetKey,
-        assetFrame: monsterData.assetFrame,
-        attackIds: [...monsterData.attackIds],
-      });
-    });
-
-    return monsters;
+    return data.find((monster) => monster.id === monsterId);
   }
 }
