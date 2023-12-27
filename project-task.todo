@@ -72,12 +72,19 @@ Saving & Loading:
   ☐ update menu scene with continue option to load game
   ☐ on new game, we should reset the player data (pos, monsters, etc)
 
+Monster Party & Monster Detail Scenes:
+  ☐ create monster party scene
+  ☐ allow player to select a monster in the scene
+  ☐ create monster detail scene
+  ☐ connect monster detail scene to monster party scene
+  ☐ add game menu option for viewing monster party scene
+
 Inventory:
   ☐ create class for items and inventory
   ☐ create ui screen for viewing items
-  ☐ update menu to have view bag
-  ☐ update battle scene to allow using items
+  ☐ update menu to have view bag option
   ☐ update data manager to allow saving of inventory items
+  ☐ update ui screen to allow player to use items
 
 Battle Scene Part 2:
   ☐ using items
@@ -101,6 +108,12 @@ Tools Part 1:
     ☐ positioning game objects
     ☐ monster attacks
     ☐ animations
+
+Audio:
+  ☐ adding background music
+  ☐ adding battle music
+  ☐ adding attack effects
+  ☐ connecting audio options to settings
 
 -------------------------------
 
