@@ -71,7 +71,6 @@ Saving & Loading:
   ☐ add game menu with option to save game
   ☐ update menu scene with continue option to load game
   ☐ on new game, we should reset the player data (pos, monsters, etc)
-  ☐ update data manager to persist monster data and current stats
 
 Inventory:
   ☐ create class for items and inventory
@@ -86,6 +85,7 @@ Battle Scene Part 2:
   ☐ enemy random attack
   ☐ player faint
   ☐ attacking order
+  ☐ update data manager to persist monster data and current stats
   ☐ dynamic monster data based on player party and encounter
 
 World Scene Part 3:
