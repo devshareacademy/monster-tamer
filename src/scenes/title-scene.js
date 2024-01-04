@@ -7,6 +7,7 @@ import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { dataManager, DATA_MANAGER_STORE_KEYS } from '../utils/data-manager.js';
+import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = Object.freeze({
@@ -31,7 +32,7 @@ const MAIN_MENU_OPTIONS = Object.freeze({
   OPTIONS: 'OPTIONS',
 });
 
-export class TitleScene extends Phaser.Scene {
+export class TitleScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image} */
   #mainMenuCursorPhaserImageGameObject;
   /** @type {Controls} */
@@ -49,8 +50,11 @@ export class TitleScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
-    console.log(`[${TitleScene.name}:init] invoked`);
+    super.init();
 
     this.#nineSliceMenu = new NineSlice({
       cornerCutSize: 32,
@@ -59,8 +63,11 @@ export class TitleScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
-    console.log(`[${TitleScene.name}:create] invoked`);
+    super.create();
 
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
     this.#isContinueButtonEnabled = dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false;

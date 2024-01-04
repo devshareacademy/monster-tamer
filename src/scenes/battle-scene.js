@@ -12,6 +12,7 @@ import { createSceneTransition } from '../utils/scene-transition.js';
 import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
+import { BaseScene } from './base-scene.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -25,7 +26,7 @@ const BATTLE_STATES = Object.freeze({
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
 });
 
-export class BattleScene extends Phaser.Scene {
+export class BattleScene extends BaseScene {
   /** @type {BattleMenu} */
   #battleMenu;
   /** @type {Controls} */
@@ -49,7 +50,12 @@ export class BattleScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
+    super.init();
+
     this.#activePlayerAttackIndex = -1;
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
@@ -60,8 +66,12 @@ export class BattleScene extends Phaser.Scene {
     this.#skipAnimations = true;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
-    console.log(`[${BattleScene.name}:create] invoked`);
+    super.create();
+
     // create main background
     const background = new Background(this);
     background.showForest();
@@ -97,6 +107,9 @@ export class BattleScene extends Phaser.Scene {
     this.#controls = new Controls(this);
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     this.#battleStateMachine.update();
 

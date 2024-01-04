@@ -14,6 +14,7 @@ import {
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const OPTIONS_TEXT_STYLE = {
@@ -37,7 +38,7 @@ const TEXT_FONT_COLORS = Object.freeze({
   SELECTED: '#FF2222',
 });
 
-export class OptionsScene extends Phaser.Scene {
+export class OptionsScene extends BaseScene {
   /** @type {Phaser.GameObjects.Container} */
   #mainContainer;
   /** @type {NineSlice} */
@@ -89,7 +90,7 @@ export class OptionsScene extends Phaser.Scene {
    * @returns {void}
    */
   init() {
-    console.log(`[${OptionsScene.name}:init] invoked`);
+    super.init();
 
     this.#nineSliceMainContainer = new NineSlice({
       cornerCutSize: 32,
@@ -114,7 +115,7 @@ export class OptionsScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${OptionsScene.name}:create] invoked`);
+    super.create();
 
     const { width, height } = this.scale;
     const optionMenuWidth = width - 200;

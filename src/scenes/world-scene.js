@@ -11,6 +11,7 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
+import { BaseScene } from './base-scene.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -41,7 +42,7 @@ const TILED_NPC_PROPERTY = Object.freeze({
   each grid size will be 64 x 64 pixels
 */
 
-export class WorldScene extends Phaser.Scene {
+export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
   /** @type {Controls} */
@@ -71,7 +72,8 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   init() {
-    console.log(`[${WorldScene.name}:init] invoked`);
+    super.init();
+
     this.#wildMonsterEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
   }
@@ -80,7 +82,7 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${WorldScene.name}:create] invoked`);
+    super.create();
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
