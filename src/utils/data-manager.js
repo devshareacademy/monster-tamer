@@ -7,6 +7,12 @@ import { exhaustiveGuard } from './guard.js';
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
 /**
+ * @typedef MonsterData
+ * @type {object}
+ * @property {import('../types/typedef.js').Monster[]} monsters.inParty
+ */
+
+/**
  * @typedef GlobalState
  * @type {object}
  * @property {object} player
@@ -22,6 +28,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').VolumeMenuOptions} options.volume
  * @property {import('../common/options.js').MenuColorOptions} options.menuColor
  * @property {boolean} gameStarted
+ * @property {MonsterData} monsters
  */
 
 /** @type {GlobalState} */
@@ -42,6 +49,22 @@ const initialState = {
     menuColor: 0,
   },
   gameStarted: false,
+  monsters: {
+    inParty: [
+      {
+        id: 1,
+        monsterId: 1,
+        currentHp: 25,
+        maxHp: 25,
+        baseAttack: 20,
+        currentLevel: 5,
+        assetKey: 'IGUANIGNITE',
+        name: 'iguanignite',
+        assetFrame: 0,
+        attackIds: [2],
+      },
+    ],
+  },
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -54,6 +77,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   OPTIONS_VOLUME: 'OPTIONS_VOLUME',
   OPTIONS_MENU_COLOR: 'OPTIONS_MENU_COLOR',
   GAME_STARTED: 'GAME_STARTED',
+  MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -129,6 +153,9 @@ class DataManager extends Phaser.Events.EventEmitter {
     this.#store.reset();
     this.#updateDataManger(existingData);
     this.saveData();
+    existingData.monsters = {
+      inParty: [...initialState.monsters.inParty],
+    };
   }
 
   /**
@@ -168,6 +195,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: data.options.volume,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
+      [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
     });
   }
 
@@ -192,6 +220,9 @@ class DataManager extends Phaser.Events.EventEmitter {
         menuColor: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR),
       },
       gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
+      monsters: {
+        inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
+      },
     };
   }
 }
