@@ -45,8 +45,6 @@ const TILED_NPC_PROPERTY = Object.freeze({
 export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Controls} */
-  #controls;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
   #encounterLayer;
   /** @type {boolean} */
@@ -156,8 +154,6 @@ export class WorldScene extends BaseScene {
     // create foreground for depth
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
 
-    this.#controls = new Controls(this);
-
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
     // create menu
@@ -177,9 +173,9 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
-    const selectedDirectionHeldDown = this.#controls.getDirectionKeyPressedDown();
-    const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirectionHeldDown);
     }
@@ -188,7 +184,7 @@ export class WorldScene extends BaseScene {
       this.#handlePlayerInteraction();
     }
 
-    if (this.#controls.wasEnterKeyPressed() && !this.#player.isMoving) {
+    if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
       if (this.#dialogUi.isVisible) {
         return;
       }
@@ -214,7 +210,7 @@ export class WorldScene extends BaseScene {
         // TODO: handle other selected menu options
       }
 
-      if (this.#controls.wasBackKeyPressed()) {
+      if (this._controls.wasBackKeyPressed()) {
         this.#menu.hide();
       }
     }
@@ -321,7 +317,7 @@ export class WorldScene extends BaseScene {
   }
 
   #isPlayerInputLocked() {
-    return this.#controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
   }
 
   /**

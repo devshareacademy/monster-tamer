@@ -63,8 +63,6 @@ export class OptionsScene extends BaseScene {
   #selectedOptionInfoMsgTextGameObject;
   /** @type {Phaser.GameObjects.Rectangle} */
   #optionsMenuCursor;
-  /** @type {Controls} */
-  #controls;
   /** @type {import('../common/options.js').OptionMenuOptions} */
   #selectedOptionMenu;
   /** @type {import('../common/options.js').TextSpeedMenuOptions} */
@@ -206,8 +204,6 @@ export class OptionsScene extends BaseScene {
     this.#updateVolumeSlider();
     this.#updateMenuColorDisplayText();
 
-    this.#controls = new Controls(this);
-
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start(SCENE_KEYS.TITLE_SCENE);
     });
@@ -217,24 +213,24 @@ export class OptionsScene extends BaseScene {
    * @returns {void}
    */
   update() {
-    if (this.#controls.isInputLocked) {
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
-      this.#controls.lockInput = true;
+    if (this._controls.wasBackKeyPressed()) {
+      this._controls.lockInput = true;
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
-      this.#controls.lockInput = true;
+    if (this._controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
+      this._controls.lockInput = true;
       this.#updateOptionDataInDataManager();
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveOptionMenuCursor(selectedDirection);
     }

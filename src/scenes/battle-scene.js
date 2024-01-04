@@ -29,8 +29,6 @@ const BATTLE_STATES = Object.freeze({
 export class BattleScene extends BaseScene {
   /** @type {BattleMenu} */
   #battleMenu;
-  /** @type {Controls} */
-  #controls;
   /** @type {EnemyBattleMonster} */
   #activeEnemyMonster;
   /** @type {PlayerBattleMonster} */
@@ -103,8 +101,6 @@ export class BattleScene extends BaseScene {
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
-
-    this.#controls = new Controls(this);
   }
 
   /**
@@ -113,7 +109,7 @@ export class BattleScene extends BaseScene {
   update() {
     this.#battleStateMachine.update();
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     // limit input based on the current battle state we are in
     // if we are not in the right battle state, return early and do not process input
     if (
@@ -150,12 +146,12 @@ export class BattleScene extends BaseScene {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
+    if (this._controls.wasBackKeyPressed()) {
       this.#battleMenu.handlePlayerInput('CANCEL');
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
     }

@@ -35,8 +35,6 @@ const MAIN_MENU_OPTIONS = Object.freeze({
 export class TitleScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image} */
   #mainMenuCursorPhaserImageGameObject;
-  /** @type {Controls} */
-  #controls;
   /** @type {MainMenuOptions} */
   #selectedMenuOption;
   /** @type {boolean} */
@@ -131,23 +129,21 @@ export class TitleScene extends BaseScene {
 
       this.scene.start(SCENE_KEYS.WORLD_SCENE);
     });
-
-    this.#controls = new Controls(this);
   }
 
   update() {
-    if (this.#controls.isInputLocked) {
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       this.cameras.main.fadeOut(500, 0, 0, 0);
-      this.#controls.lockInput = true;
+      this._controls.lockInput = true;
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveMenuSelectCursor(selectedDirection);
     }
