@@ -129,7 +129,7 @@ export class PreloadScene extends Phaser.Scene {
     this.#createAnimations();
     // attempt to populate data manager with saved data
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+    this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE);
   }
 
   #createAnimations() {
