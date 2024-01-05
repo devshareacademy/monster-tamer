@@ -6,6 +6,7 @@ import {
 } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
@@ -77,9 +78,9 @@ export class MonsterPartyScene extends BaseScene {
     this.#updateInfoContainerText();
 
     // create monsters in party
-
+    this.#createMonster(0, 0, dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0]);
     // alpha is used for knowing if monster is selected, not selected, or knocked out
-    this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
+    // this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
     this.add.image(510, 40, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(0, 160, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 190, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
@@ -121,7 +122,7 @@ export class MonsterPartyScene extends BaseScene {
       .setOrigin(0)
       .setAlpha(0.5);
 
-    const healthBar = new HealthBar(this, 100, 40);
+    const healthBar = new HealthBar(this, 100, 40, 240);
     healthBar.setMeterPercentageAnimated(monsterDetails.currentHp / monsterDetails.maxHp, {
       duration: 0,
       skipBattleAnimations: true,
