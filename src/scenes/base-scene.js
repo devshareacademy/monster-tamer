@@ -39,6 +39,12 @@ export class BaseScene extends Phaser.Scene {
   }
 
   /**
+   * @param {DOMHighResTimeStamp} [time]
+   * @returns {void}
+   */
+  update(time) {}
+
+  /**
    * @protected
    * @param {string} message
    */
