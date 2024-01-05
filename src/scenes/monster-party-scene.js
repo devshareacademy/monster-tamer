@@ -273,7 +273,7 @@ export class MonsterPartyScene extends BaseScene {
   #goBackToPreviousScene() {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
-    this.scene.resume(SCENE_KEYS.WORLD_SCENE);
+    this.scene.resume(this.#sceneData.previousSceneName);
     return;
   }
 
