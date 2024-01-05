@@ -143,7 +143,7 @@ export class MonsterPartyScene extends BaseScene {
 
       // for now, lock screen to prepare for scene transition
       this._controls.lockInput = true;
-      this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+      this.scene.start(SCENE_KEYS.WORLD_SCENE);
       return;
     }
 
@@ -245,7 +245,9 @@ export class MonsterPartyScene extends BaseScene {
    * @returns {void}
    */
   #goBackToPreviousScene() {
-    // TODO
+    this._controls.lockInput = true;
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    return;
   }
 
   /**
