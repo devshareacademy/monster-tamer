@@ -115,6 +115,16 @@ export class MonsterPartyScene extends BaseScene {
     this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
     */
+
+    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+  }
+
+  /**
+   * @returns {void}
+   */
+  cleanup() {
+    super.cleanup();
+    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
   /**
@@ -141,9 +151,15 @@ export class MonsterPartyScene extends BaseScene {
 
       // TODO: handle input based on what player intention was (use item, view monster details, select monster to switch to)
 
-      // for now, lock screen to prepare for scene transition
       this._controls.lockInput = true;
-      this.scene.start(SCENE_KEYS.WORLD_SCENE);
+      // pause this scene and launch the monster details scene
+      /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
+      const sceneDataToPass = {
+        monster: this.#monsters[this.#selectedPartyMonsterIndex],
+      };
+      this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
+      this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+
       return;
     }
 
@@ -299,5 +315,13 @@ export class MonsterPartyScene extends BaseScene {
       }
       background.setAlpha(0.7);
     });
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleSceneResume() {
+    console.log(`[${MonsterPartyScene.name}:handleSceneResume] scene has been resumed`);
+    this._controls.lockInput = false;
   }
 }

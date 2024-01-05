@@ -16,9 +16,14 @@ export class BaseScene extends Phaser.Scene {
   }
 
   /**
+   * @param {any | undefined} [data]
    * @returns {void}
    */
-  init() {
+  init(data) {
+    if (data) {
+      this._log(`[${this.constructor.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
+      return;
+    }
     this._log(`[${this.constructor.name}:init] invoked`);
   }
 
@@ -43,6 +48,13 @@ export class BaseScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {}
+
+  /**
+   * @returns {void}
+   */
+  cleanup() {
+    this._log(`[${this.constructor.name}:cleanup] invoked`);
+  }
 
   /**
    * @protected

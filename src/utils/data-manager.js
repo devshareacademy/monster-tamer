@@ -63,6 +63,18 @@ const initialState = {
         assetFrame: 0,
         attackIds: [2],
       },
+      {
+        id: 2,
+        monsterId: 2,
+        currentHp: 25,
+        maxHp: 25,
+        baseAttack: 20,
+        currentLevel: 5,
+        assetKey: 'CARNODUSK',
+        name: 'CARNODUSK',
+        assetFrame: 0,
+        attackIds: [1],
+      },
     ],
   },
 };
