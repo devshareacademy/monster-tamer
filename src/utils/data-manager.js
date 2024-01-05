@@ -61,7 +61,7 @@ const initialState = {
         assetKey: 'IGUANIGNITE',
         name: 'iguanignite',
         assetFrame: 0,
-        attackIds: [2],
+        attackIds: [2, 1, 2, 1],
       },
     ],
   },
