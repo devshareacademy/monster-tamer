@@ -149,7 +149,7 @@ export class PreloadScene extends BaseScene {
     this.#createAnimations();
     // attempt to populate data manager with saved data
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE);
+    this.scene.start(SCENE_KEYS.MONSTER_DETAILS_SCENE);
   }
 
   #createAnimations() {
