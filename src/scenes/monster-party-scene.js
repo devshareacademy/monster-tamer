@@ -17,6 +17,18 @@ const UI_TEXT_STYLE = {
   fontSize: '24px',
 };
 
+const MONSTER_PARTY_POSITIONS = Object.freeze({
+  EVEN: {
+    x: 0,
+    y: 10,
+  },
+  ODD: {
+    x: 510,
+    y: 40,
+  },
+  increment: 150,
+});
+
 export class MonsterPartyScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image[]} */
   #monsterPartyBackgrounds;
@@ -30,6 +42,8 @@ export class MonsterPartyScene extends BaseScene {
   #healthBarTextGameObjects;
   /** @type {number} */
   #selectedPartyMonsterIndex;
+  /** @type {import('../types/typedef.js').Monster[]} */
+  #monsters;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
@@ -45,6 +59,7 @@ export class MonsterPartyScene extends BaseScene {
     this.#healthBars = [];
     this.#healthBarTextGameObjects = [];
     this.#selectedPartyMonsterIndex = 0;
+    this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
   }
 
   /**
@@ -78,14 +93,25 @@ export class MonsterPartyScene extends BaseScene {
     this.#updateInfoContainerText();
 
     // create monsters in party
-    this.#createMonster(0, 0, dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0]);
+    this.#monsters.forEach((monster, index) => {
+      // 1, 3, 5
+      const isEven = index % 2 === 0;
+      const x = isEven ? MONSTER_PARTY_POSITIONS.EVEN.x : MONSTER_PARTY_POSITIONS.ODD.x;
+      const y =
+        (isEven ? MONSTER_PARTY_POSITIONS.EVEN.y : MONSTER_PARTY_POSITIONS.ODD.y) +
+        MONSTER_PARTY_POSITIONS.increment * Math.floor(index / 2);
+      this.#createMonster(x, y, monster);
+    });
+
     // alpha is used for knowing if monster is selected, not selected, or knocked out
-    // this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
+    /*
+    this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
     this.add.image(510, 40, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(0, 160, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 190, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
+    */
   }
 
   /**
