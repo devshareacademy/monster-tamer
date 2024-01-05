@@ -41,6 +41,7 @@ export class BaseScene extends Phaser.Scene {
     this._log(`[${this.constructor.name}:create] invoked`);
 
     this._controls = new Controls(this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
 
   /**
