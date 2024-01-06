@@ -54,7 +54,6 @@ export class TestScene extends Phaser.Scene {
   #addDataGui() {
     const pane = new TweakPane.Pane();
 
-    /** @type {TweakPane.FolderApi} */
     const f1 = pane.addFolder({
       title: 'Monsters',
       expanded: true, // optional
