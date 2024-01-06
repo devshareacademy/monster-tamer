@@ -68,10 +68,10 @@ Title Screen:
   ✔ connecting option data to battle scene @done(23-12-20 11:10)
 
 Bug Fixes Part 1:
-  battle scene - health bar value when battle starts
-  health bar - animation when value of delay is provided
+  ☐ battle scene - health bar value when battle starts
+  ☐ health bar - animation when value of delay is provided
   battle scene - at battle start player can provide input
-  world scene - player movement, handle when only sprite direction changes
+  ☐ world scene - player movement, handle when only sprite direction changes
 
 Tools Part 1:
   ☐ using tweakpane for testing
