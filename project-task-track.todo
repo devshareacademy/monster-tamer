@@ -74,12 +74,12 @@ Bug Fixes Part 1:
   ✔ world scene - player movement, handle when only sprite direction changes @done(24-01-06 09:05)
 
 Tools Part 1:
-  ☐ using tweakpane for testing
-    ☐ tweakpane basics
-    ☐ positioning game objects
-    ☐ monster attacks
-    ☐ animations
-  ☐ util function for moving game objects
+  ✔ using tweakpane for testing @done(24-01-06 12:10)
+    ✔ tweakpane basics @done(24-01-06 12:10)
+    ✔ positioning game objects @done(24-01-06 12:10)
+    ✔ monster attacks @done(24-01-06 12:10)
+    ✔ animations @done(24-01-06 12:10)
+  ✔ util function for moving game objects @done(24-01-06 12:10)
 
 Saving & Loading:
   ☐ add game menu with option to save game
