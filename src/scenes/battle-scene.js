@@ -87,7 +87,7 @@ export class BattleScene extends Phaser.Scene {
         name: MONSTER_ASSET_KEYS.IGUANIGNITE,
         assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
         assetFrame: 0,
-        currentHp: 25,
+        currentHp: 20,
         maxHp: 25,
         attackIds: [2],
         baseAttack: 15,
@@ -102,10 +102,15 @@ export class BattleScene extends Phaser.Scene {
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
 
     this.#controls = new Controls(this);
+    this.#controls.lockInput = true;
   }
 
   update() {
     this.#battleStateMachine.update();
+
+    if (this.#controls.isInputLocked) {
+      return;
+    }
 
     const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
     // limit input based on the current battle state we are in
@@ -280,6 +285,7 @@ export class BattleScene extends Phaser.Scene {
         // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
           this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this.#controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
             () => {

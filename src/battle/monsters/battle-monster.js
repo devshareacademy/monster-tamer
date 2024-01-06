@@ -43,6 +43,10 @@ export class BattleMonster {
       .image(position.x, position.y, this._monsterDetails.assetKey, this._monsterDetails.assetFrame || 0)
       .setAlpha(0);
     this.#createHealthBarComponents(config.scaleHealthBarBackgroundImageByY);
+    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, {
+      skipBattleAnimations: false,
+      duration: 0,
+    });
 
     this._monsterDetails.attackIds.forEach((attackId) => {
       const monsterAttack = DataUtils.getMonsterAttack(this._scene, attackId);
