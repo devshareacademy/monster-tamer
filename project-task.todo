@@ -69,9 +69,11 @@ Title Screen:
 
 Tools Part 1:
   ☐ using tweakpane for testing
+    ☐ tweakpane basics
     ☐ positioning game objects
     ☐ monster attacks
     ☐ animations
+  ☐ util function for moving game objects
 
 Saving & Loading:
   ☐ add game menu with option to save game
