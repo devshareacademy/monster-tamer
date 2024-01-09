@@ -25,6 +25,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {CharacterIdleFrameConfig} idleFrameConfig
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
+ * @property {() => void} [spriteChangedDirectionCallback]
  */
 
 export class Character {
@@ -50,6 +51,8 @@ export class Character {
   _collisionLayer;
   /** @protected @type {Character[]} */
   _otherCharactersToCheckForCollisionsWith;
+  /** @protected @type {() => void | undefined} */
+  _spriteChangedDirectionCallback;
 
   /**
    * @param {CharacterConfig} config
@@ -72,6 +75,7 @@ export class Character {
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
       .setOrigin(this._origin.x, this._origin.y);
     this._spriteGridMovementFinishedCallback = config.spriteGridMovementFinishedCallback;
+    this._spriteChangedDirectionCallback = config.spriteChangedDirectionCallback;
   }
 
   /** @type {Phaser.GameObjects.Sprite} */
@@ -152,10 +156,19 @@ export class Character {
    * @returns {void}
    */
   _moveSprite(direction) {
+    const changedDirection = this._direction !== direction;
     this._direction = direction;
+
+    if (changedDirection) {
+      if (this._spriteChangedDirectionCallback !== undefined) {
+        this._spriteChangedDirectionCallback();
+      }
+    }
+
     if (this._isBlockingTile()) {
       return;
     }
+
     this._isMoving = true;
     this.#handleSpriteMovement();
   }

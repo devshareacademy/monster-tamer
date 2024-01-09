@@ -13,6 +13,7 @@ import {
 } from '../common/options.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const OPTIONS_TEXT_STYLE = {
@@ -93,16 +94,20 @@ export class OptionsScene extends Phaser.Scene {
     this.#nineSliceMainContainer = new NineSlice({
       cornerCutSize: 32,
       textureManager: this.sys.textures,
-      assetKey: UI_ASSET_KEYS.MENU_BACKGROUND,
+      assetKeys: [
+        UI_ASSET_KEYS.MENU_BACKGROUND,
+        UI_ASSET_KEYS.MENU_BACKGROUND_GREEN,
+        UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE,
+      ],
     });
 
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
-    this.#selectedTextSpeedOption = TEXT_SPEED_OPTIONS.MID;
-    this.#selectedBattleSceneOption = BATTLE_SCENE_OPTIONS.ON;
-    this.#selectedBattleStyleOption = BATTLE_STYLE_OPTIONS.SHIFT;
-    this.#selectedSoundMenuOption = SOUND_OPTIONS.ON;
-    this.#selectedVolumeOption = 4;
-    this.#selectedMenuColorOption = 0;
+    this.#selectedTextSpeedOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    this.#selectedBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
+    this.#selectedBattleStyleOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE);
+    this.#selectedSoundMenuOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND);
+    this.#selectedVolumeOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME);
+    this.#selectedMenuColorOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
   }
 
   /**
@@ -115,7 +120,12 @@ export class OptionsScene extends Phaser.Scene {
     const optionMenuWidth = width - 200;
 
     // main options container
-    this.#mainContainer = this.#nineSliceMainContainer.createNineSliceContainer(this, optionMenuWidth, 432);
+    this.#mainContainer = this.#nineSliceMainContainer.createNineSliceContainer(
+      this,
+      optionMenuWidth,
+      432,
+      UI_ASSET_KEYS.MENU_BACKGROUND
+    );
     this.#mainContainer.setX(100).setY(20);
 
     // create main option sections
@@ -169,7 +179,12 @@ export class OptionsScene extends Phaser.Scene {
     this.add.image(660, 352, UI_ASSET_KEYS.CURSOR_WHITE).setOrigin(0, 0).setScale(2.5);
 
     // option details container
-    this.#infoContainer = this.#nineSliceMainContainer.createNineSliceContainer(this, optionMenuWidth, 100);
+    this.#infoContainer = this.#nineSliceMainContainer.createNineSliceContainer(
+      this,
+      optionMenuWidth,
+      100,
+      UI_ASSET_KEYS.MENU_BACKGROUND
+    );
     this.#infoContainer.setX(100).setY(height - 110);
     this.#selectedOptionInfoMsgTextGameObject = this.add.text(125, 480, OPTION_MENU_OPTION_INFO_MSG.TEXT_SPEED, {
       ...OPTIONS_TEXT_STYLE,
@@ -220,7 +235,7 @@ export class OptionsScene extends Phaser.Scene {
 
     if (this.#controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
       this.#controls.lockInput = true;
-      // TODO: add logic for saving recent values from options
+      this.#updateOptionDataInDataManager();
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
@@ -232,7 +247,23 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   /**
+   * @returns {void}
+   */
+  #updateOptionDataInDataManager() {
+    dataManager.store.set({
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: this.#selectedTextSpeedOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS]: this.#selectedBattleSceneOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE]: this.#selectedBattleStyleOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND]: this.#selectedSoundMenuOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: this.#selectedVolumeOption,
+      [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: this.#selectedMenuColorOption,
+    });
+    dataManager.saveData();
+  }
+
+  /**
    * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
    */
   #moveOptionMenuCursor(direction) {
     if (direction === DIRECTION.NONE) {
@@ -271,6 +302,7 @@ export class OptionsScene extends Phaser.Scene {
 
   /**
    * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
    */
   #updateSelectedOptionMenuFromInput(direction) {
     if (direction === DIRECTION.NONE) {
@@ -650,6 +682,8 @@ export class OptionsScene extends Phaser.Scene {
       );
       return;
     }
+
+    exhaustiveGuard(direction);
   }
 
   /**
@@ -713,15 +747,42 @@ export class OptionsScene extends Phaser.Scene {
     switch (this.#selectedMenuColorOption) {
       case 0:
         this.#selectedMenuColorTextGameObject.setText('1');
-        // TODO
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#mainContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND
+        );
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#infoContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND
+        );
         break;
       case 1:
         this.#selectedMenuColorTextGameObject.setText('2');
-        // TODO
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#mainContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_GREEN
+        );
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#infoContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_GREEN
+        );
         break;
       case 2:
         this.#selectedMenuColorTextGameObject.setText('3');
-        // TODO
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#mainContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE
+        );
+        this.#nineSliceMainContainer.updateNineSliceContainerTexture(
+          this.sys.textures,
+          this.#infoContainer,
+          UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE
+        );
         break;
       default:
         exhaustiveGuard(this.#selectedMenuColorOption);

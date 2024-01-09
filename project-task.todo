@@ -67,24 +67,38 @@ Title Screen:
   ☐ save & loading options
   ☐ connecting option data to battle scene
 
+Bug Fixes Part 1:
+  ☐ battle scene - health bar value when battle starts
+  ☐ health bar - animation when value of delay is provided
+  ☐ battle scene - at battle start player can provide input
+  ☐ world scene - player movement, handle when only sprite direction changes
+
 Tools Part 1:
   ☐ using tweakpane for testing
+    ☐ tweakpane basics
     ☐ positioning game objects
     ☐ monster attacks
     ☐ animations
+  ☐ util function for moving game objects
 
 Saving & Loading:
   ☐ add game menu with option to save game
   ☐ update menu scene with continue option to load game
   ☐ on new game, we should reset the player data (pos, monsters, etc)
-  ☐ update data manager to persist monster data and current stats
+
+Monster Party & Monster Detail Scenes:
+  ☐ create monster party scene
+  ☐ allow player to select a monster in the scene
+  ☐ create monster detail scene
+  ☐ connect monster detail scene to monster party scene
+  ☐ add game menu option for viewing monster party scene
 
 Inventory:
   ☐ create class for items and inventory
   ☐ create ui screen for viewing items
-  ☐ update menu to have view bag
-  ☐ update battle scene to allow using items
+  ☐ update menu to have view bag option
   ☐ update data manager to allow saving of inventory items
+  ☐ update ui screen to allow player to use items
 
 Battle Scene Part 2:
   ☐ using items
@@ -92,6 +106,7 @@ Battle Scene Part 2:
   ☐ enemy random attack
   ☐ player faint
   ☐ attacking order
+  ☐ update data manager to persist monster data and current stats
   ☐ dynamic monster data based on player party and encounter
 
 World Scene Part 3:
@@ -101,6 +116,12 @@ World Scene Part 3:
     ☐ view monster party
   ☐ buildings
   ☐ items in the field
+
+Audio:
+  ☐ adding background music
+  ☐ adding battle music
+  ☐ adding attack effects
+  ☐ connecting audio options to settings
 
 -------------------------------
 
