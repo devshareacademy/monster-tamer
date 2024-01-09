@@ -194,10 +194,10 @@ export class WorldScene extends BaseScene {
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
       },
-      otherCharactersToCheckForCollisionsWith: this.#npcs,
       spriteChangedDirectionCallback: () => {
         this.#handlePlayerDirectionUpdate();
       },
+      otherCharactersToCheckForCollisionsWith: this.#npcs,
       entranceLayer: this.#entranceLayer,
       enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
         this.#handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);

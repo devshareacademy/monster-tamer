@@ -98,7 +98,6 @@ export class OptionsScene extends BaseScene {
     });
 
     this.#selectedOptionMenu = OPTION_MENU_OPTIONS.TEXT_SPEED;
-
     this.#selectedTextSpeedOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
     this.#selectedBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
     this.#selectedBattleStyleOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE);

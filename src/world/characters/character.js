@@ -25,6 +25,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
+ * @property {() => void} [spriteChangedDirectionCallback]
  */
 
 /**
