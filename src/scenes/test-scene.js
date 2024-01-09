@@ -119,7 +119,6 @@ export class TestScene extends Phaser.Scene {
         this.#iceShardAttack.playAnimation();
         return;
       }
-
       if (this.#selectedAttack === ATTACK_KEYS.SLASH) {
         this.#slashAttack.playAnimation();
         return;
