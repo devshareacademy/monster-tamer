@@ -222,6 +222,16 @@ export class WorldScene extends BaseScene {
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
+        if (this.#menu.selectedMenuOption === 'BAG') {
+          // pause this scene and launch the inventory scene
+          /** @type {import('./inventory-scene.js').InventorySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
+
         // TODO: handle other selected menu options
       }
 

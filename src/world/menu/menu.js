@@ -60,7 +60,7 @@ export class Menu {
     this.#scene = scene;
     this.#padding = 4;
     this.#width = 300;
-    this.#availableMenuOptions = [MENU_OPTIONS.MONSTERS, MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
+    this.#availableMenuOptions = [MENU_OPTIONS.MONSTERS, MENU_OPTIONS.BAG, MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
     this.#menuOptionsTextGameObjects = [];
     this.#selectedMenuOptionIndex = 0;
 
@@ -207,6 +207,8 @@ export class Menu {
         this.#selectedMenuOption = MENU_OPTIONS.MONSTERS;
         break;
       case MENU_OPTIONS.BAG:
+        this.#selectedMenuOption = MENU_OPTIONS.BAG;
+        break;
       case MENU_OPTIONS.MONSTERDEX:
       case MENU_OPTIONS.OPTION:
         // TODO: implement logic for other menu options
