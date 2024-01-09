@@ -6,6 +6,7 @@ import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const INVENTORY_TEXT_STYLE = {
@@ -28,12 +29,29 @@ const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
  * @property {string} previousSceneName
  */
 
+/**
+ * @typedef InventoryItemGameObjects
+ * @type {object}
+ * @property {Phaser.GameObjects.Text} [itemName]
+ * @property {Phaser.GameObjects.Text} [quantitySign]
+ * @property {Phaser.GameObjects.Text} [quantity]
+ */
+
+/**
+ * @typedef {import('../types/typedef.js').InventoryItem & { gameObjects: InventoryItemGameObjects }} InventoryItemWithGameObjects
+ */
+
+/**
+ * @typedef CustomInventory
+ * @type {InventoryItemWithGameObjects[]}
+ */
+
 export class InventoryScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image} */
   #userInputCursor;
   /** @type {Phaser.GameObjects.Text} */
   #selectedInventoryDescriptionText;
-  /** @type {any[]} */
+  /** @type {CustomInventory} */
   #inventory;
   /** @type {number} */
   #selectedInventoryOptionIndex;
@@ -55,14 +73,14 @@ export class InventoryScene extends BaseScene {
 
     this.#sceneData = data;
     this.#selectedInventoryOptionIndex = 0;
-    this.#inventory = [
-      {
-        name: 'potion',
-        description: 'A basic healing item that will heal 30 HP from a single monster.',
-        quantity: 10,
+    const inventory = dataManager.getInventory(this);
+    this.#inventory = inventory.map((inventoryItem) => {
+      return {
+        item: inventoryItem.item,
+        quantity: inventoryItem.quantity,
         gameObjects: {},
-      },
-    ];
+      };
+    });
     this.#nineSliceMainContainer = new NineSlice({
       cornerCutSize: 32,
       textureManager: this.sys.textures,
@@ -99,7 +117,7 @@ export class InventoryScene extends BaseScene {
       const itemText = this.add.text(
         INVENTORY_ITEM_POSITION.x,
         INVENTORY_ITEM_POSITION.y + index * INVENTORY_ITEM_POSITION.space,
-        inventoryItem.name,
+        inventoryItem.item.name,
         INVENTORY_TEXT_STYLE
       );
       const qtyText1 = this.add.text(620, INVENTORY_ITEM_POSITION.y + 2 + index * INVENTORY_ITEM_POSITION.space, 'x', {
@@ -203,7 +221,9 @@ export class InventoryScene extends BaseScene {
       return;
     }
 
-    this.#selectedInventoryDescriptionText.setText(this.#inventory[this.#selectedInventoryOptionIndex].description);
+    this.#selectedInventoryDescriptionText.setText(
+      this.#inventory[this.#selectedInventoryOptionIndex].item.description
+    );
   }
 
   /**

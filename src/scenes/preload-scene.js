@@ -90,6 +90,7 @@ export class PreloadScene extends BaseScene {
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
     this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
+    this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
