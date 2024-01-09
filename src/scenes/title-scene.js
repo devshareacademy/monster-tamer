@@ -130,7 +130,6 @@ export class TitleScene extends Phaser.Scene {
     });
 
     this.#controls = new Controls(this);
-    this.scene.start(SCENE_KEYS.TEST_SCENE);
   }
 
   update() {
