@@ -1,7 +1,7 @@
 import Phaser from '../lib/phaser.js';
-import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { DIRECTION } from '../common/direction.js';
-import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
+import { TEXT_SPEED, TILE_SIZE } from '../config.js';
+import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
@@ -181,7 +181,7 @@ class DataManager extends Phaser.Events.EventEmitter {
    */
   getAnimatedTextSpeed() {
     /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
-    const chosenTextSpeed = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    const chosenTextSpeed = this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
     if (chosenTextSpeed === undefined) {
       return TEXT_SPEED.MEDIUM;
     }
@@ -225,7 +225,10 @@ class DataManager extends Phaser.Events.EventEmitter {
   #dataManagerDataToGlobalStateObject() {
     return {
       player: {
-        position: { ...this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION) },
+        position: {
+          x: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).x,
+          y: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).y,
+        },
         direction: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
         location: { ...this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION) },
       },
