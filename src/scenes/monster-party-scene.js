@@ -127,6 +127,7 @@ export class MonsterPartyScene extends BaseScene {
     */
 
     this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+    this.scene.bringToTop(SCENE_KEYS.MONSTER_PARTY_SCENE);
   }
 
   /**

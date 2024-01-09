@@ -157,7 +157,7 @@ export class PreloadScene extends BaseScene {
     this.#createAnimations();
     // attempt to populate data manager with saved data
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.INVENTORY_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
   #createAnimations() {

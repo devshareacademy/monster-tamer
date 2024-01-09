@@ -4,6 +4,8 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { BaseScene } from './base-scene.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { DIRECTION } from '../common/direction.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const INVENTORY_TEXT_STYLE = {
@@ -137,6 +139,59 @@ export class InventoryScene extends BaseScene {
       ...{ wordWrap: { width: this.scale.width - 18 }, color: '#ffffff' },
     });
     this.#updateItemDescriptionText();
+
+    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+  }
+
+  /**
+   * @returns {void}
+   */
+  cleanup() {
+    super.cleanup();
+    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+  }
+
+  /**
+   * @returns {void}
+   */
+  update() {
+    super.update();
+
+    if (this._controls.isInputLocked) {
+      return;
+    }
+
+    if (this._controls.wasBackKeyPressed()) {
+      this.#goBackToPreviousScene();
+      return;
+    }
+
+    const spaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    if (spaceKeyPressed && this.#isCancelButtonSelected()) {
+      this.#goBackToPreviousScene();
+      return;
+    }
+
+    if (spaceKeyPressed) {
+      this._controls.lockInput = true;
+      // pause this scene and launch the monster party scene
+      /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+      const sceneDataToPass = {
+        previousSceneName: SCENE_KEYS.INVENTORY_SCENE,
+      };
+      this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+      this.scene.pause(SCENE_KEYS.INVENTORY_SCENE);
+
+      // in a future update
+      // TODO: add submenu for accept/cancel after picking an item
+      return;
+    }
+
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#movePlayerInputCursor(selectedDirection);
+      this.#updateItemDescriptionText();
+    }
   }
 
   /**
@@ -156,5 +211,57 @@ export class InventoryScene extends BaseScene {
    */
   #isCancelButtonSelected() {
     return this.#selectedInventoryOptionIndex === this.#inventory.length;
+  }
+
+  /**
+   * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
+   */
+  #movePlayerInputCursor(direction) {
+    switch (direction) {
+      case DIRECTION.UP:
+        this.#selectedInventoryOptionIndex -= 1;
+        if (this.#selectedInventoryOptionIndex < 0) {
+          this.#selectedInventoryOptionIndex = this.#inventory.length;
+        }
+        break;
+      case DIRECTION.DOWN:
+        this.#selectedInventoryOptionIndex += 1;
+        if (this.#selectedInventoryOptionIndex > this.#inventory.length) {
+          this.#selectedInventoryOptionIndex = 0;
+        }
+        break;
+      case DIRECTION.LEFT:
+      case DIRECTION.RIGHT:
+        return;
+      case DIRECTION.NONE:
+        break;
+      default:
+        exhaustiveGuard(direction);
+    }
+    const y = 30 + this.#selectedInventoryOptionIndex * 50;
+
+    this.#userInputCursor.setY(y);
+  }
+
+  /**
+   * @returns {void}
+   */
+  #goBackToPreviousScene() {
+    this._controls.lockInput = true;
+    this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
+    this.scene.resume(this.#sceneData.previousSceneName);
+  }
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {object} data
+   * @returns {void}
+   */
+  #handleSceneResume(sys, data) {
+    console.log(
+      `[${InventoryScene.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
+    );
+    this._controls.lockInput = false;
   }
 }
