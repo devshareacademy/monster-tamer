@@ -298,11 +298,6 @@ export class WorldScene extends BaseScene {
       }
     }
 
-    // TODO: see if this can be cleaned up
-    // if (this._controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
-    //   this.#handlePlayerInteraction();
-    // }
-
     this.#player.update(time);
 
     this.#npcs.forEach((npc) => {
