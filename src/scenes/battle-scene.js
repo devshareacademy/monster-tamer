@@ -9,7 +9,6 @@ import { StateMachine } from '../utils/state-machine.js';
 import { Background } from '../battle/background.js';
 import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
-import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { BaseScene } from './base-scene.js';
@@ -101,6 +100,7 @@ export class BattleScene extends BaseScene {
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
+    this._controls.lockInput = true;
   }
 
   /**
@@ -108,6 +108,10 @@ export class BattleScene extends BaseScene {
    */
   update() {
     this.#battleStateMachine.update();
+
+    if (this._controls.isInputLocked) {
+      return;
+    }
 
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     // limit input based on the current battle state we are in
@@ -282,6 +286,7 @@ export class BattleScene extends BaseScene {
         // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
           this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this._controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
             () => {
