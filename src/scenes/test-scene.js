@@ -56,10 +56,11 @@ export class TestScene extends Phaser.Scene {
 
     const f1 = pane.addFolder({
       title: 'Monsters',
-      expanded: true, // optional
+      expanded: true,
     });
     const playerMonsterFolder = f1.addFolder({
       title: 'Player',
+      expanded: true,
     });
     playerMonsterFolder.addBinding(this.#playerMonster, 'x', {
       min: 0,
@@ -74,20 +75,21 @@ export class TestScene extends Phaser.Scene {
 
     const enemyMonsterFolder = f1.addFolder({
       title: 'Enemy',
+      expanded: true,
     });
     enemyMonsterFolder.addBinding(this.#enemyMonster, 'x', { readonly: true });
     enemyMonsterFolder.addBinding(this.#enemyMonster, 'y', { readonly: true });
 
-    const F2PARAMS = {
+    const f2Params = {
       attack: this.#selectedAttack,
       x: 745,
-      y: 140,
+      y: 120,
     };
     const f2 = pane.addFolder({
       title: 'Attacks',
-      expanded: true, // optional
+      expanded: true,
     });
-    f2.addBinding(F2PARAMS, 'attack', {
+    f2.addBinding(f2Params, 'attack', {
       options: {
         [ATTACK_KEYS.SLASH]: ATTACK_KEYS.SLASH,
         [ATTACK_KEYS.ICE_SHARD]: ATTACK_KEYS.ICE_SHARD,
@@ -95,15 +97,15 @@ export class TestScene extends Phaser.Scene {
     }).on('change', (ev) => {
       if (ev.value === ATTACK_KEYS.ICE_SHARD) {
         this.#selectedAttack = ATTACK_KEYS.ICE_SHARD;
-        F2PARAMS.x = this.#iceShardAttack.gameObject.x;
-        F2PARAMS.y = this.#iceShardAttack.gameObject.y;
+        f2Params.x = this.#iceShardAttack.gameObject.x;
+        f2Params.y = this.#iceShardAttack.gameObject.y;
         f2.refresh();
         return;
       }
       if (ev.value === ATTACK_KEYS.SLASH) {
         this.#selectedAttack = ATTACK_KEYS.SLASH;
-        F2PARAMS.x = this.#slashAttack.gameObject.x;
-        F2PARAMS.y = this.#slashAttack.gameObject.y;
+        f2Params.x = this.#slashAttack.gameObject.x;
+        f2Params.y = this.#slashAttack.gameObject.y;
         f2.refresh();
         return;
       }
@@ -123,14 +125,14 @@ export class TestScene extends Phaser.Scene {
       }
     });
 
-    f2.addBinding(F2PARAMS, 'x', {
+    f2.addBinding(f2Params, 'x', {
       min: 0,
       max: 1024,
       step: 1,
     }).on('change', (ev) => {
       this.#updateAttackGameObjectPosition('x', ev.value);
     });
-    f2.addBinding(F2PARAMS, 'y', {
+    f2.addBinding(f2Params, 'y', {
       min: 0,
       max: 576,
       step: 1,

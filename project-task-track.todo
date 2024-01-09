@@ -67,13 +67,19 @@ Title Screen:
   ✔ save & loading options @done(23-12-20 10:23)
   ✔ connecting option data to battle scene @done(23-12-20 11:10)
 
+Bug Fixes Part 1:
+  ✔ battle scene - health bar value when battle starts @done(24-01-06 09:05)
+  ✔ health bar - animation when value of delay is provided @done(24-01-06 09:05)
+  ✔ battle scene - at battle start player can provide input @done(24-01-06 09:05)
+  ✔ world scene - player movement, handle when only sprite direction changes @done(24-01-06 09:05)
+
 Tools Part 1:
-  ☐ using tweakpane for testing
-    ☐ tweakpane basics
-    ☐ positioning game objects
-    ☐ monster attacks
-    ☐ animations
-  ☐ util function for moving game objects
+  ✔ using tweakpane for testing @done(24-01-06 12:10)
+    ✔ tweakpane basics @done(24-01-06 12:10)
+    ✔ positioning game objects @done(24-01-06 12:10)
+    ✔ monster attacks @done(24-01-06 12:10)
+    ✔ animations @done(24-01-06 12:10)
+  ✔ util function for moving game objects @done(24-01-06 12:10)
 
 Saving & Loading:
   ☐ add game menu with option to save game
