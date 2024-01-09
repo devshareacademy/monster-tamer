@@ -43,6 +43,7 @@ This project uses both assets I developed as well as other assets that have been
 | --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
 | Fonts                       | Kenney           | [Kenney Fonts](https://www.kenney.nl/assets/kenney-fonts)                                         |
 | UI Panel                    | Kenney           | [Kenney UI Space Pack](https://www.kenney.nl/assets/ui-pack-space-expansion)                      |
+| UI Pack                     | Kenney           | [Kenney UI Pack](https://www.kenney.nl/assets/ui-pack)                                            |
 | Board Game Info             | Kenney           | [Kenney Board Game Info Pack](https://www.kenney.nl/assets/board-game-info)                       |
 | Ice Attack                  | Pimen            | [Pimen Ice Spell Effect](https://pimen.itch.io/ice-spell-effect-01)                               |
 | Slash Attack                | Pimen            | [Pimen Slash VFX](https://pimen.itch.io/battle-vfx-slashes-and-thrusts)                           |
