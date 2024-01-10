@@ -178,16 +178,18 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyPressedDown();
-    if (selectedDirection !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-      this.#player.moveCharacter(selectedDirection);
+    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const selectedDirectionHelDown = this.#controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
+    if (selectedDirectionHelDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
+      this.#player.moveCharacter(selectedDirectionHelDown);
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving && !this.#menu.isVisible) {
+    if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {
       this.#handlePlayerInteraction();
     }
 
-    if (this.#controls.wasEnterKeyPressed()) {
+    if (this.#controls.wasEnterKeyPressed() && !this.#player.isMoving) {
       if (this.#dialogUi.isVisible) {
         return;
       }
@@ -201,7 +203,24 @@ export class WorldScene extends Phaser.Scene {
     }
 
     if (this.#menu.isVisible) {
-      // TODO: handle input for menu
+      if (selectedDirectionPressedOnce !== DIRECTION.NONE) {
+        this.#menu.handlePlayerInput(selectedDirectionPressedOnce);
+      }
+
+      if (wasSpaceKeyPressed) {
+        this.#menu.handlePlayerInput('OK');
+
+        if (this.#menu.selectedMenuOption === 'SAVE') {
+          this.#menu.hide();
+          dataManager.saveData();
+          this.#dialogUi.showDialogModal(['Game progress has been saved']);
+        } else if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
+        }
+
+        // TODO: handle other selected menu options
+      }
+
       if (this.#controls.wasBackKeyPressed()) {
         this.#menu.hide();
       }
@@ -307,7 +326,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   #isPlayerInputLocked() {
-    return this.#dialogUi.isVisible;
+    return this.#controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
   }
 
   /**
