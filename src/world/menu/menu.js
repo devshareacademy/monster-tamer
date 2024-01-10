@@ -2,7 +2,9 @@ import { UI_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DIRECTION } from '../../common/direction.js';
 import Phaser from '../../lib/phaser.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../../utils/data-manager.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
+import { MENU_COLOR } from './menu-config.js';
 
 /**
  * @typedef {keyof typeof MENU_OPTIONS} MenuOptions
@@ -132,10 +134,11 @@ export class Menu {
 
   #createGraphics() {
     const g = this.#scene.add.graphics();
+    const menuColor = this.#getMenuColorsFromDataManager();
 
-    g.fillStyle(0x32454c, 1);
+    g.fillStyle(menuColor.main, 1);
     g.fillRect(1, 0, this.#width - 1, this.#height - 1);
-    g.lineStyle(8, 0x6d9aa8, 1);
+    g.lineStyle(8, menuColor.border, 1);
     g.strokeRect(0, 0, this.#width, this.#height);
     g.setAlpha(0.9);
 
@@ -180,5 +183,27 @@ export class Menu {
    */
   #handleSelectedMenuOption() {
     this.#selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
+  }
+
+  /**
+   * @returns {{ main: number; border: number; }}
+   */
+  #getMenuColorsFromDataManager() {
+    /** @type {import('../../common/options.js').MenuColorOptions} */
+    const chosenMenuColor = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
+    if (chosenMenuColor === undefined) {
+      return MENU_COLOR[1];
+    }
+
+    switch (chosenMenuColor) {
+      case 0:
+        return MENU_COLOR[1];
+      case 1:
+        return MENU_COLOR[2];
+      case 2:
+        return MENU_COLOR[3];
+      default:
+        exhaustiveGuard(chosenMenuColor);
+    }
   }
 }
