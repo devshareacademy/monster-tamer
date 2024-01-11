@@ -6,7 +6,7 @@ import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const INVENTORY_TEXT_STYLE = {
@@ -294,7 +294,7 @@ export class InventoryScene extends BaseScene {
 
   /**
    * @param {Phaser.Scenes.Systems} sys
-   * @param {object} data
+   * @param {InventorySceneResumeData} data
    * @returns {void}
    */
   #handleSceneResume(sys, data) {

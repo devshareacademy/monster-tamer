@@ -1,3 +1,4 @@
+import Phaser from '../lib/phaser.js';
 import {
   BATTLE_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
