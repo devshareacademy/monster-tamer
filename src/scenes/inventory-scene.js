@@ -6,7 +6,7 @@ import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { dataManager } from '../utils/data-manager.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const INVENTORY_TEXT_STYLE = {
@@ -44,6 +44,13 @@ const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
 /**
  * @typedef CustomInventory
  * @type {InventoryItemWithGameObjects[]}
+ */
+
+/**
+ * @typedef InventorySceneResumeData
+ * @type {object}
+ * @property {boolean} itemUsed
+ * @property {import('../types/typedef.js').Item} [item]
  */
 
 export class InventoryScene extends BaseScene {
@@ -180,22 +187,27 @@ export class InventoryScene extends BaseScene {
     }
 
     if (this._controls.wasBackKeyPressed()) {
-      this.#goBackToPreviousScene();
+      this.#goBackToPreviousScene(false);
       return;
     }
 
     const spaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (spaceKeyPressed && this.#isCancelButtonSelected()) {
-      this.#goBackToPreviousScene();
+      this.#goBackToPreviousScene(false);
       return;
     }
 
     if (spaceKeyPressed) {
+      if (this.#inventory[this.#selectedInventoryOptionIndex].quantity < 1) {
+        return;
+      }
+
       this._controls.lockInput = true;
       // pause this scene and launch the monster party scene
       /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
       const sceneDataToPass = {
         previousSceneName: SCENE_KEYS.INVENTORY_SCENE,
+        itemSelected: this.#inventory[this.#selectedInventoryOptionIndex].item,
       };
       this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
       this.scene.pause(SCENE_KEYS.INVENTORY_SCENE);
@@ -265,12 +277,19 @@ export class InventoryScene extends BaseScene {
   }
 
   /**
+   * @param {boolean} wasItemUsed
+   * @param {import('../types/typedef.js').Item} [item]
    * @returns {void}
    */
-  #goBackToPreviousScene() {
+  #goBackToPreviousScene(wasItemUsed, item) {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
-    this.scene.resume(this.#sceneData.previousSceneName);
+    /** @type {InventorySceneResumeData} */
+    const sceneDataToPass = {
+      itemUsed: wasItemUsed,
+      item,
+    };
+    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
   }
 
   /**
@@ -283,5 +302,23 @@ export class InventoryScene extends BaseScene {
       `[${InventoryScene.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
     );
     this._controls.lockInput = false;
+
+    if (!data) {
+      return;
+    }
+
+    if (data.itemUsed) {
+      const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
+      selectedItem.quantity -= 1;
+      selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
+      // TODO: add logic to handle when the last of an item was just used
+
+      dataManager.updateInventory(this.#inventory);
+
+      // if previous scene was battle scene, switch back to that scene
+      if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+        this.#goBackToPreviousScene(true, selectedItem.item);
+      }
+    }
   }
 }

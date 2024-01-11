@@ -56,7 +56,7 @@ const initialState = {
       {
         id: 1,
         monsterId: 1,
-        currentHp: 25,
+        currentHp: 20,
         maxHp: 25,
         baseAttack: 20,
         currentLevel: 5,
@@ -200,7 +200,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     /** @type {import('../types/typedef.js').InventoryItem[]} */
     const items = [];
     /** @type {import('../types/typedef.js').Inventory} */
-    const inventory = dataManager.store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
+    const inventory = this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
     inventory.forEach((baseItem) => {
       const item = DataUtils.getItem(scene, baseItem.item.id);
       items.push({
@@ -209,6 +209,23 @@ class DataManager extends Phaser.Events.EventEmitter {
       });
     });
     return items;
+  }
+
+  /**
+   * @param {import('../types/typedef.js').InventoryItem[]} items
+   * @returns {void}
+   */
+  updateInventory(items) {
+    /** @type {import('../types/typedef.js').BaseInventoryItem[]} */
+    const inventory = items.map((item) => {
+      return {
+        item: {
+          id: item.item.id,
+        },
+        quantity: item.quantity,
+      };
+    });
+    this.#store.set(DATA_MANAGER_STORE_KEYS.INVENTORY, inventory);
   }
 
   /**
