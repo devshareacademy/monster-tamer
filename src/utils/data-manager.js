@@ -3,8 +3,15 @@ import { DIRECTION } from '../common/direction.js';
 import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
+import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
+
+/**
+ * @typedef MonsterData
+ * @type {object}
+ * @property {import('../types/typedef.js').Monster[]} inParty
+ */
 
 /**
  * @typedef GlobalState
@@ -21,6 +28,8 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').SoundMenuOptions} options.sound
  * @property {import('../common/options.js').VolumeMenuOptions} options.volume
  * @property {import('../common/options.js').MenuColorOptions} options.menuColor
+ * @property {boolean} gameStarted
+ * @property {MonsterData} monsters
  */
 
 /** @type {GlobalState} */
@@ -40,6 +49,23 @@ const initialState = {
     volume: 4,
     menuColor: 0,
   },
+  gameStarted: false,
+  monsters: {
+    inParty: [
+      {
+        id: 1,
+        monsterId: 1,
+        name: MONSTER_ASSET_KEYS.IGUANIGNITE,
+        assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
+        assetFrame: 0,
+        currentHp: 25,
+        maxHp: 25,
+        attackIds: [2],
+        baseAttack: 15,
+        currentLevel: 5,
+      },
+    ],
+  },
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -51,6 +77,8 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   OPTIONS_SOUND: 'OPTIONS_SOUND',
   OPTIONS_VOLUME: 'OPTIONS_VOLUME',
   OPTIONS_MENU_COLOR: 'OPTIONS_MENU_COLOR',
+  GAME_STARTED: 'GAME_STARTED',
+  MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -113,6 +141,21 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
+  startNewGame() {
+    // get existing data before resetting all of the data, so we can persist options data
+    const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
+    existingData.player.position = { ...initialState.player.position };
+    existingData.player.direction = initialState.player.direction;
+    existingData.gameStarted = initialState.gameStarted;
+    existingData.monsters = {
+      inParty: [...initialState.monsters.inParty],
+    };
+
+    this.#store.reset();
+    this.#updateDataManger(existingData);
+    this.saveData();
+  }
+
   /**
    * @returns {number}
    */
@@ -149,6 +192,8 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND]: data.options.sound,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: data.options.volume,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
+      [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
+      [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
     });
   }
 
@@ -171,6 +216,10 @@ class DataManager extends Phaser.Events.EventEmitter {
         sound: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND),
         volume: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME),
         menuColor: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR),
+      },
+      gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
+      monsters: {
+        inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
       },
     };
   }
