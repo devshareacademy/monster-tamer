@@ -1,10 +1,10 @@
 name: Itch.io Deploy Workflow
 
 on:
-  push:
-    branches:
-      - wip
-      - GH-76
+  # push:
+  #   branches:
+  #     - wip
+  #     - GH-76
   workflow_dispatch:
 
 jobs:
