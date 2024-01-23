@@ -3,6 +3,7 @@ import { DIRECTION } from '../common/direction.js';
 import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
+import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DataUtils } from './data-utils.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
@@ -10,7 +11,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 /**
  * @typedef MonsterData
  * @type {object}
- * @property {import('../types/typedef.js').Monster[]} monsters.inParty
+ * @property {import('../types/typedef.js').Monster[]} inParty
  */
 
 /**
@@ -56,14 +57,14 @@ const initialState = {
       {
         id: 1,
         monsterId: 1,
-        currentHp: 20,
-        maxHp: 25,
-        baseAttack: 20,
-        currentLevel: 5,
-        assetKey: 'IGUANIGNITE',
-        name: 'iguanignite',
+        name: MONSTER_ASSET_KEYS.IGUANIGNITE,
+        assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
         assetFrame: 0,
+        currentHp: 25,
+        maxHp: 25,
         attackIds: [2],
+        baseAttack: 15,
+        currentLevel: 5,
       },
     ],
   },
@@ -151,23 +152,20 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
-  /**
-   * @returns {void}
-   */
   startNewGame() {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
     existingData.player.direction = initialState.player.direction;
     existingData.gameStarted = initialState.gameStarted;
+    existingData.monsters = {
+      inParty: [...initialState.monsters.inParty],
+    };
     existingData.inventory = initialState.inventory;
 
     this.#store.reset();
     this.#updateDataManger(existingData);
     this.saveData();
-    existingData.monsters = {
-      inParty: [...initialState.monsters.inParty],
-    };
   }
 
   /**
