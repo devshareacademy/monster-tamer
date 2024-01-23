@@ -6,7 +6,7 @@ import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
-import { dataManager, DATA_MANAGER_STORE_KEYS } from '../utils/data-manager.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = Object.freeze({

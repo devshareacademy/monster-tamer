@@ -2,9 +2,9 @@ import Phaser from '../../lib/phaser.js';
 import { UI_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DIRECTION } from '../../common/direction.js';
-import { exhaustiveGuard } from '../../utils/guard.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../../utils/data-manager.js';
-import { MENU_COLOR } from '../../config.js';
+import { exhaustiveGuard } from '../../utils/guard.js';
+import { MENU_COLOR } from './menu-config.js';
 
 /**
  * @typedef {keyof typeof MENU_OPTIONS} MenuOptions
@@ -16,7 +16,7 @@ export const MENU_OPTIONS = Object.freeze({
   MONSTERS: 'MONSTERS',
   BAG: 'BAG',
   SAVE: 'SAVE',
-  OPTION: 'OPTION',
+  OPTIONS: 'OPTIONS',
   EXIT: 'EXIT',
 });
 
@@ -31,11 +31,11 @@ export class Menu {
   /** @type {Phaser.Scene} */
   #scene;
   /** @type {number} */
+  #padding;
+  /** @type {number} */
   #width;
   /** @type {number} */
   #height;
-  /** @type {number} */
-  #padding;
   /** @type {Phaser.GameObjects.Graphics} */
   #graphics;
   /** @type {Phaser.GameObjects.Container} */
@@ -46,12 +46,12 @@ export class Menu {
   #availableMenuOptions;
   /** @type {Phaser.GameObjects.Text[]} */
   #menuOptionsTextGameObjects;
-  /** @type {Phaser.GameObjects.Image} */
-  #userInputCursor;
   /** @type {number} */
   #selectedMenuOptionIndex;
   /** @type {MenuOptions} */
   #selectedMenuOption;
+  /** @type {Phaser.GameObjects.Image} */
+  #userInputCursor;
 
   /**
    * @param {Phaser.Scene} scene
@@ -147,7 +147,7 @@ export class Menu {
 
     g.fillStyle(menuColor.main, 1);
     g.fillRect(1, 0, this.#width - 1, this.#height - 1);
-    g.lineStyle(8, menuColor.border, 10);
+    g.lineStyle(8, menuColor.border, 1);
     g.strokeRect(0, 0, this.#width, this.#height);
     g.setAlpha(0.9);
 
@@ -190,32 +190,11 @@ export class Menu {
    * @returns {void}
    */
   #handleSelectedMenuOption() {
-    /** @type {MenuOptions} */
-    const selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
-
-    switch (selectedMenuOption) {
-      case MENU_OPTIONS.EXIT:
-        this.#selectedMenuOption = MENU_OPTIONS.EXIT;
-        this.hide();
-        break;
-      case MENU_OPTIONS.SAVE:
-        this.#selectedMenuOption = MENU_OPTIONS.SAVE;
-        dataManager.saveData();
-        this.hide();
-        break;
-      case MENU_OPTIONS.BAG:
-      case MENU_OPTIONS.MONSTERS:
-      case MENU_OPTIONS.MONSTERDEX:
-      case MENU_OPTIONS.OPTION:
-        // TODO: implement logic for other menu options
-        break;
-      default:
-        exhaustiveGuard(selectedMenuOption);
-    }
+    this.#selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
   }
 
   /**
-   * @returns {{ main: number; border: number}}
+   * @returns {{ main: number; border: number; }}
    */
   #getMenuColorsFromDataManager() {
     /** @type {import('../../common/options.js').MenuColorOptions} */

@@ -164,6 +164,9 @@ export class WorldScene extends Phaser.Scene {
     // create menu
     this.#menu = new Menu(this);
 
+    // create menu
+    this.#menu = new Menu(this);
+
     this.cameras.main.fadeIn(1000, 0, 0, 0);
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
   }
@@ -203,15 +206,21 @@ export class WorldScene extends Phaser.Scene {
     }
 
     if (this.#menu.isVisible) {
-      // TODO: handle input for menu
       if (selectedDirectionPressedOnce !== DIRECTION.NONE) {
         this.#menu.handlePlayerInput(selectedDirectionPressedOnce);
       }
+
       if (wasSpaceKeyPressed) {
         this.#menu.handlePlayerInput('OK');
+
         if (this.#menu.selectedMenuOption === 'SAVE') {
-          this.#dialogUi.showDialogModal(['Game progress has been saved.']);
+          this.#menu.hide();
+          dataManager.saveData();
+          this.#dialogUi.showDialogModal(['Game progress has been saved']);
+        } else if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
         }
+
         // TODO: handle other selected menu options
       }
 
