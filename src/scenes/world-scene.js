@@ -10,6 +10,7 @@ import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/gr
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC } from '../world/characters/npc.js';
+import { Menu } from '../world/menu/menu.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -57,6 +58,8 @@ export class WorldScene extends Phaser.Scene {
   #npcs;
   /** @type {NPC | undefined} */
   #npcPlayerIsInteractingWith;
+  /** @type {Menu} */
+  #menu;
 
   constructor() {
     super({
@@ -158,7 +161,13 @@ export class WorldScene extends Phaser.Scene {
 
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
+
+    // create menu
+    this.#menu = new Menu(this);
+
     this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
 
     this.cameras.main.on(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
       const element = document.querySelector("[data-test-id='loaded']");
@@ -178,13 +187,52 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyPressedDown();
-    if (selectedDirection !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-      this.#player.moveCharacter(selectedDirection);
+    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown = this.#controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
+    if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
+      this.#player.moveCharacter(selectedDirectionHeldDown);
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+    if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {
       this.#handlePlayerInteraction();
+    }
+
+    if (this.#controls.wasEnterKeyPressed() && !this.#player.isMoving) {
+      if (this.#dialogUi.isVisible) {
+        return;
+      }
+
+      if (this.#menu.isVisible) {
+        this.#menu.hide();
+        return;
+      }
+
+      this.#menu.show();
+    }
+
+    if (this.#menu.isVisible) {
+      if (selectedDirectionPressedOnce !== DIRECTION.NONE) {
+        this.#menu.handlePlayerInput(selectedDirectionPressedOnce);
+      }
+
+      if (wasSpaceKeyPressed) {
+        this.#menu.handlePlayerInput('OK');
+
+        if (this.#menu.selectedMenuOption === 'SAVE') {
+          this.#menu.hide();
+          dataManager.saveData();
+          this.#dialogUi.showDialogModal(['Game progress has been saved']);
+        } else if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
+        }
+
+        // TODO: handle other selected menu options
+      }
+
+      if (this.#controls.wasBackKeyPressed()) {
+        this.#menu.hide();
+      }
     }
 
     this.#player.update(time);
@@ -287,7 +335,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   #isPlayerInputLocked() {
-    return this.#dialogUi.isVisible;
+    return this.#controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
   }
 
   /**
