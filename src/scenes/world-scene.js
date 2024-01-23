@@ -180,10 +180,10 @@ export class WorldScene extends Phaser.Scene {
     }
 
     const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
-    const selectedDirectionHelDown = this.#controls.getDirectionKeyPressedDown();
+    const selectedDirectionHeldDown = this.#controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
-    if (selectedDirectionHelDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-      this.#player.moveCharacter(selectedDirectionHelDown);
+    if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
+      this.#player.moveCharacter(selectedDirectionHeldDown);
     }
 
     if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {

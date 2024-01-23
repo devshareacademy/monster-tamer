@@ -33,7 +33,7 @@ export class Controls {
 
   /** @returns {boolean} */
   wasEnterKeyPressed() {
-    if (this.#cursorKeys === undefined) {
+    if (this.#enterKey === undefined) {
       return false;
     }
     return Phaser.Input.Keyboard.JustDown(this.#enterKey);

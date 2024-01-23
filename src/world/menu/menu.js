@@ -1,7 +1,7 @@
+import Phaser from '../../lib/phaser.js';
 import { UI_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DIRECTION } from '../../common/direction.js';
-import Phaser from '../../lib/phaser.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../../utils/data-manager.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 import { MENU_COLOR } from './menu-config.js';
@@ -96,6 +96,9 @@ export class Menu {
     return this.#selectedMenuOption;
   }
 
+  /**
+   * @returns {void}
+   */
   show() {
     const { right, top } = this.#scene.cameras.main.worldView;
     const startX = right - this.#padding * 2 - this.#width;
@@ -106,6 +109,9 @@ export class Menu {
     this.#isVisible = true;
   }
 
+  /**
+   * @returns {void}
+   */
   hide() {
     this.#container.setAlpha(0);
     this.#selectedMenuOptionIndex = 0;
@@ -132,6 +138,9 @@ export class Menu {
     this.#moveMenuCursor(input);
   }
 
+  /**
+   * @returns {Phaser.GameObjects.Graphics}
+   */
   #createGraphics() {
     const g = this.#scene.add.graphics();
     const menuColor = this.#getMenuColorsFromDataManager();
@@ -171,7 +180,6 @@ export class Menu {
       default:
         exhaustiveGuard(direction);
     }
-
     const x = 20 + this.#padding;
     const y = 28 + this.#padding + this.#selectedMenuOptionIndex * 50;
 
