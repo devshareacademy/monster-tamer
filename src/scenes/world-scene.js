@@ -291,6 +291,10 @@ export class WorldScene extends BaseScene {
           this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
+
+        if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
+        }
       }
 
       if (this._controls.wasBackKeyPressed()) {

@@ -16,7 +16,7 @@ export const MENU_OPTIONS = Object.freeze({
   MONSTERS: 'MONSTERS',
   BAG: 'BAG',
   SAVE: 'SAVE',
-  OPTION: 'OPTION',
+  OPTIONS: 'OPTIONS',
   EXIT: 'EXIT',
 });
 
@@ -31,11 +31,11 @@ export class Menu {
   /** @type {Phaser.Scene} */
   #scene;
   /** @type {number} */
+  #padding;
+  /** @type {number} */
   #width;
   /** @type {number} */
   #height;
-  /** @type {number} */
-  #padding;
   /** @type {Phaser.GameObjects.Graphics} */
   #graphics;
   /** @type {Phaser.GameObjects.Container} */
@@ -46,23 +46,23 @@ export class Menu {
   #availableMenuOptions;
   /** @type {Phaser.GameObjects.Text[]} */
   #menuOptionsTextGameObjects;
-  /** @type {Phaser.GameObjects.Image} */
-  #userInputCursor;
   /** @type {number} */
   #selectedMenuOptionIndex;
   /** @type {MenuOptions} */
   #selectedMenuOption;
+  /** @type {Phaser.GameObjects.Image} */
+  #userInputCursor;
 
   /**
    * @param {Phaser.Scene} scene
    */
   constructor(scene) {
     this.#scene = scene;
+    this.#padding = 4;
+    this.#width = 300;
     this.#availableMenuOptions = [MENU_OPTIONS.MONSTERS, MENU_OPTIONS.BAG, MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
     this.#menuOptionsTextGameObjects = [];
     this.#selectedMenuOptionIndex = 0;
-    this.#padding = 4;
-    this.#width = 300;
 
     // calculate height based on currently available options
     this.#height = 10 + this.#padding * 2 + this.#availableMenuOptions.length * 50;
@@ -147,33 +147,11 @@ export class Menu {
 
     g.fillStyle(menuColor.main, 1);
     g.fillRect(1, 0, this.#width - 1, this.#height - 1);
-    g.lineStyle(8, menuColor.border, 10);
+    g.lineStyle(8, menuColor.border, 1);
     g.strokeRect(0, 0, this.#width, this.#height);
     g.setAlpha(0.9);
 
     return g;
-  }
-
-  /**
-   * @returns {{ main: number; border: number}}
-   */
-  #getMenuColorsFromDataManager() {
-    /** @type {import('../../common/options.js').MenuColorOptions} */
-    const chosenMenuColor = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
-    if (chosenMenuColor === undefined) {
-      return MENU_COLOR[1];
-    }
-
-    switch (chosenMenuColor) {
-      case 0:
-        return MENU_COLOR[1];
-      case 1:
-        return MENU_COLOR[2];
-      case 2:
-        return MENU_COLOR[3];
-      default:
-        exhaustiveGuard(chosenMenuColor);
-    }
   }
 
   /**
@@ -212,31 +190,28 @@ export class Menu {
    * @returns {void}
    */
   #handleSelectedMenuOption() {
-    /** @type {MenuOptions} */
-    const selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
+    this.#selectedMenuOption = this.#availableMenuOptions[this.#selectedMenuOptionIndex];
+  }
 
-    switch (selectedMenuOption) {
-      case MENU_OPTIONS.EXIT:
-        this.#selectedMenuOption = MENU_OPTIONS.EXIT;
-        this.hide();
-        break;
-      case MENU_OPTIONS.SAVE:
-        this.#selectedMenuOption = MENU_OPTIONS.SAVE;
-        dataManager.saveData();
-        this.hide();
-        break;
-      case MENU_OPTIONS.BAG:
-        this.#selectedMenuOption = MENU_OPTIONS.BAG;
-        break;
-      case MENU_OPTIONS.MONSTERS:
-        this.#selectedMenuOption = MENU_OPTIONS.MONSTERS;
-        break;
-      case MENU_OPTIONS.MONSTERDEX:
-      case MENU_OPTIONS.OPTION:
-        // TODO: implement logic for other menu options
-        break;
+  /**
+   * @returns {{ main: number; border: number; }}
+   */
+  #getMenuColorsFromDataManager() {
+    /** @type {import('../../common/options.js').MenuColorOptions} */
+    const chosenMenuColor = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
+    if (chosenMenuColor === undefined) {
+      return MENU_COLOR[1];
+    }
+
+    switch (chosenMenuColor) {
+      case 0:
+        return MENU_COLOR[1];
+      case 1:
+        return MENU_COLOR[2];
+      case 2:
+        return MENU_COLOR[3];
       default:
-        exhaustiveGuard(selectedMenuOption);
+        exhaustiveGuard(chosenMenuColor);
     }
   }
 }
