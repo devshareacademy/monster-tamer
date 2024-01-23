@@ -269,7 +269,9 @@ export class WorldScene extends BaseScene {
       if (wasSpaceKeyPressed) {
         this.#menu.handlePlayerInput('OK');
         if (this.#menu.selectedMenuOption === 'SAVE') {
-          this.#dialogUi.showDialogModal(['Game progress has been saved.']);
+          this.#menu.hide();
+          dataManager.saveData();
+          this.#dialogUi.showDialogModal(['Game progress has been saved']);
         }
 
         if (this.#menu.selectedMenuOption === 'BAG') {
