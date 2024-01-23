@@ -2,7 +2,6 @@ import Phaser from '../lib/phaser.js';
 import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
-import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
@@ -159,6 +158,7 @@ export class WorldScene extends BaseScene {
 
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
+
     // create menu
     this.#menu = new Menu(this);
 
@@ -201,15 +201,19 @@ export class WorldScene extends BaseScene {
     }
 
     if (this.#menu.isVisible) {
-      // TODO: handle input for menu
       if (selectedDirectionPressedOnce !== DIRECTION.NONE) {
         this.#menu.handlePlayerInput(selectedDirectionPressedOnce);
       }
+
       if (wasSpaceKeyPressed) {
         this.#menu.handlePlayerInput('OK');
 
         if (this.#menu.selectedMenuOption === 'SAVE') {
-          this.#dialogUi.showDialogModal(['Game progress has been saved.']);
+          this.#menu.hide();
+          dataManager.saveData();
+          this.#dialogUi.showDialogModal(['Game progress has been saved']);
+        } else if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
         }
 
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
