@@ -161,8 +161,6 @@ export class WorldScene extends Phaser.Scene {
 
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
-    // create menu
-    this.#menu = new Menu(this);
 
     // create menu
     this.#menu = new Menu(this);

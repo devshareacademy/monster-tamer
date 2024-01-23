@@ -157,24 +157,6 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
-   * @returns {void}
-   */
-  startNewGame() {
-    // get existing data before resetting all of the data, so we can persist options data
-    const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
-    existingData.player.position = { ...initialState.player.position };
-    existingData.player.direction = initialState.player.direction;
-    existingData.gameStarted = initialState.gameStarted;
-
-    this.#store.reset();
-    this.#updateDataManger(existingData);
-    this.saveData();
-    existingData.monsters = {
-      inParty: [...initialState.monsters.inParty],
-    };
-  }
-
-  /**
    * @returns {number}
    */
   getAnimatedTextSpeed() {
