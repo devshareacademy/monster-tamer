@@ -8,10 +8,10 @@ import { StateMachine } from '../utils/state-machine.js';
 import { Background } from '../battle/background.js';
 import { ATTACK_TARGET, AttackManager } from '../battle/attacks/attack-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
-import { Controls } from '../utils/controls.js';
-import { DataUtils } from '../utils/data-utils.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
+import { BaseScene } from './base-scene.js';
+import { DataUtils } from '../utils/data-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -25,11 +25,16 @@ const BATTLE_STATES = Object.freeze({
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
 });
 
-export class BattleScene extends Phaser.Scene {
+/**
+ * @typedef BattleSceneData
+ * @type {object}
+ * @property {import('../types/typedef.js').Monster[]} playerMonsters
+ * @property {import('../types/typedef.js').Monster[]} enemyMonsters
+ */
+
+export class BattleScene extends BaseScene {
   /** @type {BattleMenu} */
   #battleMenu;
-  /** @type {Controls} */
-  #controls;
   /** @type {EnemyBattleMonster} */
   #activeEnemyMonster;
   /** @type {PlayerBattleMonster} */
@@ -44,6 +49,10 @@ export class BattleScene extends Phaser.Scene {
   #skipAnimations;
   /** @type {number} */
   #activeEnemyAttackIndex;
+  /** @type {BattleSceneData} */
+  #sceneData;
+  /** @type {number} */
+  #activePlayerMonsterPartyIndex;
 
   constructor() {
     super({
@@ -52,10 +61,24 @@ export class BattleScene extends Phaser.Scene {
   }
 
   /**
+   * @param {BattleSceneData} data
    * @returns {void}
    */
-  init() {
+  init(data) {
+    super.init(data);
+    this.#sceneData = data;
+
+    // added for testing from preload scene
+    if (Object.keys(data).length === 0) {
+      this.#sceneData = {
+        enemyMonsters: [DataUtils.getCarnodusk(this)],
+        playerMonsters: [dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0]],
+      };
+    }
+
     this.#activePlayerAttackIndex = -1;
+    this.#activePlayerMonsterPartyIndex = 0;
+
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
     if (chosenBattleSceneOption === undefined || chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
@@ -69,7 +92,8 @@ export class BattleScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${BattleScene.name}:create] invoked`);
+    super.create();
+
     // create main background
     const background = new Background(this);
     background.showForest();
@@ -77,12 +101,12 @@ export class BattleScene extends Phaser.Scene {
     // create the player and enemy monsters
     this.#activeEnemyMonster = new EnemyBattleMonster({
       scene: this,
-      monsterDetails: DataUtils.getCarnodusk(this),
+      monsterDetails: this.#sceneData.enemyMonsters[0],
       skipBattleAnimations: this.#skipAnimations,
     });
     this.#activePlayerMonster = new PlayerBattleMonster({
       scene: this,
-      monsterDetails: DataUtils.getIguanignite(this),
+      monsterDetails: this.#sceneData.playerMonsters[0],
       skipBattleAnimations: this.#skipAnimations,
     });
 
@@ -91,21 +115,22 @@ export class BattleScene extends Phaser.Scene {
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
 
-    this.#controls = new Controls(this);
-    this.#controls.lockInput = true;
+    this._controls.lockInput = true;
   }
 
   /**
    * @returns {void}
    */
   update() {
+    super.update();
+
     this.#battleStateMachine.update();
 
-    if (this.#controls.isInputLocked) {
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     // limit input based on the current battle state we are in
     // if we are not in the right battle state, return early and do not process input
     if (
@@ -123,6 +148,18 @@ export class BattleScene extends Phaser.Scene {
 
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
+
+      // check if the player used an item
+      if (this.#battleMenu.wasItemUsed) {
+        this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+        return;
+      }
+
+      // check if the player attempted to flee
+      if (this.#battleMenu.isAttemptingToFlee) {
+        this.#battleStateMachine.setState(BATTLE_STATES.FLEE_ATTEMPT);
+        return;
+      }
 
       // check if the player selected an attack, and start battle sequence for the fight
       if (this.#battleMenu.selectedAttack === undefined) {
@@ -142,12 +179,12 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
+    if (this._controls.wasBackKeyPressed()) {
       this.#battleMenu.handlePlayerInput('CANCEL');
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
     }
@@ -204,6 +241,9 @@ export class BattleScene extends Phaser.Scene {
             () => {
               this.#activePlayerMonster.playTakeDamageAnimation(() => {
                 this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
+                  this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp =
+                    this.#activePlayerMonster.currentHp;
+                  dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
                   callback();
                 });
               });
@@ -297,7 +337,7 @@ export class BattleScene extends Phaser.Scene {
         // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
           this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
-          this.#controls.lockInput = false;
+          this._controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
             () => {
@@ -351,6 +391,32 @@ export class BattleScene extends Phaser.Scene {
         // then play health bar animation, brief pause
         // then repeat the steps above for the other monster
 
+        // if item was used, only have enemy attack
+        if (this.#battleMenu.wasItemUsed) {
+          // TODO: enhance once we can switch monsters
+          this.#activePlayerMonster.updateMonsterHealth(
+            /** @type {import('../types/typedef.js').Monster[]} */ (
+              dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
+            )[0].currentHp
+          );
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+          return;
+        }
+
+        // if player failed to flee, only have enemy attack
+        if (this.#battleMenu.isAttemptingToFlee) {
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+          return;
+        }
+
         const randomNumber = Phaser.Math.Between(0, 1);
         if (randomNumber === 0) {
           this.#playerAttack(() => {
@@ -385,8 +451,21 @@ export class BattleScene extends Phaser.Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
-          this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+        const randomNumber = Phaser.Math.Between(1, 10);
+        if (randomNumber > 5) {
+          // player has run away successfully
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
+            this.time.delayedCall(200, () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+            });
+          });
+          return;
+        }
+        // player failed to run away, allow enemy to take their turn
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You failed to run away...'], () => {
+          this.time.delayedCall(200, () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+          });
         });
       },
     });

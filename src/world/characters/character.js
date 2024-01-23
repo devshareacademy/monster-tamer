@@ -18,10 +18,13 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @type {object}
  * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
  * @property {import('../../types/typedef.js').Coordinate} position the starting position of the character
- * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionWith=[]]
  * @property {import('../../common/direction.js').Direction} direction
  * @property {() => void} [spriteGridMovementFinishedCallback]
+ * @property {() => void} [spriteChangedDirectionCallback]
+ * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
+ * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
+ * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
  * @property {() => void} [spriteChangedDirectionCallback]
  */
 
@@ -29,9 +32,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @typedef CharacterConfigProps
  * @type {object}
  * @property {string} assetKey the name of the asset key that should be used for this character
- * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
  * @property {CharacterIdleFrameConfig} idleFrameConfig
- * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  */
 
 /**
@@ -58,7 +59,7 @@ export class Character {
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
   _origin;
   /** @protected @type {Character[]} */
-  _otherCharactersToCheckForCollisionWith;
+  _otherCharactersToCheckForCollisionsWith;
   /** @protected @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   _collisionLayer;
   /** @protected @type {() => void | undefined} */
@@ -80,7 +81,7 @@ export class Character {
     this._idleFrameConfig = config.idleFrameConfig;
     this._origin = config.origin ? { ...config.origin } : { x: 0, y: 0 };
     this._collisionLayer = config.collisionLayer;
-    this._otherCharactersToCheckForCollisionWith = config.otherCharactersToCheckForCollisionWith || [];
+    this._otherCharactersToCheckForCollisionsWith = config.otherCharactersToCheckForCollisionsWith || [];
     this._phaserGameObject = this._scene.add
       .sprite(config.position.x, config.position.y, config.assetKey, this._getIdleFrame())
       .setOrigin(this._origin.x, this._origin.y);
@@ -119,7 +120,7 @@ export class Character {
    * @returns {void}
    */
   addCharacterToCheckForCollisionsWith(character) {
-    this._otherCharactersToCheckForCollisionWith.push(character);
+    this._otherCharactersToCheckForCollisionsWith.push(character);
   }
 
   /**
@@ -246,7 +247,9 @@ export class Character {
 
     const { x, y } = position;
     const tile = this._collisionLayer.getTileAtWorldXY(x, y, true);
-
+    if (!tile) {
+      return false;
+    }
     return tile.index !== -1;
   }
 
@@ -256,13 +259,13 @@ export class Character {
    */
   #doesPositionCollideWithOtherCharacter(position) {
     const { x, y } = position;
-    if (this._otherCharactersToCheckForCollisionWith.length === 0) {
+    if (this._otherCharactersToCheckForCollisionsWith.length === 0) {
       return false;
     }
 
     // checks if the new position that this character wants to move to is the same position that another
     // character is currently at, or was previously at and is moving towards currently
-    const collidesWithACharacter = this._otherCharactersToCheckForCollisionWith.some((character) => {
+    const collidesWithACharacter = this._otherCharactersToCheckForCollisionsWith.some((character) => {
       return (
         (character._targetPosition.x === x && character._targetPosition.y === y) ||
         (character._previousTargetPosition.x === x && character._previousTargetPosition.y === y)

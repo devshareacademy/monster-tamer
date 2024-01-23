@@ -1,10 +1,24 @@
 import Phaser from '../lib/phaser.js';
-import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { DIRECTION } from '../common/direction.js';
-import { BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS, TEXT_SPEED_OPTIONS } from '../common/options.js';
+import { TEXT_SPEED, TILE_SIZE } from '../config.js';
+import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
+import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
+
+/**
+ * @typedef PlayerLocation
+ * @type {object}
+ * @property {string} area
+ * @property {boolean} isInterior
+ */
+
+/**
+ * @typedef MonsterData
+ * @type {object}
+ * @property {import('../types/typedef.js').Monster[]} inParty
+ */
 
 /**
  * @typedef GlobalState
@@ -14,6 +28,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {number} player.position.x
  * @property {number} player.position.y
  * @property {import('../common/direction.js').Direction} player.direction
+ * @property {PlayerLocation} player.location
  * @property {object} options
  * @property {import('../common/options.js').TextSpeedMenuOptions} options.textSpeed
  * @property {import('../common/options.js').BattleSceneMenuOptions} options.battleSceneAnimations
@@ -23,6 +38,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').VolumeMenuOptions} options.menuColor
  * @property {boolean} gameStarted
  * @property {import('../types/typedef.js').Inventory} inventory
+ * @property {MonsterData} monsters
  */
 
 /** @type {GlobalState} */
@@ -33,6 +49,10 @@ const initialState = {
       y: 21 * TILE_SIZE,
     },
     direction: DIRECTION.DOWN,
+    location: {
+      area: 'main_1',
+      isInterior: false,
+    },
   },
   options: {
     textSpeed: TEXT_SPEED_OPTIONS.MID,
@@ -44,11 +64,28 @@ const initialState = {
   },
   gameStarted: false,
   inventory: [],
+  monsters: {
+    inParty: [
+      {
+        id: 1,
+        monsterId: 1,
+        name: MONSTER_ASSET_KEYS.IGUANIGNITE,
+        assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
+        assetFrame: 0,
+        currentHp: 25,
+        maxHp: 25,
+        attackIds: [2],
+        baseAttack: 15,
+        currentLevel: 5,
+      },
+    ],
+  },
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   PLAYER_POSITION: 'PLAYER_POSITION',
   PLAYER_DIRECTION: 'PLAYER_DIRECTION',
+  PLAYER_LOCATION: 'PLAYER_LOCATION',
   OPTIONS_TEXT_SPEED: 'OPTIONS_TEXT_SPEED',
   OPTIONS_BATTLE_SCENE_ANIMATIONS: 'OPTIONS_BATTLE_SCENE_ANIMATIONS',
   OPTIONS_BATTLE_STYLE: 'OPTIONS_BATTLE_STYLE',
@@ -57,6 +94,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   OPTIONS_MENU_COLOR: 'OPTIONS_MENU_COLOR',
   GAME_STARTED: 'GAME_STARTED',
   INVENTORY: 'INVENTORY',
+  MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -123,12 +161,19 @@ class DataManager extends Phaser.Events.EventEmitter {
    * @returns {void}
    */
   startNewGame() {
-    this.#store.set({
-      [DATA_MANAGER_STORE_KEYS.PLAYER_POSITION]: initialState.player.position,
-      [DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION]: initialState.player.direction,
-      [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: initialState.gameStarted,
-      [DATA_MANAGER_STORE_KEYS.INVENTORY]: initialState.inventory,
-    });
+    // get existing data before resetting all of the data, so we can persist options data
+    const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
+    existingData.player.position = { ...initialState.player.position };
+    existingData.player.direction = initialState.player.direction;
+    existingData.player.location = { ...initialState.player.location };
+    existingData.gameStarted = initialState.gameStarted;
+    existingData.inventory = initialState.inventory;
+    existingData.monsters = {
+      inParty: [...initialState.monsters.inParty],
+    };
+
+    this.#store.reset();
+    this.#updateDataManger(existingData);
     this.saveData();
   }
 
@@ -137,7 +182,7 @@ class DataManager extends Phaser.Events.EventEmitter {
    */
   getAnimatedTextSpeed() {
     /** @type {import('../common/options.js').TextSpeedMenuOptions | undefined} */
-    const chosenTextSpeed = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
+    const chosenTextSpeed = this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED);
     if (chosenTextSpeed === undefined) {
       return TEXT_SPEED.MEDIUM;
     }
@@ -162,6 +207,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     this.#store.set({
       [DATA_MANAGER_STORE_KEYS.PLAYER_POSITION]: data.player.position,
       [DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION]: data.player.direction,
+      [DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION]: data.player.location,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: data.options.textSpeed,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS]: data.options.battleSceneAnimations,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE]: data.options.battleStyle,
@@ -170,6 +216,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
+      [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
     });
   }
 
@@ -184,6 +231,7 @@ class DataManager extends Phaser.Events.EventEmitter {
           y: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).y,
         },
         direction: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
+        location: { ...this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION) },
       },
       options: {
         textSpeed: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED),
@@ -195,6 +243,9 @@ class DataManager extends Phaser.Events.EventEmitter {
       },
       gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
+      monsters: {
+        inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
+      },
     };
   }
 }

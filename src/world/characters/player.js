@@ -1,15 +1,30 @@
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
+import { TILE_SIZE } from '../../config.js';
+import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 import { Character } from './character.js';
 
 /**
- * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'idleFrameConfig'>} PlayerConfig
+ * @typedef PlayerConfigProps
+ * @type {object}
+ * @property {Phaser.Tilemaps.TilemapLayer} collisionLayer
+ * @property {Phaser.Tilemaps.ObjectLayer} entranceLayer
+ * @property {(entranceName: string, entranceId: string) => void} enterEntranceCallback
+ */
+
+/**
+ * @typedef {import('./character.js').BaseCharacterConfig & PlayerConfigProps} PlayerConfig
  */
 
 export class Player extends Character {
+  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  #entranceLayer;
+  /** @type {(entranceName: string, entranceId: string, isBuildingEntrance: boolean) => void | undefined} */
+  #enterEntranceCallback;
+
   /**
-   * @param {import('./character.js').BaseCharacterConfig} config
+   * @param {PlayerConfig} config
    */
   constructor(config) {
     super({
@@ -24,6 +39,8 @@ export class Player extends Character {
         RIGHT: 4,
       },
     });
+    this.#entranceLayer = config.entranceLayer;
+    this.#enterEntranceCallback = config.enterEntranceCallback;
   }
 
   /**
@@ -50,6 +67,30 @@ export class Player extends Character {
       default:
         // We should never reach this default case
         exhaustiveGuard(this._direction);
+    }
+
+    // validate character is not moving and that the target position belongs to an entrance
+    if (!this._isMoving) {
+      const targetPosition = getTargetPositionFromGameObjectPositionAndDirection(
+        { x: this._phaserGameObject.x, y: this._phaserGameObject.y },
+        this._direction
+      );
+      const nearbyEntrance = this.#entranceLayer.objects.find((object) => {
+        if (!object.x || !object.y) {
+          return false;
+        }
+        return object.x === targetPosition.x && object.y - TILE_SIZE === targetPosition.y;
+      });
+
+      if (!nearbyEntrance) {
+        return;
+      }
+
+      // entrance is nearby and the player is trying to enter that location
+      const entranceName = nearbyEntrance.properties.find((property) => property.name === 'connects_to').value;
+      const entranceId = nearbyEntrance.properties.find((property) => property.name === 'entrance_id').value;
+      const isBuildingEntrance = nearbyEntrance.properties.find((property) => property.name === 'is_building').value;
+      this.#enterEntranceCallback(entranceName, entranceId, isBuildingEntrance);
     }
   }
 }

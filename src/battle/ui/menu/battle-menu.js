@@ -7,6 +7,7 @@ import { BATTLE_UI_TEXT_STYLE } from './battle-menu-config.js';
 import { BattleMonster } from '../../monsters/battle-monster.js';
 import { animateText } from '../../../utils/text-utils.js';
 import { dataManager } from '../../../utils/data-manager.js';
+import { SCENE_KEYS } from '../../../scenes/scene-keys.js';
 
 const BATTLE_MENU_CURSOR_POS = Object.freeze({
   x: 42,
@@ -61,6 +62,10 @@ export class BattleMenu {
   #skipAnimations;
   /** @type {boolean} */
   #queuedMessageAnimationPlaying;
+  /** @type {boolean} */
+  #usedItem;
+  /** @type {boolean} */
+  #fleeAttempt;
 
   /**
    *
@@ -80,18 +85,38 @@ export class BattleMenu {
     this.#selectedAttackIndex = undefined;
     this.#skipAnimations = skipBattleAnimations || false;
     this.#queuedMessageAnimationPlaying = false;
+    this.#usedItem = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
     this.#createPlayerInputCursor();
+
+    this.#scene.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+    this.#scene.events.once(
+      Phaser.Scenes.Events.SHUTDOWN,
+      () => {
+        this.#scene.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+      },
+      this
+    );
   }
 
-  /** @types {number | undefined} */
+  /** @type {number | undefined} */
   get selectedAttack() {
     if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
       return this.#selectedAttackIndex;
     }
     return undefined;
+  }
+
+  /** @type {boolean} */
+  get wasItemUsed() {
+    return this.#usedItem;
+  }
+
+  /** @type {boolean} */
+  get isAttemptingToFlee() {
+    return this.#fleeAttempt;
   }
 
   showMainBattleMenu() {
@@ -104,6 +129,8 @@ export class BattleMenu {
     this.#selectedBattleMenuOption = BATTLE_MENU_OPTIONS.FIGHT;
     this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(BATTLE_MENU_CURSOR_POS.x, BATTLE_MENU_CURSOR_POS.y);
     this.#selectedAttackIndex = undefined;
+    this.#usedItem = false;
+    this.#fleeAttempt = false;
   }
 
   hideMainBattleMenu() {
@@ -553,15 +580,19 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.ITEM) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player having no items
-        and allow the player to navigate back to the main menu
-      */
-      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
-      this.updateInfoPaneMessagesAndWaitForInput(['Your bag is empty...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_ITEM;
+
+      // pause this scene and launch the inventory scene
+      /** @type {import('../../../scenes/inventory-scene.js').InventorySceneData} */
+      const sceneDataToPass = {
+        previousSceneName: SCENE_KEYS.BATTLE_SCENE,
+      };
+      this.#scene.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
+      this.#scene.scene.pause(SCENE_KEYS.BATTLE_SCENE);
+
+      // this.updateInfoPaneMessagesAndWaitForInput(['Your bag is empty...'], () => {
+      //   this.#switchToMainBattleMenu();
+      // });
       return;
     }
 
@@ -579,15 +610,7 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player successfully running away
-        and then restart the Phaser scene after doing a screen fade out
-      */
-      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
-      this.updateInfoPaneMessagesAndWaitForInput(['You fail to run away...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.#fleeAttempt = true;
       return;
     }
 
@@ -633,5 +656,26 @@ export class BattleMenu {
       targets: this.#userInputCursorPhaserImageGameObject,
     });
     this.#userInputCursorPhaserTween.pause();
+  }
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {import('../../../scenes/inventory-scene.js').InventorySceneResumeData} data
+   * @returns {void}
+   */
+  #handleSceneResume(sys, data) {
+    console.log(
+      `[${BattleMenu.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
+    );
+
+    if (!data || !data.itemUsed) {
+      this.#switchToMainBattleMenu();
+      return;
+    }
+
+    if (data.itemUsed) {
+      this.#usedItem = true;
+      this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
+    }
   }
 }

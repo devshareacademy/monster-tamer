@@ -1,8 +1,8 @@
-import Phaser from '../lib/phaser.js';
 import {
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
+  BUILDING_ASSET_KEYS,
   CHARACTER_ASSET_KEYS,
   DATA_ASSET_KEYS,
   EXTERNAL_LINKS_ASSET_KEYS,
@@ -17,13 +17,12 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { createNineSliceTextures } from '../utils/nine-slice.js';
-import { DIRECTION } from '../common/direction.js';
-import { SHOW_SOCIAL_LINKS, WALK_FRAME_RATE } from '../config.js';
+import { SHOW_SOCIAL_LINKS } from '../config.js';
 import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { BaseScene } from './base-scene.js';
 
-export class PreloadScene extends Phaser.Scene {
+export class PreloadScene extends BaseScene {
   constructor() {
     super({
       key: SCENE_KEYS.PRELOAD_SCENE,
@@ -34,7 +33,7 @@ export class PreloadScene extends Phaser.Scene {
    * @returns {void}
    */
   preload() {
-    console.log(`[${PreloadScene.name}:preload] invoked`);
+    super.preload();
 
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
@@ -130,11 +129,20 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     // load world assets
-    this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
-    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL, `assets/data/level.json`);
+    this.load.image(WORLD_ASSET_KEYS.MAIN_1_BACKGROUND, `${monsterTamerAssetPath}/map/main_1_level_background.png`);
+    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.MAIN_1_LEVEL, `assets/data/main_1.json`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
-    this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/level_foreground.png`);
+    this.load.image(WORLD_ASSET_KEYS.MAIN_1_FOREGROUND, `${monsterTamerAssetPath}/map/main_1_level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_foreground.png`
+    );
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_background.png`
+    );
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_1_LEVEL, `assets/data/building_1.json`);
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
@@ -173,41 +181,14 @@ export class PreloadScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${PreloadScene.name}:create] invoked`);
+    super.create();
 
-    // TODO: move to animations file
-    // create npc animations
-    this.anims.create({
-      key: `NPC_1_${DIRECTION.DOWN}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [24, 20, 25] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `NPC_1_${DIRECTION.UP}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [26, 21, 27] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-    this.anims.create({
-      key: `NPC_1_${DIRECTION.RIGHT}`,
-      frames: this.anims.generateFrameNumbers(CHARACTER_ASSET_KEYS.NPC, { frames: [28, 22, 29] }),
-      frameRate: WALK_FRAME_RATE,
-      repeat: -1,
-      yoyo: true,
-    });
-
-    // create nineslice textures
-    createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND);
-    createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_GREEN);
-    createNineSliceTextures(this, UI_ASSET_KEYS.MENU_BACKGROUND_PURPLE);
+    // create animations from json file
+    this.#createAnimations();
 
     // attempt to populate data manager with saved data
     dataManager.loadData();
 
-    this.#createAnimations();
     this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 

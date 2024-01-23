@@ -55,36 +55,50 @@ Level Development With Tiled:
   ✔ Exporting level images and JSON @done(23-11-27 09:26)
 
 World Scene Part 2:
-  ✔ add interactive game objects @done(23-11-27 10:28)
-  ☐ dialog ui component
-  ☐ add npcs
-  ☐ add npc dialog
-  ☐ add npc movement
+  ✔ add interactive game objects @done(23-11-18 20:35)
+  ✔ dialog ui component @done(23-11-18 20:35)
+  ✔ add npcs @done(23-11-18 20:59)
+  ✔ add npc dialog @done(23-11-18 21:46)
+  ✔ add npc movement @done(23-11-18 22:07)
 
 Title Screen:
-  ☐ create basic title screen
-  ☐ add options menu
-  ☐ save & loading options
-  ☐ connecting option data to battle scene
+  ✔ create basic title screen @done(23-12-20 10:23)
+  ✔ add options menu @done(23-12-20 10:23)
+  ✔ save & loading options @done(23-12-20 10:23)
+  ✔ connecting option data to battle scene @done(23-12-20 11:10)
+
+Bug Fixes Part 1:
+  ✔ battle scene - health bar value when battle starts @done(24-01-06 09:05)
+  ✔ health bar - animation when value of delay is provided @done(24-01-06 09:05)
+  ✔ battle scene - at battle start player can provide input @done(24-01-06 09:05)
+  ✔ world scene - player movement, handle when only sprite direction changes @done(24-01-06 09:05)
 
 Tools Part 1:
-  ☐ using tweakpane for testing
-    ☐ positioning game objects
-    ☐ monster attacks
-    ☐ animations
+  ✔ using tweakpane for testing @done(24-01-06 12:10)
+    ✔ tweakpane basics @done(24-01-06 12:10)
+    ✔ positioning game objects @done(24-01-06 12:10)
+    ✔ monster attacks @done(24-01-06 12:10)
+    ✔ animations @done(24-01-06 12:10)
+  ✔ util function for moving game objects @done(24-01-06 12:10)
 
 Saving & Loading:
-  ☐ add game menu with option to save game
-  ☐ update menu scene with continue option to load game
-  ☐ on new game, we should reset the player data (pos, monsters, etc)
-  ☐ update data manager to persist monster data and current stats
+  ✔ add game menu with option to save game @done(24-01-22 08:31)
+  ✔ update menu scene with continue option to load game @done(24-01-22 08:31)
+  ✔ on new game, we should reset the player data (pos, monsters, etc) @done(24-01-22 08:51)
+
+Monster Party & Monster Detail Scenes:
+  ☐ create monster party scene
+  ☐ allow player to select a monster in the scene
+  ☐ create monster detail scene
+  ☐ connect monster detail scene to monster party scene
+  ☐ add game menu option for viewing monster party scene
 
 Inventory:
   ☐ create class for items and inventory
   ☐ create ui screen for viewing items
-  ☐ update menu to have view bag
-  ☐ update battle scene to allow using items
+  ☐ update menu to have view bag option
   ☐ update data manager to allow saving of inventory items
+  ☐ update ui screen to allow player to use items
 
 Battle Scene Part 2:
   ☐ using items
@@ -92,6 +106,7 @@ Battle Scene Part 2:
   ☐ enemy random attack
   ☐ player faint
   ☐ attacking order
+  ☐ update data manager to persist monster data and current stats
   ☐ dynamic monster data based on player party and encounter
 
 World Scene Part 3:
@@ -99,9 +114,14 @@ World Scene Part 3:
   ☐ adding a game menu
     ☐ view inventory
     ☐ view monster party
-    ☐ saving game data
   ☐ buildings
   ☐ items in the field
+
+Audio:
+  ☐ adding background music
+  ☐ adding battle music
+  ☐ adding attack effects
+  ☐ connecting audio options to settings
 
 -------------------------------
 

@@ -1,13 +1,13 @@
 export const SHOW_SOCIAL_LINKS = true;
-export const TILED_COLLISION_LAYER_ALPHA = 0.0;
 export const TILE_SIZE = 64;
-export const WALK_FRAME_RATE = 6;
-export const DISABLE_WILD_ENCOUNTERS = true;
+export const TILED_COLLISION_LAYER_ALPHA = 0;
 export const TEXT_SPEED = Object.freeze({
   SLOW: 50,
   MEDIUM: 30,
   FAST: 15,
 });
+export const WALK_FRAME_RATE = 6;
+export const DISABLE_WILD_ENCOUNTERS = false;
 export const MENU_COLOR = Object.freeze({
   1: {
     main: 0x32454c,

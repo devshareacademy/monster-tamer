@@ -3,17 +3,16 @@ import { SCENE_KEYS } from './scene-keys.js';
 import {
   BATTLE_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
-  MONSTER_ASSET_KEYS,
   MONSTER_PARTY_ASSET_KEYS,
   UI_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
-import { DataUtils } from '../utils/data-utils.js';
-import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
+import { BaseScene } from './base-scene.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -41,7 +40,7 @@ const MONSTER_PARTY_POSITIONS = Object.freeze({
   increment: 150,
 });
 
-export class MonsterPartyScene extends Phaser.Scene {
+export class MonsterPartyScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image} */
   #cancelButton;
   /** @type {Phaser.GameObjects.Image[]} */
@@ -50,8 +49,6 @@ export class MonsterPartyScene extends Phaser.Scene {
   #selectedPartyMonsterIndex;
   /** @type {import('../types/typedef.js').Monster[]} */
   #monsters;
-  /** @type {Controls} */
-  #controls;
   /** @type {Phaser.GameObjects.Text} */
   #infoTextGameObject;
   /** @type {MonsterPartySceneData} */
@@ -60,6 +57,8 @@ export class MonsterPartyScene extends Phaser.Scene {
   #waitingForInput;
   /** @type {HealthBar[]} */
   #healthBars;
+  /** @type {Phaser.GameObjects.Text[]} */
+  #healthBarTextGameObjects;
 
   constructor() {
     super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
@@ -70,29 +69,23 @@ export class MonsterPartyScene extends Phaser.Scene {
    * @returns {void}
    */
   init(data) {
-    console.log(`[${MonsterPartyScene.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
+    super.init(data);
 
     this.#selectedPartyMonsterIndex = 0;
-    this.#monsters = [];
-
-    // added for testing from preload scene
-    // TODO: need to add logic to grab monster party data from the data manager
-    if (this.#monsters.length === 0) {
-      this.#monsters.push(DataUtils.getIguanignite(this));
-      // this.#monsters.push(DataUtils.getCarnodusk(this));
-    }
+    this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
 
     this.#monsterPartyBackgrounds = [];
     this.#sceneData = data;
     this.#waitingForInput = false;
     this.#healthBars = [];
+    this.#healthBarTextGameObjects = [];
   }
 
   /**
    * @returns {void}
    */
   create() {
-    console.log(`[${MonsterPartyScene.name}:create] invoked`);
+    super.create();
 
     // create custom background
     this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x000000, 1).setOrigin(0);
@@ -135,19 +128,28 @@ export class MonsterPartyScene extends Phaser.Scene {
     // this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     // this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
 
-    this.#controls = new Controls(this);
     this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
   /**
    * @returns {void}
    */
+  cleanup() {
+    super.cleanup();
+    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+  }
+
+  /**
+   * @returns {void}
+   */
   update() {
-    if (this.#controls.isInputLocked) {
+    super.update();
+
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
+    if (this._controls.wasBackKeyPressed()) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
         this.#waitingForInput = false;
@@ -158,7 +160,7 @@ export class MonsterPartyScene extends Phaser.Scene {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
@@ -177,7 +179,7 @@ export class MonsterPartyScene extends Phaser.Scene {
         return;
       }
 
-      this.#controls.lockInput = true;
+      this._controls.lockInput = true;
       // pause this scene and launch the monster details scene
       /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
       const sceneDataToPass = {
@@ -193,7 +195,7 @@ export class MonsterPartyScene extends Phaser.Scene {
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
       this.#updateInfoContainerText();
@@ -224,7 +226,10 @@ export class MonsterPartyScene extends Phaser.Scene {
       .setAlpha(0.5);
 
     const healthBar = new HealthBar(this, 100, 40, 240);
-    healthBar.setMeterPercentageAnimated(monsterDetails.currentHp / monsterDetails.maxHp, { duration: 0 });
+    healthBar.setMeterPercentageAnimated(monsterDetails.currentHp / monsterDetails.maxHp, {
+      duration: 0,
+      skipBattleAnimations: true,
+    });
     this.#healthBars.push(healthBar);
 
     const monsterHpText = this.add.text(164, 66, 'HP', {
@@ -253,6 +258,7 @@ export class MonsterPartyScene extends Phaser.Scene {
         fontSize: '38px',
       })
       .setOrigin(1, 0);
+    this.#healthBarTextGameObjects.push(healthBarTextGameObject);
 
     const monsterImage = this.add.image(35, 20, monsterDetails.assetKey).setOrigin(0).setScale(0.35);
 
@@ -318,7 +324,7 @@ export class MonsterPartyScene extends Phaser.Scene {
    * @returns {void}
    */
   #goBackToPreviousScene(itemUsed) {
-    this.#controls.lockInput = true;
+    this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
 
     if (this.#sceneData.previousSceneName === SCENE_KEYS.WORLD_SCENE) {
@@ -351,7 +357,6 @@ export class MonsterPartyScene extends Phaser.Scene {
    * @returns {void}
    */
   #handleHealItemUsed(amount) {
-    console.log(this.#sceneData.itemSelected);
     // validate that the monster is not fainted
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
       this.#infoTextGameObject.setText('Cannot heal fainted monster');
@@ -370,7 +375,7 @@ export class MonsterPartyScene extends Phaser.Scene {
     }
 
     // otherwise, heal monster by the amount if we are not in a battle and show animation
-    this.#controls.lockInput = true;
+    this._controls.lockInput = true;
     this.#monsters[this.#selectedPartyMonsterIndex].currentHp += amount;
     if (
       this.#monsters[this.#selectedPartyMonsterIndex].currentHp > this.#monsters[this.#selectedPartyMonsterIndex].maxHp
@@ -382,6 +387,12 @@ export class MonsterPartyScene extends Phaser.Scene {
       this.#monsters[this.#selectedPartyMonsterIndex].currentHp / this.#monsters[this.#selectedPartyMonsterIndex].maxHp,
       {
         callback: () => {
+          this.#healthBarTextGameObjects[this.#selectedPartyMonsterIndex].setText(
+            `${this.#monsters[this.#selectedPartyMonsterIndex].currentHp} / ${
+              this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+            }`
+          );
+          dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
           this.time.delayedCall(300, () => {
             this.#goBackToPreviousScene(true);
           });
@@ -395,6 +406,6 @@ export class MonsterPartyScene extends Phaser.Scene {
    */
   #handleSceneResume() {
     console.log(`[${MonsterPartyScene.name}:handleSceneResume] scene has been resumed`);
-    this.#controls.lockInput = false;
+    this._controls.lockInput = false;
   }
 }
