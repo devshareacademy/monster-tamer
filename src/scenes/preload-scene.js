@@ -3,6 +3,7 @@ import {
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
   CHARACTER_ASSET_KEYS,
+  EXTERNAL_LINKS_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   INVENTORY_ASSET_KEYS,
@@ -17,6 +18,7 @@ import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { dataManager } from '../utils/data-manager.js';
+import { SHOW_SOCIAL_LINKS } from '../config.js';
 import { BaseScene } from './base-scene.js';
 
 export class PreloadScene extends BaseScene {
@@ -37,6 +39,20 @@ export class PreloadScene extends BaseScene {
     const pimenAssetPath = 'assets/images/pimen';
     const axulArtAssetPath = 'assets/images/axulart';
     const pbGamesAssetPath = 'assets/images/parabellum-games';
+
+    // external social links assets
+    if (SHOW_SOCIAL_LINKS) {
+      this.load.image(
+        EXTERNAL_LINKS_ASSET_KEYS.GITHUB_BANNER,
+        'assets/images/external-social/forkme_right_red_aa0000.webp'
+      );
+      this.load.image(
+        EXTERNAL_LINKS_ASSET_KEYS.YOUTUBE_BUTTON,
+        'assets/images/external-social/WatchonYouTube-white-3xPNG.png'
+      );
+      this.load.image(EXTERNAL_LINKS_ASSET_KEYS.LEARN_MORE_BACKGROUND, 'assets/images/external-social/blank.png');
+      this.load.image(EXTERNAL_LINKS_ASSET_KEYS.YOUTUBE_THUMB_NAIL, 'assets/images/external-social/thumbnail.jpeg');
+    }
 
     // battle backgrounds
     this.load.image(

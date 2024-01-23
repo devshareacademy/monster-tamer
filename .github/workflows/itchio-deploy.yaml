@@ -1,0 +1,29 @@
+name: Itch.io Deploy Workflow
+
+on:
+  # push:
+  #   branches:
+  #     - wip
+  #     - GH-76
+  workflow_dispatch:
+
+jobs:
+  itchio-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Run bundle script
+        run: ./deploy/bundle.sh
+
+      - name: Deploy
+        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.ITCH_IO_API_KEY }}
+          CHANNEL: HTML
+          ITCH_GAME: monster-tamer
+          ITCH_USER: galemius
+          PACKAGE: dist
