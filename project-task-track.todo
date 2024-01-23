@@ -82,9 +82,9 @@ Tools Part 1:
   ✔ util function for moving game objects @done(24-01-06 12:10)
 
 Saving & Loading:
-  ☐ add game menu with option to save game
-  ☐ update menu scene with continue option to load game
-  ☐ on new game, we should reset the player data (pos, monsters, etc)
+  ✔ add game menu with option to save game @done(24-01-22 08:31)
+  ✔ update menu scene with continue option to load game @done(24-01-22 08:31)
+  ✔ on new game, we should reset the player data (pos, monsters, etc) @done(24-01-22 08:51)
 
 Monster Party & Monster Detail Scenes:
   ☐ create monster party scene

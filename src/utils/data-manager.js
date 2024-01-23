@@ -3,6 +3,7 @@ import { DIRECTION } from '../common/direction.js';
 import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
+import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
@@ -16,7 +17,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 /**
  * @typedef MonsterData
  * @type {object}
- * @property {import('../types/typedef.js').Monster[]} monsters.inParty
+ * @property {import('../types/typedef.js').Monster[]} inParty
  */
 
 /**
@@ -68,14 +69,14 @@ const initialState = {
       {
         id: 1,
         monsterId: 1,
+        name: MONSTER_ASSET_KEYS.IGUANIGNITE,
+        assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
+        assetFrame: 0,
         currentHp: 25,
         maxHp: 25,
-        baseAttack: 20,
-        currentLevel: 5,
-        assetKey: 'IGUANIGNITE',
-        name: 'iguanignite',
-        assetFrame: 0,
         attackIds: [2],
+        baseAttack: 15,
+        currentLevel: 5,
       },
     ],
   },

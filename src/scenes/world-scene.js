@@ -273,7 +273,9 @@ export class WorldScene extends BaseScene {
       if (wasSpaceKeyPressed) {
         this.#menu.handlePlayerInput('OK');
         if (this.#menu.selectedMenuOption === 'SAVE') {
-          this.#dialogUi.showDialogModal(['Game progress has been saved.']);
+          this.#menu.hide();
+          dataManager.saveData();
+          this.#dialogUi.showDialogModal(['Game progress has been saved']);
         }
 
         if (this.#menu.selectedMenuOption === 'BAG') {
@@ -295,17 +297,16 @@ export class WorldScene extends BaseScene {
           this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
+
+        if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
+        }
       }
 
       if (this._controls.wasBackKeyPressed()) {
         this.#menu.handlePlayerInput('CANCEL');
       }
     }
-
-    // TODO: see if this can be cleaned up
-    // if (this._controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
-    //   this.#handlePlayerInteraction();
-    // }
 
     this.#player.update(time);
 
