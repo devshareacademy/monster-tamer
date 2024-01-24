@@ -2,7 +2,6 @@ import Phaser from '../lib/phaser.js';
 import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
-import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
@@ -11,6 +10,7 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
+import { BaseScene } from './base-scene.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -41,11 +41,9 @@ const TILED_NPC_PROPERTY = Object.freeze({
   each grid size will be 64 x 64 pixels
 */
 
-export class WorldScene extends Phaser.Scene {
+export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Controls} */
-  #controls;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
   #encounterLayer;
   /** @type {boolean} */
@@ -71,7 +69,7 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   init() {
-    console.log(`[${WorldScene.name}:init] invoked`);
+    super.init();
     this.#wildMonsterEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
   }
@@ -80,7 +78,7 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${WorldScene.name}:create] invoked`);
+    super.create();
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -157,8 +155,6 @@ export class WorldScene extends Phaser.Scene {
     // create foreground for depth
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
 
-    this.#controls = new Controls(this);
-
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
 
@@ -174,14 +170,15 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
+    super.update();
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
-    const selectedDirectionHeldDown = this.#controls.getDirectionKeyPressedDown();
-    const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirectionHeldDown);
     }
@@ -190,7 +187,7 @@ export class WorldScene extends Phaser.Scene {
       this.#handlePlayerInteraction();
     }
 
-    if (this.#controls.wasEnterKeyPressed() && !this.#player.isMoving) {
+    if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
       if (this.#dialogUi.isVisible) {
         return;
       }
@@ -222,7 +219,7 @@ export class WorldScene extends Phaser.Scene {
         // TODO: handle other selected menu options
       }
 
-      if (this.#controls.wasBackKeyPressed()) {
+      if (this._controls.wasBackKeyPressed()) {
         this.#menu.hide();
       }
     }
@@ -327,7 +324,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   #isPlayerInputLocked() {
-    return this.#controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
   }
 
   /**

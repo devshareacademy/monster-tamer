@@ -1,4 +1,3 @@
-import Phaser from '../lib/phaser.js';
 import {
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
@@ -18,8 +17,9 @@ import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { dataManager } from '../utils/data-manager.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
+import { BaseScene } from './base-scene.js';
 
-export class PreloadScene extends Phaser.Scene {
+export class PreloadScene extends BaseScene {
   constructor() {
     super({
       key: SCENE_KEYS.PRELOAD_SCENE,
@@ -27,7 +27,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log(`[${PreloadScene.name}:preload] invoked`);
+    super.preload();
 
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
@@ -141,7 +141,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create() {
-    console.log(`[${PreloadScene.name}:create] invoked`);
+    super.create();
     this.#createAnimations();
     // attempt to populate data manager with saved data
     dataManager.loadData();

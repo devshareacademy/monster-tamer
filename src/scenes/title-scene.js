@@ -2,12 +2,12 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { EXTERNAL_LINKS_ASSET_KEYS, TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
+import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = Object.freeze({
@@ -32,11 +32,9 @@ const MAIN_MENU_OPTIONS = Object.freeze({
   OPTIONS: 'OPTIONS',
 });
 
-export class TitleScene extends Phaser.Scene {
+export class TitleScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image} */
   #mainMenuCursorPhaserImageGameObject;
-  /** @type {Controls} */
-  #controls;
   /** @type {MainMenuOptions} */
   #selectedMenuOption;
   /** @type {boolean} */
@@ -51,7 +49,7 @@ export class TitleScene extends Phaser.Scene {
   }
 
   init() {
-    console.log(`[${TitleScene.name}:init] invoked`);
+    super.init();
 
     this.#nineSliceMenu = new NineSlice({
       cornerCutSize: 32,
@@ -61,7 +59,7 @@ export class TitleScene extends Phaser.Scene {
   }
 
   create() {
-    console.log(`[${TitleScene.name}:create] invoked`);
+    super.create();
 
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
     this.#isContinueButtonEnabled = dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false;
@@ -130,23 +128,23 @@ export class TitleScene extends Phaser.Scene {
 
       this.scene.start(SCENE_KEYS.WORLD_SCENE);
     });
-
-    this.#controls = new Controls(this);
   }
 
   update() {
-    if (this.#controls.isInputLocked) {
+    super.update();
+
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       this.cameras.main.fadeOut(500, 0, 0, 0);
-      this.#controls.lockInput = true;
+      this._controls.lockInput = true;
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveMenuSelectCursor(selectedDirection);
     }
