@@ -10,6 +10,7 @@ import {
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
+  MONSTER_PARTY_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
@@ -95,6 +96,8 @@ export class PreloadScene extends BaseScene {
       `${kenneysAssetPath}/ui-space-expansion/glassPanel_purple.png`
     );
     this.load.image(UI_ASSET_KEYS.MENU_BACKGROUND_GREEN, `${kenneysAssetPath}/ui-space-expansion/glassPanel_green.png`);
+    this.load.image(UI_ASSET_KEYS.BLUE_BUTTON, `${kenneysAssetPath}/ui-pack/blue_button01.png`);
+    this.load.image(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, `${kenneysAssetPath}/ui-pack/blue_button00.png`);
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
@@ -138,6 +141,16 @@ export class PreloadScene extends BaseScene {
     this.load.image(TITLE_ASSET_KEYS.BACKGROUND, `${monsterTamerAssetPath}/ui/title/background.png`);
     this.load.image(TITLE_ASSET_KEYS.PANEL, `${monsterTamerAssetPath}/ui/title/title_background.png`);
     this.load.image(TITLE_ASSET_KEYS.TITLE, `${monsterTamerAssetPath}/ui/title/title_text.png`);
+
+    // ui components for monster party
+    this.load.image(
+      MONSTER_PARTY_ASSET_KEYS.PARTY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/monster-party/background.png`
+    );
+    this.load.image(
+      MONSTER_PARTY_ASSET_KEYS.MONSTER_DETAILS_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/monster-party/monster-details-background.png`
+    );
   }
 
   create() {
@@ -145,7 +158,7 @@ export class PreloadScene extends BaseScene {
     this.#createAnimations();
     // attempt to populate data manager with saved data
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE);
   }
 
   #createAnimations() {
