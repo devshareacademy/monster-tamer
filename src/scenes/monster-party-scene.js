@@ -1,7 +1,13 @@
-import { BATTLE_ASSET_KEYS, MONSTER_PARTY_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import {
+  BATTLE_ASSET_KEYS,
+  HEALTH_BAR_ASSET_KEYS,
+  MONSTER_PARTY_ASSET_KEYS,
+  UI_ASSET_KEYS,
+} from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
 import Phaser from '../lib/phaser.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
@@ -11,6 +17,18 @@ const UI_TEXT_STYLE = {
   color: '#FFFFFF',
   fontSize: '24px',
 };
+
+const MONSTER_PARTY_POSITIONS = Object.freeze({
+  EVEN: {
+    x: 0,
+    y: 10,
+  },
+  ODD: {
+    x: 510,
+    y: 40,
+  },
+  increment: 150,
+});
 
 export class MonsterPartyScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image[]} */
@@ -25,6 +43,8 @@ export class MonsterPartyScene extends BaseScene {
   #healthBarTextGameObjects;
   /** @type {number} */
   #selectedPartyMonsterIndex;
+  /** @type {import('../types/typedef.js').Monster[]} */
+  #monsters;
 
   constructor() {
     super({
@@ -42,6 +62,7 @@ export class MonsterPartyScene extends BaseScene {
     this.#healthBars = [];
     this.#healthBarTextGameObjects = [];
     this.#selectedPartyMonsterIndex = 0;
+    this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
   }
 
   /**
@@ -74,12 +95,23 @@ export class MonsterPartyScene extends BaseScene {
     this.#updateInfoContainerText();
 
     // create monsters in party
+    this.#monsters.forEach((monster, index) => {
+      const isEven = index % 2 === 0;
+      const x = isEven ? MONSTER_PARTY_POSITIONS.EVEN.x : MONSTER_PARTY_POSITIONS.ODD.x;
+      const y =
+        (isEven ? MONSTER_PARTY_POSITIONS.EVEN.y : MONSTER_PARTY_POSITIONS.ODD.y) +
+        MONSTER_PARTY_POSITIONS.increment * Math.floor(index / 2);
+      this.#createMonster(x, y, monster);
+    });
+    // alpha is used for knowing if monster is selected, not selected, or knocked out
+    /*
     this.add.image(0, 10, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
     this.add.image(510, 40, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(0, 160, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 190, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
+    */
   }
 
   #updateInfoContainerText() {
@@ -88,5 +120,81 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
     this.#infoTextGameObject.setText('Choose a monster');
+  }
+
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {import('../types/typedef.js').Monster} monsterDetails
+   * @returns {Phaser.GameObjects.Container}
+   */
+  #createMonster(x, y, monsterDetails) {
+    const container = this.add.container(x, y, []);
+
+    const background = this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
+    this.#monsterPartyBackgrounds.push(background);
+
+    const leftShadowCap = this.add.image(160, 67, HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW).setOrigin(0).setAlpha(0.5);
+    const middleShadow = this.add
+      .image(leftShadowCap.x + leftShadowCap.width, 67, HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW)
+      .setOrigin(0)
+      .setAlpha(0.5);
+    middleShadow.displayWidth = 285;
+    const rightShadowCap = this.add
+      .image(middleShadow.x + middleShadow.displayWidth, 67, HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW)
+      .setOrigin(0)
+      .setAlpha(0.5);
+
+    const healthBar = new HealthBar(this, 100, 40, 240);
+    healthBar.setMeterPercentageAnimated(monsterDetails.currentHp / monsterDetails.maxHp, {
+      duration: 0,
+      skipBattleAnimations: true,
+    });
+    this.#healthBars.push(healthBar);
+
+    const monsterHpText = this.add.text(164, 66, 'HP', {
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      color: '#FF6505',
+      fontSize: '24px',
+      fontStyle: 'italic',
+    });
+
+    const monsterHealthBarLevelText = this.add.text(26, 116, `Lv. ${monsterDetails.currentLevel}`, {
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      color: '#ffffff',
+      fontSize: '22px',
+    });
+
+    const monsterNameGameText = this.add.text(162, 36, monsterDetails.name, {
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      color: '#ffffff',
+      fontSize: '30px',
+    });
+
+    const healthBarTextGameObject = this.add
+      .text(458, 95, `${monsterDetails.currentHp} / ${monsterDetails.maxHp}`, {
+        fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+        color: '#ffffff',
+        fontSize: '38px',
+      })
+      .setOrigin(1, 0);
+    this.#healthBarTextGameObjects.push(healthBarTextGameObject);
+
+    const monsterImage = this.add.image(35, 20, monsterDetails.assetKey).setOrigin(0).setScale(0.35);
+
+    container.add([
+      background,
+      healthBar.container,
+      monsterHpText,
+      monsterHealthBarLevelText,
+      monsterNameGameText,
+      leftShadowCap,
+      middleShadow,
+      rightShadowCap,
+      healthBarTextGameObject,
+      monsterImage,
+    ]);
+
+    return container;
   }
 }
