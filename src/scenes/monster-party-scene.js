@@ -1,3 +1,4 @@
+import Phaser from '../lib/phaser.js';
 import {
   BATTLE_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
@@ -56,7 +57,9 @@ export class MonsterPartyScene extends BaseScene {
   #sceneData;
 
   constructor() {
-    super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
+    super({
+      key: SCENE_KEYS.MONSTER_PARTY_SCENE,
+    });
   }
 
   /**
@@ -87,11 +90,11 @@ export class MonsterPartyScene extends BaseScene {
       .setOrigin(0)
       .setAlpha(0.7);
 
-    // create back button
+    // create button
     const buttonContainer = this.add.container(883, 519, []);
     this.#cancelButton = this.add.image(0, 0, UI_ASSET_KEYS.BLUE_BUTTON, 0).setOrigin(0).setScale(0.7, 1).setAlpha(0.7);
-    const cancelButtonText = this.add.text(66.5, 20.5, 'cancel', UI_TEXT_STYLE).setOrigin(0.5);
-    buttonContainer.add([this.#cancelButton, cancelButtonText]);
+    const cancelText = this.add.text(66.5, 20.6, 'cancel', UI_TEXT_STYLE).setOrigin(0.5);
+    buttonContainer.add([this.#cancelButton, cancelText]);
 
     // create info container
     const infoContainer = this.add.container(4, this.scale.height - 69, []);
@@ -118,23 +121,13 @@ export class MonsterPartyScene extends BaseScene {
 
     // alpha is used for knowing if monster is selected, not selected, or knocked out
     /*
-    this.add.image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
+    this.add.image(0, 10, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
     this.add.image(510, 40, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(0, 160, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 190, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
     */
-
-    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
-  }
-
-  /**
-   * @returns {void}
-   */
-  cleanup() {
-    super.cleanup();
-    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
   /**
@@ -169,7 +162,6 @@ export class MonsterPartyScene extends BaseScene {
       };
       this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
       this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
-
       return;
     }
 
@@ -274,7 +266,6 @@ export class MonsterPartyScene extends BaseScene {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
     this.scene.resume(this.#sceneData.previousSceneName);
-    return;
   }
 
   /**
@@ -326,13 +317,5 @@ export class MonsterPartyScene extends BaseScene {
       }
       background.setAlpha(0.7);
     });
-  }
-
-  /**
-   * @returns {void}
-   */
-  #handleSceneResume() {
-    console.log(`[${MonsterPartyScene.name}:handleSceneResume] scene has been resumed`);
-    this._controls.lockInput = false;
   }
 }
