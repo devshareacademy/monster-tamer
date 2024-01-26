@@ -87,8 +87,8 @@ Saving & Loading:
   ✔ on new game, we should reset the player data (pos, monsters, etc) @done(24-01-22 08:51)
 
 Monster Party & Monster Detail Scenes:
-  ☐ create monster party scene
-  ☐ allow player to select a monster in the scene
+  ✔ create monster party scene @done(24-01-26 09:08)
+  ✔ allow player to select a monster in the scene @done(24-01-26 09:08)
   ☐ create monster detail scene
   ☐ connect monster detail scene to monster party scene
   ☐ add game menu option for viewing monster party scene

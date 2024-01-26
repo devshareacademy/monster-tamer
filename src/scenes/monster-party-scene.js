@@ -145,7 +145,7 @@ export class MonsterPartyScene extends BaseScene {
       // for now, lock screen to prepare for scene transition
 
       this._controls.lockInput = true;
-      this.scene.start(SCENE_KEYS.WORLD_SCENE);
+      this.scene.start(SCENE_KEYS.MONSTER_DETAILS_SCENE);
       return;
     }
 
