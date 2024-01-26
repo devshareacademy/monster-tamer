@@ -222,21 +222,11 @@ export class WorldScene extends BaseScene {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
           };
           this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
-          this.scene.pause();
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
         if (this.#menu.selectedMenuOption === 'EXIT') {
           this.#menu.hide();
-        }
-
-        if (this.#menu.selectedMenuOption === 'MONSTERS') {
-          // pause this scene and launch the monster party scene
-          /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
-          const sceneDataToPass = {
-            previousSceneName: SCENE_KEYS.WORLD_SCENE,
-          };
-          this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
-          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
         // TODO: handle other selected menu options
