@@ -45,9 +45,12 @@ export class MonsterDetailsScene extends BaseScene {
     super.init(data);
 
     this.#monsterDetails = data.monster;
+
+    // added for testing from preload scene directly
     if (this.#monsterDetails === undefined) {
       this.#monsterDetails = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0];
     }
+
     this.#monsterAttacks = [];
     this.#monsterDetails.attackIds.forEach((attackId) => {
       const monsterAttack = DataUtils.getMonsterAttack(this, attackId);

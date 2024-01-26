@@ -213,6 +213,7 @@ export class OptionsScene extends BaseScene {
    */
   update() {
     super.update();
+
     if (this._controls.isInputLocked) {
       return;
     }

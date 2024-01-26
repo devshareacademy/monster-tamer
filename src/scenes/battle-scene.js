@@ -47,8 +47,12 @@ export class BattleScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     super.init();
+
     this.#activePlayerAttackIndex = -1;
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
@@ -59,8 +63,12 @@ export class BattleScene extends BaseScene {
     this.#skipAnimations = true;
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     super.create();
+
     // create main background
     const background = new Background(this);
     background.showForest();
@@ -96,6 +104,9 @@ export class BattleScene extends BaseScene {
     this._controls.lockInput = true;
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     super.update();
     this.#battleStateMachine.update();

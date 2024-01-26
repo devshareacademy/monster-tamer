@@ -7,10 +7,10 @@ import {
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
+  MONSTER_PARTY_ASSET_KEYS,
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
-  MONSTER_PARTY_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
@@ -27,6 +27,9 @@ export class PreloadScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   preload() {
     super.preload();
 
@@ -153,12 +156,18 @@ export class PreloadScene extends BaseScene {
     );
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     super.create();
+
     this.#createAnimations();
+
     // attempt to populate data manager with saved data
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
   #createAnimations() {

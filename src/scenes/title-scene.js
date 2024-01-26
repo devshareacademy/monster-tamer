@@ -48,6 +48,9 @@ export class TitleScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   init() {
     super.init();
 
@@ -58,6 +61,9 @@ export class TitleScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     super.create();
 

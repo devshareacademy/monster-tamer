@@ -1,3 +1,4 @@
+import Phaser from '../lib/phaser.js';
 import {
   BATTLE_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
@@ -7,7 +8,6 @@ import {
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
 import { DIRECTION } from '../common/direction.js';
-import Phaser from '../lib/phaser.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { BaseScene } from './base-scene.js';
@@ -102,13 +102,14 @@ export class MonsterPartyScene extends BaseScene {
     this.#infoTextGameObject = this.add.text(15, 14, '', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#000000',
-      fontSize: '23px',
+      fontSize: '32px',
     });
     infoContainer.add([infoDisplay, this.#infoTextGameObject]);
     this.#updateInfoContainerText();
 
     // create monsters in party
     this.#monsters.forEach((monster, index) => {
+      // 1, 3, 5
       const isEven = index % 2 === 0;
       const x = isEven ? MONSTER_PARTY_POSITIONS.EVEN.x : MONSTER_PARTY_POSITIONS.ODD.x;
       const y =
@@ -171,6 +172,9 @@ export class MonsterPartyScene extends BaseScene {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #updateInfoContainerText() {
     if (this.#selectedPartyMonsterIndex === -1) {
       this.#infoTextGameObject.setText('Go back to previous menu');
@@ -255,6 +259,9 @@ export class MonsterPartyScene extends BaseScene {
     return container;
   }
 
+  /**
+   * @returns {void}
+   */
   #goBackToPreviousScene() {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);

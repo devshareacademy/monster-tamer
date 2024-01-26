@@ -70,6 +70,7 @@ export class WorldScene extends BaseScene {
    */
   init() {
     super.init();
+
     this.#wildMonsterEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
   }
@@ -221,7 +222,7 @@ export class WorldScene extends BaseScene {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
           };
           this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
-          this.scene.pause();
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
         if (this.#menu.selectedMenuOption === 'EXIT') {
