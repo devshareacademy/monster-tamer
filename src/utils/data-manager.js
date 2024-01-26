@@ -72,7 +72,7 @@ const initialState = {
         name: MONSTER_ASSET_KEYS.IGUANIGNITE,
         assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
         assetFrame: 0,
-        currentHp: 25,
+        currentHp: 20,
         maxHp: 25,
         attackIds: [2],
         baseAttack: 15,

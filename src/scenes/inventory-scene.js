@@ -171,16 +171,6 @@ export class InventoryScene extends BaseScene {
       ...{ wordWrap: { width: this.scale.width - 18 }, color: '#ffffff' },
     });
     this.#updateItemDescriptionText();
-
-    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
-  }
-
-  /**
-   * @returns {void}
-   */
-  cleanup() {
-    super.cleanup();
-    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
   /**
@@ -300,11 +290,8 @@ export class InventoryScene extends BaseScene {
    * @param {InventorySceneResumeData} data
    * @returns {void}
    */
-  #handleSceneResume(sys, data) {
-    console.log(
-      `[${InventoryScene.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
-    );
-    this._controls.lockInput = false;
+  handleSceneResume(sys, data) {
+    super.handleSceneResume(sys, data);
 
     if (!data) {
       return;

@@ -12,7 +12,7 @@ import {
 } from '../common/options.js';
 import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { dataManager, DATA_MANAGER_STORE_KEYS } from '../utils/data-manager.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BaseScene } from './base-scene.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */

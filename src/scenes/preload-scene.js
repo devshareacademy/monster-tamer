@@ -163,13 +163,6 @@ export class PreloadScene extends BaseScene {
     this.load.image(TITLE_ASSET_KEYS.PANEL, `${monsterTamerAssetPath}/ui/title/title_background.png`);
     this.load.image(TITLE_ASSET_KEYS.TITLE, `${monsterTamerAssetPath}/ui/title/title_text.png`);
 
-    // ui components for inventory
-    this.load.image(
-      INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND,
-      `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
-    );
-    this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
-
     // ui components for monster party
     this.load.image(
       MONSTER_PARTY_ASSET_KEYS.PARTY_BACKGROUND,
@@ -179,6 +172,13 @@ export class PreloadScene extends BaseScene {
       MONSTER_PARTY_ASSET_KEYS.MONSTER_DETAILS_BACKGROUND,
       `${monsterTamerAssetPath}/ui/monster-party/monster-details-background.png`
     );
+
+    // ui components for inventory
+    this.load.image(
+      INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
+    );
+    this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
   }
 
   /**
