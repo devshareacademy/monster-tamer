@@ -3,7 +3,6 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { Controls } from '../utils/controls.js';
 import {
   BATTLE_SCENE_OPTIONS,
   BATTLE_STYLE_OPTIONS,
@@ -213,6 +212,8 @@ export class OptionsScene extends BaseScene {
    * @returns {void}
    */
   update() {
+    super.update();
+
     if (this._controls.isInputLocked) {
       return;
     }

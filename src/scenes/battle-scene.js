@@ -100,6 +100,7 @@ export class BattleScene extends BaseScene {
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
+
     this._controls.lockInput = true;
   }
 
@@ -107,6 +108,7 @@ export class BattleScene extends BaseScene {
    * @returns {void}
    */
   update() {
+    super.update();
     this.#battleStateMachine.update();
 
     if (this._controls.isInputLocked) {

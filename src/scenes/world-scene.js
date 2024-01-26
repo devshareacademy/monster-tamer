@@ -171,6 +171,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   update(time) {
+    super.update();
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
       return;
@@ -212,8 +213,6 @@ export class WorldScene extends BaseScene {
           this.#menu.hide();
           dataManager.saveData();
           this.#dialogUi.showDialogModal(['Game progress has been saved']);
-        } else if (this.#menu.selectedMenuOption === 'EXIT') {
-          this.#menu.hide();
         }
 
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
@@ -234,6 +233,10 @@ export class WorldScene extends BaseScene {
           };
           this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
+
+        if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
         }
 
         // TODO: handle other selected menu options
