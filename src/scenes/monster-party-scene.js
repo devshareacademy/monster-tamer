@@ -32,6 +32,12 @@ const MONSTER_PARTY_POSITIONS = Object.freeze({
   increment: 150,
 });
 
+/**
+ * @typedef MonsterPartySceneData
+ * @type {object}
+ * @property {string} previousSceneName
+ */
+
 export class MonsterPartyScene extends BaseScene {
   /** @type {Phaser.GameObjects.Image[]} */
   #monsterPartyBackgrounds;
@@ -47,6 +53,8 @@ export class MonsterPartyScene extends BaseScene {
   #selectedPartyMonsterIndex;
   /** @type {import('../types/typedef.js').Monster[]} */
   #monsters;
+  /** @type {MonsterPartySceneData} */
+  #sceneData;
 
   constructor() {
     super({
@@ -55,11 +63,13 @@ export class MonsterPartyScene extends BaseScene {
   }
 
   /**
+   * @param {MonsterPartySceneData} data
    * @returns {void}
    */
-  init() {
-    super.init();
+  init(data) {
+    super.init(data);
 
+    this.#sceneData = data;
     this.#monsterPartyBackgrounds = [];
     this.#healthBars = [];
     this.#healthBarTextGameObjects = [];
@@ -74,6 +84,7 @@ export class MonsterPartyScene extends BaseScene {
     super.create();
 
     // create custom background
+    this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x000000, 1).setOrigin(0);
     this.add
       .tileSprite(0, 0, this.scale.width, this.scale.height, MONSTER_PARTY_ASSET_KEYS.PARTY_BACKGROUND, 0)
       .setOrigin(0)
@@ -142,10 +153,14 @@ export class MonsterPartyScene extends BaseScene {
 
       // TODO: handle input based on what player intention was (use item, view monster details, select monster to switch to)
 
-      // for now, lock screen to prepare for scene transition
-
       this._controls.lockInput = true;
-      this.scene.start(SCENE_KEYS.MONSTER_DETAILS_SCENE);
+      // pause this scene and launch the monster details scene
+      /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
+      const sceneDataToPass = {
+        monster: this.#monsters[this.#selectedPartyMonsterIndex],
+      };
+      this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
+      this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
       return;
     }
 
@@ -242,7 +257,8 @@ export class MonsterPartyScene extends BaseScene {
 
   #goBackToPreviousScene() {
     this._controls.lockInput = true;
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
+    this.scene.resume(this.#sceneData.previousSceneName);
   }
 
   /**

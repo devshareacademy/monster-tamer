@@ -16,9 +16,14 @@ export class BaseScene extends Phaser.Scene {
   }
 
   /**
+   * @param {any | undefined} [data]
    * @returns {void}
    */
-  init() {
+  init(data) {
+    if (data) {
+      this._log(`[${this.constructor.name}:init] invoked, data provided: ${JSON.stringify(data)}`);
+      return;
+    }
     this._log(`[${this.constructor.name}:init] invoked`);
   }
 
@@ -36,6 +41,8 @@ export class BaseScene extends Phaser.Scene {
     this._log(`[${this.constructor.name}:create] invoked`);
 
     this._controls = new Controls(this);
+    this.events.on(Phaser.Scenes.Events.RESUME, this.handleSceneResume, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleSceneCleanup, this);
   }
 
   /**
@@ -43,6 +50,25 @@ export class BaseScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {}
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {any | undefined} [data]
+   * @returns {void}
+   */
+  handleSceneResume(sys, data) {
+    this._controls.lockInput = false;
+    if (data) {
+      this._log(`[${this.constructor.name}:handleSceneResume] invoked, data provided: ${JSON.stringify(data)}`);
+      return;
+    }
+    this._log(`[${this.constructor.name}:handleSceneResume] invoked`);
+  }
+
+  handleSceneCleanup() {
+    this._log(`[${this.constructor.name}:handleSceneCleanup] invoked`);
+    this.events.off(Phaser.Scenes.Events.RESUME, this.handleSceneResume, this);
+  }
 
   /**
    * @protected

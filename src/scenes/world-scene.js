@@ -212,7 +212,19 @@ export class WorldScene extends BaseScene {
           this.#menu.hide();
           dataManager.saveData();
           this.#dialogUi.showDialogModal(['Game progress has been saved']);
-        } else if (this.#menu.selectedMenuOption === 'EXIT') {
+        }
+
+        if (this.#menu.selectedMenuOption === 'MONSTERS') {
+          // pause this scene and launch the monster party scene
+          /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+          this.scene.pause();
+        }
+
+        if (this.#menu.selectedMenuOption === 'EXIT') {
           this.#menu.hide();
         }
 

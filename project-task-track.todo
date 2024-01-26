@@ -89,9 +89,9 @@ Saving & Loading:
 Monster Party & Monster Detail Scenes:
   ✔ create monster party scene @done(24-01-26 09:08)
   ✔ allow player to select a monster in the scene @done(24-01-26 09:08)
-  ☐ create monster detail scene
-  ☐ connect monster detail scene to monster party scene
-  ☐ add game menu option for viewing monster party scene
+  ✔ create monster detail scene @done(24-01-26 10:35)
+  ✔ connect monster detail scene to monster party scene @done(24-01-26 11:54)
+  ✔ add game menu option for viewing monster party scene @done(24-01-26 11:54)
 
 Inventory:
   ☐ create class for items and inventory
