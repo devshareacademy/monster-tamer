@@ -1,5 +1,4 @@
 import Phaser from '../lib/phaser.js';
-import { SCENE_KEYS } from './scene-keys.js';
 import {
   BATTLE_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
@@ -9,10 +8,11 @@ import {
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
 import { DIRECTION } from '../common/direction.js';
-import { exhaustiveGuard } from '../utils/guard.js';
-import { ITEM_EFFECT } from '../types/typedef.js';
-import { BaseScene } from './base-scene.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { exhaustiveGuard } from '../utils/guard.js';
+import { BaseScene } from './base-scene.js';
+import { SCENE_KEYS } from './scene-keys.js';
+import { ITEM_EFFECT } from '../types/typedef.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -20,13 +20,6 @@ const UI_TEXT_STYLE = {
   color: '#FFFFFF',
   fontSize: '24px',
 };
-
-/**
- * @typedef MonsterPartySceneData
- * @type {object}
- * @property {string} previousSceneName
- * @property {import('../types/typedef.js').Item} [itemSelected]
- */
 
 const MONSTER_PARTY_POSITIONS = Object.freeze({
   EVEN: {
@@ -40,28 +33,37 @@ const MONSTER_PARTY_POSITIONS = Object.freeze({
   increment: 150,
 });
 
+/**
+ * @typedef MonsterPartySceneData
+ * @type {object}
+ * @property {string} previousSceneName
+ * @property {import('../types/typedef.js').Item} [itemSelected]
+ */
+
 export class MonsterPartyScene extends BaseScene {
-  /** @type {Phaser.GameObjects.Image} */
-  #cancelButton;
   /** @type {Phaser.GameObjects.Image[]} */
   #monsterPartyBackgrounds;
-  /** @type {number} */
-  #selectedPartyMonsterIndex;
-  /** @type {import('../types/typedef.js').Monster[]} */
-  #monsters;
+  /** @type {Phaser.GameObjects.Image} */
+  #cancelButton;
   /** @type {Phaser.GameObjects.Text} */
   #infoTextGameObject;
-  /** @type {MonsterPartySceneData} */
-  #sceneData;
-  /** @type {boolean} */
-  #waitingForInput;
   /** @type {HealthBar[]} */
   #healthBars;
   /** @type {Phaser.GameObjects.Text[]} */
   #healthBarTextGameObjects;
+  /** @type {number} */
+  #selectedPartyMonsterIndex;
+  /** @type {import('../types/typedef.js').Monster[]} */
+  #monsters;
+  /** @type {MonsterPartySceneData} */
+  #sceneData;
+  /** @type {boolean} */
+  #waitingForInput;
 
   constructor() {
-    super({ key: SCENE_KEYS.MONSTER_PARTY_SCENE });
+    super({
+      key: SCENE_KEYS.MONSTER_PARTY_SCENE,
+    });
   }
 
   /**
@@ -71,14 +73,12 @@ export class MonsterPartyScene extends BaseScene {
   init(data) {
     super.init(data);
 
-    this.#selectedPartyMonsterIndex = 0;
-    this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
-
-    this.#monsterPartyBackgrounds = [];
     this.#sceneData = data;
-    this.#waitingForInput = false;
+    this.#monsterPartyBackgrounds = [];
     this.#healthBars = [];
     this.#healthBarTextGameObjects = [];
+    this.#selectedPartyMonsterIndex = 0;
+    this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
   }
 
   /**
@@ -94,11 +94,11 @@ export class MonsterPartyScene extends BaseScene {
       .setOrigin(0)
       .setAlpha(0.7);
 
-    // create back button
+    // create button
     const buttonContainer = this.add.container(883, 519, []);
     this.#cancelButton = this.add.image(0, 0, UI_ASSET_KEYS.BLUE_BUTTON, 0).setOrigin(0).setScale(0.7, 1).setAlpha(0.7);
-    const cancelButtonText = this.add.text(66.5, 20.5, 'cancel', UI_TEXT_STYLE).setOrigin(0.5);
-    buttonContainer.add([this.#cancelButton, cancelButtonText]);
+    const cancelText = this.add.text(66.5, 20.6, 'cancel', UI_TEXT_STYLE).setOrigin(0.5);
+    buttonContainer.add([this.#cancelButton, cancelText]);
 
     // create info container
     const infoContainer = this.add.container(4, this.scale.height - 69, []);
@@ -113,30 +113,25 @@ export class MonsterPartyScene extends BaseScene {
 
     // create monsters in party
     this.#monsters.forEach((monster, index) => {
+      // 1, 3, 5
       const isEven = index % 2 === 0;
       const x = isEven ? MONSTER_PARTY_POSITIONS.EVEN.x : MONSTER_PARTY_POSITIONS.ODD.x;
       const y =
         (isEven ? MONSTER_PARTY_POSITIONS.EVEN.y : MONSTER_PARTY_POSITIONS.ODD.y) +
-        MONSTER_PARTY_POSITIONS.increment * (index / 2);
+        MONSTER_PARTY_POSITIONS.increment * Math.floor(index / 2);
       this.#createMonster(x, y, monster);
     });
+    this.#movePlayerInputCursor(DIRECTION.NONE);
 
-    // this.#createMonster(0, 10, 5, 'Apple', 25, 25);
-    // this.add.image(510, 40, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
-    // this.add.image(0, 160, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
-    // this.add.image(510, 190, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
-    // this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
-    // this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
-
-    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
-  }
-
-  /**
-   * @returns {void}
-   */
-  cleanup() {
-    super.cleanup();
-    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
+    // alpha is used for knowing if monster is selected, not selected, or knocked out
+    /*
+    this.add.image(0, 10, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
+    this.add.image(510, 40, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
+    this.add.image(0, 160, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
+    this.add.image(510, 190, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
+    this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
+    this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
+    */
   }
 
   /**
@@ -285,13 +280,33 @@ export class MonsterPartyScene extends BaseScene {
   #movePlayerInputCursor(direction) {
     switch (direction) {
       case DIRECTION.UP:
-        this.#selectedPartyMonsterIndex = 0;
+        // if we are already at the cancel button, then reset index
+        if (this.#selectedPartyMonsterIndex === -1) {
+          this.#selectedPartyMonsterIndex = this.#monsters.length;
+        }
+        this.#selectedPartyMonsterIndex -= 1;
+        // prevent from looping to the bottom
+        if (this.#selectedPartyMonsterIndex < 0) {
+          this.#selectedPartyMonsterIndex = 0;
+        }
         this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex].setAlpha(1);
         this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON, 0).setAlpha(0.7);
         break;
       case DIRECTION.DOWN:
-        this.#selectedPartyMonsterIndex = -1;
-        this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, 0).setAlpha(1);
+        // already at the bottom of the menu
+        if (this.#selectedPartyMonsterIndex === -1) {
+          break;
+        }
+        // increment index and check if we are pass the threshold
+        this.#selectedPartyMonsterIndex += 1;
+        if (this.#selectedPartyMonsterIndex > this.#monsters.length - 1) {
+          this.#selectedPartyMonsterIndex = -1;
+        }
+        if (this.#selectedPartyMonsterIndex === -1) {
+          this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, 0).setAlpha(1);
+          break;
+        }
+        this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex].setAlpha(1);
         break;
       case DIRECTION.LEFT:
       case DIRECTION.RIGHT:

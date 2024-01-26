@@ -1,9 +1,9 @@
-import Phaser from '../lib/phaser.js';
 import { MONSTER_PARTY_ASSET_KEYS } from '../assets/asset-keys.js';
-import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { BaseScene } from './base-scene.js';
+import { SCENE_KEYS } from './scene-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -32,7 +32,9 @@ export class MonsterDetailsScene extends BaseScene {
   #monsterAttacks;
 
   constructor() {
-    super({ key: SCENE_KEYS.MONSTER_DETAILS_SCENE });
+    super({
+      key: SCENE_KEYS.MONSTER_DETAILS_SCENE,
+    });
   }
 
   /**
@@ -43,9 +45,10 @@ export class MonsterDetailsScene extends BaseScene {
     super.init(data);
 
     this.#monsterDetails = data.monster;
+
     // added for testing from preload scene directly
     if (this.#monsterDetails === undefined) {
-      this.#monsterDetails = DataUtils.getIguanignite(this);
+      this.#monsterDetails = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0];
     }
 
     this.#monsterAttacks = [];
@@ -110,9 +113,12 @@ export class MonsterDetailsScene extends BaseScene {
 
     if (this._controls.wasBackKeyPressed()) {
       this.#goBackToPreviousScene();
+      return;
     }
+
     if (this._controls.wasSpaceKeyPressed()) {
       this.#goBackToPreviousScene();
+      return;
     }
   }
 

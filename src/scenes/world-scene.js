@@ -274,16 +274,6 @@ export class WorldScene extends BaseScene {
           this.#dialogUi.showDialogModal(['Game progress has been saved']);
         }
 
-        if (this.#menu.selectedMenuOption === 'BAG') {
-          // pause this scene and launch the inventory scene
-          /** @type {import('./inventory-scene.js').InventorySceneData} */
-          const sceneDataToPass = {
-            previousSceneName: SCENE_KEYS.WORLD_SCENE,
-          };
-          this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
-          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
-        }
-
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
           // pause this scene and launch the monster party scene
           /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
@@ -291,6 +281,16 @@ export class WorldScene extends BaseScene {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
           };
           this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
+
+        if (this.#menu.selectedMenuOption === 'BAG') {
+          // pause this scene and launch the inventory scene
+          /** @type {import('./inventory-scene.js').InventorySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
