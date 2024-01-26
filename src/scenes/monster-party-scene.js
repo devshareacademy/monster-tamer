@@ -6,8 +6,10 @@ import {
 } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { HealthBar } from '../battle/ui/health-bar.js';
+import { DIRECTION } from '../common/direction.js';
 import Phaser from '../lib/phaser.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
@@ -103,6 +105,8 @@ export class MonsterPartyScene extends BaseScene {
         MONSTER_PARTY_POSITIONS.increment * Math.floor(index / 2);
       this.#createMonster(x, y, monster);
     });
+    this.#movePlayerInputCursor(DIRECTION.NONE);
+
     // alpha is used for knowing if monster is selected, not selected, or knocked out
     /*
     this.add.image(0, 10, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
@@ -112,6 +116,44 @@ export class MonsterPartyScene extends BaseScene {
     this.add.image(0, 310, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.7);
     this.add.image(510, 340, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2).setAlpha(0.35);
     */
+  }
+
+  /**
+   * @returns {void}
+   */
+  update() {
+    super.update();
+
+    if (this._controls.isInputLocked) {
+      return;
+    }
+
+    if (this._controls.wasBackKeyPressed()) {
+      this.#goBackToPreviousScene();
+      return;
+    }
+
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    if (wasSpaceKeyPressed) {
+      if (this.#selectedPartyMonsterIndex === -1) {
+        this.#goBackToPreviousScene();
+        return;
+      }
+
+      // TODO: handle input based on what player intention was (use item, view monster details, select monster to switch to)
+
+      // for now, lock screen to prepare for scene transition
+
+      this._controls.lockInput = true;
+      this.scene.start(SCENE_KEYS.WORLD_SCENE);
+      return;
+    }
+
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#movePlayerInputCursor(selectedDirection);
+      this.#updateInfoContainerText();
+    }
   }
 
   #updateInfoContainerText() {
@@ -196,5 +238,61 @@ export class MonsterPartyScene extends BaseScene {
     ]);
 
     return container;
+  }
+
+  #goBackToPreviousScene() {
+    this._controls.lockInput = true;
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+  }
+
+  /**
+   * @param {import('../common/direction.js').Direction} direction
+   * @returns {void}
+   */
+  #movePlayerInputCursor(direction) {
+    switch (direction) {
+      case DIRECTION.UP:
+        // if we are already at the cancel button, then reset index
+        if (this.#selectedPartyMonsterIndex === -1) {
+          this.#selectedPartyMonsterIndex = this.#monsters.length;
+        }
+        this.#selectedPartyMonsterIndex -= 1;
+        // prevent from looping to the bottom
+        if (this.#selectedPartyMonsterIndex < 0) {
+          this.#selectedPartyMonsterIndex = 0;
+        }
+        this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex].setAlpha(1);
+        this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON, 0).setAlpha(0.7);
+        break;
+      case DIRECTION.DOWN:
+        // already at the bottom of the menu
+        if (this.#selectedPartyMonsterIndex === -1) {
+          break;
+        }
+        // increment index and check if we are pass the threshold
+        this.#selectedPartyMonsterIndex += 1;
+        if (this.#selectedPartyMonsterIndex > this.#monsters.length - 1) {
+          this.#selectedPartyMonsterIndex = -1;
+        }
+        if (this.#selectedPartyMonsterIndex === -1) {
+          this.#cancelButton.setTexture(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, 0).setAlpha(1);
+          break;
+        }
+        this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex].setAlpha(1);
+        break;
+      case DIRECTION.LEFT:
+      case DIRECTION.RIGHT:
+      case DIRECTION.NONE:
+        break;
+      default:
+        exhaustiveGuard(direction);
+    }
+
+    this.#monsterPartyBackgrounds.forEach((background, index) => {
+      if (index === this.#selectedPartyMonsterIndex) {
+        return;
+      }
+      background.setAlpha(0.7);
+    });
   }
 }
