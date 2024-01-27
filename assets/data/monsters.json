@@ -20,5 +20,38 @@
     "currentHp": 25,
     "baseAttack": 5,
     "maxHp": 25
+  },
+  {
+    "id": 3,
+    "name": "ignivolt",
+    "attackIds": [2],
+    "assetKey": "IGNIVOLT",
+    "assetFrame": 0,
+    "currentLevel": 5,
+    "currentHp": 25,
+    "baseAttack": 5,
+    "maxHp": 25
+  },
+  {
+    "id": 4,
+    "name": "aquavalor",
+    "attackIds": [2],
+    "assetKey": "AQUAVALOR",
+    "assetFrame": 0,
+    "currentLevel": 5,
+    "currentHp": 25,
+    "baseAttack": 5,
+    "maxHp": 25
+  },
+  {
+    "id": 5,
+    "name": "frostsaber",
+    "attackIds": [1],
+    "assetKey": "FROSTSABER",
+    "assetFrame": 0,
+    "currentLevel": 5,
+    "currentHp": 25,
+    "baseAttack": 5,
+    "maxHp": 25
   }
 ]

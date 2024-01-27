@@ -13,6 +13,7 @@ import { Menu } from '../world/menu/menu.js';
 import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { weightedRandom } from '../utils/random.js';
 
 /**
  * @typedef WorldSceneData
@@ -43,6 +44,10 @@ const TILED_NPC_PROPERTY = Object.freeze({
 
 const TILED_SIGN_PROPERTY = Object.freeze({
   MESSAGE: 'message',
+});
+
+const TILED_ENCOUNTER_PROPERTY = Object.freeze({
+  AREA: 'area',
 });
 
 /*
@@ -397,15 +402,23 @@ export class WorldScene extends BaseScene {
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
-      console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);
-      // TODO: add feature in a future update
-      // add in a custom animation that is similar to the old games
+      /** @type {number} */
+      const encounterArea = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
+        (property) => {
+          return property.name === TILED_ENCOUNTER_PROPERTY.AREA;
+        }
+      ).value;
+      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterArea);
+      const randomMonster = weightedRandom(possibleMonsters);
+
+      console.log(
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterArea} and monster id has been picked randomly ${randomMonster}`
+      );
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        // TODO: add logic to determine monster that was encountered
         /** @type {import('./battle-scene.js').BattleSceneData} */
         const dataToPass = {
-          enemyMonsters: [DataUtils.getCarnodusk(this)],
+          enemyMonsters: [DataUtils.getMonsterById(this, randomMonster)],
           playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
         };
 
