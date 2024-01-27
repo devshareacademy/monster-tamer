@@ -13,6 +13,7 @@ import { Menu } from '../world/menu/menu.js';
 import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { weightedRandom } from '../utils/random.js';
 
 /**
  * @typedef WorldSceneData
@@ -407,19 +408,17 @@ export class WorldScene extends BaseScene {
           return property.name === TILED_ENCOUNTER_PROPERTY.AREA;
         }
       ).value;
-      // TODO: figure out how to determine the area
-      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, 1);
-      console.log(possibleMonsters);
+      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterArea);
+      const randomMonster = weightedRandom(possibleMonsters);
 
       console.log(
-        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterArea}`
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterArea} and monster id has been picked randomly ${randomMonster}`
       );
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        // TODO: add logic to determine monster that was encountered
         /** @type {import('./battle-scene.js').BattleSceneData} */
         const dataToPass = {
-          enemyMonsters: [DataUtils.getMonsterById(this, possibleMonsters[1][0])],
+          enemyMonsters: [DataUtils.getMonsterById(this, randomMonster)],
           playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
         };
 
