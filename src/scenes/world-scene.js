@@ -14,6 +14,8 @@ import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { weightedRandom } from '../utils/random.js';
+import { NPC_EVENT_TYPE } from '../types/typedef.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 /**
  * @typedef WorldSceneData
@@ -36,10 +38,8 @@ const CUSTOM_TILED_TYPES = Object.freeze({
 });
 
 const TILED_NPC_PROPERTY = Object.freeze({
-  IS_SPAWN_POINT: 'is_spawn_point',
   MOVEMENT_PATTERN: 'movement_pattern',
-  MESSAGES: 'messages',
-  FRAME: 'frame',
+  ID: 'id',
 });
 
 const TILED_SIGN_PROPERTY = Object.freeze({
@@ -76,6 +76,8 @@ export class WorldScene extends BaseScene {
   #sceneData;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
+  /** @type {number} */
+  #lastNpcEventHandledIndex;
 
   constructor() {
     super({
@@ -110,6 +112,7 @@ export class WorldScene extends BaseScene {
       })
     );
     this.#npcPlayerIsInteractingWith = undefined;
+    this.#lastNpcEventHandledIndex = -1;
   }
 
   /**
@@ -327,8 +330,7 @@ export class WorldScene extends BaseScene {
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
       if (this.#npcPlayerIsInteractingWith) {
-        this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
-        this.#npcPlayerIsInteractingWith = undefined;
+        this.#handleNpcInteraction();
       }
       return;
     }
@@ -372,7 +374,7 @@ export class WorldScene extends BaseScene {
       nearbyNpc.facePlayer(this.#player.direction);
       nearbyNpc.isTalkingToPlayer = true;
       this.#npcPlayerIsInteractingWith = nearbyNpc;
-      this.#dialogUi.showDialogModal(nearbyNpc.messages);
+      this.#handleNpcInteraction();
       return;
     }
   }
@@ -465,32 +467,27 @@ export class WorldScene extends BaseScene {
         npcPath[parseInt(obj.name, 10)] = { x: obj.x, y: obj.y - TILE_SIZE };
       });
 
-      /** @type {string} */
-      const npcFrame =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.FRAME
-        )?.value || '0';
-      /** @type {string} */
-      const npcMessagesString =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
-        )?.value || '';
-      const npcMessages = npcMessagesString.split('::');
       /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
       const npcMovement =
         /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
           (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
         )?.value || 'IDLE';
 
+      /** @type {number} */
+      const npcId = /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+        (property) => property.name === TILED_NPC_PROPERTY.ID
+      )?.value;
+      const npcDetails = DataUtils.getNpcData(this, npcId);
+
       // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       const npc = new NPC({
         scene: this,
         position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
         direction: DIRECTION.DOWN,
-        frame: parseInt(npcFrame, 10),
-        messages: npcMessages,
+        frame: npcDetails.frame,
         npcPath,
         movementPattern: npcMovement,
+        events: npcDetails.events,
       });
       this.#npcs.push(npc);
     });
@@ -550,5 +547,62 @@ export class WorldScene extends BaseScene {
         this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
       },
     });
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleNpcInteraction() {
+    // check to see if the npc has any events associated with them
+    const isMoreEventsToProcess = this.#npcPlayerIsInteractingWith.events.length - 1 !== this.#lastNpcEventHandledIndex;
+
+    if (!isMoreEventsToProcess) {
+      this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+      this.#npcPlayerIsInteractingWith = undefined;
+      this.#lastNpcEventHandledIndex = -1;
+      return;
+    }
+
+    // get the next event from the queue and process for this npc
+    this.#lastNpcEventHandledIndex += 1;
+    const eventToHandle = this.#npcPlayerIsInteractingWith.events[this.#lastNpcEventHandledIndex];
+    const eventType = eventToHandle.type;
+
+    switch (eventType) {
+      case NPC_EVENT_TYPE.MESSAGE:
+        this.#dialogUi.showDialogModal(eventToHandle.data.messages);
+        break;
+      case NPC_EVENT_TYPE.HEAL:
+        // heal all monsters in party
+        /** @type {import('../types/typedef.js').Monster[]} */
+        const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+        monsters.forEach((monster) => {
+          monster.currentHp = monster.maxHp;
+        });
+        dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
+        this.#handleNpcInteraction();
+        break;
+      case NPC_EVENT_TYPE.SCENE_FADE_IN_AND_OUT:
+        // lock input, and wait for scene to fade in and out
+        this._controls.lockInput = true;
+        this.cameras.main.fadeOut(eventToHandle.data.fadeOutDuration, 0, 0, 0, (fadeOutCamera, fadeOutProgress) => {
+          if (fadeOutProgress !== 1) {
+            return;
+          }
+          this.time.delayedCall(eventToHandle.data.waitDuration, () => {
+            this.cameras.main.fadeIn(eventToHandle.data.fadeInDuration, 0, 0, 0, (fadeInCamera, fadeInProgress) => {
+              if (fadeInProgress !== 1) {
+                return;
+              }
+              this._controls.lockInput = false;
+              this.#handleNpcInteraction();
+            });
+          });
+        });
+        // TODO: play audio cue
+        break;
+      default:
+        exhaustiveGuard(eventType);
+    }
   }
 }

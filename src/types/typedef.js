@@ -94,3 +94,61 @@ export const ITEM_EFFECT = Object.freeze({
  * @typedef EncounterData
  * @type {Object.<string, number[][]>}
  */
+
+/** NPC JSON Data Types */
+
+/**
+ * @typedef {keyof typeof NPC_EVENT_TYPE} NpcEventType
+ */
+
+/** @enum {NpcEventType} */
+export const NPC_EVENT_TYPE = Object.freeze({
+  MESSAGE: 'MESSAGE',
+  SCENE_FADE_IN_AND_OUT: 'SCENE_FADE_IN_AND_OUT',
+  HEAL: 'HEAL',
+  TRADE: 'TRADE',
+  ITEM: 'ITEM',
+  BATTLE: 'BATTLE',
+});
+
+/**
+ * @typedef NpcEventMessage
+ * @type {object}
+ * @property {'MESSAGE'} type
+ * @property {object} data
+ * @property {string[]} data.messages
+ */
+
+/**
+ * @typedef NpcEventSceneFadeInAndOut
+ * @type {object}
+ * @property {'SCENE_FADE_IN_AND_OUT'} type
+ * @property {object} data
+ * @property {number} data.fadeInDuration
+ * @property {number} data.fadeOutDuration
+ * @property {number} data.waitDuration
+ */
+
+/**
+ * @typedef NpcEventHeal
+ * @type {object}
+ * @property {'HEAL'} type
+ * @property {object} data
+ */
+
+/**
+ * @typedef NpcEvent
+ * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal}
+ */
+
+/**
+ * @typedef NpcDetails
+ * @type {object}
+ * @property {number} frame
+ * @property {NpcEvent[]} events
+ */
+
+/**
+ * @typedef NpcData
+ * @type {Object.<string, NpcDetails>}
+ */
