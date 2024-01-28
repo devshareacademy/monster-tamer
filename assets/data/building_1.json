@@ -68,10 +68,11 @@
                  "x":0,
                  "y":0
                 }],
+         "locked":true,
          "name":"Main-Scene",
          "opacity":1,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -91,7 +92,7 @@
          "name":"Collision",
          "opacity":0.68,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":13,
          "x":0,
          "y":0
@@ -133,14 +134,39 @@
          "name":"Encounter",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":13,
          "x":0,
          "y":0
         }, 
         {
          "draworder":"topdown",
+         "id":14,
+         "locked":true,
+         "name":"Revive-Location",
+         "objects":[
+                {
+                 "gid":125,
+                 "height":64,
+                 "id":7,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":576,
+                 "y":320
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":6,
+         "locked":true,
          "name":"Scene-Transitions",
          "objects":[
                 {
@@ -173,12 +199,86 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":13,
+         "locked":true,
+         "name":"Area-Metadata",
+         "objects":[
+                {
+                 "gid":125,
+                 "height":64,
+                 "id":6,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"faint_location",
+                         "type":"string",
+                         "value":"building_1"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"area_metadata",
+                 "visible":true,
+                 "width":64,
+                 "x":128,
+                 "y":448
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":11,
+         "layers":[
+                {
+                 "draworder":"topdown",
+                 "id":12,
+                 "name":"NPC1",
+                 "objects":[
+                        {
+                         "gid":125,
+                         "height":64,
+                         "id":5,
+                         "name":"NPC1",
+                         "properties":[
+                                {
+                                 "name":"id",
+                                 "type":"int",
+                                 "value":1
+                                }],
+                         "rotation":0,
+                         "type":"npc",
+                         "visible":true,
+                         "width":64,
+                         "x":576,
+                         "y":256
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }],
+         "name":"NPC",
+         "opacity":1,
+         "type":"group",
+         "visible":true,
          "x":0,
          "y":0
         }],
- "nextlayerid":11,
- "nextobjectid":5,
+ "nextlayerid":15,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

@@ -14,12 +14,15 @@ import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { weightedRandom } from '../utils/random.js';
+import { NPC_EVENT_TYPE } from '../types/typedef.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 /**
  * @typedef WorldSceneData
  * @type {object}
- * @property {string} area
- * @property {boolean} isInterior
+ * @property {string} [area]
+ * @property {boolean} [isInterior]
+ * @property {boolean} [isPlayedKnockedOut]
  */
 
 /**
@@ -36,10 +39,8 @@ const CUSTOM_TILED_TYPES = Object.freeze({
 });
 
 const TILED_NPC_PROPERTY = Object.freeze({
-  IS_SPAWN_POINT: 'is_spawn_point',
   MOVEMENT_PATTERN: 'movement_pattern',
-  MESSAGES: 'messages',
-  FRAME: 'frame',
+  ID: 'id',
 });
 
 const TILED_SIGN_PROPERTY = Object.freeze({
@@ -50,12 +51,19 @@ const TILED_ENCOUNTER_PROPERTY = Object.freeze({
   AREA: 'area',
 });
 
+const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
+  FAINT_LOCATION: 'faint_location',
+  ID: 'id',
+});
+
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
   each grid size will be 64 x 64 pixels
 */
 
 export class WorldScene extends BaseScene {
+  /** @type {Phaser.GameObjects.Rectangle} */
+  #backgroundRect;
   /** @type {Player} */
   #player;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
@@ -76,6 +84,10 @@ export class WorldScene extends BaseScene {
   #sceneData;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
+  /** @type {number} */
+  #lastNpcEventHandledIndex;
+  /** @type {boolean} */
+  #isProcessingNpcEvent;
 
   constructor() {
     super({
@@ -96,12 +108,42 @@ export class WorldScene extends BaseScene {
     if (!this.#sceneData || !this.#sceneData.area) {
       /** @type {string} */
       const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
+      const isInterior =
+        this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
+      const isPlayedKnockedOut = this.#sceneData?.isPlayedKnockedOut || false;
 
       this.#sceneData = {
         area,
-        isInterior: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior,
+        isInterior: isInterior,
+        isPlayedKnockedOut: isPlayedKnockedOut,
       };
     }
+
+    // update player location, and map data if the player was knocked out in a battle
+    if (this.#sceneData.isPlayedKnockedOut) {
+      // get the nearest knocked out spawn location from the map meta data
+      let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
+      const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
+      const knockOutSpawnLocation = /** @type {TiledObjectProperty[]} */ (areaMetaDataProperties).find(
+        (property) => property.name === TILED_AREA_META_DATA_PROPERTY.FAINT_LOCATION
+      )?.value;
+
+      // check to see if the level data we need to load is different and load that map to get player spawn data
+      const knockedOutLevelName = knockOutSpawnLocation.toUpperCase();
+      if (knockedOutLevelName !== this.#sceneData.area.toUpperCase()) {
+        this.#sceneData.area = knockOutSpawnLocation;
+        map = this.make.tilemap({ key: `${knockedOutLevelName}_LEVEL` });
+      }
+
+      // set players spawn location to that map and finds the revive location based on that object
+      const reviveLocation = map.getObjectLayer('Revive-Location').objects[0];
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: reviveLocation.x,
+        y: reviveLocation.y - TILE_SIZE,
+      });
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.UP);
+    }
+
     dataManager.store.set(
       DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION,
       /** @type {import('../utils/data-manager.js').PlayerLocation} */ ({
@@ -110,6 +152,8 @@ export class WorldScene extends BaseScene {
       })
     );
     this.#npcPlayerIsInteractingWith = undefined;
+    this.#lastNpcEventHandledIndex = -1;
+    this.#isProcessingNpcEvent = false;
   }
 
   /**
@@ -180,7 +224,7 @@ export class WorldScene extends BaseScene {
     }
     this.cameras.main.setZoom(0.8);
 
-    const bgRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
+    this.#backgroundRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
     // create npcs
@@ -220,12 +264,19 @@ export class WorldScene extends BaseScene {
     // create menu
     this.#menu = new Menu(this);
 
-    let isBgRectUpdated = false;
-    this.cameras.main.fadeIn(1000, 0, 0, 0, () => {
-      if (!isBgRectUpdated && this.cameras.main.worldView.width !== 0) {
-        bgRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
-        bgRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
-        isBgRectUpdated = true;
+    this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
+      if (progress === 1) {
+        this.#backgroundRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
+        this.#backgroundRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
+
+        // if the player was knocked out, we want to lock input, heal player, and then have npc show message
+        if (this.#sceneData.isPlayedKnockedOut) {
+          this.#healPlayerParty();
+          this.#dialogUi.showDialogModal([
+            'It looks like your team put up quite a fight...',
+            'I went ahead and healed them up for you.',
+          ]);
+        }
       }
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
@@ -255,7 +306,7 @@ export class WorldScene extends BaseScene {
     }
 
     if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
-      if (this.#dialogUi.isVisible) {
+      if (this.#dialogUi.isVisible || this.#isProcessingNpcEvent) {
         return;
       }
 
@@ -327,8 +378,7 @@ export class WorldScene extends BaseScene {
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
       if (this.#npcPlayerIsInteractingWith) {
-        this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
-        this.#npcPlayerIsInteractingWith = undefined;
+        this.#handleNpcInteraction();
       }
       return;
     }
@@ -372,7 +422,7 @@ export class WorldScene extends BaseScene {
       nearbyNpc.facePlayer(this.#player.direction);
       nearbyNpc.isTalkingToPlayer = true;
       this.#npcPlayerIsInteractingWith = nearbyNpc;
-      this.#dialogUi.showDialogModal(nearbyNpc.messages);
+      this.#handleNpcInteraction();
       return;
     }
   }
@@ -431,7 +481,9 @@ export class WorldScene extends BaseScene {
    * @returns {boolean}
    */
   #isPlayerInputLocked() {
-    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+    return (
+      this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible || this.#isProcessingNpcEvent
+    );
   }
 
   /**
@@ -465,32 +517,27 @@ export class WorldScene extends BaseScene {
         npcPath[parseInt(obj.name, 10)] = { x: obj.x, y: obj.y - TILE_SIZE };
       });
 
-      /** @type {string} */
-      const npcFrame =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.FRAME
-        )?.value || '0';
-      /** @type {string} */
-      const npcMessagesString =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
-        )?.value || '';
-      const npcMessages = npcMessagesString.split('::');
       /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
       const npcMovement =
         /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
           (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
         )?.value || 'IDLE';
 
+      /** @type {number} */
+      const npcId = /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+        (property) => property.name === TILED_NPC_PROPERTY.ID
+      )?.value;
+      const npcDetails = DataUtils.getNpcData(this, npcId);
+
       // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       const npc = new NPC({
         scene: this,
         position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
         direction: DIRECTION.DOWN,
-        frame: parseInt(npcFrame, 10),
-        messages: npcMessages,
+        frame: npcDetails.frame,
         npcPath,
         movementPattern: npcMovement,
+        events: npcDetails.events,
       });
       this.#npcs.push(npc);
     });
@@ -535,6 +582,7 @@ export class WorldScene extends BaseScene {
       y += TILE_SIZE;
     }
 
+    this.#backgroundRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
     createBuildingSceneTransition(this, {
       callback: () => {
         dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
@@ -550,5 +598,76 @@ export class WorldScene extends BaseScene {
         this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
       },
     });
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleNpcInteraction() {
+    if (this.#isProcessingNpcEvent) {
+      return;
+    }
+
+    // check to see if the npc has any events associated with them
+    const isMoreEventsToProcess = this.#npcPlayerIsInteractingWith.events.length - 1 !== this.#lastNpcEventHandledIndex;
+
+    if (!isMoreEventsToProcess) {
+      this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+      this.#npcPlayerIsInteractingWith = undefined;
+      this.#lastNpcEventHandledIndex = -1;
+      this.#isProcessingNpcEvent = false;
+      return;
+    }
+
+    // get the next event from the queue and process for this npc
+    this.#lastNpcEventHandledIndex += 1;
+    const eventToHandle = this.#npcPlayerIsInteractingWith.events[this.#lastNpcEventHandledIndex];
+    const eventType = eventToHandle.type;
+
+    switch (eventType) {
+      case NPC_EVENT_TYPE.MESSAGE:
+        this.#dialogUi.showDialogModal(eventToHandle.data.messages);
+        break;
+      case NPC_EVENT_TYPE.HEAL:
+        this.#isProcessingNpcEvent = true;
+        this.#healPlayerParty();
+        this.#isProcessingNpcEvent = false;
+        this.#handleNpcInteraction();
+        break;
+      case NPC_EVENT_TYPE.SCENE_FADE_IN_AND_OUT:
+        this.#isProcessingNpcEvent = true;
+        // lock input, and wait for scene to fade in and out
+        this.cameras.main.fadeOut(eventToHandle.data.fadeOutDuration, 0, 0, 0, (fadeOutCamera, fadeOutProgress) => {
+          if (fadeOutProgress !== 1) {
+            return;
+          }
+          this.time.delayedCall(eventToHandle.data.waitDuration, () => {
+            this.cameras.main.fadeIn(eventToHandle.data.fadeInDuration, 0, 0, 0, (fadeInCamera, fadeInProgress) => {
+              if (fadeInProgress !== 1) {
+                return;
+              }
+              this.#isProcessingNpcEvent = false;
+              this.#handleNpcInteraction();
+            });
+          });
+        });
+        // TODO: play audio cue
+        break;
+      default:
+        exhaustiveGuard(eventType);
+    }
+  }
+
+  /**
+   * @returns {void}
+   */
+  #healPlayerParty() {
+    // heal all monsters in party
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    monsters.forEach((monster) => {
+      monster.currentHp = monster.maxHp;
+    });
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
   }
 }
