@@ -78,6 +78,8 @@ export class WorldScene extends BaseScene {
   #entranceLayer;
   /** @type {number} */
   #lastNpcEventHandledIndex;
+  /** @type {boolean} */
+  #isProcessingNpcEvent;
 
   constructor() {
     super({
@@ -113,6 +115,7 @@ export class WorldScene extends BaseScene {
     );
     this.#npcPlayerIsInteractingWith = undefined;
     this.#lastNpcEventHandledIndex = -1;
+    this.#isProcessingNpcEvent = false;
   }
 
   /**
@@ -258,7 +261,7 @@ export class WorldScene extends BaseScene {
     }
 
     if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
-      if (this.#dialogUi.isVisible) {
+      if (this.#dialogUi.isVisible || this.#isProcessingNpcEvent) {
         return;
       }
 
@@ -433,7 +436,9 @@ export class WorldScene extends BaseScene {
    * @returns {boolean}
    */
   #isPlayerInputLocked() {
-    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+    return (
+      this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible || this.#isProcessingNpcEvent
+    );
   }
 
   /**
@@ -553,6 +558,10 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #handleNpcInteraction() {
+    if (this.#isProcessingNpcEvent) {
+      return;
+    }
+
     // check to see if the npc has any events associated with them
     const isMoreEventsToProcess = this.#npcPlayerIsInteractingWith.events.length - 1 !== this.#lastNpcEventHandledIndex;
 
@@ -560,6 +569,7 @@ export class WorldScene extends BaseScene {
       this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
       this.#npcPlayerIsInteractingWith = undefined;
       this.#lastNpcEventHandledIndex = -1;
+      this.#isProcessingNpcEvent = false;
       return;
     }
 
@@ -573,6 +583,7 @@ export class WorldScene extends BaseScene {
         this.#dialogUi.showDialogModal(eventToHandle.data.messages);
         break;
       case NPC_EVENT_TYPE.HEAL:
+        this.#isProcessingNpcEvent = true;
         // heal all monsters in party
         /** @type {import('../types/typedef.js').Monster[]} */
         const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
@@ -580,11 +591,12 @@ export class WorldScene extends BaseScene {
           monster.currentHp = monster.maxHp;
         });
         dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
+        this.#isProcessingNpcEvent = false;
         this.#handleNpcInteraction();
         break;
       case NPC_EVENT_TYPE.SCENE_FADE_IN_AND_OUT:
+        this.#isProcessingNpcEvent = true;
         // lock input, and wait for scene to fade in and out
-        this._controls.lockInput = true;
         this.cameras.main.fadeOut(eventToHandle.data.fadeOutDuration, 0, 0, 0, (fadeOutCamera, fadeOutProgress) => {
           if (fadeOutProgress !== 1) {
             return;
@@ -594,7 +606,7 @@ export class WorldScene extends BaseScene {
               if (fadeInProgress !== 1) {
                 return;
               }
-              this._controls.lockInput = false;
+              this.#isProcessingNpcEvent = false;
               this.#handleNpcInteraction();
             });
           });
