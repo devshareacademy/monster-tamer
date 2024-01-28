@@ -20,8 +20,9 @@ import { exhaustiveGuard } from '../utils/guard.js';
 /**
  * @typedef WorldSceneData
  * @type {object}
- * @property {string} area
- * @property {boolean} isInterior
+ * @property {string} [area]
+ * @property {boolean} [isInterior]
+ * @property {boolean} [isPlayedKnockedOut]
  */
 
 /**
@@ -48,6 +49,11 @@ const TILED_SIGN_PROPERTY = Object.freeze({
 
 const TILED_ENCOUNTER_PROPERTY = Object.freeze({
   AREA: 'area',
+});
+
+const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
+  FAINT_LOCATION: 'faint_location',
+  ID: 'id',
 });
 
 /*
@@ -100,12 +106,42 @@ export class WorldScene extends BaseScene {
     if (!this.#sceneData || !this.#sceneData.area) {
       /** @type {string} */
       const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
+      const isInterior =
+        this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
+      const isPlayedKnockedOut = this.#sceneData?.isPlayedKnockedOut || true;
 
       this.#sceneData = {
         area,
-        isInterior: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior,
+        isInterior: isInterior,
+        isPlayedKnockedOut: isPlayedKnockedOut,
       };
     }
+
+    // update player location, and map data if the player was knocked out in a battle
+    if (this.#sceneData.isPlayedKnockedOut) {
+      // get the nearest knocked out spawn location from the map meta data
+      let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
+      const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
+      const knockOutSpawnLocation = /** @type {TiledObjectProperty[]} */ (areaMetaDataProperties).find(
+        (property) => property.name === TILED_AREA_META_DATA_PROPERTY.FAINT_LOCATION
+      )?.value;
+
+      // check to see if the level data we need to load is different and load that map to get player spawn data
+      const knockedOutLevelName = knockOutSpawnLocation.toUpperCase();
+      if (knockedOutLevelName !== this.#sceneData.area.toUpperCase()) {
+        this.#sceneData.area = knockOutSpawnLocation;
+        map = this.make.tilemap({ key: `${knockedOutLevelName}_LEVEL` });
+      }
+
+      // set players spawn location to that map and finds the revive location based on that object
+      const reviveLocation = map.getObjectLayer('Revive-Location').objects[0];
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: reviveLocation.x,
+        y: reviveLocation.y - TILE_SIZE,
+      });
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.UP);
+    }
+
     dataManager.store.set(
       DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION,
       /** @type {import('../utils/data-manager.js').PlayerLocation} */ ({
@@ -225,6 +261,8 @@ export class WorldScene extends BaseScene {
     this.#dialogUi = new DialogUi(this, 1280);
     // create menu
     this.#menu = new Menu(this);
+
+    //
 
     let isBgRectUpdated = false;
     this.cameras.main.fadeIn(1000, 0, 0, 0, () => {
