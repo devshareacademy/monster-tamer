@@ -62,6 +62,8 @@ const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
 */
 
 export class WorldScene extends BaseScene {
+  /** @type {Phaser.GameObjects.Rectangle} */
+  #backgroundRect;
   /** @type {Player} */
   #player;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
@@ -222,7 +224,7 @@ export class WorldScene extends BaseScene {
     }
     this.cameras.main.setZoom(0.8);
 
-    const bgRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
+    this.#backgroundRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
     // create npcs
@@ -262,13 +264,10 @@ export class WorldScene extends BaseScene {
     // create menu
     this.#menu = new Menu(this);
 
-    let isBgRectUpdated = false;
-    // TODO: revisit and see if we need to use progress here
-    this.cameras.main.fadeIn(1000, 0, 0, 0, () => {
-      if (!isBgRectUpdated && this.cameras.main.worldView.width !== 0) {
-        bgRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
-        bgRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
-        isBgRectUpdated = true;
+    this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
+      if (progress === 1) {
+        this.#backgroundRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
+        this.#backgroundRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
 
         // if the player was knocked out, we want to lock input, heal player, and then have npc show message
         if (this.#sceneData.isPlayedKnockedOut) {
@@ -583,6 +582,7 @@ export class WorldScene extends BaseScene {
       y += TILE_SIZE;
     }
 
+    this.#backgroundRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
     createBuildingSceneTransition(this, {
       callback: () => {
         dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
