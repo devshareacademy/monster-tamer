@@ -108,7 +108,7 @@ export class WorldScene extends BaseScene {
       const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
       const isInterior =
         this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
-      const isPlayedKnockedOut = this.#sceneData?.isPlayedKnockedOut || true;
+      const isPlayedKnockedOut = this.#sceneData?.isPlayedKnockedOut || false;
 
       this.#sceneData = {
         area,
@@ -262,14 +262,22 @@ export class WorldScene extends BaseScene {
     // create menu
     this.#menu = new Menu(this);
 
-    //
-
     let isBgRectUpdated = false;
+    // TODO: revisit and see if we need to use progress here
     this.cameras.main.fadeIn(1000, 0, 0, 0, () => {
       if (!isBgRectUpdated && this.cameras.main.worldView.width !== 0) {
         bgRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
         bgRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
         isBgRectUpdated = true;
+
+        // if the player was knocked out, we want to lock input, heal player, and then have npc show message
+        if (this.#sceneData.isPlayedKnockedOut) {
+          this.#healPlayerParty();
+          this.#dialogUi.showDialogModal([
+            'It looks like your team put up quite a fight...',
+            'I went ahead and healed them up for you.',
+          ]);
+        }
       }
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
@@ -622,13 +630,7 @@ export class WorldScene extends BaseScene {
         break;
       case NPC_EVENT_TYPE.HEAL:
         this.#isProcessingNpcEvent = true;
-        // heal all monsters in party
-        /** @type {import('../types/typedef.js').Monster[]} */
-        const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
-        monsters.forEach((monster) => {
-          monster.currentHp = monster.maxHp;
-        });
-        dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
+        this.#healPlayerParty();
         this.#isProcessingNpcEvent = false;
         this.#handleNpcInteraction();
         break;
@@ -654,5 +656,18 @@ export class WorldScene extends BaseScene {
       default:
         exhaustiveGuard(eventType);
     }
+  }
+
+  /**
+   * @returns {void}
+   */
+  #healPlayerParty() {
+    // heal all monsters in party
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    monsters.forEach((monster) => {
+      monster.currentHp = monster.maxHp;
+    });
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
   }
 }
