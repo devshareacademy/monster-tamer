@@ -2,6 +2,8 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+![Monster Tamer Logo](/docs/logo.png?raw=true 'Monster Tamer Logo')
+
 Monster Tamer - Pokemon like RPG Tutorial with Phaser 3
 
 A Pokemon like game created using [Phaser 3](https://github.com/photonstorm/phaser)!
