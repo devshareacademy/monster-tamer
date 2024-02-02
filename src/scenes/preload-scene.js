@@ -11,6 +11,7 @@ import {
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
+  INVENTORY_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
@@ -154,6 +155,13 @@ export class PreloadScene extends BaseScene {
       MONSTER_PARTY_ASSET_KEYS.MONSTER_DETAILS_BACKGROUND,
       `${monsterTamerAssetPath}/ui/monster-party/monster-details-background.png`
     );
+
+    // ui components for inventory
+    this.load.image(
+      INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
+    );
+    this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
   }
 
   /**
@@ -167,7 +175,7 @@ export class PreloadScene extends BaseScene {
     // attempt to populate data manager with saved data
     dataManager.loadData();
 
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.INVENTORY_SCENE);
   }
 
   #createAnimations() {
