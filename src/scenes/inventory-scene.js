@@ -4,6 +4,14 @@ import { NineSlice } from '../utils/nine-slice.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
+const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
+
+const INVENTORY_ITEM_POSITION = Object.freeze({
+  x: 50,
+  y: 14,
+  space: 50,
+});
+
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const INVENTORY_TEXT_STYLE = {
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
@@ -22,6 +30,13 @@ export class InventoryScene extends BaseScene {
   #sceneData;
   /** @type {NineSlice} */
   #nineSliceMainContainer;
+  /** @type {Phaser.GameObjects.Text} */
+  #selectedInventoryDescriptionText;
+  /** @type {Phaser.GameObjects.Image} */
+  #userInputCursor;
+  #inventory;
+  /** @type {number} */
+  #selectedInventoryOptionIndex;
 
   constructor() {
     super({
@@ -42,6 +57,15 @@ export class InventoryScene extends BaseScene {
       textureManager: this.sys.textures,
       assetKeys: [UI_ASSET_KEYS.MENU_BACKGROUND],
     });
+    this.#inventory = [
+      {
+        name: 'potion',
+        description: 'A basic healing item that will heal 30 HP from a single monster.',
+        quantity: 10,
+        gameObjects: {},
+      },
+    ];
+    this.#selectedInventoryOptionIndex = 0;
   }
 
   /**
@@ -68,5 +92,69 @@ export class InventoryScene extends BaseScene {
 
     const textTitle = this.add.text(116, 28, 'Items', INVENTORY_TEXT_STYLE).setOrigin(0.5);
     titleContainer.add(textTitle);
+
+    // create inventory text from available items
+    this.#inventory.forEach((inventoryItem, index) => {
+      const itemText = this.add.text(
+        INVENTORY_ITEM_POSITION.x,
+        INVENTORY_ITEM_POSITION.y + index * INVENTORY_ITEM_POSITION.space,
+        inventoryItem.name,
+        INVENTORY_TEXT_STYLE
+      );
+      const qty1Text = this.add.text(620, INVENTORY_ITEM_POSITION.y + 2 + index * INVENTORY_ITEM_POSITION.space, 'x', {
+        color: '#000000',
+        fontSize: '30px',
+      });
+      const qty2Text = this.add.text(
+        650,
+        INVENTORY_ITEM_POSITION.y + index * INVENTORY_ITEM_POSITION.space,
+        inventoryItem.quantity,
+        INVENTORY_TEXT_STYLE
+      );
+      container.add([itemText, qty1Text, qty2Text]);
+      inventoryItem.gameObjects = {
+        itemName: itemText,
+        quantity: qty2Text,
+        quantitySign: qty1Text,
+      };
+    });
+
+    // create cancel text
+    const cancelText = this.add.text(
+      INVENTORY_ITEM_POSITION.x,
+      INVENTORY_ITEM_POSITION.y + this.#inventory.length * INVENTORY_ITEM_POSITION.space,
+      'Cancel',
+      INVENTORY_TEXT_STYLE
+    );
+    container.add(cancelText);
+
+    // create player input cursor
+    this.#userInputCursor = this.add.image(30, 30, UI_ASSET_KEYS.CURSOR).setScale(3);
+    container.add(this.#userInputCursor);
+
+    // create inventory description text
+    this.#selectedInventoryDescriptionText = this.add.text(25, 420, '', {
+      ...INVENTORY_TEXT_STYLE,
+      ...{
+        wordWrap: {
+          width: this.scale.width - 18,
+        },
+        color: '#ffffff',
+      },
+    });
+    this.#updateItemDescriptionText();
+  }
+
+  #updateItemDescriptionText() {
+    if (this.#isCancelButtonSelected()) {
+      this.#selectedInventoryDescriptionText.setText(CANCEL_TEXT_DESCRIPTION);
+      return;
+    }
+
+    this.#selectedInventoryDescriptionText.setText(this.#inventory[this.#selectedInventoryOptionIndex].description);
+  }
+
+  #isCancelButtonSelected() {
+    return this.#selectedInventoryOptionIndex === this.#inventory.length;
   }
 }
