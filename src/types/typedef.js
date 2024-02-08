@@ -50,3 +50,41 @@ import Phaser from '../lib/phaser.js';
  * @property {boolean} yoyo
  * @property {string} assetKey
  */
+
+/**
+ * @typedef {keyof typeof ITEM_EFFECT} ItemEffect
+ */
+
+/** @enum {ItemEffect} */
+export const ITEM_EFFECT = Object.freeze({
+  HEAL_30: 'HEAL_30',
+});
+
+/**
+ * @typedef Item
+ * @type {object}
+ * @property {number} id
+ * @property {string} name
+ * @property {ItemEffect} effect
+ * @property {string} description
+ */
+
+/**
+ * @typedef BaseInventoryItem
+ * @type {object}
+ * @property {object} item
+ * @property {number} item.id
+ * @property {number} quantity
+ */
+
+/**
+ * @typedef Inventory
+ * @type {BaseInventoryItem[]}
+ */
+
+/**
+ * @typedef InventoryItem
+ * @type {object}
+ * @property {Item} item
+ * @property {number} quantity
+ */

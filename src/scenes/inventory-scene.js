@@ -1,6 +1,7 @@
 import { INVENTORY_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
+import { dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { BaseScene } from './base-scene.js';
@@ -22,6 +23,23 @@ const INVENTORY_TEXT_STYLE = {
 };
 
 /**
+ * @typedef InventoryItemGameObjects
+ * @type {object}
+ * @property {Phaser.GameObjects.Text} [itemName]
+ * @property {Phaser.GameObjects.Text} [quantitySign]
+ * @property {Phaser.GameObjects.Text} [quantity]
+ */
+
+/**
+ * @typedef {import('../types/typedef.js').InventoryItem & { gameObjects: InventoryItemGameObjects }} InventoryItemWithGameObjects
+ */
+
+/**
+ * @typedef CustomInventory
+ * @type {InventoryItemWithGameObjects[]}
+ */
+
+/**
  * @typedef InventorySceneData
  * @type {object}
  * @property {string} previousSceneName
@@ -36,6 +54,7 @@ export class InventoryScene extends BaseScene {
   #selectedInventoryDescriptionText;
   /** @type {Phaser.GameObjects.Image} */
   #userInputCursor;
+  /** @type {CustomInventory} */
   #inventory;
   /** @type {number} */
   #selectedInventoryOptionIndex;
@@ -59,14 +78,22 @@ export class InventoryScene extends BaseScene {
       textureManager: this.sys.textures,
       assetKeys: [UI_ASSET_KEYS.MENU_BACKGROUND],
     });
-    this.#inventory = [
-      {
-        name: 'potion',
-        description: 'A basic healing item that will heal 30 HP from a single monster.',
-        quantity: 10,
+    const inventory = dataManager.getInventory(this);
+    // this.#inventory = [
+    //   {
+    //     name: 'potion',
+    //     description: 'A basic healing item that will heal 30 HP from a single monster.',
+    //     quantity: 10,
+    //     gameObjects: {},
+    //   },
+    // ];
+    this.#inventory = inventory.map((inventoryItem) => {
+      return {
+        item: inventoryItem.item,
+        quantity: inventoryItem.quantity,
         gameObjects: {},
-      },
-    ];
+      };
+    });
     this.#selectedInventoryOptionIndex = 0;
   }
 
@@ -100,7 +127,7 @@ export class InventoryScene extends BaseScene {
       const itemText = this.add.text(
         INVENTORY_ITEM_POSITION.x,
         INVENTORY_ITEM_POSITION.y + index * INVENTORY_ITEM_POSITION.space,
-        inventoryItem.name,
+        inventoryItem.item.name,
         INVENTORY_TEXT_STYLE
       );
       const qty1Text = this.add.text(620, INVENTORY_ITEM_POSITION.y + 2 + index * INVENTORY_ITEM_POSITION.space, 'x', {
@@ -110,7 +137,7 @@ export class InventoryScene extends BaseScene {
       const qty2Text = this.add.text(
         650,
         INVENTORY_ITEM_POSITION.y + index * INVENTORY_ITEM_POSITION.space,
-        inventoryItem.quantity,
+        `${inventoryItem.quantity}`,
         INVENTORY_TEXT_STYLE
       );
       container.add([itemText, qty1Text, qty2Text]);
@@ -196,7 +223,9 @@ export class InventoryScene extends BaseScene {
       return;
     }
 
-    this.#selectedInventoryDescriptionText.setText(this.#inventory[this.#selectedInventoryOptionIndex].description);
+    this.#selectedInventoryDescriptionText.setText(
+      this.#inventory[this.#selectedInventoryOptionIndex].item.description
+    );
   }
 
   /**
