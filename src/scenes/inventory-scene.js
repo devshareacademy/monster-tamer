@@ -164,16 +164,6 @@ export class InventoryScene extends BaseScene {
       ...{ wordWrap: { width: this.scale.width - 18 }, color: '#ffffff' },
     });
     this.#updateItemDescriptionText();
-
-    this.events.on(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
-  }
-
-  /**
-   * @returns {void}
-   */
-  cleanup() {
-    super.cleanup();
-    this.events.off(Phaser.Scenes.Events.RESUME, this.#handleSceneResume, this);
   }
 
   /**

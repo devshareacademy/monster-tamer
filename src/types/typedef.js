@@ -61,27 +61,19 @@ export const ITEM_EFFECT = Object.freeze({
 });
 
 /**
- * @typedef BaseItem
+ * @typedef Item
  * @type {object}
  * @property {number} id the unique id of this item
- */
-
-/**
- * @typedef ItemProps
- * @type {object}
  * @property {string} name the name of this item
  * @property {ItemEffect} effect the effect of using this item
  * @property {string} description the description of the item to show in the inventory bag
  */
 
 /**
- * @typedef {BaseItem & ItemProps} Item
- */
-
-/**
  * @typedef BaseInventoryItem
  * @type {object}
- * @property {BaseItem} item
+ * @property {object} item
+ * @property {number} item.id the unique id of this item
  * @property {number} quantity
  */
 
