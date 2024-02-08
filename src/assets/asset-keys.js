@@ -90,3 +90,9 @@ export const INVENTORY_ASSET_KEYS = Object.freeze({
   INVENTORY_BACKGROUND: 'INVENTORY_BACKGROUND',
   INVENTORY_BAG: 'INVENTORY_BAG',
 });
+
+export const AUDIO_ASSET_KEYS = Object.freeze({
+  TITLE: 'TITLE',
+  BATTLE: 'BATTLE',
+  MAIN: 'MAIN',
+});

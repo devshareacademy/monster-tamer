@@ -1,5 +1,6 @@
 import {
   ATTACK_ASSET_KEYS,
+  AUDIO_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
   BUILDING_ASSET_KEYS,
@@ -180,6 +181,12 @@ export class PreloadScene extends BaseScene {
       `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
     );
     this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
+
+    // load audio
+    this.load.setPath('assets/audio/xDeviruchi');
+    this.load.audio(AUDIO_ASSET_KEYS.MAIN, 'And-the-Journey-Begins.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.BATTLE, 'Decisive-Battle.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.TITLE, 'Title-Theme.wav');
   }
 
   /**
