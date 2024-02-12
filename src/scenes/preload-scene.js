@@ -18,10 +18,11 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { dataManager } from '../utils/data-manager.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { BaseScene } from './base-scene.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
+import { setGlobalSoundSettings } from '../utils/audio-utils.js';
 
 export class PreloadScene extends BaseScene {
   constructor() {
@@ -198,10 +199,14 @@ export class PreloadScene extends BaseScene {
     // create animations from json file
     this.#createAnimations();
 
+    // create audio objects
+    this.#createAudio();
+
     // attempt to populate data manager with saved data
     dataManager.loadData();
+    // set global audio based on data manager settings
+    setGlobalSoundSettings(this);
 
-    this.scene.launch(SCENE_KEYS.AUDIO_MANAGER_SCENE);
     this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
@@ -222,6 +227,15 @@ export class PreloadScene extends BaseScene {
         delay: animation.delay,
         yoyo: animation.yoyo,
       });
+    });
+  }
+
+  /**
+   * @returns {void}
+   */
+  #createAudio() {
+    this.sound.add(AUDIO_ASSET_KEYS.TITLE, {
+      loop: true,
     });
   }
 }

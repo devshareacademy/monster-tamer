@@ -9,6 +9,7 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
 import { BaseScene } from './base-scene.js';
 import { SOUND_OPTIONS } from '../common/options.js';
+import { playBackgroundMusic } from '../utils/audio-utils.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = Object.freeze({
@@ -142,13 +143,8 @@ export class TitleScene extends BaseScene {
       this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
     });
 
-    // add audio
-    if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND) === SOUND_OPTIONS.ON) {
-      this.sound.add(AUDIO_ASSET_KEYS.TITLE, {
-        loop: true,
-        volume: dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME) * 0.25,
-      });
-    }
+    // play background music
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.TITLE);
   }
 
   /**
