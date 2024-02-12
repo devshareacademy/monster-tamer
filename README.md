@@ -10,6 +10,13 @@ A Pokemon like game created using [Phaser 3](https://github.com/photonstorm/phas
 
 This is the official code repository for the [Monster Tamer - Pokemon like RPG Tutorial with Phaser 3](https://www.youtube.com/playlist?list=PLmcXe0-sfoSgq-pyXrFx0GZjHbvoVUW8t) series available on YouTube.
 
+## Demo
+
+You can find a playable demo of the game on Itch.io here: [Monster Tamer](https://galemius.itch.io/monster-tamer)
+
+![Monster Tamer Game play Screenshot 1](/docs/screenshot1.png?raw=true 'Screenshot 1')
+![Monster Tamer Game play Screenshot 2](/docs/screenshot2.png?raw=true 'Screenshot 2')
+
 ## Local Setup
 
 This project is currently setup to require a very minimal amount of tools to run the web application. The main tools that are needed are:
