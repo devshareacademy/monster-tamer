@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
@@ -16,6 +16,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { SOUND_OPTIONS } from '../common/options.js';
 
 /**
  * @typedef WorldSceneData
@@ -280,6 +281,14 @@ export class WorldScene extends BaseScene {
       }
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
+
+    // add audio
+    if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND) === SOUND_OPTIONS.ON) {
+      this.sound.add(AUDIO_ASSET_KEYS.MAIN, {
+        loop: true,
+        volume: dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME) * 0.25,
+      });
+    }
   }
 
   /**

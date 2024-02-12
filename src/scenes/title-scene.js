@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { EXTERNAL_LINKS_ASSET_KEYS, TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, EXTERNAL_LINKS_ASSET_KEYS, TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -8,6 +8,7 @@ import { NineSlice } from '../utils/nine-slice.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
 import { BaseScene } from './base-scene.js';
+import { SOUND_OPTIONS } from '../common/options.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = Object.freeze({
@@ -140,6 +141,14 @@ export class TitleScene extends BaseScene {
 
       this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
     });
+
+    // add audio
+    if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND) === SOUND_OPTIONS.ON) {
+      this.sound.add(AUDIO_ASSET_KEYS.TITLE, {
+        loop: true,
+        volume: dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME) * 0.25,
+      });
+    }
   }
 
   /**
