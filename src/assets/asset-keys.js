@@ -95,4 +95,8 @@ export const AUDIO_ASSET_KEYS = Object.freeze({
   TITLE: 'TITLE',
   BATTLE: 'BATTLE',
   MAIN: 'MAIN',
+  FLEE: 'FLEE',
+  GRASS: 'GRASS',
+  CLAW: 'CLAW',
+  ICE: 'ICE',
 });

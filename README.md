@@ -55,7 +55,8 @@ This project uses both assets I developed as well as other assets that have been
 | Beach & Caves Tileset       | AxulArt          | [AxulArt's Beach and caves tileset](https://axulart.itch.io/axularts-beach-and-caves-tileset)     |
 | Building Interiors          | AxulArt          | [Basic Top-down Interior](https://axulart.itch.io/axularts-basic-top-down-interior)               |
 | Retro RPG Buildings Tileset | The Pixel Nook   | [Retro RPG Buildings](https://the-pixel-nook.itch.io/rpg-building-pack)                           |
-| Game Audio                  | xdeviruchi       | [xdeviruchi Sound Cloud](https://soundcloud.com/xdeviruchi)                                       |
+| Game BG Music               | xdeviruchi       | [xdeviruchi Sound Cloud](https://soundcloud.com/xdeviruchi)                                       |
+| Sound Effects               | leohpaz          | [RPG Essentials SFX Free](https://leohpaz.itch.io/rpg-essentials-sfx-free)                        |
 
 ## Issues
 

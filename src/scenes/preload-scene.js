@@ -188,6 +188,11 @@ export class PreloadScene extends BaseScene {
     this.load.audio(AUDIO_ASSET_KEYS.MAIN, 'And-the-Journey-Begins.wav');
     this.load.audio(AUDIO_ASSET_KEYS.BATTLE, 'Decisive-Battle.wav');
     this.load.audio(AUDIO_ASSET_KEYS.TITLE, 'Title-Theme.wav');
+    this.load.setPath('assets/audio/leohpaz');
+    this.load.audio(AUDIO_ASSET_KEYS.CLAW, '03_Claw_03.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.GRASS, '03_Step_grass_03.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.ICE, '13_Ice_explosion_01.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.FLEE, '51_Flee_02.wav');
   }
 
   /**
