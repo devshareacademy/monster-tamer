@@ -12,6 +12,8 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { playBackgroundMusic } from '../utils/audio-utils.js';
+import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -119,6 +121,9 @@ export class BattleScene extends BaseScene {
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
 
     this._controls.lockInput = true;
+
+    // add audio
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.BATTLE);
   }
 
   /**

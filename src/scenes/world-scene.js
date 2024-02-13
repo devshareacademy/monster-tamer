@@ -17,6 +17,7 @@ import { weightedRandom } from '../utils/random.js';
 import { NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { SOUND_OPTIONS } from '../common/options.js';
+import { playBackgroundMusic } from '../utils/audio-utils.js';
 
 /**
  * @typedef WorldSceneData
@@ -283,12 +284,7 @@ export class WorldScene extends BaseScene {
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
 
     // add audio
-    if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND) === SOUND_OPTIONS.ON) {
-      this.sound.add(AUDIO_ASSET_KEYS.MAIN, {
-        loop: true,
-        volume: dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME) * 0.25,
-      });
-    }
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
   }
 
   /**
