@@ -17,7 +17,7 @@ import { weightedRandom } from '../utils/random.js';
 import { NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { SOUND_OPTIONS } from '../common/options.js';
-import { playBackgroundMusic } from '../utils/audio-utils.js';
+import { playBackgroundMusic, playSoundFX } from '../utils/audio-utils.js';
 
 /**
  * @typedef WorldSceneData
@@ -455,6 +455,7 @@ export class WorldScene extends BaseScene {
     }
 
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
+    playSoundFX(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
       /** @type {number} */

@@ -46,6 +46,7 @@ import Phaser from '../lib/phaser.js';
  * @property {number} id the unique id of this attack
  * @property {string} name the name of this attack
  * @property {import('../battle/attacks/attack-keys.js').AttackKeys} animationName the animation key that is tied to this attack, will be used to play the attack animation when attack is used.
+ * @property {string} audioKey the unique key of the audio asset that is cached by phaser, will be passed to the phaser sound manager to play this audio object
  */
 
 /**

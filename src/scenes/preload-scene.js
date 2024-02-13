@@ -204,9 +204,6 @@ export class PreloadScene extends BaseScene {
     // create animations from json file
     this.#createAnimations();
 
-    // create audio objects
-    this.#createAudio();
-
     // attempt to populate data manager with saved data
     dataManager.loadData();
     // set global audio based on data manager settings
@@ -232,15 +229,6 @@ export class PreloadScene extends BaseScene {
         delay: animation.delay,
         yoyo: animation.yoyo,
       });
-    });
-  }
-
-  /**
-   * @returns {void}
-   */
-  #createAudio() {
-    this.sound.add(AUDIO_ASSET_KEYS.TITLE, {
-      loop: true,
     });
   }
 }

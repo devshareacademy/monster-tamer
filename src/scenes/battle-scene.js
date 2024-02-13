@@ -12,7 +12,7 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { playBackgroundMusic } from '../utils/audio-utils.js';
+import { playBackgroundMusic, playSoundFX } from '../utils/audio-utils.js';
 import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
 
 const BATTLE_STATES = Object.freeze({
@@ -209,6 +209,9 @@ export class BattleScene extends BaseScene {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
+          this.time.delayedCall(100, () =>
+            playSoundFX(this, this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].audioKey)
+          );
           this.#attackManager.playAttackAnimation(
             this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].animationName,
             ATTACK_TARGET.ENEMY,
@@ -243,6 +246,9 @@ export class BattleScene extends BaseScene {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
+          this.time.delayedCall(100, () =>
+            playSoundFX(this, this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].audioKey)
+          );
           this.#attackManager.playAttackAnimation(
             this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].animationName,
             ATTACK_TARGET.PLAYER,
@@ -469,6 +475,7 @@ export class BattleScene extends BaseScene {
           // player has run away successfully
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
             this.time.delayedCall(200, () => {
+              playSoundFX(this, AUDIO_ASSET_KEYS.FLEE);
               this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
             });
           });
