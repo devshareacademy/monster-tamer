@@ -64,6 +64,8 @@ export class BattleMenu {
   #queuedMessageAnimationPlaying;
   /** @type {boolean} */
   #usedItem;
+  /** @type {boolean} */
+  #fleeAttempt;
 
   /**
    *
@@ -111,6 +113,11 @@ export class BattleMenu {
     return this.#usedItem;
   }
 
+  /** @type {boolean} */
+  get isAttemptingToFlee() {
+    return this.#fleeAttempt;
+  }
+
   showMainBattleMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#battleTextGameObjectLine1.setText('what should');
@@ -122,6 +129,7 @@ export class BattleMenu {
     this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(BATTLE_MENU_CURSOR_POS.x, BATTLE_MENU_CURSOR_POS.y);
     this.#selectedAttackIndex = undefined;
     this.#usedItem = false;
+    this.#fleeAttempt = false;
   }
 
   hideMainBattleMenu() {
@@ -597,15 +605,8 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player successfully running away
-        and then restart the Phaser scene after doing a screen fade out
-      */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
-      this.updateInfoPaneMessagesAndWaitForInput(['You fail to run away...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.#fleeAttempt = true;
       return;
     }
 

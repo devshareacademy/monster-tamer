@@ -140,6 +140,12 @@ export class BattleScene extends BaseScene {
         return;
       }
 
+      // check if the player attempted to flee
+      if (this.#battleMenu.isAttemptingToFlee) {
+        this.#battleStateMachine.setState(BATTLE_STATES.FLEE_ATTEMPT);
+        return;
+      }
+
       // check if the player selected an attack, and start battle sequence for the fight
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
@@ -361,6 +367,14 @@ export class BattleScene extends BaseScene {
           return;
         }
 
+        // if player failed to flee, only have enemy attack
+        if (this.#battleMenu.isAttemptingToFlee) {
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack();
+          });
+          return;
+        }
+
         this.#playerAttack();
       },
     });
@@ -382,8 +396,21 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
-          this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+        const randomNumber = Phaser.Math.Between(1, 10);
+        if (randomNumber > 5) {
+          // player has run away successfully
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
+            this.time.delayedCall(200, () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+            });
+          });
+          return;
+        }
+        // player failed to run away, allow enemy to take their turn
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You failed to run away...'], () => {
+          this.time.delayedCall(200, () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+          });
         });
       },
     });
