@@ -6,6 +6,7 @@ import {
   EXTERNAL_LINKS_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
+  INVENTORY_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
   MONSTER_PARTY_ASSET_KEYS,
   TITLE_ASSET_KEYS,
@@ -105,6 +106,7 @@ export class PreloadScene extends BaseScene {
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
     this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
+    this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -154,6 +156,13 @@ export class PreloadScene extends BaseScene {
       MONSTER_PARTY_ASSET_KEYS.MONSTER_DETAILS_BACKGROUND,
       `${monsterTamerAssetPath}/ui/monster-party/monster-details-background.png`
     );
+
+    // ui components for inventory
+    this.load.image(
+      INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
+    );
+    this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
   }
 
   /**

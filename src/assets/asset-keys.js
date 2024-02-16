@@ -40,6 +40,7 @@ export const UI_ASSET_KEYS = Object.freeze({
 export const DATA_ASSET_KEYS = Object.freeze({
   ATTACKS: 'ATTACKS',
   ANIMATIONS: 'ANIMATIONS',
+  ITEMS: 'ITEMS',
 });
 
 export const ATTACK_ASSET_KEYS = Object.freeze({
@@ -70,4 +71,9 @@ export const TITLE_ASSET_KEYS = Object.freeze({
 export const MONSTER_PARTY_ASSET_KEYS = Object.freeze({
   PARTY_BACKGROUND: 'PARTY_BACKGROUND',
   MONSTER_DETAILS_BACKGROUND: 'MONSTER_DETAILS_BACKGROUND',
+});
+
+export const INVENTORY_ASSET_KEYS = Object.freeze({
+  INVENTORY_BACKGROUND: 'INVENTORY_BACKGROUND',
+  INVENTORY_BAG: 'INVENTORY_BAG',
 });

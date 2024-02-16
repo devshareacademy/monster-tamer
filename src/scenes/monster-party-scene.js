@@ -12,6 +12,7 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import { ITEM_EFFECT } from '../types/typedef.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -36,6 +37,7 @@ const MONSTER_PARTY_POSITIONS = Object.freeze({
  * @typedef MonsterPartySceneData
  * @type {object}
  * @property {string} previousSceneName
+ * @property {import('../types/typedef.js').Item} [itemSelected]
  */
 
 export class MonsterPartyScene extends BaseScene {
@@ -55,6 +57,8 @@ export class MonsterPartyScene extends BaseScene {
   #monsters;
   /** @type {MonsterPartySceneData} */
   #sceneData;
+  /** @type {boolean} */
+  #waitingForInput;
 
   constructor() {
     super({
@@ -75,6 +79,7 @@ export class MonsterPartyScene extends BaseScene {
     this.#healthBarTextGameObjects = [];
     this.#selectedPartyMonsterIndex = 0;
     this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    this.#waitingForInput = false;
   }
 
   /**
@@ -141,18 +146,34 @@ export class MonsterPartyScene extends BaseScene {
     }
 
     if (this._controls.wasBackKeyPressed()) {
-      this.#goBackToPreviousScene();
+      if (this.#waitingForInput) {
+        this.#updateInfoContainerText();
+        this.#waitingForInput = false;
+        return;
+      }
+
+      this.#goBackToPreviousScene(false);
       return;
     }
 
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
-      if (this.#selectedPartyMonsterIndex === -1) {
-        this.#goBackToPreviousScene();
+      if (this.#waitingForInput) {
+        this.#updateInfoContainerText();
+        this.#waitingForInput = false;
         return;
       }
 
-      // TODO: handle input based on what player intention was (use item, view monster details, select monster to switch to)
+      if (this.#selectedPartyMonsterIndex === -1) {
+        this.#goBackToPreviousScene(false);
+        return;
+      }
+
+      // handle input based on what player intention was (use item, view monster details, select monster to switch to)
+      if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
+        this.#handleItemUsed();
+        return;
+      }
 
       this._controls.lockInput = true;
       // pause this scene and launch the monster details scene
@@ -162,6 +183,10 @@ export class MonsterPartyScene extends BaseScene {
       };
       this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
       this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+      return;
+    }
+
+    if (this.#waitingForInput) {
       return;
     }
 
@@ -260,12 +285,13 @@ export class MonsterPartyScene extends BaseScene {
   }
 
   /**
+   * @param {boolean} itemUsed
    * @returns {void}
    */
-  #goBackToPreviousScene() {
+  #goBackToPreviousScene(itemUsed) {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
-    this.scene.resume(this.#sceneData.previousSceneName);
+    this.scene.resume(this.#sceneData.previousSceneName, { itemUsed });
   }
 
   /**
@@ -317,5 +343,67 @@ export class MonsterPartyScene extends BaseScene {
       }
       background.setAlpha(0.7);
     });
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleItemUsed() {
+    switch (this.#sceneData.itemSelected.effect) {
+      case ITEM_EFFECT.HEAL_30:
+        this.#handleHealItemUsed(30);
+        break;
+      default:
+        exhaustiveGuard(this.#sceneData.itemSelected.effect);
+    }
+  }
+
+  /**
+   * @param {number} amount the amount of health to heal the monster by
+   * @returns {void}
+   */
+  #handleHealItemUsed(amount) {
+    // validate that the monster is not fainted
+    if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
+      this.#infoTextGameObject.setText('Cannot heal fainted monster');
+      this.#waitingForInput = true;
+      return;
+    }
+
+    // validate that the monster is not already fully healed
+    if (
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp ===
+      this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+    ) {
+      this.#infoTextGameObject.setText('Monster is already fully healed');
+      this.#waitingForInput = true;
+      return;
+    }
+
+    // otherwise, heal monster by the amount if we are not in a battle and show animation
+    this._controls.lockInput = true;
+    this.#monsters[this.#selectedPartyMonsterIndex].currentHp += amount;
+    if (
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp > this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+    ) {
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp = this.#monsters[this.#selectedPartyMonsterIndex].maxHp;
+    }
+    this.#infoTextGameObject.setText(`Healed monster by ${amount} HP`);
+    this.#healthBars[this.#selectedPartyMonsterIndex].setMeterPercentageAnimated(
+      this.#monsters[this.#selectedPartyMonsterIndex].currentHp / this.#monsters[this.#selectedPartyMonsterIndex].maxHp,
+      {
+        callback: () => {
+          this.#healthBarTextGameObjects[this.#selectedPartyMonsterIndex].setText(
+            `${this.#monsters[this.#selectedPartyMonsterIndex].currentHp} / ${
+              this.#monsters[this.#selectedPartyMonsterIndex].maxHp
+            }`
+          );
+          dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
+          this.time.delayedCall(300, () => {
+            this.#goBackToPreviousScene(true);
+          });
+        },
+      }
+    );
   }
 }
