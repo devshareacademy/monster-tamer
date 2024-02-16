@@ -45,6 +45,19 @@ const INVENTORY_TEXT_STYLE = {
  * @property {string} previousSceneName
  */
 
+/**
+ * @typedef InventorySceneWasResumedData
+ * @type {object}
+ * @property {boolean} itemUsed
+ */
+
+/**
+ * @typedef InventorySceneItemUsedData
+ * @type {object}
+ * @property {boolean} itemUsed
+ * @property {import('../types/typedef.js').Item} [item]
+ */
+
 export class InventoryScene extends BaseScene {
   /** @type {InventorySceneData} */
   #sceneData;
@@ -79,14 +92,6 @@ export class InventoryScene extends BaseScene {
       assetKeys: [UI_ASSET_KEYS.MENU_BACKGROUND],
     });
     const inventory = dataManager.getInventory(this);
-    // this.#inventory = [
-    //   {
-    //     name: 'potion',
-    //     description: 'A basic healing item that will heal 30 HP from a single monster.',
-    //     quantity: 10,
-    //     gameObjects: {},
-    //   },
-    // ];
     this.#inventory = inventory.map((inventoryItem) => {
       return {
         item: inventoryItem.item,
@@ -185,14 +190,18 @@ export class InventoryScene extends BaseScene {
     }
 
     if (this._controls.wasBackKeyPressed()) {
-      this.#goBackToPreviousScene();
+      this.#goBackToPreviousScene(false);
       return;
     }
 
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (this.#isCancelButtonSelected()) {
-        this.#goBackToPreviousScene();
+        this.#goBackToPreviousScene(false);
+        return;
+      }
+
+      if (this.#inventory[this.#selectedInventoryOptionIndex].quantity < 1) {
         return;
       }
 
@@ -201,6 +210,7 @@ export class InventoryScene extends BaseScene {
       /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
       const sceneDataToPass = {
         previousSceneName: SCENE_KEYS.INVENTORY_SCENE,
+        itemSelected: this.#inventory[this.#selectedInventoryOptionIndex].item,
       };
       this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
       this.scene.pause(SCENE_KEYS.INVENTORY_SCENE);
@@ -211,6 +221,29 @@ export class InventoryScene extends BaseScene {
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
       this.#updateItemDescriptionText();
+    }
+  }
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {InventorySceneWasResumedData | undefined} [data]
+   * @returns {void}
+   */
+  handleSceneResume(sys, data) {
+    super.handleSceneResume(sys, data);
+
+    if (!data || !data.itemUsed) {
+      return;
+    }
+
+    const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
+    selectedItem.quantity -= 1;
+    selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
+    // TODO: add logic to handle when the last of an item was just used
+    dataManager.updateInventory(this.#inventory);
+
+    if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+      this.#goBackToPreviousScene(true, selectedItem.item);
     }
   }
 
@@ -236,12 +269,19 @@ export class InventoryScene extends BaseScene {
   }
 
   /**
+   * @param {boolean} wasItemUsed
+   * @param {import('../types/typedef.js').Item} [item]
    * @returns {void}
    */
-  #goBackToPreviousScene() {
+  #goBackToPreviousScene(wasItemUsed, item) {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
-    this.scene.resume(this.#sceneData.previousSceneName);
+    /** @type {InventorySceneItemUsedData} */
+    const sceneDataToPass = {
+      itemUsed: wasItemUsed,
+      item,
+    };
+    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
   }
 
   /**
