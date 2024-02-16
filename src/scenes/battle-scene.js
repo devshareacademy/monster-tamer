@@ -177,7 +177,11 @@ export class BattleScene extends BaseScene {
     }
   }
 
-  #playerAttack() {
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  #playerAttack(callback) {
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
@@ -190,7 +194,7 @@ export class BattleScene extends BaseScene {
             () => {
               this.#activeEnemyMonster.playTakeDamageAnimation(() => {
                 this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
-                  this.#enemyAttack();
+                  callback();
                 });
               });
             }
@@ -200,7 +204,11 @@ export class BattleScene extends BaseScene {
     );
   }
 
-  #enemyAttack() {
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  #enemyAttack(callback) {
     if (this.#activeEnemyMonster.isFainted) {
       this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
       return;
@@ -220,7 +228,7 @@ export class BattleScene extends BaseScene {
             () => {
               this.#activePlayerMonster.playTakeDamageAnimation(() => {
                 this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-                  this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+                  callback();
                 });
               });
             }
@@ -366,7 +374,9 @@ export class BattleScene extends BaseScene {
             )[0].currentHp
           );
           this.time.delayedCall(500, () => {
-            this.#enemyAttack();
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
           });
           return;
         }
@@ -374,12 +384,26 @@ export class BattleScene extends BaseScene {
         // if player failed to flee, only have enemy attack
         if (this.#battleMenu.isAttemptingToFlee) {
           this.time.delayedCall(500, () => {
-            this.#enemyAttack();
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
           });
           return;
         }
-
-        this.#playerAttack();
+        const randomNumber = Phaser.Math.Between(0, 1);
+        if (randomNumber === 0) {
+          this.#playerAttack(() => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+          return;
+        }
+        this.#enemyAttack(() => {
+          this.#playerAttack(() => {
+            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          });
+        });
       },
     });
 
