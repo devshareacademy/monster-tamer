@@ -146,6 +146,12 @@ export class MonsterPartyScene extends BaseScene {
     }
 
     if (this._controls.wasBackKeyPressed()) {
+      if (this.#waitingForInput) {
+        this.#updateInfoContainerText();
+        this.#waitingForInput = false;
+        return;
+      }
+
       this.#goBackToPreviousScene(false);
       return;
     }
