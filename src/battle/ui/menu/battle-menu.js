@@ -98,7 +98,7 @@ export class BattleMenu {
     );
   }
 
-  /** @types {number | undefined} */
+  /** @type {number | undefined} */
   get selectedAttack() {
     if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
       return this.#selectedAttackIndex;
@@ -106,7 +106,7 @@ export class BattleMenu {
     return undefined;
   }
 
-  /** @types {boolean} */
+  /** @type {boolean} */
   get wasItemUsed() {
     return this.#usedItem;
   }
