@@ -78,13 +78,13 @@ export const ITEM_EFFECT = Object.freeze({
  */
 
 /**
+ * @typedef Inventory
+ * @type {BaseInventoryItem[]}
+ */
+
+/**
  * @typedef InventoryItem
  * @type {object}
  * @property {Item} item
  * @property {number} quantity
- */
-
-/**
- * @typedef Inventory
- * @type {BaseInventoryItem[]}
  */

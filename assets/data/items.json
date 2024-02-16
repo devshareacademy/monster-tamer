@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "potion",
-    "effect": "HEAL_30",
-    "description": "A basic healing item that will heal 30 HP from a single monster."
+    "description": "A basic healing item that will heal 30 HP from a single monster.",
+    "effect": "HEAL_30"
   }
 ]

@@ -1,19 +1,13 @@
-import Phaser from '../lib/phaser.js';
 import { INVENTORY_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
-import { SCENE_KEYS } from './scene-keys.js';
-import { BaseScene } from './base-scene.js';
-import { NineSlice } from '../utils/nine-slice.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
-import { exhaustiveGuard } from '../utils/guard.js';
 import { dataManager } from '../utils/data-manager.js';
+import { exhaustiveGuard } from '../utils/guard.js';
+import { NineSlice } from '../utils/nine-slice.js';
+import { BaseScene } from './base-scene.js';
+import { SCENE_KEYS } from './scene-keys.js';
 
-/** @type {Phaser.Types.GameObjects.Text.TextStyle} */
-const INVENTORY_TEXT_STYLE = {
-  fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
-  color: '#000000',
-  fontSize: '30px',
-};
+const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
 
 const INVENTORY_ITEM_POSITION = Object.freeze({
   x: 50,
@@ -21,13 +15,12 @@ const INVENTORY_ITEM_POSITION = Object.freeze({
   space: 50,
 });
 
-const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
-
-/**
- * @typedef InventorySceneData
- * @type {object}
- * @property {string} previousSceneName
- */
+/** @type {Phaser.Types.GameObjects.Text.TextStyle} */
+const INVENTORY_TEXT_STYLE = {
+  fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+  color: '#000000',
+  fontSize: '30px',
+};
 
 /**
  * @typedef InventoryItemGameObjects
@@ -47,6 +40,12 @@ const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
  */
 
 /**
+ * @typedef InventorySceneData
+ * @type {object}
+ * @property {string} previousSceneName
+ */
+
+/**
  * @typedef InventorySceneResumeData
  * @type {object}
  * @property {boolean} itemUsed
@@ -54,21 +53,23 @@ const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
  */
 
 export class InventoryScene extends BaseScene {
-  /** @type {Phaser.GameObjects.Image} */
-  #userInputCursor;
-  /** @type {Phaser.GameObjects.Text} */
-  #selectedInventoryDescriptionText;
-  /** @type {CustomInventory} */
-  #inventory;
-  /** @type {number} */
-  #selectedInventoryOptionIndex;
   /** @type {InventorySceneData} */
   #sceneData;
   /** @type {NineSlice} */
   #nineSliceMainContainer;
+  /** @type {Phaser.GameObjects.Text} */
+  #selectedInventoryDescriptionText;
+  /** @type {Phaser.GameObjects.Image} */
+  #userInputCursor;
+  /** @type {CustomInventory} */
+  #inventory;
+  /** @type {number} */
+  #selectedInventoryOptionIndex;
 
   constructor() {
-    super({ key: SCENE_KEYS.INVENTORY_SCENE });
+    super({
+      key: SCENE_KEYS.INVENTORY_SCENE,
+    });
   }
 
   /**
@@ -101,6 +102,7 @@ export class InventoryScene extends BaseScene {
   create() {
     super.create();
 
+    // create custom background
     this.add.image(0, 0, INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND).setOrigin(0);
     this.add.image(40, 120, INVENTORY_ASSET_KEYS.INVENTORY_BAG).setOrigin(0).setScale(0.5);
 
@@ -127,28 +129,28 @@ export class InventoryScene extends BaseScene {
         inventoryItem.item.name,
         INVENTORY_TEXT_STYLE
       );
-      const qtyText1 = this.add.text(620, INVENTORY_ITEM_POSITION.y + 2 + index * INVENTORY_ITEM_POSITION.space, 'x', {
+      const qty1Text = this.add.text(620, INVENTORY_ITEM_POSITION.y + 2 + index * INVENTORY_ITEM_POSITION.space, 'x', {
         color: '#000000',
         fontSize: '30px',
       });
-      const qtyText2 = this.add.text(
+      const qty2Text = this.add.text(
         650,
         INVENTORY_ITEM_POSITION.y + index * INVENTORY_ITEM_POSITION.space,
         `${inventoryItem.quantity}`,
         INVENTORY_TEXT_STYLE
       );
-      container.add([itemText, qtyText1, qtyText2]);
+      container.add([itemText, qty1Text, qty2Text]);
       inventoryItem.gameObjects = {
         itemName: itemText,
-        quantity: qtyText2,
-        quantitySign: qtyText1,
+        quantity: qty2Text,
+        quantitySign: qty1Text,
       };
     });
 
     // create cancel text
     const cancelText = this.add.text(
       INVENTORY_ITEM_POSITION.x,
-      INVENTORY_ITEM_POSITION.y + INVENTORY_ITEM_POSITION.space * this.#inventory.length,
+      INVENTORY_ITEM_POSITION.y + this.#inventory.length * INVENTORY_ITEM_POSITION.space,
       'Cancel',
       INVENTORY_TEXT_STYLE
     );
@@ -161,7 +163,12 @@ export class InventoryScene extends BaseScene {
     // create inventory description text
     this.#selectedInventoryDescriptionText = this.add.text(25, 420, '', {
       ...INVENTORY_TEXT_STYLE,
-      ...{ wordWrap: { width: this.scale.width - 18 }, color: '#ffffff' },
+      ...{
+        wordWrap: {
+          width: this.scale.width - 18,
+        },
+        color: '#ffffff',
+      },
     });
     this.#updateItemDescriptionText();
   }
@@ -236,6 +243,22 @@ export class InventoryScene extends BaseScene {
   }
 
   /**
+   * @param {boolean} wasItemUsed
+   * @param {import('../types/typedef.js').Item} [item]
+   * @returns {void}
+   */
+  #goBackToPreviousScene(wasItemUsed, item) {
+    this._controls.lockInput = true;
+    this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
+    /** @type {InventorySceneResumeData} */
+    const sceneDataToPass = {
+      itemUsed: wasItemUsed,
+      item,
+    };
+    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
+  }
+
+  /**
    * @param {import('../common/direction.js').Direction} direction
    * @returns {void}
    */
@@ -261,25 +284,10 @@ export class InventoryScene extends BaseScene {
       default:
         exhaustiveGuard(direction);
     }
+
     const y = 30 + this.#selectedInventoryOptionIndex * 50;
 
     this.#userInputCursor.setY(y);
-  }
-
-  /**
-   * @param {boolean} wasItemUsed
-   * @param {import('../types/typedef.js').Item} [item]
-   * @returns {void}
-   */
-  #goBackToPreviousScene(wasItemUsed, item) {
-    this._controls.lockInput = true;
-    this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
-    /** @type {InventorySceneResumeData} */
-    const sceneDataToPass = {
-      itemUsed: wasItemUsed,
-      item,
-    };
-    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
   }
 
   /**
@@ -287,11 +295,8 @@ export class InventoryScene extends BaseScene {
    * @param {InventorySceneResumeData} data
    * @returns {void}
    */
-  #handleSceneResume(sys, data) {
-    console.log(
-      `[${InventoryScene.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
-    );
-    this._controls.lockInput = false;
+  handleSceneResume(sys, data) {
+    super.handleSceneResume(sys, data);
 
     if (!data) {
       return;
