@@ -86,7 +86,7 @@ export class BattleMenu {
     this.#createPlayerInputCursor();
   }
 
-  /** @types {number | undefined} */
+  /** @type {number | undefined} */
   get selectedAttack() {
     if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
       return this.#selectedAttackIndex;
