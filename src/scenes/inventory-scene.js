@@ -46,7 +46,13 @@ const INVENTORY_TEXT_STYLE = {
  */
 
 /**
- * @typedef InventorySceneResumeData
+ * @typedef InventorySceneWasResumedData
+ * @type {object}
+ * @property {boolean} itemUsed
+ */
+
+/**
+ * @typedef InventorySceneItemUsedData
  * @type {object}
  * @property {boolean} itemUsed
  * @property {import('../types/typedef.js').Item} [item]
@@ -188,13 +194,13 @@ export class InventoryScene extends BaseScene {
       return;
     }
 
-    const spaceKeyPressed = this._controls.wasSpaceKeyPressed();
-    if (spaceKeyPressed && this.#isCancelButtonSelected()) {
-      this.#goBackToPreviousScene(false);
-      return;
-    }
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    if (wasSpaceKeyPressed) {
+      if (this.#isCancelButtonSelected()) {
+        this.#goBackToPreviousScene(false);
+        return;
+      }
 
-    if (spaceKeyPressed) {
       if (this.#inventory[this.#selectedInventoryOptionIndex].quantity < 1) {
         return;
       }
@@ -218,6 +224,32 @@ export class InventoryScene extends BaseScene {
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
       this.#updateItemDescriptionText();
+    }
+  }
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {InventorySceneWasResumedData | undefined} [data]
+   * @returns {void}
+   */
+  handleSceneResume(sys, data) {
+    super.handleSceneResume(sys, data);
+
+    if (!data || !data.itemUsed) {
+      return;
+    }
+
+    const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
+    selectedItem.quantity -= 1;
+    selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
+
+    // TODO: add logic to handle when the last of an item was just used
+
+    dataManager.updateInventory(this.#inventory);
+
+    // if previous scene was battle scene, switch back to that scene
+    if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+      this.#goBackToPreviousScene(true, selectedItem.item);
     }
   }
 
@@ -250,7 +282,7 @@ export class InventoryScene extends BaseScene {
   #goBackToPreviousScene(wasItemUsed, item) {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
-    /** @type {InventorySceneResumeData} */
+    /** @type {InventorySceneItemUsedData} */
     const sceneDataToPass = {
       itemUsed: wasItemUsed,
       item,
@@ -288,32 +320,5 @@ export class InventoryScene extends BaseScene {
     const y = 30 + this.#selectedInventoryOptionIndex * 50;
 
     this.#userInputCursor.setY(y);
-  }
-
-  /**
-   * @param {Phaser.Scenes.Systems} sys
-   * @param {InventorySceneResumeData} data
-   * @returns {void}
-   */
-  handleSceneResume(sys, data) {
-    super.handleSceneResume(sys, data);
-
-    if (!data) {
-      return;
-    }
-
-    if (data.itemUsed) {
-      const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
-      selectedItem.quantity -= 1;
-      selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
-      // TODO: add logic to handle when the last of an item was just used
-
-      dataManager.updateInventory(this.#inventory);
-
-      // if previous scene was battle scene, switch back to that scene
-      if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-        this.#goBackToPreviousScene(true, selectedItem.item);
-      }
-    }
   }
 }
