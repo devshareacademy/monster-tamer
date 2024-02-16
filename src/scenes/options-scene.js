@@ -14,6 +14,7 @@ import { DIRECTION } from '../common/direction.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BaseScene } from './base-scene.js';
+import { setGlobalSoundSettings } from '../utils/audio-utils.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const OPTIONS_TEXT_STYLE = {
@@ -225,6 +226,10 @@ export class OptionsScene extends BaseScene {
     if (this._controls.wasSpaceKeyPressed() && this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM) {
       this._controls.lockInput = true;
       this.#updateOptionDataInDataManager();
+
+      // update the global sound volume
+      setGlobalSoundSettings(this);
+
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }

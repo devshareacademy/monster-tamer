@@ -2,6 +2,8 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+![Monster Tamer Logo](/docs/logo.png?raw=true 'Monster Tamer Logo')
+
 Monster Tamer - Pokemon like RPG Tutorial with Phaser 3
 
 A Pokemon like game created using [Phaser 3](https://github.com/photonstorm/phaser)!
@@ -53,6 +55,8 @@ This project uses both assets I developed as well as other assets that have been
 | Beach & Caves Tileset       | AxulArt          | [AxulArt's Beach and caves tileset](https://axulart.itch.io/axularts-beach-and-caves-tileset)     |
 | Building Interiors          | AxulArt          | [Basic Top-down Interior](https://axulart.itch.io/axularts-basic-top-down-interior)               |
 | Retro RPG Buildings Tileset | The Pixel Nook   | [Retro RPG Buildings](https://the-pixel-nook.itch.io/rpg-building-pack)                           |
+| Game BG Music               | xdeviruchi       | [xdeviruchi Sound Cloud](https://soundcloud.com/xdeviruchi)                                       |
+| Sound Effects               | leohpaz          | [RPG Essentials SFX Free](https://leohpaz.itch.io/rpg-essentials-sfx-free)                        |
 
 ## Issues
 
