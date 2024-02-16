@@ -670,9 +670,7 @@ export class BattleMenu {
 
     if (data.itemUsed) {
       this.#usedItem = true;
-      this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`], () => {
-        // update battle monster data
-      });
+      this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
     }
   }
 }
