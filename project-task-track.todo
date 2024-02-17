@@ -101,7 +101,7 @@ Inventory:
   ✔ update ui screen to allow player to use items @done(24-02-16 08:55)
 
 Battle Scene Part 2:
-  ☐ using items
+  ✔ using items @done(24-02-17 07:57)
   ☐ running away
   ☐ enemy random attack
   ☐ player faint

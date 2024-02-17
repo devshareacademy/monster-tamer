@@ -139,4 +139,19 @@ export class PlayerBattleMonster extends BattleMonster {
       },
     });
   }
+
+  /**
+   * @param {number} updatedHp
+   * @returns {void}
+   */
+  updateMonsterHealth(updatedHp) {
+    this._currentHealth = updatedHp;
+    if (this._currentHealth > this._maxHealth) {
+      this._currentHealth = this._maxHealth;
+    }
+    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, {
+      skipBattleAnimations: true,
+    });
+    this.#setHealthBarText();
+  }
 }
