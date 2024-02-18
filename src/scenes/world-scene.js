@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
@@ -12,6 +12,7 @@ import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { playBackgroundMusic } from '../utils/audio-utils.js';
 /**
  * @typedef WorldSceneData
  * @type {object}
@@ -210,6 +211,9 @@ export class WorldScene extends BaseScene {
       }
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
+
+    // add audio
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
   }
 
   /**
