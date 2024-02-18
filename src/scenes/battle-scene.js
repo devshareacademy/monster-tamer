@@ -111,6 +111,7 @@ export class BattleScene extends BaseScene {
    */
   update() {
     super.update();
+
     this.#battleStateMachine.update();
 
     if (this._controls.isInputLocked) {
@@ -182,6 +183,11 @@ export class BattleScene extends BaseScene {
    * @returns {void}
    */
   #playerAttack(callback) {
+    if (this.#activePlayerMonster.isFainted) {
+      callback();
+      return;
+    }
+
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
@@ -210,7 +216,7 @@ export class BattleScene extends BaseScene {
    */
   #enemyAttack(callback) {
     if (this.#activeEnemyMonster.isFainted) {
-      this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+      callback();
       return;
     }
 
@@ -238,6 +244,9 @@ export class BattleScene extends BaseScene {
     );
   }
 
+  /**
+   * @returns {void}
+   */
   #postBattleSequenceCheck() {
     if (this.#activeEnemyMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
@@ -268,6 +277,9 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
   }
 
+  /**
+   * @returns {void}
+   */
   #transitionToNextScene() {
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
@@ -275,6 +287,9 @@ export class BattleScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #createBattleStateMachine() {
     /**
      * General state flow for battle scene
@@ -368,6 +383,7 @@ export class BattleScene extends BaseScene {
 
         // if item was used, only have enemy attack
         if (this.#battleMenu.wasItemUsed) {
+          // TODO: enhance once we support multiple monsters
           this.#activePlayerMonster.updateMonsterHealth(
             /** @type {import('../types/typedef.js').Monster[]} */ (
               dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
@@ -390,6 +406,7 @@ export class BattleScene extends BaseScene {
           });
           return;
         }
+
         const randomNumber = Phaser.Math.Between(0, 1);
         if (randomNumber === 0) {
           this.#playerAttack(() => {
