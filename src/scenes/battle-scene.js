@@ -53,6 +53,8 @@ export class BattleScene extends BaseScene {
   #sceneData;
   /** @type {number} */
   #activePlayerMonsterPartyIndex;
+  /** @type {boolean} */
+  #playerKnockedOut;
 
   constructor() {
     super({
@@ -86,6 +88,7 @@ export class BattleScene extends BaseScene {
       return;
     }
     this.#skipAnimations = true;
+    this.#playerKnockedOut = false;
   }
 
   /**
@@ -281,8 +284,10 @@ export class BattleScene extends BaseScene {
       // play monster fainted animation and wait for animation to finish
       this.#activePlayerMonster.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          // TODO: this will need to be updated once we support multiple monsters
           [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
           () => {
+            this.#playerKnockedOut = true;
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
           }
         );
@@ -297,9 +302,13 @@ export class BattleScene extends BaseScene {
    * @returns {void}
    */
   #transitionToNextScene() {
+    /** @type {import('./world-scene.js').WorldSceneData} */
+    const sceneDataToPass = {
+      isPlayedKnockedOut: this.#playerKnockedOut,
+    };
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start(SCENE_KEYS.WORLD_SCENE);
+      this.scene.start(SCENE_KEYS.WORLD_SCENE, sceneDataToPass);
     });
   }
 

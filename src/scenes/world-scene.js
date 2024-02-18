@@ -12,6 +12,11 @@ import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
+/**
+ * @typedef WorldSceneData
+ * @type {object}
+ * @property {boolean} [isPlayedKnockedOut]
+ */
 
 /**
  * @typedef TiledObjectProperty
@@ -59,6 +64,8 @@ export class WorldScene extends BaseScene {
   #npcPlayerIsInteractingWith;
   /** @type {Menu} */
   #menu;
+  /** @type {WorldSceneData} */
+  #sceneData;
 
   constructor() {
     super({
@@ -67,12 +74,39 @@ export class WorldScene extends BaseScene {
   }
 
   /**
+   * @param {WorldSceneData} data
    * @returns {void}
    */
-  init() {
-    super.init();
+  init(data) {
+    super.init(data);
 
     this.#wildMonsterEncountered = false;
+    this.#sceneData = data;
+
+    if (!this.#sceneData) {
+      this.#sceneData = {
+        isPlayedKnockedOut: false,
+      };
+    }
+
+    // update player location, and map data if the player was knocked out in a battle
+    if (this.#sceneData.isPlayedKnockedOut) {
+      /**
+       * TODO: see below
+       * this will need to be updated to use respawn locations once we support multiple
+       * areas in the game. For the time being, we will respawn the player back outside
+       * their house in the initial starting location.
+       *
+       * We will also need to re-heal the players party.
+       */
+
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: 6 * TILE_SIZE,
+        y: 21 * TILE_SIZE,
+      });
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.DOWN);
+    }
+
     this.#npcPlayerIsInteractingWith = undefined;
   }
 
@@ -163,7 +197,18 @@ export class WorldScene extends BaseScene {
     // create menu
     this.#menu = new Menu(this);
 
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
+    this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
+      if (progress === 1) {
+        // if the player was knocked out, we want to lock input, heal player, and then have npc show message
+        if (this.#sceneData.isPlayedKnockedOut) {
+          this.#healPlayerParty();
+          this.#dialogUi.showDialogModal([
+            'It looks like your team put up quite a fight...',
+            'I went ahead and healed them up for you.',
+          ]);
+        }
+      }
+    });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
   }
 
@@ -172,7 +217,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   update(time) {
-    super.update();
+    super.update(time);
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
       return;
@@ -423,5 +468,18 @@ export class WorldScene extends BaseScene {
   #handlePlayerDirectionUpdate() {
     // update player direction on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
+  }
+
+  /**
+   * @returns {void}
+   */
+  #healPlayerParty() {
+    // heal all monsters in party
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    monsters.forEach((monster) => {
+      monster.currentHp = monster.maxHp;
+    });
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
   }
 }
