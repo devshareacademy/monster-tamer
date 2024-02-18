@@ -3,7 +3,6 @@ import { DIRECTION } from '../common/direction.js';
 import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
-import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DataUtils } from './data-utils.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
@@ -53,27 +52,14 @@ const initialState = {
   },
   gameStarted: false,
   monsters: {
-    inParty: [
-      {
-        id: 1,
-        monsterId: 1,
-        name: MONSTER_ASSET_KEYS.IGUANIGNITE,
-        assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
-        assetFrame: 0,
-        currentHp: 25,
-        maxHp: 25,
-        attackIds: [2],
-        baseAttack: 15,
-        currentLevel: 5,
-      },
-    ],
+    inParty: [],
   },
   inventory: [
     {
       item: {
         id: 1,
       },
-      quantity: 1,
+      quantity: 10,
     },
   ],
 };
@@ -106,6 +92,15 @@ class DataManager extends Phaser.Events.EventEmitter {
   /** @type {Phaser.Data.DataManager} */
   get store() {
     return this.#store;
+  }
+
+  /**
+   * @param {Phaser.Scene} scene
+   * @returns {void}
+   */
+  init(scene) {
+    const startingMonster = DataUtils.getMonsterById(scene, 1);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, [startingMonster]);
   }
 
   /**
@@ -152,7 +147,11 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
-  startNewGame() {
+  /**
+   * @param {Phaser.Scene} scene
+   * @returns {void}
+   */
+  startNewGame(scene) {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
@@ -165,6 +164,7 @@ class DataManager extends Phaser.Events.EventEmitter {
 
     this.#store.reset();
     this.#updateDataManger(existingData);
+    this.init(scene);
     this.saveData();
   }
 

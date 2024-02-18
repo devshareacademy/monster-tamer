@@ -50,4 +50,15 @@ export class DataUtils {
       return itemIds.some((id) => id === item.id);
     });
   }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} monsterId
+   * @returns {import('../types/typedef.js').Monster}
+   */
+  static getMonsterById(scene, monsterId) {
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
+    return data.find((monster) => monster.id === monsterId);
+  }
 }
