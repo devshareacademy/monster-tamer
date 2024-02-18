@@ -85,6 +85,7 @@ export class BattleMenu {
     this.#selectedAttackIndex = undefined;
     this.#skipAnimations = skipBattleAnimations;
     this.#queuedMessageAnimationPlaying = false;
+    this.#usedItem = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -656,7 +657,7 @@ export class BattleMenu {
 
   /**
    * @param {Phaser.Scenes.Systems} sys
-   * @param {import('../../../scenes/inventory-scene.js').InventorySceneResumeData} data
+   * @param {import('../../../scenes/inventory-scene.js').InventorySceneItemUsedData} data
    * @returns {void}
    */
   #handleSceneResume(sys, data) {
@@ -669,9 +670,7 @@ export class BattleMenu {
       return;
     }
 
-    if (data.itemUsed) {
-      this.#usedItem = true;
-      this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
-    }
+    this.#usedItem = true;
+    this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
   }
 }
