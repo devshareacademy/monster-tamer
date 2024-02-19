@@ -18,7 +18,7 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { BaseScene } from './base-scene.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
@@ -151,6 +151,15 @@ export class PreloadScene extends BaseScene {
       `${monsterTamerAssetPath}/map/buildings/building_1_level_background.png`
     );
     this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_1_LEVEL, `assets/data/building_1.json`);
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_2_FOREGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_2_level_foreground.png`
+    );
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_2_BACKGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_2_level_background.png`
+    );
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_2_LEVEL, `assets/data/building_2.json`);
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
