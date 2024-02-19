@@ -26,6 +26,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
  * @property {() => void} [spriteChangedDirectionCallback]
+ * @property {{position: import('../../types/typedef.js').Coordinate}[]} [objectsToCheckForCollisionsWith]
  */
 
 /**
@@ -64,6 +65,8 @@ export class Character {
   _collisionLayer;
   /** @protected @type {() => void | undefined} */
   _spriteChangedDirectionCallback;
+  /** @protected @type {{position: import('../../types/typedef.js').Coordinate}[]} */
+  _objectsToCheckForCollisionsWith;
 
   /**
    * @param {CharacterConfig} config
@@ -87,6 +90,7 @@ export class Character {
       .setOrigin(this._origin.x, this._origin.y);
     this._spriteGridMovementFinishedCallback = config.spriteGridMovementFinishedCallback;
     this._spriteChangedDirectionCallback = config.spriteChangedDirectionCallback;
+    this._objectsToCheckForCollisionsWith = config.objectsToCheckForCollisionsWith || [];
   }
 
   /** @type {Phaser.GameObjects.Sprite} */
@@ -198,7 +202,8 @@ export class Character {
 
     return (
       this.#doesPositionCollideWithCollisionLayer(updatedPosition) ||
-      this.#doesPositionCollideWithOtherCharacter(updatedPosition)
+      this.#doesPositionCollideWithOtherCharacter(updatedPosition) ||
+      this.#doesPositionCollideWithObject(updatedPosition)
     );
   }
 
@@ -272,5 +277,20 @@ export class Character {
       );
     });
     return collidesWithACharacter;
+  }
+
+  /**
+   * @param {import('../../types/typedef.js').Coordinate} position
+   * @returns {boolean}
+   */
+  #doesPositionCollideWithObject(position) {
+    const { x, y } = position;
+    if (this._objectsToCheckForCollisionsWith.length === 0) {
+      return false;
+    }
+    const collidesWithObject = this._objectsToCheckForCollisionsWith.some((object) => {
+      return object.position.x === x && object.position.y === y;
+    });
+    return collidesWithObject;
   }
 }

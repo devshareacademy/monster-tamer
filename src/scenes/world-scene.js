@@ -16,8 +16,8 @@ import { DataUtils } from '../utils/data-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { SOUND_OPTIONS } from '../common/options.js';
 import { playBackgroundMusic, playSoundFX } from '../utils/audio-utils.js';
+import { Item } from '../world/item.js';
 
 /**
  * @typedef WorldSceneData
@@ -58,6 +58,11 @@ const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
   ID: 'id',
 });
 
+const TILED_ITEM_PROPERTY = Object.freeze({
+  ITEM_ID: 'item_id',
+  ID: 'id',
+});
+
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
   each grid size will be 64 x 64 pixels
@@ -90,6 +95,8 @@ export class WorldScene extends BaseScene {
   #lastNpcEventHandledIndex;
   /** @type {boolean} */
   #isProcessingNpcEvent;
+  /** @type {Item[]} */
+  #items;
 
   constructor() {
     super({
@@ -156,6 +163,7 @@ export class WorldScene extends BaseScene {
     this.#npcPlayerIsInteractingWith = undefined;
     this.#lastNpcEventHandledIndex = -1;
     this.#isProcessingNpcEvent = false;
+    this.#items = [];
   }
 
   /**
@@ -229,6 +237,9 @@ export class WorldScene extends BaseScene {
     this.#backgroundRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
+    // create items and collisions
+    this.#createItems(map);
+
     // create npcs
     this.#createNPCs(map);
 
@@ -249,6 +260,7 @@ export class WorldScene extends BaseScene {
       enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
         this.#handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
       },
+      objectsToCheckForCollisionsWith: this.#items,
     });
     this.cameras.main.startFollow(this.#player.sprite);
 
@@ -265,9 +277,6 @@ export class WorldScene extends BaseScene {
     this.#dialogUi = new DialogUi(this, 1280);
     // create menu
     this.#menu = new Menu(this);
-
-    // create items and collisions
-    this.#createItems(map);
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
@@ -432,6 +441,25 @@ export class WorldScene extends BaseScene {
       this.#npcPlayerIsInteractingWith = nearbyNpc;
       this.#handleNpcInteraction();
       return;
+    }
+
+    // check for a nearby item and display message about player finding the item
+    let nearbyItemIndex;
+    const nearbyItem = this.#items.find((item, index) => {
+      if (item.position.x === targetPosition.x && item.position.y === targetPosition.y) {
+        nearbyItemIndex = index;
+        return true;
+      }
+      return false;
+    });
+    if (nearbyItem) {
+      // add item to inventory and display message to player
+      const item = DataUtils.getItem(this, nearbyItem.itemId);
+      dataManager.addItem(item, 1);
+      nearbyItem.gameObject.destroy();
+      this.#items.splice(nearbyItemIndex, 1);
+      dataManager.addItemPickedUp(nearbyItem.id);
+      this.#dialogUi.showDialogModal([`You found a ${item.name}`]);
     }
   }
 
@@ -685,7 +713,42 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #createItems(map) {
-    const reviveLocation = map.getObjectLayerNames();
-    console.log(reviveLocation);
+    const itemObjectLayer = map.getObjectLayer('Item');
+    if (!itemObjectLayer) {
+      return;
+    }
+    const items = itemObjectLayer.objects;
+    const validItems = items.filter((item) => {
+      return item.x !== undefined && item.y !== undefined;
+    });
+    /** @type {number[]} */
+    const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP);
+
+    for (const tiledItem of validItems) {
+      /** @type {number} */
+      const itemId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+        (property) => property.name === TILED_ITEM_PROPERTY.ITEM_ID
+      )?.value;
+      /** @type {number} */
+      const id = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+        (property) => property.name === TILED_ITEM_PROPERTY.ID
+      )?.value;
+
+      if (itemsPickedUp.includes(id)) {
+        continue;
+      }
+
+      // create object
+      const item = new Item({
+        scene: this,
+        position: {
+          x: tiledItem.x,
+          y: tiledItem.y - TILE_SIZE,
+        },
+        itemId,
+        id,
+      });
+      this.#items.push(item);
+    }
   }
 }

@@ -160,6 +160,14 @@ export class PreloadScene extends BaseScene {
       `${monsterTamerAssetPath}/map/buildings/building_2_level_background.png`
     );
     this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_2_LEVEL, `assets/data/building_2.json`);
+    this.load.spritesheet(
+      WORLD_ASSET_KEYS.BEACH,
+      `${axulArtAssetPath}/beach/AxulArtīs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png`,
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
+    );
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
@@ -219,7 +227,7 @@ export class PreloadScene extends BaseScene {
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);
 
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
   /**

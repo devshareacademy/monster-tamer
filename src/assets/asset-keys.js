@@ -58,6 +58,7 @@ export const ATTACK_ASSET_KEYS = Object.freeze({
 });
 
 export const WORLD_ASSET_KEYS = Object.freeze({
+  BEACH: 'BEACH',
   MAIN_1_BACKGROUND: 'MAIN_1_BACKGROUND',
   MAIN_1_FOREGROUND: 'MAIN_1_FOREGROUND',
   MAIN_1_LEVEL: 'MAIN_1_LEVEL',
