@@ -266,6 +266,9 @@ export class WorldScene extends BaseScene {
     // create menu
     this.#menu = new Menu(this);
 
+    // create items and collisions
+    this.#createItems(map);
+
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
         this.#backgroundRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
@@ -675,5 +678,14 @@ export class WorldScene extends BaseScene {
       monster.currentHp = monster.maxHp;
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
+  }
+
+  /**
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createItems(map) {
+    const reviveLocation = map.getObjectLayerNames();
+    console.log(reviveLocation);
   }
 }
