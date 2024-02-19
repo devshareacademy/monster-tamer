@@ -4,6 +4,7 @@ import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
 import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
+import { DataUtils } from './data-utils.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
@@ -39,6 +40,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {boolean} gameStarted
  * @property {import('../types/typedef.js').Inventory} inventory
  * @property {MonsterData} monsters
+ * @property {import('../types/typedef.js').Inventory} inventory
  */
 
 /** @type {GlobalState} */
@@ -80,6 +82,14 @@ const initialState = {
       },
     ],
   },
+  inventory: [
+    {
+      item: {
+        id: 1,
+      },
+      quantity: 1,
+    },
+  ],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -95,6 +105,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   GAME_STARTED: 'GAME_STARTED',
   INVENTORY: 'INVENTORY',
   MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
+  INVENTORY: 'INVENTORY',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -171,6 +182,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.monsters = {
       inParty: [...initialState.monsters.inParty],
     };
+    existingData.inventory = initialState.inventory;
 
     this.#store.reset();
     this.#updateDataManger(existingData);
@@ -200,6 +212,42 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {Phaser.Scene} scene
+   * @returns {import('../types/typedef.js').InventoryItem[]}
+   */
+  getInventory(scene) {
+    /** @type {import('../types/typedef.js').InventoryItem[]} */
+    const items = [];
+    /** @type {import('../types/typedef.js').Inventory} */
+    const inventory = this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
+    inventory.forEach((baseItem) => {
+      const item = DataUtils.getItem(scene, baseItem.item.id);
+      items.push({
+        item: item,
+        quantity: baseItem.quantity,
+      });
+    });
+    return items;
+  }
+
+  /**
+   * @param {import('../types/typedef.js').InventoryItem[]} items
+   * @returns {void}
+   */
+  updateInventory(items) {
+    /** @type {import('../types/typedef.js').BaseInventoryItem[]} */
+    const inventory = items.map((item) => {
+      return {
+        item: {
+          id: item.item.id,
+        },
+        quantity: item.quantity,
+      };
+    });
+    this.#store.set(DATA_MANAGER_STORE_KEYS.INVENTORY, inventory);
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -217,6 +265,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
       [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
+      [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
     });
   }
 
@@ -246,6 +295,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       monsters: {
         inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
       },
+      inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
     };
   }
 }

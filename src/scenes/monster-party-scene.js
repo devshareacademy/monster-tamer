@@ -79,6 +79,7 @@ export class MonsterPartyScene extends BaseScene {
     this.#healthBarTextGameObjects = [];
     this.#selectedPartyMonsterIndex = 0;
     this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    this.#waitingForInput = false;
   }
 
   /**
@@ -198,6 +199,17 @@ export class MonsterPartyScene extends BaseScene {
   }
 
   /**
+   * @returns {void}
+   */
+  #updateInfoContainerText() {
+    if (this.#selectedPartyMonsterIndex === -1) {
+      this.#infoTextGameObject.setText('Go back to previous menu');
+      return;
+    }
+    this.#infoTextGameObject.setText('Choose a monster');
+  }
+
+  /**
    * @param {number} x
    * @param {number} y
    * @param {import('../types/typedef.js').Monster} monsterDetails
@@ -274,6 +286,30 @@ export class MonsterPartyScene extends BaseScene {
   }
 
   /**
+   * @param {boolean} itemUsed
+   * @returns {void}
+   */
+  #goBackToPreviousScene(itemUsed) {
+    this._controls.lockInput = true;
+    this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
+
+    // TODO: see if we can replace the following code with just
+    //   this.scene.resume(this.#sceneData.previousSceneName, { itemUsed });
+    // since we will just not use the data in the world scene
+
+    if (this.#sceneData.previousSceneName === SCENE_KEYS.WORLD_SCENE) {
+      this.scene.resume(SCENE_KEYS.WORLD_SCENE);
+      return;
+    }
+
+    /** @type {import('./inventory-scene.js').InventorySceneResumeData} */
+    const sceneDataToPass = {
+      itemUsed,
+    };
+    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
+  }
+
+  /**
    * @param {import('../common/direction.js').Direction} direction
    * @returns {void}
    */
@@ -315,43 +351,13 @@ export class MonsterPartyScene extends BaseScene {
       default:
         exhaustiveGuard(direction);
     }
-    this.#monsterPartyBackgrounds.forEach((monster, index) => {
+
+    this.#monsterPartyBackgrounds.forEach((background, index) => {
       if (index === this.#selectedPartyMonsterIndex) {
         return;
       }
-      monster.setAlpha(0.7);
+      background.setAlpha(0.7);
     });
-  }
-
-  /**
-   * @returns {void}
-   */
-  #updateInfoContainerText() {
-    if (this.#selectedPartyMonsterIndex === -1) {
-      this.#infoTextGameObject.setText('Go back to previous menu');
-      return;
-    }
-    this.#infoTextGameObject.setText('Choose a monster');
-  }
-
-  /**
-   * @param {boolean} itemUsed
-   * @returns {void}
-   */
-  #goBackToPreviousScene(itemUsed) {
-    this._controls.lockInput = true;
-    this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
-
-    if (this.#sceneData.previousSceneName === SCENE_KEYS.WORLD_SCENE) {
-      this.scene.resume(SCENE_KEYS.WORLD_SCENE);
-      return;
-    }
-
-    /** @type {import('./inventory-scene.js').InventorySceneResumeData} */
-    const sceneDataToPass = {
-      itemUsed,
-    };
-    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
   }
 
   /**
@@ -414,13 +420,5 @@ export class MonsterPartyScene extends BaseScene {
         },
       }
     );
-  }
-
-  /**
-   * @returns {void}
-   */
-  #handleSceneResume() {
-    console.log(`[${MonsterPartyScene.name}:handleSceneResume] scene has been resumed`);
-    this._controls.lockInput = false;
   }
 }

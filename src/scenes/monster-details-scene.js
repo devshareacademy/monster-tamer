@@ -99,6 +99,8 @@ export class MonsterDetailsScene extends BaseScene {
     if (this.#monsterAttacks[3] !== undefined) {
       this.add.text(560, 322, this.#monsterAttacks[3].name, MONSTER_MOVE_TEXT_STYLE);
     }
+
+    this.scene.bringToTop(SCENE_KEYS.MONSTER_DETAILS_SCENE);
   }
 
   /**

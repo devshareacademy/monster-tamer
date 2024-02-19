@@ -589,10 +589,6 @@ export class BattleMenu {
       };
       this.#scene.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
       this.#scene.scene.pause(SCENE_KEYS.BATTLE_SCENE);
-
-      // this.updateInfoPaneMessagesAndWaitForInput(['Your bag is empty...'], () => {
-      //   this.#switchToMainBattleMenu();
-      // });
       return;
     }
 
@@ -660,7 +656,7 @@ export class BattleMenu {
 
   /**
    * @param {Phaser.Scenes.Systems} sys
-   * @param {import('../../../scenes/inventory-scene.js').InventorySceneResumeData} data
+   * @param {import('../../../scenes/inventory-scene.js').InventorySceneItemUsedData} data
    * @returns {void}
    */
   #handleSceneResume(sys, data) {
@@ -673,9 +669,7 @@ export class BattleMenu {
       return;
     }
 
-    if (data.itemUsed) {
-      this.#usedItem = true;
-      this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
-    }
+    this.#usedItem = true;
+    this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
   }
 }

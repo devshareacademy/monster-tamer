@@ -115,6 +115,7 @@ export class PreloadScene extends BaseScene {
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
     this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
     this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
+    this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
     this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
     this.load.json(DATA_ASSET_KEYS.NPCS, 'assets/data/npcs.json');
 

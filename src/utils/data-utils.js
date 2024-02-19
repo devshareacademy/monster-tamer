@@ -15,6 +15,76 @@ export class DataUtils {
   }
 
   /**
+   * Utility function for retrieving an Item object from the items.json data file.
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} itemId the id of the item to retrieve from the items.json file
+   * @returns {import('../types/typedef.js').Item | undefined}
+   */
+  static getItem(scene, itemId) {
+    /** @type {import('../types/typedef.js').Item[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.ITEMS);
+    return data.find((item) => item.id === itemId);
+  }
+
+  /**
+   * Utility function for retrieving an array Item objects from the items.json data file.
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number[]} itemIds the array of the item ids to retrieve from the items.json file
+   * @returns {import('../types/typedef.js').Item[] | undefined}
+   */
+  static getItems(scene, itemIds) {
+    /** @type {import('../types/typedef.js').Item[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.ITEMS);
+    return data.filter((item) => {
+      return itemIds.some((id) => id === item.id);
+    });
+  }
+
+  /**
+   * Utility function for retrieving the Animation objects from the animations.json data file.
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @returns {import('../types/typedef.js').Animation[]}
+   */
+  static getAnimations(scene) {
+    /** @type {import('../types/typedef.js').Animation[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.ANIMATIONS);
+    return data;
+  }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} monsterId
+   * @returns {import('../types/typedef.js').Monster}
+   */
+  static getMonsterById(scene, monsterId) {
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
+    return data.find((monster) => monster.id === monsterId);
+  }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} area
+   * @returns {number[][]}
+   */
+  static getEncounterAreaDetails(scene, area) {
+    /** @type {import('../types/typedef.js').EncounterData} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.ENCOUNTERS);
+    return data[area];
+  }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} npcId
+   * @returns {import('../types/typedef.js').NpcDetails}
+   */
+  static getNpcData(scene, npcId) {
+    /** @type {import('../types/typedef.js').NpcDetails} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.NPCS);
+    return data[npcId];
+  }
+
+  /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
    * @returns {import('../types/typedef.js').Monster}
    */
@@ -32,79 +102,5 @@ export class DataUtils {
     /** @type { import('../types/typedef.js').Monster[]} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
     return data.find((monster) => monster.id === 2);
-  }
-
-  /**
-   * Utility function for retrieving the Animation objects from the animations.json data file.
-   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @returns {import('../types/typedef.js').Animation[]}
-   */
-  static getAnimations(scene) {
-    /** @type {import('../types/typedef.js').Animation[]} */
-    const data = scene.cache.json.get(DATA_ASSET_KEYS.ANIMATIONS);
-    return data;
-  }
-
-  // /**
-  //  * Utility function for retrieving the Animation objects from the animations.json data file.
-  //  * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-  //  * @param {import('../types/typedef.js').BaseMonster[]} baseMonsters the base monsters that need to be populated with data
-  //  * @returns {import('../types/typedef.js').Monster[]}
-  //  */
-  // static createMonstersFromBaseMonsters(scene, baseMonsters) {
-  //   /** @type { import('../types/typedef.js').Monster[]} */
-  //   const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
-
-  //   /** @type {import('../types/typedef.js').Monster[]} */
-  //   const monsters = [];
-
-  //   baseMonsters.forEach((baseMonster) => {
-  //     const monsterData = data.find((monster) => monster.id === baseMonster.id);
-  //     if (!monsterData) {
-  //       return;
-  //     }
-  //     monsters.push({
-  //       ...baseMonster,
-  //       name: monsterData.name,
-  //       assetKey: monsterData.assetKey,
-  //       assetFrame: monsterData.assetFrame,
-  //       attackIds: [...monsterData.attackIds],
-  //     });
-  //   });
-
-  //   return monsters;
-  // }
-
-  /**
-   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {number} area
-   * @returns {number[][]}
-   */
-  static getEncounterAreaDetails(scene, area) {
-    /** @type {import('../types/typedef.js').EncounterData} */
-    const data = scene.cache.json.get(DATA_ASSET_KEYS.ENCOUNTERS);
-    return data[area];
-  }
-
-  /**
-   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {number} monsterId
-   * @returns {import('../types/typedef.js').Monster}
-   */
-  static getMonsterById(scene, monsterId) {
-    /** @type {import('../types/typedef.js').Monster[]} */
-    const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
-    return data.find((monster) => monster.id === monsterId);
-  }
-
-  /**
-   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {number} npcId
-   * @returns {import('../types/typedef.js').NpcDetails}
-   */
-  static getNpcData(scene, npcId) {
-    /** @type {import('../types/typedef.js').NpcDetails} */
-    const data = scene.cache.json.get(DATA_ASSET_KEYS.NPCS);
-    return data[npcId];
   }
 }
