@@ -563,6 +563,63 @@
         }, 
         {
          "draworder":"topdown",
+         "id":25,
+         "name":"Item",
+         "objects":[
+                {
+                 "gid":230,
+                 "height":64,
+                 "id":26,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"id",
+                         "type":"int",
+                         "value":2
+                        }, 
+                        {
+                         "name":"item_id",
+                         "type":"int",
+                         "value":1
+                        }],
+                 "rotation":0,
+                 "type":"item",
+                 "visible":true,
+                 "width":64,
+                 "x":64,
+                 "y":640
+                }, 
+                {
+                 "gid":230,
+                 "height":64,
+                 "id":27,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"id",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
+                         "name":"item_id",
+                         "type":"int",
+                         "value":1
+                        }],
+                 "rotation":0,
+                 "type":"item",
+                 "visible":true,
+                 "width":64,
+                 "x":960,
+                 "y":1728
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":23,
          "locked":true,
          "name":"Scene-Transitions",
@@ -754,6 +811,7 @@
                 {
                  "draworder":"topdown",
                  "id":18,
+                 "locked":true,
                  "name":"NPC1",
                  "objects":[
                         {
@@ -873,6 +931,7 @@
                 {
                  "draworder":"topdown",
                  "id":20,
+                 "locked":true,
                  "name":"NPC2",
                  "objects":[
                         {
@@ -905,6 +964,7 @@
                  "x":0,
                  "y":0
                 }],
+         "locked":true,
          "name":"NPC",
          "opacity":1,
          "type":"group",
@@ -912,8 +972,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":25,
- "nextobjectid":22,
+ "nextlayerid":26,
+ "nextobjectid":28,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -1042,6 +1102,19 @@
          "tileheight":64,
          "tilewidth":64,
          "transparentcolor":"#ff00ff"
+        }, 
+        {
+         "columns":12,
+         "firstgid":208,
+         "image":"monster_tamer_tiled_project\/AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png",
+         "imageheight":640,
+         "imagewidth":768,
+         "margin":0,
+         "name":"AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed",
+         "spacing":0,
+         "tilecount":120,
+         "tileheight":64,
+         "tilewidth":64
         }],
  "tilewidth":64,
  "type":"map",
