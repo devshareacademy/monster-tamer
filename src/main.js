@@ -9,6 +9,7 @@ import { TestScene } from './scenes/test-scene.js';
 import { MonsterPartyScene } from './scenes/monster-party-scene.js';
 import { MonsterDetailsScene } from './scenes/monster-details-scene.js';
 import { InventoryScene } from './scenes/inventory-scene.js';
+import { IntroScene } from './scenes/intro-scene.js';
 
 const game = new Phaser.Game({
   type: Phaser.CANVAS,
@@ -32,4 +33,5 @@ game.scene.add(SCENE_KEYS.TEST_SCENE, TestScene);
 game.scene.add(SCENE_KEYS.MONSTER_PARTY_SCENE, MonsterPartyScene);
 game.scene.add(SCENE_KEYS.MONSTER_DETAILS_SCENE, MonsterDetailsScene);
 game.scene.add(SCENE_KEYS.INVENTORY_SCENE, InventoryScene);
+game.scene.add(SCENE_KEYS.INTRO_SCENE, IntroScene);
 game.scene.start(SCENE_KEYS.PRELOAD_SCENE);

@@ -6,6 +6,7 @@ import {
   EXTERNAL_LINKS_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
+  INTRO_ASSET_KEYS,
   INVENTORY_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
   MONSTER_PARTY_ASSET_KEYS,
@@ -223,6 +224,10 @@ export class PreloadScene extends BaseScene {
     this.load.audio(AUDIO_ASSET_KEYS.GRASS, '03_Step_grass_03.wav');
     this.load.audio(AUDIO_ASSET_KEYS.ICE, '13_Ice_explosion_01.wav');
     this.load.audio(AUDIO_ASSET_KEYS.FLEE, '51_Flee_02.wav');
+
+    // load intro assets
+    this.load.setPath('/');
+    this.load.image(INTRO_ASSET_KEYS.LOGO, `${monsterTamerAssetPath}/intro/logo.png`);
   }
 
   /**
@@ -240,7 +245,7 @@ export class PreloadScene extends BaseScene {
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);
 
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.INTRO_SCENE);
   }
 
   /**

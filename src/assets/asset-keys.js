@@ -111,3 +111,7 @@ export const AUDIO_ASSET_KEYS = Object.freeze({
   CLAW: 'CLAW',
   ICE: 'ICE',
 });
+
+export const INTRO_ASSET_KEYS = Object.freeze({
+  LOGO: 'LOGO',
+});
