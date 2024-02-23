@@ -40,6 +40,8 @@ export class BattleScene extends BaseScene {
   #attackManager;
   /** @type {boolean} */
   #skipAnimations;
+  /** @type {number} */
+  #activeEnemyAttackIndex;
 
   constructor() {
     super({
@@ -54,6 +56,7 @@ export class BattleScene extends BaseScene {
     super.init();
 
     this.#activePlayerAttackIndex = -1;
+    this.#activeEnemyAttackIndex = -1;
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
     if (chosenBattleSceneOption === undefined || chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
@@ -140,6 +143,12 @@ export class BattleScene extends BaseScene {
         return;
       }
 
+      // check if the player attempted to flee
+      if (this.#battleMenu.isAttemptingToFlee) {
+        this.#battleStateMachine.setState(BATTLE_STATES.FLEE_ATTEMPT);
+        return;
+      }
+
       // check if the player selected an attack, and start battle sequence for the fight
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
@@ -169,7 +178,16 @@ export class BattleScene extends BaseScene {
     }
   }
 
-  #playerAttack() {
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  #playerAttack(callback) {
+    if (this.#activePlayerMonster.isFainted) {
+      callback();
+      return;
+    }
+
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
@@ -182,7 +200,7 @@ export class BattleScene extends BaseScene {
             () => {
               this.#activeEnemyMonster.playTakeDamageAnimation(() => {
                 this.#activeEnemyMonster.takeDamage(this.#activePlayerMonster.baseAttack, () => {
-                  this.#enemyAttack();
+                  callback();
                 });
               });
             }
@@ -192,25 +210,31 @@ export class BattleScene extends BaseScene {
     );
   }
 
-  #enemyAttack() {
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  #enemyAttack(callback) {
     if (this.#activeEnemyMonster.isFainted) {
-      this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+      callback();
       return;
     }
 
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
-      `foe ${this.#activeEnemyMonster.name} used ${this.#activeEnemyMonster.attacks[0].name}`,
+      `foe ${this.#activeEnemyMonster.name} used ${
+        this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].name
+      }`,
       () => {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
           this.#attackManager.playAttackAnimation(
-            this.#activeEnemyMonster.attacks[0].animationName,
+            this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].animationName,
             ATTACK_TARGET.PLAYER,
             () => {
               this.#activePlayerMonster.playTakeDamageAnimation(() => {
                 this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-                  this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+                  callback();
                 });
               });
             }
@@ -332,8 +356,8 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.ENEMY_INPUT,
       onEnter: () => {
-        // TODO: add feature in a future update
         // pick a random move for the enemy monster, and in the future implement some type of AI behavior
+        this.#activeEnemyAttackIndex = this.#activeEnemyMonster.pickRandomMove();
         this.#battleStateMachine.setState(BATTLE_STATES.BATTLE);
       },
     });
@@ -356,12 +380,38 @@ export class BattleScene extends BaseScene {
             )[0].currentHp
           );
           this.time.delayedCall(500, () => {
-            this.#enemyAttack();
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
           });
           return;
         }
 
-        this.#playerAttack();
+        // if player failed to flee, only have enemy attack
+        if (this.#battleMenu.isAttemptingToFlee) {
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+          return;
+        }
+
+        const randomNumber = Phaser.Math.Between(0, 1);
+        if (randomNumber === 0) {
+          this.#playerAttack(() => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+          return;
+        }
+
+        this.#enemyAttack(() => {
+          this.#playerAttack(() => {
+            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          });
+        });
       },
     });
 
@@ -382,8 +432,20 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
-          this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+        const randomNumber = Phaser.Math.Between(1, 10);
+        if (randomNumber > 5) {
+          // player has run away successfully
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          });
+          return;
+        }
+
+        // player failed to run away, allow enemy to take their turn
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You failed to run away...'], () => {
+          this.time.delayedCall(200, () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+          });
         });
       },
     });

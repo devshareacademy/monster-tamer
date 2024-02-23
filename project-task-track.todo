@@ -102,10 +102,10 @@ Inventory:
 
 Battle Scene Part 2:
   ✔ using items @done(24-02-17 07:57)
-  ☐ running away
-  ☐ enemy random attack
+  ✔ running away @done(24-02-23 12:28)
+  ✔ enemy random attack @done(24-02-23 12:28)
   ☐ player faint
-  ☐ attacking order
+  ✔ attacking order @done(24-02-23 12:28)
   ☐ update data manager to persist monster data and current stats
   ☐ dynamic monster data based on player party and encounter
 
