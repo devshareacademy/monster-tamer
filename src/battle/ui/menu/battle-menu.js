@@ -86,6 +86,7 @@ export class BattleMenu {
     this.#skipAnimations = skipBattleAnimations;
     this.#queuedMessageAnimationPlaying = false;
     this.#usedItem = false;
+    this.#fleeAttempt = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();

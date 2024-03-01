@@ -79,8 +79,8 @@ export class BattleScene extends BaseScene {
     }
 
     this.#activePlayerAttackIndex = -1;
+    this.#activeEnemyAttackIndex = -1;
     this.#activePlayerMonsterPartyIndex = 0;
-
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
     if (chosenBattleSceneOption === undefined || chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
@@ -441,6 +441,7 @@ export class BattleScene extends BaseScene {
           });
           return;
         }
+
         this.#enemyAttack(() => {
           this.#playerAttack(() => {
             this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
