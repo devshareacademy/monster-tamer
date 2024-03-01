@@ -47,3 +47,12 @@ export function playSoundFX(scene, audioKey) {
     volume: 20 * baseVolume,
   });
 }
+
+/**
+ * @param {Phaser.Scene} scene The Phaser 3 scene to get the sound manager reference from
+ * @returns {void}
+ */
+export function setGlobalSoundSettings(scene) {
+  scene.sound.setVolume(dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME) * 0.25);
+  scene.sound.setMute(dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND) === SOUND_OPTIONS.OFF);
+}

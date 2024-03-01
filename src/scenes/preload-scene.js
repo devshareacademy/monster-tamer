@@ -21,6 +21,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { dataManager } from '../utils/data-manager.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
 import { BaseScene } from './base-scene.js';
+import { setGlobalSoundSettings } from '../utils/audio-utils.js';
 
 export class PreloadScene extends BaseScene {
   constructor() {
@@ -189,6 +190,8 @@ export class PreloadScene extends BaseScene {
     // attempt to populate data manager with saved data and initialize
     dataManager.init(this);
     dataManager.loadData();
+    // set global audio based on data manager settings
+    setGlobalSoundSettings(this);
 
     this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
