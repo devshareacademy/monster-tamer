@@ -106,8 +106,8 @@ Battle Scene Part 2:
   ✔ enemy random attack @done(24-02-23 12:28)
   ☐ player faint
   ✔ attacking order @done(24-02-23 12:28)
-  ☐ update data manager to persist monster data and current stats
-  ☐ dynamic monster data based on player party and encounter
+  ✔ update data manager to persist monster data and current stats @done(24-03-04 12:31)
+  ✔ dynamic monster data based on player party and encounter @done(24-03-04 12:31)
 
 World Scene Part 3:
   ☐ advanced wild monster encounter logic

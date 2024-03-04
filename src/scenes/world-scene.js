@@ -11,6 +11,7 @@ import { DialogUi } from '../world/dialog-ui.js';
 import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
 import { BaseScene } from './base-scene.js';
+import { DataUtils } from '../utils/data-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -341,7 +342,13 @@ export class WorldScene extends BaseScene {
       // TODO: add in a custom animation that is similar to the old games
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+        /** @type {import('./battle-scene.js').BattleSceneData} */
+        const dataToPass = {
+          enemyMonsters: [DataUtils.getMonsterById(this, 2)],
+          playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
+        };
+
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
       });
     }
   }
