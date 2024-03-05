@@ -104,7 +104,7 @@ Battle Scene Part 2:
   ✔ using items @done(24-02-17 07:57)
   ✔ running away @done(24-02-23 12:28)
   ✔ enemy random attack @done(24-02-23 12:28)
-  ☐ player faint
+  ✔ player faint @done(24-03-05 09:55)
   ✔ attacking order @done(24-02-23 12:28)
   ✔ update data manager to persist monster data and current stats @done(24-03-04 12:31)
   ✔ dynamic monster data based on player party and encounter @done(24-03-04 12:31)
