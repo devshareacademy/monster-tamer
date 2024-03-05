@@ -277,6 +277,7 @@ export class BattleScene extends BaseScene {
     if (this.#activePlayerMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
       this.#activePlayerMonster.playDeathAnimation(() => {
+        // TODO: this will need to be updated once we support multiple monsters
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
           [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
           () => {

@@ -172,7 +172,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   update(time) {
-    super.update();
+    super.update(time);
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
       return;
