@@ -110,7 +110,7 @@ Battle Scene Part 2:
   ✔ dynamic monster data based on player party and encounter @done(24-03-04 12:31)
 
 Audio:
-  ☐ adding background music
+  ✔ adding background music @done(24-03-05 10:46)
   ☐ adding battle music
   ☐ adding attack effects
   ☐ connecting audio options to settings
