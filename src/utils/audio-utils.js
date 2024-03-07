@@ -36,7 +36,7 @@ export function playBackgroundMusic(scene, audioKey) {
  * @param {string} audioKey The key of the audio asset that should be played
  * @returns {void}
  */
-export function playSoundFX(scene, audioKey) {
+export function playSoundFx(scene, audioKey) {
   if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND) !== SOUND_OPTIONS.ON) {
     return;
   }
