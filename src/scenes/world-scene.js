@@ -12,7 +12,7 @@ import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { playBackgroundMusic } from '../utils/audio-utils.js';
+import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -386,6 +386,7 @@ export class WorldScene extends BaseScene {
     }
 
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
+    playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
       console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);

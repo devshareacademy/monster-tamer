@@ -111,9 +111,9 @@ Battle Scene Part 2:
 
 Audio:
   ✔ adding background music @done(24-03-05 10:46)
-  ☐ adding battle music
-  ☐ adding attack effects
-  ☐ connecting audio options to settings
+  ✔ adding battle music @done(24-03-07 13:10)
+  ✔ adding attack effects @done(24-03-07 13:10)
+  ✔ connecting audio options to settings @done(24-03-07 13:10)
 
 World Scene Part 3:
   ☐ advanced wild monster encounter logic
