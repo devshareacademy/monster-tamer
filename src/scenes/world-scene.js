@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
@@ -12,11 +12,7 @@ import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
-/**
- * @typedef WorldSceneData
- * @type {object}
- * @property {boolean} [isPlayedKnockedOut]
- */
+import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -41,6 +37,12 @@ const TILED_NPC_PROPERTY = Object.freeze({
   MESSAGES: 'messages',
   FRAME: 'frame',
 });
+
+/**
+ * @typedef WorldSceneData
+ * @type {object}
+ * @property {boolean} [isPlayerKnockedOut]
+ */
 
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
@@ -79,18 +81,18 @@ export class WorldScene extends BaseScene {
    */
   init(data) {
     super.init(data);
-
-    this.#wildMonsterEncountered = false;
     this.#sceneData = data;
 
-    if (!this.#sceneData) {
+    if (Object.keys(data).length === 0) {
       this.#sceneData = {
-        isPlayedKnockedOut: false,
+        isPlayerKnockedOut: false,
       };
     }
 
+    this.#wildMonsterEncountered = false;
+
     // update player location, and map data if the player was knocked out in a battle
-    if (this.#sceneData.isPlayedKnockedOut) {
+    if (this.#sceneData.isPlayerKnockedOut) {
       /**
        * TODO: see below
        * this will need to be updated to use respawn locations once we support multiple
@@ -108,6 +110,24 @@ export class WorldScene extends BaseScene {
     }
 
     this.#npcPlayerIsInteractingWith = undefined;
+
+    // update player location , and map data if the player was knocked out in a battle
+    if (this.#sceneData.isPlayerKnockedOut) {
+      /**
+       * TODO: see below
+       * this will need to be updated to use respawn locations once we support multiple
+       * areas in the game. For the time being, we will respawn the player back outside
+       * their house in the initial starting location.
+       *
+       * We will also need to re-heal the players party.
+       */
+
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: 6 * TILE_SIZE,
+        y: 21 * TILE_SIZE,
+      });
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.DOWN);
+    }
   }
 
   /**
@@ -200,7 +220,7 @@ export class WorldScene extends BaseScene {
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
         // if the player was knocked out, we want to lock input, heal player, and then have npc show message
-        if (this.#sceneData.isPlayedKnockedOut) {
+        if (this.#sceneData.isPlayerKnockedOut) {
           this.#healPlayerParty();
           this.#dialogUi.showDialogModal([
             'It looks like your team put up quite a fight...',
@@ -210,6 +230,9 @@ export class WorldScene extends BaseScene {
       }
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
+
+    // add audio
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
   }
 
   /**
@@ -381,6 +404,7 @@ export class WorldScene extends BaseScene {
     }
 
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
+    playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
       console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);

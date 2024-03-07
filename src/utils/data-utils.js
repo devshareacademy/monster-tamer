@@ -52,8 +52,9 @@ export class DataUtils {
   }
 
   /**
+   * Utility function for retrieving a Monster object from the monsters.json data file.
    * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {number} monsterId
+   * @param {number} monsterId the monster id to retrieve from the monsters.json file
    * @returns {import('../types/typedef.js').Monster}
    */
   static getMonsterById(scene, monsterId) {

@@ -104,21 +104,21 @@ Battle Scene Part 2:
   ✔ using items @done(24-02-17 07:57)
   ✔ running away @done(24-02-23 12:28)
   ✔ enemy random attack @done(24-02-23 12:28)
-  ☐ player faint
+  ✔ player faint @done(24-03-05 09:55)
   ✔ attacking order @done(24-02-23 12:28)
-  ☐ update data manager to persist monster data and current stats
-  ☐ dynamic monster data based on player party and encounter
+  ✔ update data manager to persist monster data and current stats @done(24-03-04 12:31)
+  ✔ dynamic monster data based on player party and encounter @done(24-03-04 12:31)
+
+Audio:
+  ✔ adding background music @done(24-03-05 10:46)
+  ✔ adding battle music @done(24-03-07 13:10)
+  ✔ adding attack effects @done(24-03-07 13:10)
+  ✔ connecting audio options to settings @done(24-03-07 13:10)
 
 World Scene Part 3:
   ☐ advanced wild monster encounter logic
   ☐ buildings
   ☐ items in the field
-
-Audio:
-  ☐ adding background music
-  ☐ adding battle music
-  ☐ adding attack effects
-  ☐ connecting audio options to settings
 
 -------------------------------
 
