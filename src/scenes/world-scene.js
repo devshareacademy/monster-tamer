@@ -13,6 +13,7 @@ import { Menu } from '../world/menu/menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
+import { weightedRandom } from '../utils/random.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -419,15 +420,11 @@ export class WorldScene extends BaseScene {
       ).value;
       const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterArea);
       console.log(possibleMonsters);
-      const randomMonsterIndex = Phaser.Math.Between(0, possibleMonsters.length - 1);
-      const randomMonsterId = possibleMonsters[randomMonsterIndex][0];
+      const randomMonsterId = weightedRandom(possibleMonsters);
 
       console.log(
         `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterArea} and monster id has been picked randomly ${randomMonsterId}`
       );
-
-      console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);
-      // TODO: add in a custom animation that is similar to the old games
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
         /** @type {import('./battle-scene.js').BattleSceneData} */
