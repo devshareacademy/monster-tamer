@@ -42,6 +42,7 @@ export const DATA_ASSET_KEYS = Object.freeze({
   ANIMATIONS: 'ANIMATIONS',
   ITEMS: 'ITEMS',
   MONSTERS: 'MONSTERS',
+  ENCOUNTERS: 'ENCOUNTERS',
 });
 
 export const ATTACK_ASSET_KEYS = Object.freeze({

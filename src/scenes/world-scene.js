@@ -38,6 +38,10 @@ const TILED_NPC_PROPERTY = Object.freeze({
   FRAME: 'frame',
 });
 
+const TILED_ENCOUNTER_PROPERTY = Object.freeze({
+  AREA: 'area',
+});
+
 /**
  * @typedef WorldSceneData
  * @type {object}
@@ -405,15 +409,30 @@ export class WorldScene extends BaseScene {
 
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
     playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
-    this.#wildMonsterEncountered = Math.random() < 0.2;
+    this.#wildMonsterEncountered = Math.random() < 0.9;
     if (this.#wildMonsterEncountered) {
+      /** @type {number} */
+      const encounterArea = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
+        (property) => {
+          return property.name === TILED_ENCOUNTER_PROPERTY.AREA;
+        }
+      ).value;
+      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterArea);
+      console.log(possibleMonsters);
+      const randomMonsterIndex = Phaser.Math.Between(0, possibleMonsters.length - 1);
+      const randomMonsterId = possibleMonsters[randomMonsterIndex][0];
+
+      console.log(
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterArea} and monster id has been picked randomly ${randomMonsterId}`
+      );
+
       console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);
       // TODO: add in a custom animation that is similar to the old games
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
         /** @type {import('./battle-scene.js').BattleSceneData} */
         const dataToPass = {
-          enemyMonsters: [DataUtils.getMonsterById(this, 2)],
+          enemyMonsters: [DataUtils.getMonsterById(this, randomMonsterId)],
           playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
         };
 
