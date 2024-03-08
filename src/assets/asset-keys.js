@@ -12,6 +12,9 @@ export const BATTLE_BACKGROUND_ASSET_KEYS = Object.freeze({
 export const MONSTER_ASSET_KEYS = Object.freeze({
   IGUANIGNITE: 'IGUANIGNITE',
   CARNODUSK: 'CARNODUSK',
+  IGNIVOLT: 'IGNIVOLT',
+  AQUAVALOR: 'AQUAVALOR',
+  FROSTSABER: 'FROSTSABER',
 });
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
