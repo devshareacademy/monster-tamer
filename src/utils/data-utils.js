@@ -62,4 +62,15 @@ export class DataUtils {
     const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
     return data.find((monster) => monster.id === monsterId);
   }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} areaId
+   * @returns {number[]}
+   */
+  static getEncounterAreaDetails(scene, areaId) {
+    /** @type {import('../types/typedef.js').EncounterData} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.ENCOUNTERS);
+    return data[areaId];
+  }
 }
