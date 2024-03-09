@@ -92,5 +92,5 @@ export const ITEM_EFFECT = Object.freeze({
 
 /**
  * @typedef EncounterData
- * @type {Object.<string, number[]>}
+ * @type {Object.<string, number[][]>}
  */
