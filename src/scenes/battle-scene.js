@@ -12,8 +12,8 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { playBackgroundMusic, playSoundFX } from '../utils/audio-utils.js';
 import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
+import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -75,12 +75,13 @@ export class BattleScene extends BaseScene {
     // added for testing from preload scene
     if (Object.keys(data).length === 0) {
       this.#sceneData = {
-        enemyMonsters: [DataUtils.getCarnodusk(this)],
+        enemyMonsters: [DataUtils.getMonsterById(this, 2)],
         playerMonsters: [dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0]],
       };
     }
 
     this.#activePlayerAttackIndex = -1;
+    this.#activeEnemyAttackIndex = -1;
     this.#activePlayerMonsterPartyIndex = 0;
 
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
@@ -203,15 +204,20 @@ export class BattleScene extends BaseScene {
    * @returns {void}
    */
   #playerAttack(callback) {
+    if (this.#activePlayerMonster.isFainted) {
+      callback();
+      return;
+    }
+
     this.#battleMenu.updateInfoPaneMessageNoInputRequired(
       `${this.#activePlayerMonster.name} used ${this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name}`,
       () => {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
-          this.time.delayedCall(100, () =>
-            playSoundFX(this, this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].audioKey)
-          );
+          this.time.delayedCall(100, () => {
+            playSoundFx(this, this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].audioKey);
+          });
           this.#attackManager.playAttackAnimation(
             this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].animationName,
             ATTACK_TARGET.ENEMY,
@@ -246,18 +252,15 @@ export class BattleScene extends BaseScene {
         // play attack animation based on the selected attack
         // when attack is finished, play damage animation and then update health bar
         this.time.delayedCall(500, () => {
-          this.time.delayedCall(100, () =>
-            playSoundFX(this, this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].audioKey)
-          );
+          this.time.delayedCall(100, () => {
+            playSoundFx(this, this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].audioKey);
+          });
           this.#attackManager.playAttackAnimation(
             this.#activeEnemyMonster.attacks[this.#activeEnemyAttackIndex].animationName,
             ATTACK_TARGET.PLAYER,
             () => {
               this.#activePlayerMonster.playTakeDamageAnimation(() => {
                 this.#activePlayerMonster.takeDamage(this.#activeEnemyMonster.baseAttack, () => {
-                  this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp =
-                    this.#activePlayerMonster.currentHp;
-                  dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
                   callback();
                 });
               });
@@ -272,6 +275,10 @@ export class BattleScene extends BaseScene {
    * @returns {void}
    */
   #postBattleSequenceCheck() {
+    // update monster details in scene data and data manager to align with changes from battle
+    this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp = this.#activePlayerMonster.currentHp;
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+
     if (this.#activeEnemyMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
       this.#activeEnemyMonster.playDeathAnimation(() => {
@@ -288,6 +295,7 @@ export class BattleScene extends BaseScene {
     if (this.#activePlayerMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
       this.#activePlayerMonster.playDeathAnimation(() => {
+        // TODO: this will need to be updated once we support multiple monsters
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
           [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
           () => {
@@ -308,7 +316,7 @@ export class BattleScene extends BaseScene {
   #transitionToNextScene() {
     /** @type {import('./world-scene.js').WorldSceneData} */
     const sceneDataToPass = {
-      isPlayedKnockedOut: this.#playerKnockedOut,
+      isPlayerKnockedOut: this.#playerKnockedOut,
     };
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
@@ -412,7 +420,7 @@ export class BattleScene extends BaseScene {
 
         // if item was used, only have enemy attack
         if (this.#battleMenu.wasItemUsed) {
-          // TODO: enhance once we can switch monsters
+          // TODO: enhance once we support multiple monsters
           this.#activePlayerMonster.updateMonsterHealth(
             /** @type {import('../types/typedef.js').Monster[]} */ (
               dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
@@ -445,6 +453,7 @@ export class BattleScene extends BaseScene {
           });
           return;
         }
+
         this.#enemyAttack(() => {
           this.#playerAttack(() => {
             this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
@@ -475,7 +484,7 @@ export class BattleScene extends BaseScene {
           // player has run away successfully
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
             this.time.delayedCall(200, () => {
-              playSoundFX(this, AUDIO_ASSET_KEYS.FLEE);
+              playSoundFx(this, AUDIO_ASSET_KEYS.FLEE);
               this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
             });
           });

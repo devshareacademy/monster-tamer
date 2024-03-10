@@ -86,6 +86,7 @@ export class BattleMenu {
     this.#skipAnimations = skipBattleAnimations || false;
     this.#queuedMessageAnimationPlaying = false;
     this.#usedItem = false;
+    this.#fleeAttempt = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -606,6 +607,7 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
+      this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
       this.#fleeAttempt = true;
       return;
     }

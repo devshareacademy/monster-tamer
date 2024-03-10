@@ -1,6 +1,5 @@
 import {
   ATTACK_ASSET_KEYS,
-  AUDIO_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
   BUILDING_ASSET_KEYS,
@@ -14,14 +13,15 @@ import {
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
+  AUDIO_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
-import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { dataManager } from '../utils/data-manager.js';
+import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { BaseScene } from './base-scene.js';
+import { dataManager } from '../utils/data-manager.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
+import { BaseScene } from './base-scene.js';
 import { setGlobalSoundSettings } from '../utils/audio-utils.js';
 
 export class PreloadScene extends BaseScene {
@@ -93,11 +93,11 @@ export class PreloadScene extends BaseScene {
     // monster assets
     this.load.image(MONSTER_ASSET_KEYS.CARNODUSK, `${monsterTamerAssetPath}/monsters/carnodusk.png`);
     this.load.image(MONSTER_ASSET_KEYS.IGUANIGNITE, `${monsterTamerAssetPath}/monsters/iguanignite.png`);
-    this.load.image(MONSTER_ASSET_KEYS.JIVY, `${monsterTamerAssetPath}/monsters/jivy.png`);
-    this.load.image(MONSTER_ASSET_KEYS.PARAZOID, `${monsterTamerAssetPath}/monsters/parazoid.png`);
     this.load.image(MONSTER_ASSET_KEYS.AQUAVALOR, `${monsterTamerAssetPath}/monsters/aquavalor.png`);
     this.load.image(MONSTER_ASSET_KEYS.FROSTSABER, `${monsterTamerAssetPath}/monsters/frostsaber.png`);
     this.load.image(MONSTER_ASSET_KEYS.IGNIVOLT, `${monsterTamerAssetPath}/monsters/ignivolt.png`);
+    this.load.image(MONSTER_ASSET_KEYS.JIVY, `${monsterTamerAssetPath}/monsters/jivy.png`);
+    this.load.image(MONSTER_ASSET_KEYS.PARAZOID, `${monsterTamerAssetPath}/monsters/parazoid.png`);
 
     // ui assets
     this.load.image(UI_ASSET_KEYS.CURSOR, `${monsterTamerAssetPath}/ui/cursor.png`);
@@ -113,9 +113,9 @@ export class PreloadScene extends BaseScene {
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
-    this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
     this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
     this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
+    this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
     this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
     this.load.json(DATA_ASSET_KEYS.NPCS, 'assets/data/npcs.json');
 
@@ -142,6 +142,14 @@ export class PreloadScene extends BaseScene {
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
     this.load.image(WORLD_ASSET_KEYS.MAIN_1_FOREGROUND, `${monsterTamerAssetPath}/map/main_1_level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
+    this.load.spritesheet(
+      WORLD_ASSET_KEYS.BEACH,
+      `${axulArtAssetPath}/beach/AxulArtīs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png`,
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
+    );
     this.load.image(
       BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
       `${monsterTamerAssetPath}/map/buildings/building_1_level_foreground.png`
@@ -160,14 +168,6 @@ export class PreloadScene extends BaseScene {
       `${monsterTamerAssetPath}/map/buildings/building_2_level_background.png`
     );
     this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_2_LEVEL, `assets/data/building_2.json`);
-    this.load.spritesheet(
-      WORLD_ASSET_KEYS.BEACH,
-      `${axulArtAssetPath}/beach/AxulArtīs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png`,
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      }
-    );
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
@@ -222,7 +222,8 @@ export class PreloadScene extends BaseScene {
     // create animations from json file
     this.#createAnimations();
 
-    // attempt to populate data manager with saved data
+    // attempt to populate data manager with saved data and initialize
+    dataManager.init(this);
     dataManager.loadData();
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);

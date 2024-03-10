@@ -3,7 +3,6 @@ import { DIRECTION } from '../common/direction.js';
 import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
-import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DataUtils } from './data-utils.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
@@ -66,27 +65,14 @@ const initialState = {
   },
   gameStarted: false,
   monsters: {
-    inParty: [
-      {
-        id: 1,
-        monsterId: 1,
-        name: MONSTER_ASSET_KEYS.IGUANIGNITE,
-        assetKey: MONSTER_ASSET_KEYS.IGUANIGNITE,
-        assetFrame: 0,
-        currentHp: 20,
-        maxHp: 25,
-        attackIds: [2],
-        baseAttack: 15,
-        currentLevel: 5,
-      },
-    ],
+    inParty: [],
   },
   inventory: [
     {
       item: {
         id: 1,
       },
-      quantity: 1,
+      quantity: 10,
     },
   ],
   itemsPickedUp: [],
@@ -122,6 +108,15 @@ class DataManager extends Phaser.Events.EventEmitter {
   /** @type {Phaser.Data.DataManager} */
   get store() {
     return this.#store;
+  }
+
+  /**
+   * @param {Phaser.Scene} scene
+   * @returns {void}
+   */
+  init(scene) {
+    const startingMonster = DataUtils.getMonsterById(scene, 1);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, [startingMonster]);
   }
 
   /**
@@ -169,9 +164,10 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {Phaser.Scene} scene
    * @returns {void}
    */
-  startNewGame() {
+  startNewGame(scene) {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
@@ -187,6 +183,7 @@ class DataManager extends Phaser.Events.EventEmitter {
 
     this.#store.reset();
     this.#updateDataManger(existingData);
+    this.init(scene);
     this.saveData();
   }
 
@@ -287,7 +284,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     this.#store.set({
       [DATA_MANAGER_STORE_KEYS.PLAYER_POSITION]: data.player.position,
       [DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION]: data.player.direction,
-      [DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION]: data.player.location,
+      [DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION]: data.player.location || { ...initialState.player.location },
       [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: data.options.textSpeed,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS]: data.options.battleSceneAnimations,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE]: data.options.battleStyle,
@@ -297,7 +294,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
       [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
-      [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp,
+      [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
     });
   }
 

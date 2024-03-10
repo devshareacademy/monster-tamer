@@ -13,19 +13,11 @@ import { Menu } from '../world/menu/menu.js';
 import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
+import { Item } from '../world/item.js';
 import { NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { playBackgroundMusic, playSoundFX } from '../utils/audio-utils.js';
-import { Item } from '../world/item.js';
-
-/**
- * @typedef WorldSceneData
- * @type {object}
- * @property {string} [area]
- * @property {boolean} [isInterior]
- * @property {boolean} [isPlayedKnockedOut]
- */
 
 /**
  * @typedef TiledObjectProperty
@@ -63,6 +55,14 @@ const TILED_ITEM_PROPERTY = Object.freeze({
   ID: 'id',
 });
 
+/**
+ * @typedef WorldSceneData
+ * @type {object}
+ * @property {boolean} [isPlayerKnockedOut]
+ * @property {string} [area]
+ * @property {boolean} [isInterior]
+ */
+
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
   each grid size will be 64 x 64 pixels
@@ -89,14 +89,14 @@ export class WorldScene extends BaseScene {
   #menu;
   /** @type {WorldSceneData} */
   #sceneData;
+  /** @type {Item[]} */
+  #items;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
   /** @type {number} */
   #lastNpcEventHandledIndex;
   /** @type {boolean} */
   #isProcessingNpcEvent;
-  /** @type {Item[]} */
-  #items;
 
   constructor() {
     super({
@@ -119,17 +119,17 @@ export class WorldScene extends BaseScene {
       const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
       const isInterior =
         this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
-      const isPlayedKnockedOut = this.#sceneData?.isPlayedKnockedOut || false;
+      const isPlayedKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
 
       this.#sceneData = {
         area,
         isInterior: isInterior,
-        isPlayedKnockedOut: isPlayedKnockedOut,
+        isPlayerKnockedOut: isPlayedKnockedOut,
       };
     }
 
     // update player location, and map data if the player was knocked out in a battle
-    if (this.#sceneData.isPlayedKnockedOut) {
+    if (this.#sceneData.isPlayerKnockedOut) {
       // get the nearest knocked out spawn location from the map meta data
       let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
       const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
@@ -160,10 +160,11 @@ export class WorldScene extends BaseScene {
         isInterior: this.#sceneData.isInterior,
       })
     );
+
+    this.#items = [];
     this.#npcPlayerIsInteractingWith = undefined;
     this.#lastNpcEventHandledIndex = -1;
     this.#isProcessingNpcEvent = false;
-    this.#items = [];
   }
 
   /**
@@ -284,7 +285,7 @@ export class WorldScene extends BaseScene {
         this.#backgroundRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
 
         // if the player was knocked out, we want to lock input, heal player, and then have npc show message
-        if (this.#sceneData.isPlayedKnockedOut) {
+        if (this.#sceneData.isPlayerKnockedOut) {
           this.#healPlayerParty();
           this.#dialogUi.showDialogModal([
             'It looks like your team put up quite a fight...',
@@ -486,26 +487,23 @@ export class WorldScene extends BaseScene {
     }
 
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
-    playSoundFX(this, AUDIO_ASSET_KEYS.GRASS);
+    playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
-      /** @type {number} */
-      const encounterArea = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
-        (property) => {
-          return property.name === TILED_ENCOUNTER_PROPERTY.AREA;
-        }
+      const encounterAreaId = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
+        (property) => property.name === TILED_ENCOUNTER_PROPERTY.AREA
       ).value;
-      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterArea);
-      const randomMonster = weightedRandom(possibleMonsters);
+      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterAreaId);
+      const randomMonsterId = weightedRandom(possibleMonsters);
 
       console.log(
-        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterArea} and monster id has been picked randomly ${randomMonster}`
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterAreaId} and monster id has been picked randomly ${randomMonsterId}`
       );
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
         /** @type {import('./battle-scene.js').BattleSceneData} */
         const dataToPass = {
-          enemyMonsters: [DataUtils.getMonsterById(this, randomMonster)],
+          enemyMonsters: [DataUtils.getMonsterById(this, randomMonsterId)],
           playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
         };
 
@@ -586,6 +584,63 @@ export class WorldScene extends BaseScene {
   #handlePlayerDirectionUpdate() {
     // update player direction on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
+  }
+
+  /**
+   * @returns {void}
+   */
+  #healPlayerParty() {
+    // heal all monsters in party
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    monsters.forEach((monster) => {
+      monster.currentHp = monster.maxHp;
+    });
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
+  }
+
+  /**
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createItems(map) {
+    const itemObjectLayer = map.getObjectLayer('Item');
+    if (!itemObjectLayer) {
+      return;
+    }
+    const items = itemObjectLayer.objects;
+    const validItems = items.filter((item) => {
+      return item.x !== undefined && item.y !== undefined;
+    });
+    /** @type {number[]} */
+    const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP);
+
+    for (const tiledItem of validItems) {
+      /** @type {number} */
+      const itemId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+        (property) => property.name === TILED_ITEM_PROPERTY.ITEM_ID
+      )?.value;
+      /** @type {number} */
+      const id = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+        (property) => property.name === TILED_ITEM_PROPERTY.ID
+      )?.value;
+
+      if (itemsPickedUp.includes(id)) {
+        continue;
+      }
+
+      // create object
+      const item = new Item({
+        scene: this,
+        position: {
+          x: tiledItem.x,
+          y: tiledItem.y - TILE_SIZE,
+        },
+        itemId,
+        id,
+      });
+      this.#items.push(item);
+    }
   }
 
   /**
@@ -692,63 +747,6 @@ export class WorldScene extends BaseScene {
         break;
       default:
         exhaustiveGuard(eventType);
-    }
-  }
-
-  /**
-   * @returns {void}
-   */
-  #healPlayerParty() {
-    // heal all monsters in party
-    /** @type {import('../types/typedef.js').Monster[]} */
-    const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
-    monsters.forEach((monster) => {
-      monster.currentHp = monster.maxHp;
-    });
-    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
-  }
-
-  /**
-   * @param {Phaser.Tilemaps.Tilemap} map
-   * @returns {void}
-   */
-  #createItems(map) {
-    const itemObjectLayer = map.getObjectLayer('Item');
-    if (!itemObjectLayer) {
-      return;
-    }
-    const items = itemObjectLayer.objects;
-    const validItems = items.filter((item) => {
-      return item.x !== undefined && item.y !== undefined;
-    });
-    /** @type {number[]} */
-    const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP);
-
-    for (const tiledItem of validItems) {
-      /** @type {number} */
-      const itemId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
-        (property) => property.name === TILED_ITEM_PROPERTY.ITEM_ID
-      )?.value;
-      /** @type {number} */
-      const id = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
-        (property) => property.name === TILED_ITEM_PROPERTY.ID
-      )?.value;
-
-      if (itemsPickedUp.includes(id)) {
-        continue;
-      }
-
-      // create object
-      const item = new Item({
-        scene: this,
-        position: {
-          x: tiledItem.x,
-          y: tiledItem.y - TILE_SIZE,
-        },
-        itemId,
-        id,
-      });
-      this.#items.push(item);
     }
   }
 }
