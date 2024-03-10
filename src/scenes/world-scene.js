@@ -123,25 +123,6 @@ export class WorldScene extends BaseScene {
     }
 
     this.#npcPlayerIsInteractingWith = undefined;
-
-    // update player location , and map data if the player was knocked out in a battle
-    if (this.#sceneData.isPlayerKnockedOut) {
-      /**
-       * TODO: see below
-       * this will need to be updated to use respawn locations once we support multiple
-       * areas in the game. For the time being, we will respawn the player back outside
-       * their house in the initial starting location.
-       *
-       * We will also need to re-heal the players party.
-       */
-
-      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
-        x: 6 * TILE_SIZE,
-        y: 21 * TILE_SIZE,
-      });
-      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.DOWN);
-    }
-
     this.#items = [];
   }
 
