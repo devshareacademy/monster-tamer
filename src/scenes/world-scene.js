@@ -445,18 +445,14 @@ export class WorldScene extends BaseScene {
     playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.9;
     if (this.#wildMonsterEncountered) {
-      /** @type {number} */
-      const encounterArea = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
-        (property) => {
-          return property.name === TILED_ENCOUNTER_PROPERTY.AREA;
-        }
+      const encounterAreaId = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
+        (property) => property.name === TILED_ENCOUNTER_PROPERTY.AREA
       ).value;
-      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterArea);
-      console.log(possibleMonsters);
+      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterAreaId);
       const randomMonsterId = weightedRandom(possibleMonsters);
 
       console.log(
-        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterArea} and monster id has been picked randomly ${randomMonsterId}`
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterAreaId} and monster id has been picked randomly ${randomMonsterId}`
       );
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {

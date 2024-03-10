@@ -140,7 +140,7 @@ export class PreloadScene extends BaseScene {
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
     this.load.spritesheet(
       WORLD_ASSET_KEYS.BEACH,
-      `${axulArtAssetPath}/beach/AxulArtīs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png`,
+      `${axulArtAssetPath}/beach/AxulArtīs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png`,
       {
         frameWidth: 64,
         frameHeight: 64,
