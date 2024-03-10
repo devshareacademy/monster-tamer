@@ -27,10 +27,11 @@ export class HealthBar {
    * @param {Phaser.Scene} scene the Phaser 3 Scene the health bar will be added to
    * @param {number} x the x position to place the health bar container
    * @param {number} y the y position to place the health bar container
+   * @param {number} [width=360] the full width of our health bar component
    */
-  constructor(scene, x, y) {
+  constructor(scene, x, y, width = 360) {
     this.#scene = scene;
-    this.#fullWidth = 360;
+    this.#fullWidth = width;
     this.#scaleY = 0.7;
 
     this.#healthBarContainer = this.#scene.add.container(x, y, []);

@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "monsterId": 1,
+    "name": "iguanignite",
+    "assetKey": "IGUANIGNITE",
+    "assetFrame": 0,
+    "currentHp": 25,
+    "maxHp": 25,
+    "attackIds": [2],
+    "baseAttack": 5,
+    "currentLevel": 5
+  },
+  {
+    "id": 2,
+    "monsterId": 2,
+    "name": "carnodusk",
+    "assetKey": "CARNODUSK",
+    "assetFrame": 0,
+    "currentHp": 25,
+    "maxHp": 25,
+    "attackIds": [1],
+    "baseAttack": 5,
+    "currentLevel": 5
+  },
+  {
+    "id": 3,
+    "monsterId": 3,
+    "name": "ignivolt",
+    "assetKey": "IGNIVOLT",
+    "assetFrame": 0,
+    "currentHp": 25,
+    "maxHp": 25,
+    "attackIds": [2],
+    "baseAttack": 5,
+    "currentLevel": 5
+  },
+  {
+    "id": 4,
+    "monsterId": 4,
+    "name": "aquavalor",
+    "assetKey": "AQUAVALOR",
+    "assetFrame": 0,
+    "currentHp": 25,
+    "maxHp": 25,
+    "attackIds": [2],
+    "baseAttack": 5,
+    "currentLevel": 5
+  },
+  {
+    "id": 5,
+    "monsterId": 5,
+    "name": "frostsaber",
+    "assetKey": "FROSTSABER",
+    "assetFrame": 0,
+    "currentHp": 25,
+    "maxHp": 25,
+    "attackIds": [1],
+    "baseAttack": 5,
+    "currentLevel": 5
+  }
+]

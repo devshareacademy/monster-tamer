@@ -109,19 +109,16 @@ Battle Scene Part 2:
   ☐ update data manager to persist monster data and current stats
   ☐ dynamic monster data based on player party and encounter
 
-World Scene Part 3:
-  ☐ advanced wild monster encounter logic
-  ☐ adding a game menu
-    ☐ view inventory
-    ☐ view monster party
-  ☐ buildings
-  ☐ items in the field
-
 Audio:
   ☐ adding background music
   ☐ adding battle music
   ☐ adding attack effects
   ☐ connecting audio options to settings
+
+World Scene Part 3:
+  ☐ advanced wild monster encounter logic
+  ☐ buildings
+  ☐ items in the field
 
 -------------------------------
 

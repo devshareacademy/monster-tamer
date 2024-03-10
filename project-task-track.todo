@@ -87,42 +87,38 @@ Saving & Loading:
   ✔ on new game, we should reset the player data (pos, monsters, etc) @done(24-01-22 08:51)
 
 Monster Party & Monster Detail Scenes:
-  ☐ create monster party scene
-  ☐ allow player to select a monster in the scene
-  ☐ create monster detail scene
-  ☐ connect monster detail scene to monster party scene
-  ☐ add game menu option for viewing monster party scene
+  ✔ create monster party scene @done(24-01-26 09:08)
+  ✔ allow player to select a monster in the scene @done(24-01-26 09:08)
+  ✔ create monster detail scene @done(24-01-26 10:35)
+  ✔ connect monster detail scene to monster party scene @done(24-01-26 11:54)
+  ✔ add game menu option for viewing monster party scene @done(24-01-26 11:54)
 
 Inventory:
-  ☐ create class for items and inventory
-  ☐ create ui screen for viewing items
-  ☐ update menu to have view bag option
-  ☐ update data manager to allow saving of inventory items
-  ☐ update ui screen to allow player to use items
+  ✔ create class for items and inventory @done(24-02-16 07:56)
+  ✔ create ui screen for viewing items @done(24-02-16 07:56)
+  ✔ update menu to have view bag option @done(24-02-16 07:56)
+  ✔ update data manager to allow saving of inventory items @done(24-02-16 07:57)
+  ✔ update ui screen to allow player to use items @done(24-02-16 08:55)
 
 Battle Scene Part 2:
-  ☐ using items
-  ☐ running away
-  ☐ enemy random attack
-  ☐ player faint
-  ☐ attacking order
-  ☐ update data manager to persist monster data and current stats
-  ☐ dynamic monster data based on player party and encounter
-
-World Scene Part 3:
-  ☐ advanced wild monster encounter logic
-  ☐ adding a game menu
-    ☐ view inventory
-    ☐ view monster party
-    ☐ saving game data
-  ☐ buildings
-  ☐ items in the field
+  ✔ using items @done(24-02-17 07:57)
+  ✔ running away @done(24-02-23 12:28)
+  ✔ enemy random attack @done(24-02-23 12:28)
+  ✔ player faint @done(24-03-05 09:55)
+  ✔ attacking order @done(24-02-23 12:28)
+  ✔ update data manager to persist monster data and current stats @done(24-03-04 12:31)
+  ✔ dynamic monster data based on player party and encounter @done(24-03-04 12:31)
 
 Audio:
-  ☐ adding background music
-  ☐ adding battle music
-  ☐ adding attack effects
-  ☐ connecting audio options to settings
+  ✔ adding background music @done(24-03-05 10:46)
+  ✔ adding battle music @done(24-03-07 13:10)
+  ✔ adding attack effects @done(24-03-07 13:10)
+  ✔ connecting audio options to settings @done(24-03-07 13:10)
+
+World Scene Part 3:
+  ✔ advanced wild monster encounter logic @done(24-03-09 11:03)
+  ☐ buildings
+  ☐ items in the field
 
 -------------------------------
 

@@ -37,6 +37,7 @@ import Phaser from '../lib/phaser.js';
  * @property {number} id the unique id of this attack
  * @property {string} name the name of this attack
  * @property {import('../battle/attacks/attack-keys.js').AttackKeys} animationName the animation key that is tied to this attack, will be used to play the attack animation when attack is used.
+ * @property {string} audioKey the unique key of the audio asset that is cached by phaser, will be passed to the phaser sound manager to play this audio object
  */
 
 /**
@@ -49,4 +50,47 @@ import Phaser from '../lib/phaser.js';
  * @property {number} delay
  * @property {boolean} yoyo
  * @property {string} assetKey
+ */
+
+/**
+ * @typedef {keyof typeof ITEM_EFFECT} ItemEffect
+ */
+
+/** @enum {ItemEffect} */
+export const ITEM_EFFECT = Object.freeze({
+  HEAL_30: 'HEAL_30',
+});
+
+/**
+ * @typedef Item
+ * @type {object}
+ * @property {number} id the unique id of this item
+ * @property {string} name the name of this item
+ * @property {ItemEffect} effect the effect of using this item
+ * @property {string} description the description of the item to show in the inventory bag
+ */
+
+/**
+ * @typedef BaseInventoryItem
+ * @type {object}
+ * @property {object} item
+ * @property {number} item.id the unique id of this item
+ * @property {number} quantity
+ */
+
+/**
+ * @typedef Inventory
+ * @type {BaseInventoryItem[]}
+ */
+
+/**
+ * @typedef InventoryItem
+ * @type {object}
+ * @property {Item} item
+ * @property {number} quantity
+ */
+
+/**
+ * @typedef EncounterData
+ * @type {Object.<string, number[][]>}
  */

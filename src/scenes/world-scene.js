@@ -1,8 +1,7 @@
 import Phaser from '../lib/phaser.js';
-import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
-import { Controls } from '../utils/controls.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
@@ -11,6 +10,10 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
+import { BaseScene } from './base-scene.js';
+import { DataUtils } from '../utils/data-utils.js';
+import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
+import { weightedRandom } from '../utils/random.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -36,16 +39,24 @@ const TILED_NPC_PROPERTY = Object.freeze({
   FRAME: 'frame',
 });
 
+const TILED_ENCOUNTER_PROPERTY = Object.freeze({
+  AREA: 'area',
+});
+
+/**
+ * @typedef WorldSceneData
+ * @type {object}
+ * @property {boolean} [isPlayerKnockedOut]
+ */
+
 /*
   Our scene will be 16 x 9 (1024 x 576 pixels)
   each grid size will be 64 x 64 pixels
 */
 
-export class WorldScene extends Phaser.Scene {
+export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Controls} */
-  #controls;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
   #encounterLayer;
   /** @type {boolean} */
@@ -60,6 +71,8 @@ export class WorldScene extends Phaser.Scene {
   #npcPlayerIsInteractingWith;
   /** @type {Menu} */
   #menu;
+  /** @type {WorldSceneData} */
+  #sceneData;
 
   constructor() {
     super({
@@ -68,11 +81,39 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
+   * @param {WorldSceneData} data
    * @returns {void}
    */
-  init() {
-    console.log(`[${WorldScene.name}:init] invoked`);
+  init(data) {
+    super.init(data);
+    this.#sceneData = data;
+
+    if (Object.keys(data).length === 0) {
+      this.#sceneData = {
+        isPlayerKnockedOut: false,
+      };
+    }
+
     this.#wildMonsterEncountered = false;
+
+    // update player location, and map data if the player was knocked out in a battle
+    if (this.#sceneData.isPlayerKnockedOut) {
+      /**
+       * TODO: see below
+       * this will need to be updated to use respawn locations once we support multiple
+       * areas in the game. For the time being, we will respawn the player back outside
+       * their house in the initial starting location.
+       *
+       * We will also need to re-heal the players party.
+       */
+
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: 6 * TILE_SIZE,
+        y: 21 * TILE_SIZE,
+      });
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.DOWN);
+    }
+
     this.#npcPlayerIsInteractingWith = undefined;
   }
 
@@ -80,7 +121,7 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   create() {
-    console.log(`[${WorldScene.name}:create] invoked`);
+    super.create();
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -157,16 +198,24 @@ export class WorldScene extends Phaser.Scene {
     // create foreground for depth
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
 
-    this.#controls = new Controls(this);
-
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
 
     // create menu
     this.#menu = new Menu(this);
 
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
-
+    this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
+      if (progress === 1) {
+        // if the player was knocked out, we want to lock input, heal player, and then have npc show message
+        if (this.#sceneData.isPlayerKnockedOut) {
+          this.#healPlayerParty();
+          this.#dialogUi.showDialogModal([
+            'It looks like your team put up quite a fight...',
+            'I went ahead and healed them up for you.',
+          ]);
+        }
+      }
+    });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
 
     this.cameras.main.on(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
@@ -175,6 +224,9 @@ export class WorldScene extends Phaser.Scene {
         element.setAttribute('data-test-scene-id', SCENE_KEYS.WORLD_SCENE);
       }
     });
+
+    // add audio
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
   }
 
   /**
@@ -182,14 +234,15 @@ export class WorldScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
+    super.update(time);
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
-    const selectedDirectionHeldDown = this.#controls.getDirectionKeyPressedDown();
-    const selectedDirectionPressedOnce = this.#controls.getDirectionKeyJustPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirectionHeldDown);
     }
@@ -198,7 +251,7 @@ export class WorldScene extends Phaser.Scene {
       this.#handlePlayerInteraction();
     }
 
-    if (this.#controls.wasEnterKeyPressed() && !this.#player.isMoving) {
+    if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
       if (this.#dialogUi.isVisible) {
         return;
       }
@@ -223,14 +276,36 @@ export class WorldScene extends Phaser.Scene {
           this.#menu.hide();
           dataManager.saveData();
           this.#dialogUi.showDialogModal(['Game progress has been saved']);
-        } else if (this.#menu.selectedMenuOption === 'EXIT') {
+        }
+
+        if (this.#menu.selectedMenuOption === 'MONSTERS') {
+          // pause this scene and launch the monster party scene
+          /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
+
+        if (this.#menu.selectedMenuOption === 'BAG') {
+          // pause this scene and launch the inventory scene
+          /** @type {import('./inventory-scene.js').InventorySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
+
+        if (this.#menu.selectedMenuOption === 'EXIT') {
           this.#menu.hide();
         }
 
         // TODO: handle other selected menu options
       }
 
-      if (this.#controls.wasBackKeyPressed()) {
+      if (this._controls.wasBackKeyPressed()) {
         this.#menu.hide();
       }
     }
@@ -323,19 +398,33 @@ export class WorldScene extends Phaser.Scene {
     }
 
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
+    playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
-      console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`);
-      // TODO: add in a custom animation that is similar to the old games
+      const encounterAreaId = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
+        (property) => property.name === TILED_ENCOUNTER_PROPERTY.AREA
+      ).value;
+      const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterAreaId);
+      const randomMonsterId = weightedRandom(possibleMonsters);
+
+      console.log(
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterAreaId} and monster id has been picked randomly ${randomMonsterId}`
+      );
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+        /** @type {import('./battle-scene.js').BattleSceneData} */
+        const dataToPass = {
+          enemyMonsters: [DataUtils.getMonsterById(this, randomMonsterId)],
+          playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
+        };
+
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
       });
     }
   }
 
   #isPlayerInputLocked() {
-    return this.#controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
   }
 
   /**
@@ -404,5 +493,18 @@ export class WorldScene extends Phaser.Scene {
   #handlePlayerDirectionUpdate() {
     // update player direction on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
+  }
+
+  /**
+   * @returns {void}
+   */
+  #healPlayerParty() {
+    // heal all monsters in party
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    monsters.forEach((monster) => {
+      monster.currentHp = monster.maxHp;
+    });
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
   }
 }

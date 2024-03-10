@@ -1,4 +1,3 @@
-import Phaser from '../lib/phaser.js';
 import {
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
@@ -7,10 +6,13 @@ import {
   EXTERNAL_LINKS_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
+  INVENTORY_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
+  MONSTER_PARTY_ASSET_KEYS,
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
+  AUDIO_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
@@ -18,16 +20,21 @@ import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { dataManager } from '../utils/data-manager.js';
 import { SHOW_SOCIAL_LINKS } from '../config.js';
+import { BaseScene } from './base-scene.js';
+import { setGlobalSoundSettings } from '../utils/audio-utils.js';
 
-export class PreloadScene extends Phaser.Scene {
+export class PreloadScene extends BaseScene {
   constructor() {
     super({
       key: SCENE_KEYS.PRELOAD_SCENE,
     });
   }
 
+  /**
+   * @returns {void}
+   */
   preload() {
-    console.log(`[${PreloadScene.name}:preload] invoked`);
+    super.preload();
 
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
@@ -85,6 +92,9 @@ export class PreloadScene extends Phaser.Scene {
     // monster assets
     this.load.image(MONSTER_ASSET_KEYS.CARNODUSK, `${monsterTamerAssetPath}/monsters/carnodusk.png`);
     this.load.image(MONSTER_ASSET_KEYS.IGUANIGNITE, `${monsterTamerAssetPath}/monsters/iguanignite.png`);
+    this.load.image(MONSTER_ASSET_KEYS.AQUAVALOR, `${monsterTamerAssetPath}/monsters/aquavalor.png`);
+    this.load.image(MONSTER_ASSET_KEYS.FROSTSABER, `${monsterTamerAssetPath}/monsters/frostsaber.png`);
+    this.load.image(MONSTER_ASSET_KEYS.IGNIVOLT, `${monsterTamerAssetPath}/monsters/ignivolt.png`);
 
     // ui assets
     this.load.image(UI_ASSET_KEYS.CURSOR, `${monsterTamerAssetPath}/ui/cursor.png`);
@@ -95,10 +105,15 @@ export class PreloadScene extends Phaser.Scene {
       `${kenneysAssetPath}/ui-space-expansion/glassPanel_purple.png`
     );
     this.load.image(UI_ASSET_KEYS.MENU_BACKGROUND_GREEN, `${kenneysAssetPath}/ui-space-expansion/glassPanel_green.png`);
+    this.load.image(UI_ASSET_KEYS.BLUE_BUTTON, `${kenneysAssetPath}/ui-pack/blue_button01.png`);
+    this.load.image(UI_ASSET_KEYS.BLUE_BUTTON_SELECTED, `${kenneysAssetPath}/ui-pack/blue_button00.png`);
 
     // load json data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
     this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
+    this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
+    this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
+    this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -123,6 +138,14 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
+    this.load.spritesheet(
+      WORLD_ASSET_KEYS.BEACH,
+      `${axulArtAssetPath}/beach/AxulArtīs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png`,
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
+    );
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
@@ -138,14 +161,51 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(TITLE_ASSET_KEYS.BACKGROUND, `${monsterTamerAssetPath}/ui/title/background.png`);
     this.load.image(TITLE_ASSET_KEYS.PANEL, `${monsterTamerAssetPath}/ui/title/title_background.png`);
     this.load.image(TITLE_ASSET_KEYS.TITLE, `${monsterTamerAssetPath}/ui/title/title_text.png`);
+
+    // ui components for monster party
+    this.load.image(
+      MONSTER_PARTY_ASSET_KEYS.PARTY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/monster-party/background.png`
+    );
+    this.load.image(
+      MONSTER_PARTY_ASSET_KEYS.MONSTER_DETAILS_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/monster-party/monster-details-background.png`
+    );
+
+    // ui components for inventory
+    this.load.image(
+      INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND,
+      `${monsterTamerAssetPath}/ui/inventory/bag_background.png`
+    );
+    this.load.image(INVENTORY_ASSET_KEYS.INVENTORY_BAG, `${monsterTamerAssetPath}/ui/inventory/bag.png`);
+
+    // load audio
+    this.load.setPath('assets/audio/xDeviruchi');
+    this.load.audio(AUDIO_ASSET_KEYS.MAIN, 'And-the-Journey-Begins.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.BATTLE, 'Decisive-Battle.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.TITLE, 'Title-Theme.wav');
+    this.load.setPath('assets/audio/leohpaz');
+    this.load.audio(AUDIO_ASSET_KEYS.CLAW, '03_Claw_03.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.GRASS, '03_Step_grass_03.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.ICE, '13_Ice_explosion_01.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.FLEE, '51_Flee_02.wav');
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
-    console.log(`[${PreloadScene.name}:create] invoked`);
+    super.create();
+
     this.#createAnimations();
-    // attempt to populate data manager with saved data
+
+    // attempt to populate data manager with saved data and initialize
+    dataManager.init(this);
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    // set global audio based on data manager settings
+    setGlobalSoundSettings(this);
+
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
   #createAnimations() {
