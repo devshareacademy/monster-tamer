@@ -4,13 +4,12 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
 import { DISABLE_WILD_ENCOUNTERS, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
-import { NPC } from '../world/characters/npc.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
+import { NPC } from '../world/characters/npc.js';
 import { Menu } from '../world/menu/menu.js';
-import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
@@ -18,6 +17,7 @@ import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
 import { NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -26,6 +26,10 @@ import { exhaustiveGuard } from '../utils/guard.js';
  * @property {string} type
  * @property {any} value
  */
+
+const TILED_SIGN_PROPERTY = Object.freeze({
+  MESSAGE: 'message',
+});
 
 const CUSTOM_TILED_TYPES = Object.freeze({
   NPC: 'npc',
@@ -37,21 +41,17 @@ const TILED_NPC_PROPERTY = Object.freeze({
   ID: 'id',
 });
 
-const TILED_SIGN_PROPERTY = Object.freeze({
-  MESSAGE: 'message',
-});
-
 const TILED_ENCOUNTER_PROPERTY = Object.freeze({
   AREA: 'area',
 });
 
-const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
-  FAINT_LOCATION: 'faint_location',
+const TILED_ITEM_PROPERTY = Object.freeze({
+  ITEM_ID: 'item_id',
   ID: 'id',
 });
 
-const TILED_ITEM_PROPERTY = Object.freeze({
-  ITEM_ID: 'item_id',
+const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
+  FAINT_LOCATION: 'faint_location',
   ID: 'id',
 });
 
@@ -69,8 +69,6 @@ const TILED_ITEM_PROPERTY = Object.freeze({
 */
 
 export class WorldScene extends BaseScene {
-  /** @type {Phaser.GameObjects.Rectangle} */
-  #backgroundRect;
   /** @type {Player} */
   #player;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
@@ -93,6 +91,8 @@ export class WorldScene extends BaseScene {
   #items;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
+  /** @type {Phaser.GameObjects.Rectangle} */
+  #backgroundRect;
   /** @type {number} */
   #lastNpcEventHandledIndex;
   /** @type {boolean} */
@@ -110,11 +110,9 @@ export class WorldScene extends BaseScene {
    */
   init(data) {
     super.init(data);
-
-    this.#wildMonsterEncountered = false;
     this.#sceneData = data;
 
-    if (!this.#sceneData || !this.#sceneData.area) {
+    if (Object.keys(data).length === 0) {
       /** @type {string} */
       const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
       const isInterior =
@@ -161,8 +159,9 @@ export class WorldScene extends BaseScene {
       })
     );
 
-    this.#items = [];
+    this.#wildMonsterEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
+    this.#items = [];
     this.#lastNpcEventHandledIndex = -1;
     this.#isProcessingNpcEvent = false;
   }
@@ -248,8 +247,8 @@ export class WorldScene extends BaseScene {
     this.#player = new Player({
       scene: this,
       position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
-      collisionLayer: collisionLayer,
       direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
+      collisionLayer: collisionLayer,
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
       },
@@ -257,11 +256,11 @@ export class WorldScene extends BaseScene {
         this.#handlePlayerDirectionUpdate();
       },
       otherCharactersToCheckForCollisionsWith: this.#npcs,
+      objectsToCheckForCollisionsWith: this.#items,
       entranceLayer: this.#entranceLayer,
       enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
         this.#handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
       },
-      objectsToCheckForCollisionsWith: this.#items,
     });
     this.cameras.main.startFollow(this.#player.sprite);
 
@@ -269,13 +268,13 @@ export class WorldScene extends BaseScene {
     this.#npcs.forEach((npc) => {
       npc.addCharacterToCheckForCollisionsWith(this.#player);
     });
-    this.cameras.main.startFollow(this.#player.sprite);
 
     // create foreground for depth
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_FOREGROUND`, 0).setOrigin(0);
 
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
+
     // create menu
     this.#menu = new Menu(this);
 
@@ -340,8 +339,10 @@ export class WorldScene extends BaseScene {
       if (selectedDirectionPressedOnce !== DIRECTION.NONE) {
         this.#menu.handlePlayerInput(selectedDirectionPressedOnce);
       }
+
       if (wasSpaceKeyPressed) {
         this.#menu.handlePlayerInput('OK');
+
         if (this.#menu.selectedMenuOption === 'SAVE') {
           this.#menu.hide();
           dataManager.saveData();
@@ -371,10 +372,12 @@ export class WorldScene extends BaseScene {
         if (this.#menu.selectedMenuOption === 'EXIT') {
           this.#menu.hide();
         }
+
+        // TODO: handle other selected menu options
       }
 
       if (this._controls.wasBackKeyPressed()) {
-        this.#menu.handlePlayerInput('CANCEL');
+        this.#menu.hide();
       }
     }
 
@@ -415,6 +418,8 @@ export class WorldScene extends BaseScene {
       if (!object.x || !object.y) {
         return false;
       }
+
+      // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       return object.x === targetPosition.x && object.y - TILE_SIZE === targetPosition.y;
     });
 
@@ -480,6 +485,7 @@ export class WorldScene extends BaseScene {
     if (!this.#encounterLayer) {
       return;
     }
+
     const isInEncounterZone =
       this.#encounterLayer.getTileAtWorldXY(this.#player.sprite.x, this.#player.sprite.y, true).index !== -1;
     if (!isInEncounterZone) {
@@ -537,6 +543,7 @@ export class WorldScene extends BaseScene {
       if (!npcObject || npcObject.x === undefined || npcObject.y === undefined) {
         return;
       }
+
       // get the path objects for this npc
       const pathObjects = layer.objects.filter((obj) => {
         return obj.type === CUSTOM_TILED_TYPES.NPC_PATH;
@@ -613,7 +620,7 @@ export class WorldScene extends BaseScene {
       return item.x !== undefined && item.y !== undefined;
     });
     /** @type {number[]} */
-    const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP);
+    const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
 
     for (const tiledItem of validItems) {
       /** @type {number} */

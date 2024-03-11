@@ -1,9 +1,9 @@
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
-import { TILE_SIZE } from '../../config.js';
-import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 import { Character } from './character.js';
+import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
+import { TILE_SIZE } from '../../config.js';
 
 /**
  * @typedef PlayerConfigProps
