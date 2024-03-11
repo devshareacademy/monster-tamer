@@ -44,9 +44,7 @@ export class TitleScene extends BaseScene {
   #nineSliceMenu;
 
   constructor() {
-    super({
-      key: SCENE_KEYS.TITLE_SCENE,
-    });
+    super({ key: SCENE_KEYS.TITLE_SCENE });
   }
 
   /**
@@ -140,6 +138,9 @@ export class TitleScene extends BaseScene {
     playBackgroundMusic(this, AUDIO_ASSET_KEYS.TITLE);
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     super.update();
 

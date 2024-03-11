@@ -297,7 +297,6 @@ export class BattleScene extends BaseScene {
       this.#activePlayerMonster.playDeathAnimation(() => {
         // TODO: this will need to be updated once we support multiple monsters
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          // TODO: this will need to be updated once we support multiple monsters
           [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
           () => {
             this.#playerKnockedOut = true;
