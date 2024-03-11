@@ -83,7 +83,7 @@ export class BattleMenu {
     this.#queuedInfoPanelMessages = [];
     this.#waitingForPlayerInput = false;
     this.#selectedAttackIndex = undefined;
-    this.#skipAnimations = skipBattleAnimations || false;
+    this.#skipAnimations = skipBattleAnimations;
     this.#queuedMessageAnimationPlaying = false;
     this.#usedItem = false;
     this.#fleeAttempt = false;

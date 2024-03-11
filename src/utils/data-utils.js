@@ -52,8 +52,6 @@ export class DataUtils {
   }
 
   /**
-   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {number} monsterId
    * Utility function for retrieving a Monster object from the monsters.json data file.
    * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
    * @param {number} monsterId the monster id to retrieve from the monsters.json file

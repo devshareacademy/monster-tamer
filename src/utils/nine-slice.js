@@ -1,11 +1,5 @@
 import Phaser from '../lib/phaser.js';
 
-/**
- * @typedef PhaserTextureFrame
- * @type {object}
- * @property {Phaser.Textures.Frame} __BASE
- */
-
 const ASSET_CUT_FRAMES = Object.freeze({
   TL: 'TL',
   TM: 'TM',
@@ -51,6 +45,7 @@ export class NineSlice {
    */
   #createNineSliceTextures(textureManager, assetKey) {
     const methodName = 'createNineSliceTextures';
+
     const texture = textureManager.get(assetKey);
     if (texture.key === '__MISSING') {
       console.warn(`[${NineSlice.name}:${methodName}] the provided texture asset key was not found`);

@@ -69,7 +69,7 @@ export class TitleScene extends BaseScene {
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
     this.#isContinueButtonEnabled = dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false;
 
-    // create title screen background
+    // create title scene background
     this.add.image(0, 0, TITLE_ASSET_KEYS.BACKGROUND).setOrigin(0).setScale(0.58);
     this.add
       .image(this.scale.width / 2, 150, TITLE_ASSET_KEYS.PANEL)

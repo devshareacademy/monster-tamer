@@ -1,10 +1,10 @@
 import Phaser from '../../lib/phaser.js';
-import { DATA_MANAGER_STORE_KEYS, dataManager } from '../../utils/data-manager.js';
 import { UI_ASSET_KEYS } from '../../assets/asset-keys.js';
-import { exhaustiveGuard } from '../../utils/guard.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
-import { MENU_COLOR } from '../../config.js';
 import { DIRECTION } from '../../common/direction.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../../utils/data-manager.js';
+import { exhaustiveGuard } from '../../utils/guard.js';
+import { MENU_COLOR } from './menu-config.js';
 
 /**
  * @typedef {keyof typeof MENU_OPTIONS} MenuOptions

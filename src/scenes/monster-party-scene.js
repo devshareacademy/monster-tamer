@@ -292,21 +292,7 @@ export class MonsterPartyScene extends BaseScene {
   #goBackToPreviousScene(itemUsed) {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
-
-    // TODO: see if we can replace the following code with just
-    //   this.scene.resume(this.#sceneData.previousSceneName, { itemUsed });
-    // since we will just not use the data in the world scene
-
-    if (this.#sceneData.previousSceneName === SCENE_KEYS.WORLD_SCENE) {
-      this.scene.resume(SCENE_KEYS.WORLD_SCENE);
-      return;
-    }
-
-    /** @type {import('./inventory-scene.js').InventorySceneResumeData} */
-    const sceneDataToPass = {
-      itemUsed,
-    };
-    this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
+    this.scene.resume(this.#sceneData.previousSceneName, { itemUsed });
   }
 
   /**
