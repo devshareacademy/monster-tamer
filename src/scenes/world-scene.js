@@ -17,7 +17,6 @@ import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
 import { NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { createBuildingSceneTransition } from '../utils/scene-transition.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -91,8 +90,6 @@ export class WorldScene extends BaseScene {
   #items;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #entranceLayer;
-  /** @type {Phaser.GameObjects.Rectangle} */
-  #backgroundRect;
   /** @type {number} */
   #lastNpcEventHandledIndex;
   /** @type {boolean} */
@@ -234,7 +231,6 @@ export class WorldScene extends BaseScene {
     }
     this.cameras.main.setZoom(0.8);
 
-    this.#backgroundRect = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
     // create items and collisions
@@ -280,9 +276,6 @@ export class WorldScene extends BaseScene {
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
-        this.#backgroundRect.setSize(this.cameras.main.worldView.width, this.cameras.main.worldView.height);
-        this.#backgroundRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
-
         // if the player was knocked out, we want to lock input, heal player, and then have npc show message
         if (this.#sceneData.isPlayerKnockedOut) {
           this.#healPlayerParty();
@@ -681,9 +674,8 @@ export class WorldScene extends BaseScene {
       y += TILE_SIZE;
     }
 
-    this.#backgroundRect.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y);
-    createBuildingSceneTransition(this, {
-      callback: () => {
+    this.cameras.main.fadeOut(1000, 0, 0, 0, (camera, progress) => {
+      if (progress === 1) {
         dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
           x,
           y,
@@ -695,7 +687,7 @@ export class WorldScene extends BaseScene {
           isInterior: isBuildingEntrance,
         };
         this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
-      },
+      }
     });
   }
 
