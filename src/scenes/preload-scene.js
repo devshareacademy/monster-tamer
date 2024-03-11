@@ -197,6 +197,7 @@ export class PreloadScene extends BaseScene {
   create() {
     super.create();
 
+    // create animations from json file
     this.#createAnimations();
 
     // attempt to populate data manager with saved data and initialize
@@ -208,6 +209,9 @@ export class PreloadScene extends BaseScene {
     this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
+  /**
+   * @returns {void}
+   */
   #createAnimations() {
     const animations = DataUtils.getAnimations(this);
     animations.forEach((animation) => {
