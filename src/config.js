@@ -7,7 +7,6 @@ export const TEXT_SPEED = Object.freeze({
   FAST: 15,
 });
 export const WALK_FRAME_RATE = 6;
-export const DISABLE_WILD_ENCOUNTERS = false;
 export const MENU_COLOR = Object.freeze({
   1: {
     main: 0x32454c,
