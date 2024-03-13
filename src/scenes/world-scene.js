@@ -199,6 +199,7 @@ export class WorldScene extends BaseScene {
         this.#handlePlayerDirectionUpdate();
       },
       otherCharactersToCheckForCollisionsWith: this.#npcs,
+      objectsToCheckForCollisionsWith: this.#items,
     });
     this.cameras.main.startFollow(this.#player.sprite);
 
@@ -393,8 +394,10 @@ export class WorldScene extends BaseScene {
     if (nearbyItem) {
       // add item to inventory and display message to player
       const item = DataUtils.getItem(this, nearbyItem.itemId);
+      dataManager.addItem(item, 1);
       nearbyItem.gameObject.destroy();
       this.#items.splice(nearbyItemIndex, 1);
+      dataManager.addItemPickedUp(nearbyItem.id);
       this.#dialogUi.showDialogModal([`You found a ${item.name}`]);
     }
   }
@@ -544,6 +547,9 @@ export class WorldScene extends BaseScene {
       return item.x !== undefined && item.y !== undefined;
     });
 
+    /** @type {number[]} */
+    const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
+
     for (const tiledItem of validItems) {
       /** @type {number} */
       const itemId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
@@ -554,6 +560,10 @@ export class WorldScene extends BaseScene {
       const id = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
         (property) => property.name === TILED_ITEM_PROPERTY.ID
       )?.value;
+
+      if (itemsPickedUp.includes(id)) {
+        continue;
+      }
 
       const item = new Item({
         scene: this,
