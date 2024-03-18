@@ -563,36 +563,13 @@
         }, 
         {
          "draworder":"topdown",
-         "id":25,
+         "id":23,
          "name":"Item",
          "objects":[
                 {
                  "gid":230,
                  "height":64,
-                 "id":26,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"id",
-                         "type":"int",
-                         "value":2
-                        }, 
-                        {
-                         "name":"item_id",
-                         "type":"int",
-                         "value":1
-                        }],
-                 "rotation":0,
-                 "type":"item",
-                 "visible":true,
-                 "width":64,
-                 "x":64,
-                 "y":640
-                }, 
-                {
-                 "gid":230,
-                 "height":64,
-                 "id":27,
+                 "id":19,
                  "name":"",
                  "properties":[
                         {
@@ -611,109 +588,29 @@
                  "width":64,
                  "x":960,
                  "y":1728
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":23,
-         "locked":true,
-         "name":"Scene-Transitions",
-         "objects":[
-                {
-                 "gid":194,
-                 "height":64,
-                 "id":19,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"connects_to",
-                         "type":"string",
-                         "value":"building_1"
-                        }, 
-                        {
-                         "name":"entrance_id",
-                         "type":"string",
-                         "value":"1"
-                        }, 
-                        {
-                         "name":"is_building",
-                         "type":"bool",
-                         "value":true
-                        }],
-                 "rotation":0,
-                 "type":"entrance",
-                 "visible":true,
-                 "width":64,
-                 "x":384,
-                 "y":1344
                 }, 
                 {
-                 "gid":194,
+                 "gid":230,
                  "height":64,
                  "id":20,
                  "name":"",
                  "properties":[
                         {
-                         "name":"connects_to",
-                         "type":"string",
-                         "value":"building_2"
-                        }, 
-                        {
-                         "name":"entrance_id",
-                         "type":"string",
-                         "value":"1"
-                        }, 
-                        {
-                         "name":"is_building",
-                         "type":"bool",
-                         "value":true
-                        }],
-                 "rotation":0,
-                 "type":"entrance",
-                 "visible":true,
-                 "width":64,
-                 "x":832,
-                 "y":1344
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":24,
-         "locked":true,
-         "name":"Area-Metadata",
-         "objects":[
-                {
-                 "gid":194,
-                 "height":64,
-                 "id":21,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"faint_location",
-                         "type":"string",
-                         "value":"building_1"
-                        }, 
-                        {
                          "name":"id",
                          "type":"int",
-                         "value":0
+                         "value":2
+                        }, 
+                        {
+                         "name":"item_id",
+                         "type":"int",
+                         "value":1
                         }],
                  "rotation":0,
-                 "type":"area_metadata",
+                 "type":"item",
                  "visible":true,
                  "width":64,
-                 "x":192,
-                 "y":1408
+                 "x":64,
+                 "y":640
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -811,7 +708,6 @@
                 {
                  "draworder":"topdown",
                  "id":18,
-                 "locked":true,
                  "name":"NPC1",
                  "objects":[
                         {
@@ -833,9 +729,14 @@
                          "name":"npc",
                          "properties":[
                                 {
-                                 "name":"id",
-                                 "type":"int",
-                                 "value":2
+                                 "name":"frame",
+                                 "type":"string",
+                                 "value":"20"
+                                }, 
+                                {
+                                 "name":"messages",
+                                 "type":"string",
+                                 "value":"Make sure you read the signposts for helpful tips!"
                                 }, 
                                 {
                                  "name":"movement_pattern",
@@ -931,7 +832,6 @@
                 {
                  "draworder":"topdown",
                  "id":20,
-                 "locked":true,
                  "name":"NPC2",
                  "objects":[
                         {
@@ -941,9 +841,14 @@
                          "name":"npc",
                          "properties":[
                                 {
-                                 "name":"id",
-                                 "type":"int",
-                                 "value":3
+                                 "name":"frame",
+                                 "type":"string",
+                                 "value":"0"
+                                }, 
+                                {
+                                 "name":"messages",
+                                 "type":"string",
+                                 "value":"You can save your game from the menu.::To open the menu, press the ENTER key."
                                 }, 
                                 {
                                  "name":"movement_pattern",
@@ -972,8 +877,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":26,
- "nextobjectid":28,
+ "nextlayerid":24,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -982,7 +887,7 @@
         {
          "columns":8,
          "firstgid":1,
-         "image":"monster_tamer_tiled_project\/BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
          "imageheight":512,
          "imagewidth":512,
          "margin":0,
@@ -995,7 +900,7 @@
         {
          "columns":15,
          "firstgid":65,
-         "image":"monster_tamer_tiled_project\/Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
          "imageheight":512,
          "imagewidth":960,
          "margin":0,
@@ -1008,7 +913,7 @@
         {
          "columns":2,
          "firstgid":185,
-         "image":"monster_tamer_tiled_project\/grass.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/grass.png",
          "imageheight":128,
          "imagewidth":128,
          "margin":0,
@@ -1021,7 +926,7 @@
         {
          "columns":1,
          "firstgid":189,
-         "image":"monster_tamer_tiled_project\/collision.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/collision.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -1034,7 +939,7 @@
         {
          "columns":2,
          "firstgid":190,
-         "image":"monster_tamer_tiled_project\/bushes.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/bushes.png",
          "imageheight":128,
          "imagewidth":128,
          "margin":0,
@@ -1047,7 +952,7 @@
         {
          "columns":1,
          "firstgid":194,
-         "image":"monster_tamer_tiled_project\/encounter.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/encounter.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -1067,7 +972,7 @@
         {
          "columns":4,
          "firstgid":195,
-         "image":"monster_tamer_tiled_project\/house2_scaled_4x_pngcrushed.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/house2_scaled_4x_pngcrushed.png",
          "imageheight":192,
          "imagewidth":256,
          "margin":0,
@@ -1081,7 +986,7 @@
          "class":"npc",
          "columns":1,
          "firstgid":207,
-         "image":"monster_tamer_tiled_project\/encounter.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/encounter.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -1106,13 +1011,26 @@
         {
          "columns":12,
          "firstgid":208,
-         "image":"monster_tamer_tiled_project\/AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png",
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png",
          "imageheight":640,
          "imagewidth":768,
          "margin":0,
          "name":"AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed",
          "spacing":0,
          "tilecount":120,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "columns":3,
+         "firstgid":328,
+         "image":"..\/Downloads\/monster-tamer-tiled-assets\/entrance.png",
+         "imageheight":64,
+         "imagewidth":192,
+         "margin":0,
+         "name":"entrance",
+         "spacing":0,
+         "tilecount":3,
          "tileheight":64,
          "tilewidth":64
         }],
