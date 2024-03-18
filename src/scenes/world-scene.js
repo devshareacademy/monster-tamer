@@ -14,6 +14,7 @@ import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
+import { Item } from '../world/item.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -41,6 +42,11 @@ const TILED_NPC_PROPERTY = Object.freeze({
 
 const TILED_ENCOUNTER_PROPERTY = Object.freeze({
   AREA: 'area',
+});
+
+const TILED_ITEM_PROPERTY = Object.freeze({
+  ITEM_ID: 'item_id',
+  ID: 'id',
 });
 
 /**
@@ -73,6 +79,8 @@ export class WorldScene extends BaseScene {
   #menu;
   /** @type {WorldSceneData} */
   #sceneData;
+  /** @type {Item[]} */
+  #items;
 
   constructor() {
     super({
@@ -115,6 +123,7 @@ export class WorldScene extends BaseScene {
     }
 
     this.#npcPlayerIsInteractingWith = undefined;
+    this.#items = [];
   }
 
   /**
@@ -171,6 +180,9 @@ export class WorldScene extends BaseScene {
 
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
+    // create items and collisions
+    this.#createItems(map);
+
     // create npcs
     this.#createNPCs(map);
 
@@ -187,6 +199,7 @@ export class WorldScene extends BaseScene {
         this.#handlePlayerDirectionUpdate();
       },
       otherCharactersToCheckForCollisionsWith: this.#npcs,
+      objectsToCheckForCollisionsWith: this.#items,
     });
     this.cameras.main.startFollow(this.#player.sprite);
 
@@ -368,6 +381,25 @@ export class WorldScene extends BaseScene {
       this.#dialogUi.showDialogModal(nearbyNpc.messages);
       return;
     }
+
+    // check for a nearby item and display message about player finding the item
+    let nearbyItemIndex;
+    const nearbyItem = this.#items.find((item, index) => {
+      if (item.position.x === targetPosition.x && item.position.y === targetPosition.y) {
+        nearbyItemIndex = index;
+        return true;
+      }
+      return false;
+    });
+    if (nearbyItem) {
+      // add item to inventory and display message to player
+      const item = DataUtils.getItem(this, nearbyItem.itemId);
+      dataManager.addItem(item, 1);
+      nearbyItem.gameObject.destroy();
+      this.#items.splice(nearbyItemIndex, 1);
+      dataManager.addItemPickedUp(nearbyItem.id);
+      this.#dialogUi.showDialogModal([`You found a ${item.name}`]);
+    }
   }
 
   /**
@@ -499,5 +531,50 @@ export class WorldScene extends BaseScene {
       monster.currentHp = monster.maxHp;
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monsters);
+  }
+
+  /**
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createItems(map) {
+    const itemObjectLayer = map.getObjectLayer('Item');
+    if (!itemObjectLayer) {
+      return;
+    }
+    const items = itemObjectLayer.objects;
+    const validItems = items.filter((item) => {
+      return item.x !== undefined && item.y !== undefined;
+    });
+
+    /** @type {number[]} */
+    const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
+
+    for (const tiledItem of validItems) {
+      /** @type {number} */
+      const itemId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+        (property) => property.name === TILED_ITEM_PROPERTY.ITEM_ID
+      )?.value;
+
+      /** @type {number} */
+      const id = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+        (property) => property.name === TILED_ITEM_PROPERTY.ID
+      )?.value;
+
+      if (itemsPickedUp.includes(id)) {
+        continue;
+      }
+
+      const item = new Item({
+        scene: this,
+        position: {
+          x: tiledItem.x,
+          y: tiledItem.y - TILE_SIZE,
+        },
+        itemId,
+        id,
+      });
+      this.#items.push(item);
+    }
   }
 }
