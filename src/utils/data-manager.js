@@ -172,6 +172,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
     existingData.player.direction = initialState.player.direction;
+    existingData.player.location = { ...initialState.player.location };
     existingData.gameStarted = initialState.gameStarted;
     existingData.monsters = {
       inParty: [...initialState.monsters.inParty],
@@ -292,7 +293,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
       [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
-      [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp,
+      [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
     });
   }
 

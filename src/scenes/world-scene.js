@@ -49,6 +49,11 @@ const TILED_ITEM_PROPERTY = Object.freeze({
   ID: 'id',
 });
 
+const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
+  FAINT_LOCATION: 'faint_location',
+  ID: 'id',
+});
+
 /**
  * @typedef WorldSceneData
  * @type {object}
@@ -104,36 +109,42 @@ export class WorldScene extends BaseScene {
     super.init(data);
     this.#sceneData = data;
 
-    if (Object.keys(data).length === 0) {
-      /** @type {string} */
-      const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
-      const isInterior =
-        this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
-      const isPlayedKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
+    // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
+    /** @type {string} */
+    const area = this.#sceneData?.area || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
+    const isInterior =
+      this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
+    const isPlayedKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
 
-      this.#sceneData = {
-        area,
-        isInterior: isInterior,
-        isPlayerKnockedOut: isPlayedKnockedOut,
-      };
-    }
+    this.#sceneData = {
+      area,
+      isInterior: isInterior,
+      isPlayerKnockedOut: isPlayedKnockedOut,
+    };
 
     // update player location, and map data if the player was knocked out in a battle
     if (this.#sceneData.isPlayerKnockedOut) {
-      /**
-       * TODO: see below
-       * this will need to be updated to use respawn locations once we support multiple
-       * areas in the game. For the time being, we will respawn the player back outside
-       * their house in the initial starting location.
-       *
-       * We will also need to re-heal the players party.
-       */
+      // get the nearest knocked out spawn location from the map meta data
+      let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
+      const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
+      const knockOutSpawnLocation = /** @type {TiledObjectProperty[]} */ (areaMetaDataProperties).find(
+        (property) => property.name === TILED_AREA_META_DATA_PROPERTY.FAINT_LOCATION
+      )?.value;
 
+      // check to see if the level data we need to load is different and load that map to get player spawn data
+      const knockedOutLevelName = knockOutSpawnLocation.toUpperCase();
+      if (knockedOutLevelName !== this.#sceneData.area.toUpperCase()) {
+        this.#sceneData.area = knockOutSpawnLocation;
+        map = this.make.tilemap({ key: `${knockedOutLevelName}_LEVEL` });
+      }
+
+      // set players spawn location to that map and finds the revive location based on that object
+      const reviveLocation = map.getObjectLayer('Revive-Location').objects[0];
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
-        x: 6 * TILE_SIZE,
-        y: 21 * TILE_SIZE,
+        x: reviveLocation.x,
+        y: reviveLocation.y - TILE_SIZE,
       });
-      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.DOWN);
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.UP);
     }
 
     dataManager.store.set(
