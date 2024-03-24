@@ -35,7 +35,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../common/options.js').BattleStyleMenuOptions} options.battleStyle
  * @property {import('../common/options.js').SoundMenuOptions} options.sound
  * @property {import('../common/options.js').VolumeMenuOptions} options.volume
- * @property {import('../common/options.js').VolumeMenuOptions} options.menuColor
+ * @property {import('../common/options.js').MenuColorOptions} options.menuColor
  * @property {boolean} gameStarted
  * @property {MonsterData} monsters
  * @property {import('../types/typedef.js').Inventory} inventory
