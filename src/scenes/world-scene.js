@@ -224,6 +224,9 @@ export class WorldScene extends BaseScene {
     // create items and collisions
     this.#createItems(map);
 
+    // create items and collisions
+    this.#createItems(map);
+
     // create npcs
     this.#createNPCs(map);
 
@@ -597,6 +600,7 @@ export class WorldScene extends BaseScene {
     const validItems = items.filter((item) => {
       return item.x !== undefined && item.y !== undefined;
     });
+
     /** @type {number[]} */
     const itemsPickedUp = dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
 
@@ -605,6 +609,7 @@ export class WorldScene extends BaseScene {
       const itemId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
         (property) => property.name === TILED_ITEM_PROPERTY.ITEM_ID
       )?.value;
+
       /** @type {number} */
       const id = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
         (property) => property.name === TILED_ITEM_PROPERTY.ID

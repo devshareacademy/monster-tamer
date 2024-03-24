@@ -38,7 +38,10 @@ export class Item {
 
   /** @type {import('../types/typedef').Coordinate} */
   get position() {
-    return { x: this.#phaserGameObject.x, y: this.#phaserGameObject.y };
+    return {
+      x: this.#phaserGameObject.x,
+      y: this.#phaserGameObject.y,
+    };
   }
 
   /** @type {number} */

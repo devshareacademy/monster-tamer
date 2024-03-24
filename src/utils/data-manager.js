@@ -255,12 +255,12 @@ class DataManager extends Phaser.Events.EventEmitter {
     });
     if (existingItem) {
       existingItem.quantity += quantity;
-      return;
+    } else {
+      inventory.push({
+        item,
+        quantity,
+      });
     }
-    inventory.push({
-      item,
-      quantity,
-    });
     this.#store.set(DATA_MANAGER_STORE_KEYS.INVENTORY, inventory);
   }
 
