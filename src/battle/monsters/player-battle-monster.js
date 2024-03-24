@@ -1,4 +1,6 @@
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
+import { ExpBar } from '../../common/exp-bar.js';
+import { totalExpNeededForLevel } from '../../utils/leveling-utils.js';
 import { BattleMonster } from './battle-monster.js';
 
 /** @type {import('../../types/typedef').Coordinate} */
@@ -10,6 +12,8 @@ const PLAYER_POSITION = Object.freeze({
 export class PlayerBattleMonster extends BattleMonster {
   /** @type {Phaser.GameObjects.Text} */
   #healthBarTextGameObject;
+  /** @type {ExpBar} */
+  #expBar;
 
   /**
    * @param {import('../../types/typedef.js').BattleMonsterConfig} config
@@ -20,6 +24,23 @@ export class PlayerBattleMonster extends BattleMonster {
     this._phaserHealthBarGameContainer.setPosition(556, 318);
 
     this.#addHealthBarComponents();
+    this.#addExpBarComponents();
+  }
+
+  #addExpBarComponents() {
+    this.#expBar = new ExpBar(this._scene, 34, 54);
+    const totalExpNeededForNextLevel = totalExpNeededForLevel(this._monsterDetails.currentLevel + 1);
+    const currentExp = this._monsterDetails.currentExp;
+    this.#expBar.setMeterPercentageAnimated(currentExp / totalExpNeededForNextLevel, { skipBattleAnimations: true });
+
+    const monsterExpText = this._scene.add.text(30, 100, 'EXP', {
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      color: '#6505FF',
+      fontSize: '14px',
+      fontStyle: 'italic',
+    });
+
+    this._phaserHealthBarGameContainer.add([monsterExpText, this.#expBar.container]);
   }
 
   #setHealthBarText() {
