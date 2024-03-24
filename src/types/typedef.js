@@ -18,6 +18,9 @@ import Phaser from '../lib/phaser.js';
  * @property {number} maxHp the max health of this monster
  * @property {number} currentHp the max health of this monster
  * @property {number} baseAttack the base attack value of this monster
+ * @property {number} currentAttack the current attack value of this monster
+ * @property {number} baseExp the base exp value of this monster
+ * @property {number} currentExp the current exp this monster has
  */
 
 /**

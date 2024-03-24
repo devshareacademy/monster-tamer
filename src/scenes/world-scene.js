@@ -109,19 +109,18 @@ export class WorldScene extends BaseScene {
     super.init(data);
     this.#sceneData = data;
 
-    if (Object.keys(data).length === 0) {
-      /** @type {string} */
-      const area = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
-      const isInterior =
-        this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
-      const isPlayedKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
+    // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
+    /** @type {string} */
+    const area = this.#sceneData?.area || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
+    const isInterior =
+      this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
+    const isPlayedKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
 
-      this.#sceneData = {
-        area,
-        isInterior: isInterior,
-        isPlayerKnockedOut: isPlayedKnockedOut,
-      };
-    }
+    this.#sceneData = {
+      area,
+      isInterior: isInterior,
+      isPlayerKnockedOut: isPlayedKnockedOut,
+    };
 
     // update player location, and map data if the player was knocked out in a battle
     if (this.#sceneData.isPlayerKnockedOut) {

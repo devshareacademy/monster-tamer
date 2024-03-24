@@ -9,7 +9,10 @@
     "maxHp": 25,
     "attackIds": [2],
     "baseAttack": 5,
-    "currentLevel": 5
+    "currentAttack": 5,
+    "currentLevel": 5,
+    "baseExp": 50,
+    "currentExp": 125
   },
   {
     "id": 2,
@@ -21,7 +24,10 @@
     "maxHp": 25,
     "attackIds": [1],
     "baseAttack": 5,
-    "currentLevel": 5
+    "currentAttack": 5,
+    "currentLevel": 5,
+    "baseExp": 52,
+    "currentExp": 125
   },
   {
     "id": 3,
@@ -33,7 +39,10 @@
     "maxHp": 25,
     "attackIds": [2],
     "baseAttack": 5,
-    "currentLevel": 5
+    "currentAttack": 5,
+    "currentLevel": 5,
+    "baseExp": 51,
+    "currentExp": 125
   },
   {
     "id": 4,
@@ -45,7 +54,10 @@
     "maxHp": 25,
     "attackIds": [2],
     "baseAttack": 5,
-    "currentLevel": 5
+    "currentAttack": 5,
+    "currentLevel": 5,
+    "baseExp": 50,
+    "currentExp": 125
   },
   {
     "id": 5,
@@ -57,6 +69,9 @@
     "maxHp": 25,
     "attackIds": [1],
     "baseAttack": 5,
-    "currentLevel": 5
+    "currentAttack": 5,
+    "currentLevel": 5,
+    "baseExp": 53,
+    "currentExp": 125
   }
 ]
