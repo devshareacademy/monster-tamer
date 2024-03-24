@@ -14,6 +14,7 @@ import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
+import { calculateExpGainedFromMonster } from '../utils/leveling-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -25,6 +26,7 @@ const BATTLE_STATES = Object.freeze({
   POST_ATTACK_CHECK: 'POST_ATTACK_CHECK',
   FINISHED: 'FINISHED',
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
+  GAIN_EXPERIENCE: 'GAIN_EXPERIENCE',
 });
 
 /**
@@ -146,6 +148,7 @@ export class BattleScene extends BaseScene {
       wasSpaceKeyPressed &&
       (this.#battleStateMachine.currentStateName === BATTLE_STATES.PRE_BATTLE_INFO ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.POST_ATTACK_CHECK ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.GAIN_EXPERIENCE ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT)
     ) {
       this.#battleMenu.handlePlayerInput('OK');
@@ -283,9 +286,9 @@ export class BattleScene extends BaseScene {
       // play monster fainted animation and wait for animation to finish
       this.#activeEnemyMonster.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`Wild ${this.#activeEnemyMonster.name} fainted.`, 'You have gained some experience'],
+          [`Wild ${this.#activeEnemyMonster.name} fainted.`],
           () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+            this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
           }
         );
       });
@@ -495,6 +498,59 @@ export class BattleScene extends BaseScene {
           this.time.delayedCall(200, () => {
             this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
           });
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.GAIN_EXPERIENCE,
+      onEnter: () => {
+        // update exp bar based on experience gained, then transition to finished state
+        const gainedExpForActiveMonster = calculateExpGainedFromMonster(
+          this.#activeEnemyMonster.baseExpValue,
+          this.#activeEnemyMonster.level,
+          true
+        );
+        const gainedExpForInactiveMonster = calculateExpGainedFromMonster(
+          this.#activeEnemyMonster.baseExpValue,
+          this.#activeEnemyMonster.level,
+          false
+        );
+
+        /** @type {string[]} */
+        const messages = [];
+        this.#sceneData.playerMonsters.forEach((monster, index) => {
+          /** @type {import('../utils/leveling-utils.js').StatChanges} */
+          let statChanges;
+          if (index === this.#activePlayerAttackIndex) {
+            statChanges = this.#activePlayerMonster.updateMonsterExp(gainedExpForActiveMonster);
+            messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`);
+          } else {
+            statChanges = this.#activePlayerMonster.updateMonsterExp(gainedExpForInactiveMonster);
+            messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForInactiveMonster} exp.`);
+          }
+          if (statChanges.level !== 0) {
+            messages.push(
+              `${this.#sceneData.playerMonsters[index].name} level increased to ${
+                this.#sceneData.playerMonsters[index].currentLevel
+              }!`,
+              `${this.#sceneData.playerMonsters[index].name} attack increased by ${
+                statChanges.attack
+              } and health increased by ${statChanges.health}`
+            );
+          }
+        });
+
+        this._controls.lockInput = true;
+        this.#activePlayerMonster.updateMonsterExpBar(() => {
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
+            this.time.delayedCall(200, () => {
+              // update the data manager with latest monster data
+              dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+            });
+          });
+          this._controls.lockInput = false;
         });
       },
     });

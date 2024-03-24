@@ -52,3 +52,65 @@ export function calculateExpBarCurrentValue(currentLevel, currentExp) {
   const maxExpForBar = expForNextLevel - expNeededForCurrentLevel;
   return currentExpForBar / maxExpForBar;
 }
+
+/**
+ * Calculates the number of experience points a monster will gain from a given monster
+ * based on that monsters baseExp value and current level.
+ * @param {number} baseExp the base exp value for a given monster that was defeated or caught
+ * @param {number} currentLevel the current level of a given monster that was defeated or caught
+ * @param {boolean} isActiveMonster if the monster that is gaining the exp was the current active monster in battle
+ * @returns {number} the number of experience points earned from this monster
+ */
+export function calculateExpGainedFromMonster(baseExp, currentLevel, isActiveMonster) {
+  return Math.round(((baseExp * currentLevel) / 7) * (1 / (isActiveMonster ? 1 : 2)));
+}
+
+/**
+ * @typedef StatChanges
+ * @type {object}
+ * @property {number} level
+ * @property {number} health
+ * @property {number} attack
+ */
+
+/**
+ * Adds the given experience to the provided monster and handles increasing the monsters
+ * level and stats if the monster leveled up.
+ * @param {import("../types/typedef").Monster} monster the monster that is gaining the experience
+ * @param {number} gainedExp the amount of experience the monster gained
+ * @returns {StatChanges} the stat increases that were applied to the monster
+ */
+export function handleMonsterGainingExperience(monster, gainedExp) {
+  if (monster.currentLevel === 100) {
+    return;
+  }
+
+  monster.currentExp += gainedExp;
+  // check if we have enough exp to gain a level
+  let gainedLevel = false;
+  const statChanges = {
+    level: 0,
+    health: 0,
+    attack: 0,
+  };
+  do {
+    gainedLevel = false;
+    const expRequiredForNextLevel = totalExpNeededForLevel(monster.currentLevel + 1);
+    if (monster.currentExp >= expRequiredForNextLevel) {
+      monster.currentLevel += 1;
+      const bonusAttack = Phaser.Math.Between(0, 1);
+      const bonusHealth = Phaser.Math.Between(0, 3);
+      const hpIncrease = 5 + bonusHealth;
+      const atkIncrease = 1 + bonusAttack;
+      monster.maxHp += hpIncrease;
+      monster.currentAttack += atkIncrease;
+      statChanges.level += 1;
+      statChanges.health += hpIncrease;
+      statChanges.attack += atkIncrease;
+
+      gainedLevel = true;
+    }
+  } while (gainedLevel);
+
+  return statChanges;
+}

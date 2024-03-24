@@ -127,6 +127,11 @@ Leveling & Experience:
   refactor hp bar into re-usable class
   update battle scene to display exp bar
   update monster details scene to display exp bar
+  gain exp when battle is over
+    add new battle state for tracking
+    new leveling utils for updates
+    update monster classes to support
+    update battle menu ui to have wordwrap
 
 -------------------------------
 

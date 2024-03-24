@@ -23,6 +23,8 @@ export class BattleMonster {
   _phaserHealthBarGameContainer;
   /** @protected @type {boolean} */
   _skipBattleAnimations;
+  /** @protected @type {Phaser.GameObjects.Text} */
+  _monsterLevelTextGameObject;
 
   /**
    * @param {import('../../types/typedef.js').BattleMonsterConfig} config
@@ -77,7 +79,7 @@ export class BattleMonster {
 
   /** @type {number} */
   get baseAttack() {
-    return this._monsterDetails.baseAttack;
+    return this._monsterDetails.currentAttack;
   }
 
   /** @type {number} */
@@ -154,6 +156,17 @@ export class BattleMonster {
     });
   }
 
+  /**
+   * @protected
+   */
+  _setMonsterLevelText() {
+    this._monsterLevelTextGameObject.setText(`L${this.level}`);
+  }
+
+  /**
+   * Creates the base health bar components for this monster.
+   * @param {number} [scaleHealthBarBackgroundImageByY=1] the scaling factor applied to the phaser image game object Y value
+   */
   #createHealthBarComponents(scaleHealthBarBackgroundImageByY = 1) {
     this._healthBar = new HealthBar(this._scene, 34, 34);
 
@@ -168,11 +181,12 @@ export class BattleMonster {
       .setOrigin(0)
       .setScale(1, scaleHealthBarBackgroundImageByY);
 
-    const monsterHealthBarLevelText = this._scene.add.text(monsterNameGameText.width + 35, 23, `L${this.level}`, {
+    this._monsterLevelTextGameObject = this._scene.add.text(monsterNameGameText.width + 35, 23, '', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#ED474B',
       fontSize: '28px',
     });
+    this._setMonsterLevelText();
 
     const monsterHpText = this._scene.add.text(30, 55, 'HP', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
@@ -186,7 +200,7 @@ export class BattleMonster {
         healthBarBgImage,
         monsterNameGameText,
         this._healthBar.container,
-        monsterHealthBarLevelText,
+        this._monsterLevelTextGameObject,
         monsterHpText,
       ])
       .setAlpha(0);
