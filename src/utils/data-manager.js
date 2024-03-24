@@ -174,7 +174,6 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.player.direction = initialState.player.direction;
     existingData.player.location = { ...initialState.player.location };
     existingData.gameStarted = initialState.gameStarted;
-    existingData.inventory = initialState.inventory;
     existingData.monsters = {
       inParty: [...initialState.monsters.inParty],
     };
