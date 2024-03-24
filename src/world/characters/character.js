@@ -14,30 +14,19 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  */
 
 /**
- * @typedef BaseCharacterConfig
+ * @typedef CharacterConfig
  * @type {object}
  * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
- * @property {import('../../types/typedef.js').Coordinate} position the starting position of the character
- * @property {Character[]} [otherCharactersToCheckForCollisionWith=[]]
- * @property {import('../../common/direction.js').Direction} direction
- * @property {() => void} [spriteGridMovementFinishedCallback]
- * @property {() => void} [spriteChangedDirectionCallback]
+ * @property {string} assetKey the name of the asset key that should be used for this character
  * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
+ * @property {import('../../types/typedef.js').Coordinate} position the starting position of the character
+ * @property {import('../../common/direction.js').Direction} direction the direction the character is currently facing
+ * @property {() => void} [spriteGridMovementFinishedCallback] an optional callback that will be called after each step of the grid movement is complete
+ * @property {CharacterIdleFrameConfig} idleFrameConfig
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
  * @property {() => void} [spriteChangedDirectionCallback]
  * @property {{position: import('../../types/typedef.js').Coordinate}[]} [objectsToCheckForCollisionsWith]
- */
-
-/**
- * @typedef CharacterConfigProps
- * @type {object}
- * @property {string} assetKey the name of the asset key that should be used for this character
- * @property {CharacterIdleFrameConfig} idleFrameConfig
- */
-
-/**
- * @typedef {BaseCharacterConfig & CharacterConfigProps} CharacterConfig
  */
 
 export class Character {
@@ -288,6 +277,7 @@ export class Character {
     if (this._objectsToCheckForCollisionsWith.length === 0) {
       return false;
     }
+
     const collidesWithObject = this._objectsToCheckForCollisionsWith.some((object) => {
       return object.position.x === x && object.position.y === y;
     });

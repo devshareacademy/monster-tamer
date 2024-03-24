@@ -257,12 +257,12 @@ class DataManager extends Phaser.Events.EventEmitter {
     });
     if (existingItem) {
       existingItem.quantity += quantity;
-      return;
+    } else {
+      inventory.push({
+        item,
+        quantity,
+      });
     }
-    inventory.push({
-      item,
-      quantity,
-    });
     this.#store.set(DATA_MANAGER_STORE_KEYS.INVENTORY, inventory);
   }
 
@@ -271,7 +271,7 @@ class DataManager extends Phaser.Events.EventEmitter {
    */
   addItemPickedUp(itemId) {
     /** @type {number[]} */
-    const itemsPickedUp = this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP);
+    const itemsPickedUp = this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
     itemsPickedUp.push(itemId);
     this.#store.set(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP, itemsPickedUp);
   }
@@ -324,7 +324,7 @@ class DataManager extends Phaser.Events.EventEmitter {
         inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
       },
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
-      itemsPickedUp: [...this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP)],
+      itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
     };
   }
 }
