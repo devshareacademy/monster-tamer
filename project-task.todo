@@ -120,6 +120,14 @@ World Scene Part 3:
   ☐ buildings
   ☐ items in the field
 
+Leveling & Experience:
+  review math for leveling and exp gain
+  update monseters json file and types to include exp info
+  add new assets for exp bar
+  refactor hp bar into re-usable class
+  update battle scene to display exp bar
+  update monster details scene to display exp bar
+
 -------------------------------
 
 Future Content:

@@ -1,6 +1,6 @@
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { ExpBar } from '../../common/exp-bar.js';
-import { totalExpNeededForLevel } from '../../utils/leveling-utils.js';
+import { calculateExpBarCurrentValue } from '../../utils/leveling-utils.js';
 import { BattleMonster } from './battle-monster.js';
 
 /** @type {import('../../types/typedef').Coordinate} */
@@ -29,9 +29,10 @@ export class PlayerBattleMonster extends BattleMonster {
 
   #addExpBarComponents() {
     this.#expBar = new ExpBar(this._scene, 34, 54);
-    const totalExpNeededForNextLevel = totalExpNeededForLevel(this._monsterDetails.currentLevel + 1);
-    const currentExp = this._monsterDetails.currentExp;
-    this.#expBar.setMeterPercentageAnimated(currentExp / totalExpNeededForNextLevel, { skipBattleAnimations: true });
+    this.#expBar.setMeterPercentageAnimated(
+      calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
+      { skipBattleAnimations: true }
+    );
 
     const monsterExpText = this._scene.add.text(30, 100, 'EXP', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
