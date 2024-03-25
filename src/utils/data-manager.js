@@ -14,12 +14,20 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  */
 
 /**
+ * @typedef PlayerLocation
+ * @type {object}
+ * @property {string} area
+ * @property {boolean} isInterior
+ */
+
+/**
  * @typedef GlobalState
  * @type {object}
  * @property {object} player
  * @property {object} player.position
  * @property {number} player.position.x
  * @property {number} player.position.y
+ * @property {PlayerLocation} player.location
  * @property {import('../common/direction.js').Direction} player.direction
  * @property {object} options
  * @property {import('../common/options.js').TextSpeedMenuOptions} options.textSpeed
@@ -42,6 +50,10 @@ const initialState = {
       y: 21 * TILE_SIZE,
     },
     direction: DIRECTION.DOWN,
+    location: {
+      area: 'main_1',
+      isInterior: false,
+    },
   },
   options: {
     textSpeed: TEXT_SPEED_OPTIONS.MID,
@@ -69,6 +81,7 @@ const initialState = {
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   PLAYER_POSITION: 'PLAYER_POSITION',
   PLAYER_DIRECTION: 'PLAYER_DIRECTION',
+  PLAYER_LOCATION: 'PLAYER_LOCATION',
   OPTIONS_TEXT_SPEED: 'OPTIONS_TEXT_SPEED',
   OPTIONS_BATTLE_SCENE_ANIMATIONS: 'OPTIONS_BATTLE_SCENE_ANIMATIONS',
   OPTIONS_BATTLE_STYLE: 'OPTIONS_BATTLE_STYLE',
@@ -158,6 +171,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
+    existingData.player.location = { ...initialState.player.location };
     existingData.player.direction = initialState.player.direction;
     existingData.gameStarted = initialState.gameStarted;
     existingData.monsters = {
@@ -269,6 +283,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     this.#store.set({
       [DATA_MANAGER_STORE_KEYS.PLAYER_POSITION]: data.player.position,
       [DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION]: data.player.direction,
+      [DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION]: data.player.location || { ...initialState.player.location },
       [DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED]: data.options.textSpeed,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS]: data.options.battleSceneAnimations,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_STYLE]: data.options.battleStyle,
@@ -293,6 +308,7 @@ class DataManager extends Phaser.Events.EventEmitter {
           y: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION).y,
         },
         direction: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
+        location: { ...this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION) },
       },
       options: {
         textSpeed: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_TEXT_SPEED),

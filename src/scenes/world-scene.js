@@ -53,6 +53,8 @@ const TILED_ITEM_PROPERTY = Object.freeze({
  * @typedef WorldSceneData
  * @type {object}
  * @property {boolean} [isPlayerKnockedOut]
+ * @property {string} [area]
+ * @property {boolean} [isInterior]
  */
 
 /*
@@ -63,11 +65,11 @@ const TILED_ITEM_PROPERTY = Object.freeze({
 export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Phaser.Tilemaps.TilemapLayer} */
+  /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   #encounterLayer;
   /** @type {boolean} */
   #wildMonsterEncountered;
-  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
@@ -96,13 +98,17 @@ export class WorldScene extends BaseScene {
     super.init(data);
     this.#sceneData = data;
 
-    if (Object.keys(data).length === 0) {
-      this.#sceneData = {
-        isPlayerKnockedOut: false,
-      };
-    }
+    /** @type {string} */
+    const area = this.#sceneData?.area || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
+    const isInterior =
+      this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
+    const isPlayerKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
 
-    this.#wildMonsterEncountered = false;
+    this.#sceneData = {
+      area,
+      isInterior,
+      isPlayerKnockedOut,
+    };
 
     // update player location, and map data if the player was knocked out in a battle
     if (this.#sceneData.isPlayerKnockedOut) {
@@ -122,6 +128,15 @@ export class WorldScene extends BaseScene {
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.DOWN);
     }
 
+    dataManager.store.set(
+      DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION,
+      /** @type {import('../utils/data-manager.js').PlayerLocation} */ ({
+        area: this.#sceneData.area,
+        isInterior: this.#sceneData.isInterior,
+      })
+    );
+
+    this.#wildMonsterEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
     this.#items = [];
   }
@@ -132,18 +147,18 @@ export class WorldScene extends BaseScene {
   create() {
     super.create();
 
-    const x = 6 * TILE_SIZE;
-    const y = 22 * TILE_SIZE;
+    // const x = 6 * TILE_SIZE;
+    // const y = 22 * TILE_SIZE;
 
     // this value comes from the width of the level background image we are using
     // we set the max camera width to the size of our image in order to control what
     // is visible to the player, since the phaser game world is infinite.
-    this.cameras.main.setBounds(0, 0, 1280, 2176);
-    this.cameras.main.setZoom(0.8);
-    this.cameras.main.centerOn(x, y);
+    // this.cameras.main.setBounds(0, 0, 1280, 2176);
+    // this.cameras.main.setZoom(0.8);
+    // this.cameras.main.centerOn(x, y);
 
     // create map and collision layer
-    const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL });
+    const map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
@@ -159,26 +174,28 @@ export class WorldScene extends BaseScene {
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
-    this.#signLayer = map.getObjectLayer('Sign');
-    if (!this.#signLayer) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
-      return;
+    const hasSignLayer = map.getObjectLayer('Sign') !== null;
+    if (hasSignLayer) {
+      this.#signLayer = map.getObjectLayer('Sign');
     }
 
     // create collision layer for encounters
-    const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
-    if (!encounterTiles) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
-      return;
+    const hasEncounterLayer = map.getObjectLayer('Encounter') !== null;
+    if (hasEncounterLayer) {
+      const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+      if (!encounterTiles) {
+        console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
+        return;
+      }
+      this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
+      this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
     }
-    this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
-    if (!this.#encounterLayer) {
-      console.log(`[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`);
-      return;
-    }
-    this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+    if (!this.#sceneData.isInterior) {
+      this.cameras.main.setBounds(0, 0, 1280, 2176);
+    }
+    this.cameras.main.setZoom(0.8);
+    this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
     // create items and collisions
     this.#createItems(map);
@@ -209,7 +226,7 @@ export class WorldScene extends BaseScene {
     });
 
     // create foreground for depth
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
+    this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_FOREGROUND`, 0).setOrigin(0);
 
     // create dialog ui
     this.#dialogUi = new DialogUi(this, 1280);
@@ -241,6 +258,7 @@ export class WorldScene extends BaseScene {
    */
   update(time) {
     super.update(time);
+
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
       return;
@@ -323,6 +341,9 @@ export class WorldScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerInteraction() {
     if (this.#dialogUi.isAnimationPlaying) {
       return;
@@ -347,7 +368,7 @@ export class WorldScene extends BaseScene {
     const targetPosition = getTargetPositionFromGameObjectPositionAndDirection({ x, y }, this.#player.direction);
 
     // check for sign, and display appropriate message if player is not facing up
-    const nearbySign = this.#signLayer.objects.find((object) => {
+    const nearbySign = this.#signLayer?.objects.find((object) => {
       if (!object.x || !object.y) {
         return false;
       }
@@ -448,6 +469,9 @@ export class WorldScene extends BaseScene {
     }
   }
 
+  /**
+   * @returns {boolean}
+   */
   #isPlayerInputLocked() {
     return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
   }
@@ -515,6 +539,9 @@ export class WorldScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerDirectionUpdate() {
     // update player direction on global data store
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, this.#player.direction);
