@@ -636,16 +636,20 @@ export class WorldScene extends BaseScene {
       y += TILE_SIZE;
     }
 
-    dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
-      x,
-      y,
-    });
+    this.cameras.main.fadeOut(1000, 0, 0, 0, (camera, progress) => {
+      if (progress === 1) {
+        dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+          x,
+          y,
+        });
 
-    /** @type {WorldSceneData} */
-    const dataToPass = {
-      area: entranceName,
-      isInterior: isBuildingEntrance,
-    };
-    this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
+        /** @type {WorldSceneData} */
+        const dataToPass = {
+          area: entranceName,
+          isInterior: isBuildingEntrance,
+        };
+        this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
+      }
+    });
   }
 }
