@@ -80,7 +80,7 @@ export class DataUtils {
    * @returns {import('../types/typedef.js').NpcDetails}
    */
   static getNpcData(scene, npcId) {
-    /** @type {import('../types/typedef.js').NpcDetails} */
+    /** @type {import('../types/typedef.js').NpcData} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.NPCS);
     return data[npcId];
   }

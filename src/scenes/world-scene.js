@@ -37,6 +37,7 @@ const CUSTOM_TILED_TYPES = Object.freeze({
 
 const TILED_NPC_PROPERTY = Object.freeze({
   MOVEMENT_PATTERN: 'movement_pattern',
+  FRAME: 'frame',
   ID: 'id',
 });
 
@@ -49,7 +50,7 @@ const TILED_ITEM_PROPERTY = Object.freeze({
   ID: 'id',
 });
 
-const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
+const TILED_AREA_METADATA_PROPERTY = Object.freeze({
   FAINT_LOCATION: 'faint_location',
   ID: 'id',
 });
@@ -70,11 +71,11 @@ const TILED_AREA_META_DATA_PROPERTY = Object.freeze({
 export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Phaser.Tilemaps.TilemapLayer} */
+  /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   #encounterLayer;
   /** @type {boolean} */
   #wildMonsterEncountered;
-  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
@@ -88,7 +89,7 @@ export class WorldScene extends BaseScene {
   #sceneData;
   /** @type {Item[]} */
   #items;
-  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #entranceLayer;
   /** @type {number} */
   #lastNpcEventHandledIndex;
@@ -112,14 +113,16 @@ export class WorldScene extends BaseScene {
     // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
     /** @type {string} */
     const area = this.#sceneData?.area || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).area;
-    const isInterior =
-      this.#sceneData?.isInterior || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
-    const isPlayedKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
+    let isInterior = this.#sceneData?.isInterior;
+    if (isInterior === undefined) {
+      isInterior = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
+    }
+    const isPlayerKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
 
     this.#sceneData = {
       area,
-      isInterior: isInterior,
-      isPlayerKnockedOut: isPlayedKnockedOut,
+      isInterior,
+      isPlayerKnockedOut,
     };
 
     // update player location, and map data if the player was knocked out in a battle
@@ -128,14 +131,13 @@ export class WorldScene extends BaseScene {
       let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
       const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
       const knockOutSpawnLocation = /** @type {TiledObjectProperty[]} */ (areaMetaDataProperties).find(
-        (property) => property.name === TILED_AREA_META_DATA_PROPERTY.FAINT_LOCATION
+        (property) => property.name === TILED_AREA_METADATA_PROPERTY.FAINT_LOCATION
       )?.value;
 
       // check to see if the level data we need to load is different and load that map to get player spawn data
-      const knockedOutLevelName = knockOutSpawnLocation.toUpperCase();
-      if (knockedOutLevelName !== this.#sceneData.area.toUpperCase()) {
+      if (knockOutSpawnLocation !== this.#sceneData.area) {
         this.#sceneData.area = knockOutSpawnLocation;
-        map = this.make.tilemap({ key: `${knockedOutLevelName}_LEVEL` });
+        map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
       }
 
       // set players spawn location to that map and finds the revive location based on that object
@@ -168,10 +170,6 @@ export class WorldScene extends BaseScene {
   create() {
     super.create();
 
-    // this value comes from the width of the level background image we are using
-    // we set the max camera width to the size of our image in order to control what
-    // is visible to the player, since the phaser game world is infinite.
-
     // create map and collision layer
     const map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
@@ -192,23 +190,16 @@ export class WorldScene extends BaseScene {
     const hasSignLayer = map.getObjectLayer('Sign') !== null;
     if (hasSignLayer) {
       this.#signLayer = map.getObjectLayer('Sign');
-      if (!this.#signLayer) {
-        console.log(`[${WorldScene.name}:create] encountered error while creating sign layer using data from tiled`);
-        return;
-      }
     }
 
     // create layer for scene transitions entrances
-    this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
-    if (!this.#entranceLayer) {
-      console.log(
-        `[${WorldScene.name}:create] encountered error while creating scene entrances layer using data from tiled`
-      );
-      return;
+    const hasSceneTransitionLayer = map.getObjectLayer('Scene-Transitions') !== null;
+    if (hasSceneTransitionLayer) {
+      this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
     }
 
     // create collision layer for encounters
-    const hasEncounterLayer = map.tilesets.some((tileset) => tileset.name === 'encounter');
+    const hasEncounterLayer = map.getLayerIndexByName('Encounter') !== null;
     if (hasEncounterLayer) {
       const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
       if (!encounterTiles) {
@@ -216,12 +207,6 @@ export class WorldScene extends BaseScene {
         return;
       }
       this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
-      if (!this.#encounterLayer) {
-        console.log(
-          `[${WorldScene.name}:create] encountered error while creating encounter layer using data from tiled`
-        );
-        return;
-      }
       this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
     }
 
@@ -229,11 +214,7 @@ export class WorldScene extends BaseScene {
       this.cameras.main.setBounds(0, 0, 1280, 2176);
     }
     this.cameras.main.setZoom(0.8);
-
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
-
-    // create items and collisions
-    this.#createItems(map);
 
     // create items and collisions
     this.#createItems(map);
@@ -257,7 +238,7 @@ export class WorldScene extends BaseScene {
       objectsToCheckForCollisionsWith: this.#items,
       entranceLayer: this.#entranceLayer,
       enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
-        this.#handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
+        this.#handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
@@ -645,12 +626,12 @@ export class WorldScene extends BaseScene {
   }
 
   /**
-   * @param {string} entranceId
    * @param {string} entranceName
+   * @param {string} entranceId
    * @param {boolean} isBuildingEntrance
    * @returns {void}
    */
-  #handleOnEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance) {
+  #handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance) {
     this._controls.lockInput = true;
 
     // update player position to match the new entrance data

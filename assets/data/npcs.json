@@ -17,13 +17,13 @@
         "data": {
           "fadeInDuration": 1000,
           "fadeOutDuration": 1000,
-          "waitDuration": 1500
+          "waitDuration": 1000
         }
       },
       {
         "type": "MESSAGE",
         "data": {
-          "messages": ["Oh good! You and monsters are looking great!"]
+          "messages": ["Oh good! You and your monsters are looking great!"]
         }
       }
     ]
@@ -45,13 +45,7 @@
       {
         "type": "MESSAGE",
         "data": {
-          "messages": ["You can save your game from the menu."]
-        }
-      },
-      {
-        "type": "MESSAGE",
-        "data": {
-          "messages": ["To open the menu, press the ENTER key."]
+          "messages": ["You can save your game from the menu.", "To open the menu, press the ENTER key."]
         }
       }
     ]
