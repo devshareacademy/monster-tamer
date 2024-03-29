@@ -1,3 +1,4 @@
+import Phaser from '../../lib/phaser.js';
 import { Character } from './character.js';
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
@@ -135,6 +136,7 @@ export class NPC extends Character {
       let characterDirection = DIRECTION.NONE;
       let nextPosition = this.#npcPath[this.#currentPathIndex + 1];
 
+      // validate if we actually moved to the next position, if not, skip updating index
       const prevPosition = this.#npcPath[this.#currentPathIndex];
       if (prevPosition.x !== this._phaserGameObject.x || prevPosition.y !== this._phaserGameObject.y) {
         nextPosition = this.#npcPath[this.#currentPathIndex];

@@ -130,7 +130,7 @@ export class WorldScene extends BaseScene {
       // get the nearest knocked out spawn location from the map meta data
       let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
       const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
-      const knockOutSpawnLocation = areaMetaDataProperties.find(
+      const knockOutSpawnLocation = /** @type {TiledObjectProperty[]} */ (areaMetaDataProperties).find(
         (property) => property.name === TILED_AREA_METADATA_PROPERTY.FAINT_LOCATION
       )?.value;
 
@@ -199,7 +199,7 @@ export class WorldScene extends BaseScene {
     }
 
     // create collision layer for encounters
-    const hasEncounterLayer = map.getObjectLayer('Encounter') !== null;
+    const hasEncounterLayer = map.getLayerIndexByName('Encounter') !== null;
     if (hasEncounterLayer) {
       const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
       if (!encounterTiles) {
@@ -611,6 +611,7 @@ export class WorldScene extends BaseScene {
         continue;
       }
 
+      // create object
       const item = new Item({
         scene: this,
         position: {
@@ -633,15 +634,19 @@ export class WorldScene extends BaseScene {
   #handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance) {
     this._controls.lockInput = true;
 
+    // update player position to match the new entrance data
+    // create tilemap using the provided entrance data
     const map = this.make.tilemap({ key: `${entranceName.toUpperCase()}_LEVEL` });
+    // get the position of the entrance object using the entrance id
     const entranceObjectLayer = map.getObjectLayer('Scene-Transitions');
+
     const entranceObject = entranceObjectLayer.objects.find((object) => {
       const tempEntranceName = object.properties.find((property) => property.name === 'connects_to').value;
       const tempEntranceId = object.properties.find((property) => property.name === 'entrance_id').value;
 
       return tempEntranceName === this.#sceneData.area && tempEntranceId === entranceId;
     });
-
+    // create position player will be placed at and update based on players facing direction
     let x = entranceObject.x;
     let y = entranceObject.y - TILE_SIZE;
     if (this.#player.direction === DIRECTION.UP) {
@@ -675,10 +680,11 @@ export class WorldScene extends BaseScene {
     if (this.#isProcessingNpcEvent) {
       return;
     }
-    // check to see if the npc has any events associated with them
-    const isMoveEventsToProcess = this.#npcPlayerIsInteractingWith.events.length - 1 !== this.#lastNpcEventHandledIndex;
 
-    if (!isMoveEventsToProcess) {
+    // check to see if the npc has any events associated with them
+    const isMoreEventsToProcess = this.#npcPlayerIsInteractingWith.events.length - 1 !== this.#lastNpcEventHandledIndex;
+
+    if (!isMoreEventsToProcess) {
       this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
       this.#npcPlayerIsInteractingWith = undefined;
       this.#lastNpcEventHandledIndex = -1;
@@ -703,6 +709,7 @@ export class WorldScene extends BaseScene {
         break;
       case NPC_EVENT_TYPE.SCENE_FADE_IN_AND_OUT:
         this.#isProcessingNpcEvent = true;
+        // lock input, and wait for scene to fade in and out
         this.cameras.main.fadeOut(eventToHandle.data.fadeOutDuration, 0, 0, 0, (fadeOutCamera, fadeOutProgress) => {
           if (fadeOutProgress !== 1) {
             return;
@@ -717,6 +724,7 @@ export class WorldScene extends BaseScene {
             });
           });
         });
+        // TODO: play audio cue
         break;
       default:
         exhaustiveGuard(eventType);

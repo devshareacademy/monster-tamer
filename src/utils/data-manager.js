@@ -8,6 +8,13 @@ import { DataUtils } from './data-utils.js';
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
 /**
+ * @typedef PlayerLocation
+ * @type {object}
+ * @property {string} area
+ * @property {boolean} isInterior
+ */
+
+/**
  * @typedef MonsterData
  * @type {object}
  * @property {import('../types/typedef.js').Monster[]} inParty
@@ -29,6 +36,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {number} player.position.y
  * @property {PlayerLocation} player.location
  * @property {import('../common/direction.js').Direction} player.direction
+ * @property {PlayerLocation} player.location
  * @property {object} options
  * @property {import('../common/options.js').TextSpeedMenuOptions} options.textSpeed
  * @property {import('../common/options.js').BattleSceneMenuOptions} options.battleSceneAnimations
@@ -173,6 +181,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.player.position = { ...initialState.player.position };
     existingData.player.location = { ...initialState.player.location };
     existingData.player.direction = initialState.player.direction;
+    existingData.player.location = { ...initialState.player.location };
     existingData.gameStarted = initialState.gameStarted;
     existingData.monsters = {
       inParty: [...initialState.monsters.inParty],

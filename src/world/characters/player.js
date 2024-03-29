@@ -1,9 +1,9 @@
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
-import { TILE_SIZE } from '../../config.js';
-import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
 import { Character } from './character.js';
+import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
+import { TILE_SIZE } from '../../config.js';
 
 /**
  * @typedef PlayerConfigProps
@@ -69,6 +69,7 @@ export class Player extends Character {
         exhaustiveGuard(this._direction);
     }
 
+    // validate character is not moving and that the target position belongs to an entrance
     if (!this._isMoving && this.#entranceLayer !== undefined) {
       const targetPosition = getTargetPositionFromGameObjectPositionAndDirection(
         { x: this._phaserGameObject.x, y: this._phaserGameObject.y },
