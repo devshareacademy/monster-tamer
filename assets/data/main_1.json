@@ -797,14 +797,9 @@
                          "name":"npc",
                          "properties":[
                                 {
-                                 "name":"frame",
-                                 "type":"string",
-                                 "value":"20"
-                                }, 
-                                {
-                                 "name":"messages",
-                                 "type":"string",
-                                 "value":"Make sure you read the signposts for helpful tips!"
+                                 "name":"id",
+                                 "type":"int",
+                                 "value":2
                                 }, 
                                 {
                                  "name":"movement_pattern",
@@ -909,14 +904,9 @@
                          "name":"npc",
                          "properties":[
                                 {
-                                 "name":"frame",
-                                 "type":"string",
-                                 "value":"0"
-                                }, 
-                                {
-                                 "name":"messages",
-                                 "type":"string",
-                                 "value":"You can save your game from the menu.::To open the menu, press the ENTER key."
+                                 "name":"id",
+                                 "type":"int",
+                                 "value":3
                                 }, 
                                 {
                                  "name":"movement_pattern",
@@ -937,7 +927,6 @@
                  "x":0,
                  "y":0
                 }],
-         "locked":true,
          "name":"NPC",
          "opacity":1,
          "type":"group",

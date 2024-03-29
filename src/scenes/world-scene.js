@@ -15,6 +15,8 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
+import { NPC_EVENT_TYPE } from '../types/typedef.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -34,10 +36,9 @@ const CUSTOM_TILED_TYPES = Object.freeze({
 });
 
 const TILED_NPC_PROPERTY = Object.freeze({
-  IS_SPAWN_POINT: 'is_spawn_point',
   MOVEMENT_PATTERN: 'movement_pattern',
-  MESSAGES: 'messages',
   FRAME: 'frame',
+  ID: 'id',
 });
 
 const TILED_ENCOUNTER_PROPERTY = Object.freeze({
@@ -85,6 +86,10 @@ export class WorldScene extends BaseScene {
   #items;
   /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #entranceLayer;
+  /** @type {number} */
+  #lastNpcEventHandledIndex;
+  /** @type {boolean} */
+  #isProcessingNpcEvent;
 
   constructor() {
     super({
@@ -143,6 +148,8 @@ export class WorldScene extends BaseScene {
     this.#wildMonsterEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
     this.#items = [];
+    this.#lastNpcEventHandledIndex = -1;
+    this.#isProcessingNpcEvent = false;
   }
 
   /**
@@ -280,7 +287,7 @@ export class WorldScene extends BaseScene {
     }
 
     if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
-      if (this.#dialogUi.isVisible) {
+      if (this.#dialogUi.isVisible || this.#isProcessingNpcEvent) {
         return;
       }
 
@@ -356,8 +363,7 @@ export class WorldScene extends BaseScene {
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
       if (this.#npcPlayerIsInteractingWith) {
-        this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
-        this.#npcPlayerIsInteractingWith = undefined;
+        this.#handleNpcInteraction();
       }
       return;
     }
@@ -403,7 +409,7 @@ export class WorldScene extends BaseScene {
       nearbyNpc.facePlayer(this.#player.direction);
       nearbyNpc.isTalkingToPlayer = true;
       this.#npcPlayerIsInteractingWith = nearbyNpc;
-      this.#dialogUi.showDialogModal(nearbyNpc.messages);
+      this.#handleNpcInteraction();
       return;
     }
 
@@ -477,7 +483,9 @@ export class WorldScene extends BaseScene {
    * @returns {boolean}
    */
   #isPlayerInputLocked() {
-    return this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible;
+    return (
+      this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible || this.#isProcessingNpcEvent
+    );
   }
 
   /**
@@ -512,32 +520,27 @@ export class WorldScene extends BaseScene {
         npcPath[parseInt(obj.name, 10)] = { x: obj.x, y: obj.y - TILE_SIZE };
       });
 
-      /** @type {string} */
-      const npcFrame =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.FRAME
-        )?.value || '0';
-      /** @type {string} */
-      const npcMessagesString =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
-          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
-        )?.value || '';
-      const npcMessages = npcMessagesString.split('::');
       /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
       const npcMovement =
         /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
           (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
         )?.value || 'IDLE';
 
+      /** @type {number} */
+      const npcId = /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+        (property) => property.name === TILED_NPC_PROPERTY.ID
+      )?.value;
+      const npcDetails = DataUtils.getNpcData(this, npcId);
+
       // In Tiled, the x value is how far the object starts from the left, and the y is the bottom of tiled object that is being added
       const npc = new NPC({
         scene: this,
         position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
         direction: DIRECTION.DOWN,
-        frame: parseInt(npcFrame, 10),
-        messages: npcMessages,
+        frame: npcDetails.frame,
         npcPath,
         movementPattern: npcMovement,
+        events: npcDetails.events,
       });
       this.#npcs.push(npc);
     });
@@ -651,5 +654,37 @@ export class WorldScene extends BaseScene {
         this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
       }
     });
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleNpcInteraction() {
+    if (this.#isProcessingNpcEvent) {
+      return;
+    }
+    // check to see if the npc has any events associated with them
+    const isMoveEventsToProcess = this.#npcPlayerIsInteractingWith.events.length - 1 !== this.#lastNpcEventHandledIndex;
+
+    if (!isMoveEventsToProcess) {
+      this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+      this.#npcPlayerIsInteractingWith = undefined;
+      this.#lastNpcEventHandledIndex = -1;
+      this.#isProcessingNpcEvent = false;
+      return;
+    }
+
+    // get the next event from the queue and process for this npc
+    this.#lastNpcEventHandledIndex += 1;
+    const eventToHandle = this.#npcPlayerIsInteractingWith.events[this.#lastNpcEventHandledIndex];
+    const eventType = eventToHandle.type;
+
+    switch (eventType) {
+      case NPC_EVENT_TYPE.MESSAGE:
+        this.#dialogUi.showDialogModal(eventToHandle.data.messages);
+        break;
+      default:
+        exhaustiveGuard(eventType);
+    }
   }
 }

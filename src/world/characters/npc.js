@@ -22,9 +22,9 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @typedef NPCConfigProps
  * @type {object}
  * @property {number} frame
- * @property {string[]} messages
  * @property {NPCPath} npcPath
  * @property {NpcMovementPattern} movementPattern
+ * @property {import('../../types/typedef.js').NpcEvent[]} events
  */
 
 /**
@@ -32,8 +32,6 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  */
 
 export class NPC extends Character {
-  /** @type {string[]} */
-  #messages;
   /** @type {boolean} */
   #talkingToPlayer;
   /** @type {NPCPath} */
@@ -44,6 +42,8 @@ export class NPC extends Character {
   #movementPattern;
   /** @type {number} */
   #lastMovementTime;
+  /** @type {import('../../types/typedef.js').NpcEvent[]} */
+  #events;
 
   /**
    * @param {NPCConfig} config
@@ -62,18 +62,18 @@ export class NPC extends Character {
       },
     });
 
-    this.#messages = config.messages;
     this.#talkingToPlayer = false;
     this.#npcPath = config.npcPath;
     this.#currentPathIndex = 0;
     this.#movementPattern = config.movementPattern;
     this.#lastMovementTime = Phaser.Math.Between(3500, 5000);
     this._phaserGameObject.setScale(4);
+    this.#events = config.events;
   }
 
-  /** @type {string[]} */
-  get messages() {
-    return [...this.#messages];
+  /** @type {import('../../types/typedef.js').NpcEvent[]} */
+  get events() {
+    return [...this.#events];
   }
 
   /** @type {boolean} */

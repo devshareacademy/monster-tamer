@@ -151,9 +151,48 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "id":8,
+         "layers":[
+                {
+                 "draworder":"topdown",
+                 "id":9,
+                 "name":"NPC1",
+                 "objects":[
+                        {
+                         "gid":121,
+                         "height":64,
+                         "id":2,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"id",
+                                 "type":"int",
+                                 "value":1
+                                }],
+                         "rotation":0,
+                         "type":"npc",
+                         "visible":true,
+                         "width":64,
+                         "x":576,
+                         "y":256
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }],
+         "name":"NPC",
+         "opacity":1,
+         "type":"group",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":8,
- "nextobjectid":2,
+ "nextlayerid":10,
+ "nextobjectid":3,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
