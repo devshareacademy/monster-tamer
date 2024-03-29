@@ -120,8 +120,25 @@ export const NPC_EVENT_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef NpcEventSceneFadeInAndOut
+ * @type {object}
+ * @property {'SCENE_FADE_IN_AND_OUT'} type
+ * @property {object} data
+ * @property {number} data.fadeInDuration
+ * @property {number} data.fadeOutDuration
+ * @property {number} data.waitDuration
+ */
+
+/**
+ * @typedef NpcEventHeal
+ * @type {object}
+ * @property {'HEAL'} type
+ * @property {object} data
+ */
+
+/**
  * @typedef NpcEvent
- * @type {NpcEventMessage}
+ * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal}
  */
 
 /**
