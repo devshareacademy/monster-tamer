@@ -21,13 +21,6 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  */
 
 /**
- * @typedef PlayerLocation
- * @type {object}
- * @property {string} area
- * @property {boolean} isInterior
- */
-
-/**
  * @typedef GlobalState
  * @type {object}
  * @property {object} player
