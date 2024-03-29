@@ -621,7 +621,42 @@
         }, 
         {
          "draworder":"topdown",
+         "id":25,
+         "name":"Area-Metadata",
+         "objects":[
+                {
+                 "gid":194,
+                 "height":64,
+                 "id":23,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"faint_location",
+                         "type":"string",
+                         "value":"building_1"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"area_metadata",
+                 "visible":true,
+                 "width":64,
+                 "x":192,
+                 "y":1408
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":24,
+         "locked":true,
          "name":"Scene-Transitions",
          "objects":[
                 {
@@ -776,6 +811,7 @@
                 {
                  "draworder":"topdown",
                  "id":18,
+                 "locked":true,
                  "name":"NPC1",
                  "objects":[
                         {
@@ -895,6 +931,7 @@
                 {
                  "draworder":"topdown",
                  "id":20,
+                 "locked":true,
                  "name":"NPC2",
                  "objects":[
                         {
@@ -927,6 +964,7 @@
                  "x":0,
                  "y":0
                 }],
+         "locked":true,
          "name":"NPC",
          "opacity":1,
          "type":"group",
@@ -934,8 +972,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":25,
- "nextobjectid":23,
+ "nextlayerid":26,
+ "nextobjectid":24,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

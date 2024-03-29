@@ -7,6 +7,24 @@
         "data": {
           "messages": ["You should take a quick rest."]
         }
+      },
+      {
+        "type": "HEAL",
+        "data": {}
+      },
+      {
+        "type": "SCENE_FADE_IN_AND_OUT",
+        "data": {
+          "fadeInDuration": 1000,
+          "fadeOutDuration": 1000,
+          "waitDuration": 1000
+        }
+      },
+      {
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Oh good! You and your monsters are looking great!"]
+        }
       }
     ]
   },
