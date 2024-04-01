@@ -44,9 +44,7 @@ export class TitleScene extends BaseScene {
   #nineSliceMenu;
 
   constructor() {
-    super({
-      key: SCENE_KEYS.TITLE_SCENE,
-    });
+    super({ key: SCENE_KEYS.TITLE_SCENE });
   }
 
   /**
@@ -148,6 +146,9 @@ export class TitleScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     super.update();
 

@@ -1,3 +1,4 @@
+import Phaser from '../../lib/phaser.js';
 import { Character } from './character.js';
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
@@ -22,9 +23,9 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @typedef NPCConfigProps
  * @type {object}
  * @property {number} frame
- * @property {string[]} messages
  * @property {NPCPath} npcPath
  * @property {NpcMovementPattern} movementPattern
+ * @property {import('../../types/typedef.js').NpcEvent[]} events
  */
 
 /**
@@ -32,8 +33,6 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  */
 
 export class NPC extends Character {
-  /** @type {string[]} */
-  #messages;
   /** @type {boolean} */
   #talkingToPlayer;
   /** @type {NPCPath} */
@@ -44,6 +43,8 @@ export class NPC extends Character {
   #movementPattern;
   /** @type {number} */
   #lastMovementTime;
+  /** @type {import('../../types/typedef.js').NpcEvent[]} */
+  #events;
 
   /**
    * @param {NPCConfig} config
@@ -62,18 +63,18 @@ export class NPC extends Character {
       },
     });
 
-    this.#messages = config.messages;
     this.#talkingToPlayer = false;
     this.#npcPath = config.npcPath;
     this.#currentPathIndex = 0;
     this.#movementPattern = config.movementPattern;
     this.#lastMovementTime = Phaser.Math.Between(3500, 5000);
     this._phaserGameObject.setScale(4);
+    this.#events = config.events;
   }
 
-  /** @type {string[]} */
-  get messages() {
-    return [...this.#messages];
+  /** @type {import('../../types/typedef.js').NpcEvent[]} */
+  get events() {
+    return [...this.#events];
   }
 
   /** @type {boolean} */
@@ -135,6 +136,7 @@ export class NPC extends Character {
       let characterDirection = DIRECTION.NONE;
       let nextPosition = this.#npcPath[this.#currentPathIndex + 1];
 
+      // validate if we actually moved to the next position, if not, skip updating index
       const prevPosition = this.#npcPath[this.#currentPathIndex];
       if (prevPosition.x !== this._phaserGameObject.x || prevPosition.y !== this._phaserGameObject.y) {
         nextPosition = this.#npcPath[this.#currentPathIndex];

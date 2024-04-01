@@ -183,6 +183,7 @@ export class MonsterPartyScene extends BaseScene {
       };
       this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
       this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+
       return;
     }
 

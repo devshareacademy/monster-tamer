@@ -79,9 +79,7 @@ export class OptionsScene extends BaseScene {
   #selectedMenuColorOption;
 
   constructor() {
-    super({
-      key: SCENE_KEYS.OPTIONS_SCENE,
-    });
+    super({ key: SCENE_KEYS.OPTIONS_SCENE });
   }
 
   /**

@@ -13,6 +13,7 @@ import {
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
   AUDIO_ASSET_KEYS,
+  BUILDING_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
@@ -114,6 +115,7 @@ export class PreloadScene extends BaseScene {
     this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
     this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
     this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
+    this.load.json(DATA_ASSET_KEYS.NPCS, 'assets/data/npcs.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -133,10 +135,10 @@ export class PreloadScene extends BaseScene {
     });
 
     // load world assets
-    this.load.image(WORLD_ASSET_KEYS.WORLD_BACKGROUND, `${monsterTamerAssetPath}/map/level_background.png`);
-    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.WORLD_MAIN_LEVEL, `assets/data/level.json`);
+    this.load.image(WORLD_ASSET_KEYS.MAIN_1_BACKGROUND, `${monsterTamerAssetPath}/map/main_1_level_background.png`);
+    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.MAIN_1_LEVEL, `assets/data/main_1.json`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
-    this.load.image(WORLD_ASSET_KEYS.WORLD_FOREGROUND, `${monsterTamerAssetPath}/map/level_foreground.png`);
+    this.load.image(WORLD_ASSET_KEYS.MAIN_1_FOREGROUND, `${monsterTamerAssetPath}/map/main_1_level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
     this.load.spritesheet(
       WORLD_ASSET_KEYS.BEACH,
@@ -146,6 +148,24 @@ export class PreloadScene extends BaseScene {
         frameHeight: 64,
       }
     );
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_foreground.png`
+    );
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_1_BACKGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_1_level_background.png`
+    );
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_1_LEVEL, `assets/data/building_1.json`);
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_2_FOREGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_2_level_foreground.png`
+    );
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_2_BACKGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_2_level_background.png`
+    );
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_2_LEVEL, `assets/data/building_2.json`);
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {
@@ -197,6 +217,7 @@ export class PreloadScene extends BaseScene {
   create() {
     super.create();
 
+    // create animations from json file
     this.#createAnimations();
 
     // attempt to populate data manager with saved data and initialize
@@ -205,9 +226,12 @@ export class PreloadScene extends BaseScene {
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);
 
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
+  /**
+   * @returns {void}
+   */
   #createAnimations() {
     const animations = DataUtils.getAnimations(this);
     animations.forEach((animation) => {
