@@ -9,18 +9,18 @@ import { TILE_SIZE } from '../../config.js';
  * @typedef PlayerConfigProps
  * @type {object}
  * @property {Phaser.Tilemaps.TilemapLayer} collisionLayer
- * @property {Phaser.Tilemaps.ObjectLayer} entranceLayer
- * @property {(entranceName: string, entranceId: string) => void} enterEntranceCallback
+ * @property {Phaser.Tilemaps.ObjectLayer} [entranceLayer]
+ * @property {(entranceName: string, entranceId: string, isBuildingEntrance: boolean) => void} enterEntranceCallback
  */
 
 /**
- * @typedef {import('./character.js').BaseCharacterConfig & PlayerConfigProps} PlayerConfig
+ * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'idleFrameConfig'> & PlayerConfigProps} PlayerConfig
  */
 
 export class Player extends Character {
-  /** @type {Phaser.Tilemaps.ObjectLayer} */
+  /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #entranceLayer;
-  /** @type {(entranceName: string, entranceId: string, isBuildingEntrance: boolean) => void | undefined} */
+  /** @type {(entranceName: string, entranceId: string, isBuildingEntrance: boolean) => void} */
   #enterEntranceCallback;
 
   /**
@@ -70,7 +70,7 @@ export class Player extends Character {
     }
 
     // validate character is not moving and that the target position belongs to an entrance
-    if (!this._isMoving) {
+    if (!this._isMoving && this.#entranceLayer !== undefined) {
       const targetPosition = getTargetPositionFromGameObjectPositionAndDirection(
         { x: this._phaserGameObject.x, y: this._phaserGameObject.y },
         this._direction
@@ -89,7 +89,8 @@ export class Player extends Character {
       // entrance is nearby and the player is trying to enter that location
       const entranceName = nearbyEntrance.properties.find((property) => property.name === 'connects_to').value;
       const entranceId = nearbyEntrance.properties.find((property) => property.name === 'entrance_id').value;
-      const isBuildingEntrance = nearbyEntrance.properties.find((property) => property.name === 'is_building').value;
+      const isBuildingEntrance =
+        nearbyEntrance.properties.find((property) => property.name === 'is_building')?.value || false;
       this.#enterEntranceCallback(entranceName, entranceId, isBuildingEntrance);
     }
   }

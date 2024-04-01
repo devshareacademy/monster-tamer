@@ -117,8 +117,10 @@ Audio:
 
 World Scene Part 3:
   ✔ advanced wild monster encounter logic @done(24-03-09 11:03)
-  ☐ buildings
+  ✔ buildings @done(24-03-29 17:56)
   ✔ items in the field @done(24-03-13 09:19)
+  ✔ npc event data structure @done(24-03-29 17:57)
+  ✔ respawn next to npc @done(24-03-29 17:57)
 
 -------------------------------
 
@@ -129,7 +131,7 @@ Future Content:
   ☐ battle npcs
   ☐ monster encyclopedia
   ☐ monster league/gyms
-
+  ☐ leveling & experience
 
 -------------------------------
 ☐ ✔ ✘

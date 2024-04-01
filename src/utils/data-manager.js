@@ -27,6 +27,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {object} player.position
  * @property {number} player.position.x
  * @property {number} player.position.y
+ * @property {PlayerLocation} player.location
  * @property {import('../common/direction.js').Direction} player.direction
  * @property {PlayerLocation} player.location
  * @property {object} options
@@ -171,6 +172,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
+    existingData.player.location = { ...initialState.player.location };
     existingData.player.direction = initialState.player.direction;
     existingData.player.location = { ...initialState.player.location };
     existingData.gameStarted = initialState.gameStarted;

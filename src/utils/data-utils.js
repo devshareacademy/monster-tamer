@@ -65,7 +65,7 @@ export class DataUtils {
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {number} areaId
+   * @param {number} areaId the area id to pull monster encounter details for
    * @returns {number[][]}
    */
   static getEncounterAreaDetails(scene, areaId) {
@@ -80,7 +80,7 @@ export class DataUtils {
    * @returns {import('../types/typedef.js').NpcDetails}
    */
   static getNpcData(scene, npcId) {
-    /** @type {import('../types/typedef.js').NpcDetails} */
+    /** @type {import('../types/typedef.js').NpcData} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.NPCS);
     return data[npcId];
   }

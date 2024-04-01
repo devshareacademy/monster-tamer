@@ -23,14 +23,13 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @typedef NPCConfigProps
  * @type {object}
  * @property {number} frame
- * @property {string[]} [messages]
  * @property {NPCPath} npcPath
  * @property {NpcMovementPattern} movementPattern
  * @property {import('../../types/typedef.js').NpcEvent[]} events
  */
 
 /**
- * @typedef {import('./character.js').BaseCharacterConfig & NPCConfigProps} NPCConfig
+ * @typedef {Omit<import('./character').CharacterConfig, 'assetKey' | 'idleFrameConfig'> & NPCConfigProps} NPCConfig
  */
 
 export class NPC extends Character {
