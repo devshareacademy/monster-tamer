@@ -162,6 +162,9 @@ export class WorldScene extends BaseScene {
     this.#items = [];
     this.#lastNpcEventHandledIndex = -1;
     this.#isProcessingNpcEvent = false;
+    this.#encounterLayer = undefined;
+    this.#signLayer = undefined;
+    this.#entranceLayer = undefined;
   }
 
   /**
