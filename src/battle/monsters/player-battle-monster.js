@@ -1,5 +1,6 @@
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { ExpBar } from '../../common/exp-bar.js';
+import { calculateExpBarCurrentValue, handleMonsterGainingExperience } from '../../utils/leveling-utils.js';
 import { BattleMonster } from './battle-monster.js';
 
 /** @type {import('../../types/typedef').Coordinate} */
@@ -161,7 +162,10 @@ export class PlayerBattleMonster extends BattleMonster {
 
   #addExpBarComponents() {
     this.#expBar = new ExpBar(this._scene, 34, 54);
-    this.#expBar.setMeterPercentageAnimated(0.5, { skipBattleAnimations: true });
+    this.#expBar.setMeterPercentageAnimated(
+      calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
+      { skipBattleAnimations: true }
+    );
 
     const monsterExpText = this._scene.add.text(30, 100, 'EXP', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
@@ -171,5 +175,36 @@ export class PlayerBattleMonster extends BattleMonster {
     });
 
     this._phaserHealthBarGameContainer.add([monsterExpText, this.#expBar.container]);
+  }
+
+  /**
+   * Updates the current monsters total experience and handles level increases.
+   * Will return the stat increases so we can display in the UI.
+   * @param {number} gainedExp
+   * @returns {import('../../utils/leveling-utils.js').StatChanges}
+   */
+  updateMonsterExp(gainedExp) {
+    return handleMonsterGainingExperience(this._monsterDetails, gainedExp);
+  }
+
+  /**
+   * Updates the exp bar in the UI, and updates the monsters level text incase
+   * the monsters level increased. This is called from the battle scene
+   * after the `updateMonsterExp` method is called.
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  updateMonsterExpBar(callback) {
+    this.#expBar.setMeterPercentageAnimated(
+      calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
+      {
+        callback: () => {
+          this._setMonsterLevelText();
+          this._maxHealth = this._monsterDetails.maxHp;
+          this.updateMonsterHealth(this._currentHealth);
+          callback();
+        },
+      }
+    );
   }
 }

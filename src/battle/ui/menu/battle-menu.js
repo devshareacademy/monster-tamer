@@ -276,7 +276,14 @@ export class BattleMenu {
   }
 
   #createMainBattleMenu() {
-    this.#battleTextGameObjectLine1 = this.#scene.add.text(20, 468, 'what should', BATTLE_UI_TEXT_STYLE);
+    this.#battleTextGameObjectLine1 = this.#scene.add.text(20, 468, 'what should', {
+      ...BATTLE_UI_TEXT_STYLE,
+      ...{
+        wordWrap: {
+          width: this.#scene.scale.width - 20,
+        },
+      },
+    });
     this.#battleTextGameObjectLine2 = this.#scene.add.text(
       20,
       512,
