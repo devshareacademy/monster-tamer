@@ -27,6 +27,9 @@ const BATTLE_STATES = Object.freeze({
   FINISHED: 'FINISHED',
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
   GAIN_EXPERIENCE: 'GAIN_EXPERIENCE',
+  USED_ITEM: 'USED_ITEM',
+  HEAL_ITEM_USED: 'HEAL_ITEM_USED',
+  CAPTURE_ITEM_USED: 'CAPTURE_ITEM_USED',
 });
 
 /**
@@ -423,17 +426,7 @@ export class BattleScene extends BaseScene {
 
         // if item was used, only have enemy attack
         if (this.#battleMenu.wasItemUsed) {
-          // TODO: enhance once we support multiple monsters
-          this.#activePlayerMonster.updateMonsterHealth(
-            /** @type {import('../types/typedef.js').Monster[]} */ (
-              dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
-            )[0].currentHp
-          );
-          this.time.delayedCall(500, () => {
-            this.#enemyAttack(() => {
-              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
-            });
-          });
+          this.#battleStateMachine.setState(BATTLE_STATES.USED_ITEM);
           return;
         }
 
@@ -551,6 +544,43 @@ export class BattleScene extends BaseScene {
             });
           });
           this._controls.lockInput = false;
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.USED_ITEM,
+      onEnter: () => {
+        // TODO: figure out type of item used
+        this.#battleStateMachine.setState(BATTLE_STATES.HEAL_ITEM_USED);
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.HEAL_ITEM_USED,
+      onEnter: () => {
+        // TODO: enhance once we support multiple monsters
+        this.#activePlayerMonster.updateMonsterHealth(
+          /** @type {import('../types/typedef.js').Monster[]} */ (
+            dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
+          )[0].currentHp
+        );
+        this.time.delayedCall(500, () => {
+          this.#enemyAttack(() => {
+            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          });
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.CAPTURE_ITEM_USED,
+      onEnter: () => {
+        // TODO: figure out logic
+        this.time.delayedCall(500, () => {
+          this.#enemyAttack(() => {
+            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          });
         });
       },
     });

@@ -65,12 +65,23 @@ import Phaser from '../lib/phaser.js';
  */
 
 /**
+ * @typedef {keyof typeof ITEM_CATEGORY} ItemCategory
+ */
+
+/** @enum {ItemCategory} */
+export const ITEM_CATEGORY = Object.freeze({
+  HEAL: 'HEAL',
+  CAPTURE: 'CAPTURE',
+});
+
+/**
  * @typedef {keyof typeof ITEM_EFFECT} ItemEffect
  */
 
 /** @enum {ItemEffect} */
 export const ITEM_EFFECT = Object.freeze({
   HEAL_30: 'HEAL_30',
+  CAPTURE_1: 'CAPTURE_1',
 });
 
 /**
@@ -80,6 +91,7 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {string} name the name of this item
  * @property {ItemEffect} effect the effect of using this item
  * @property {string} description the description of the item to show in the inventory bag
+ * @property {string} category the main category of this item, healing, capture, etc
  */
 
 /**
