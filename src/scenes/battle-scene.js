@@ -12,9 +12,11 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, BATTLE_ASSET_KEYS } from '../assets/asset-keys.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { calculateExpGainedFromMonster } from '../utils/leveling-utils.js';
+import { ITEM_CATEGORY } from '../types/typedef.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -401,6 +403,8 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.PLAYER_INPUT,
       onEnter: () => {
+        const ball = this.add.image(0, 450, BATTLE_ASSET_KEYS.DAMAGED_BALL, 0).setScale(0.1);
+
         this.#battleMenu.showMainBattleMenu();
       },
     });
@@ -551,8 +555,16 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.USED_ITEM,
       onEnter: () => {
-        // TODO: figure out type of item used
-        this.#battleStateMachine.setState(BATTLE_STATES.HEAL_ITEM_USED);
+        switch (this.#battleMenu.itemUsed.category) {
+          case ITEM_CATEGORY.CAPTURE:
+            this.#battleStateMachine.setState(BATTLE_STATES.CAPTURE_ITEM_USED);
+            break;
+          case ITEM_CATEGORY.HEAL:
+            this.#battleStateMachine.setState(BATTLE_STATES.HEAL_ITEM_USED);
+            break;
+          default:
+            exhaustiveGuard(this.#battleMenu.itemUsed.category);
+        }
       },
     });
 
@@ -577,6 +589,7 @@ export class BattleScene extends BaseScene {
       name: BATTLE_STATES.CAPTURE_ITEM_USED,
       onEnter: () => {
         // TODO: figure out logic
+        console.log('attempting to capture');
         this.time.delayedCall(500, () => {
           this.#enemyAttack(() => {
             this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);

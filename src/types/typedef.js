@@ -94,7 +94,7 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {string} name the name of this item
  * @property {ItemEffect} effect the effect of using this item
  * @property {string} description the description of the item to show in the inventory bag
- * @property {string} category the main category of this item, healing, capture, etc
+ * @property {ItemCategory} category the main category of this item, healing, capture, etc
  */
 
 /**

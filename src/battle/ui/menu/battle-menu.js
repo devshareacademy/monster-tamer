@@ -118,6 +118,11 @@ export class BattleMenu {
     return this.#wasItemUsed;
   }
 
+  /** @type {import('../../../types/typedef.js').Item | undefined} */
+  get itemUsed() {
+    return this.#usedItem;
+  }
+
   /** @type {boolean} */
   get isAttemptingToFlee() {
     return this.#fleeAttempt;
