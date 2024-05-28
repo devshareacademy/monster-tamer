@@ -1,4 +1,12 @@
 /**
+ * @typedef StatChanges
+ * @type {object}
+ * @property {number} level
+ * @property {number} health
+ * @property {number} attack
+ */
+
+/**
  * Calculates the total number of experience points that are needed for a given level.
  * For a simple growth rate, we are using the same equation for all monsters in the game.
  * Example: if target level is 5, we need 125 total exp, vs level 100 were we need 1,000,000 exp.
@@ -64,14 +72,6 @@ export function calculateExpBarCurrentValue(currentLevel, currentExp) {
 export function calculateExpGainedFromMonster(baseExp, currentLevel, isActiveMonster) {
   return Math.round(((baseExp * currentLevel) / 7) * (1 / (isActiveMonster ? 1 : 2)));
 }
-
-/**
- * @typedef StatChanges
- * @type {object}
- * @property {number} level
- * @property {number} health
- * @property {number} attack
- */
 
 /**
  * Adds the given experience to the provided monster and handles increasing the monsters

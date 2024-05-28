@@ -27,23 +27,6 @@ export class PlayerBattleMonster extends BattleMonster {
     this.#addExpBarComponents();
   }
 
-  #addExpBarComponents() {
-    this.#expBar = new ExpBar(this._scene, 34, 54);
-    this.#expBar.setMeterPercentageAnimated(
-      calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
-      { skipBattleAnimations: true }
-    );
-
-    const monsterExpText = this._scene.add.text(30, 100, 'EXP', {
-      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
-      color: '#6505FF',
-      fontSize: '14px',
-      fontStyle: 'italic',
-    });
-
-    this._phaserHealthBarGameContainer.add([monsterExpText, this.#expBar.container]);
-  }
-
   #setHealthBarText() {
     this.#healthBarTextGameObject.setText(`${this._currentHealth}/${this._maxHealth}`);
   }
@@ -175,6 +158,26 @@ export class PlayerBattleMonster extends BattleMonster {
       skipBattleAnimations: true,
     });
     this.#setHealthBarText();
+  }
+
+  /**
+   * @returns {void}
+   */
+  #addExpBarComponents() {
+    this.#expBar = new ExpBar(this._scene, 34, 54);
+    this.#expBar.setMeterPercentageAnimated(
+      calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
+      { skipBattleAnimations: true }
+    );
+
+    const monsterExpText = this._scene.add.text(30, 100, 'EXP', {
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      color: '#6505FF',
+      fontSize: '14px',
+      fontStyle: 'italic',
+    });
+
+    this._phaserHealthBarGameContainer.add([monsterExpText, this.#expBar.container]);
   }
 
   /**

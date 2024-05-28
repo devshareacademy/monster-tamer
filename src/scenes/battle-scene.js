@@ -526,7 +526,7 @@ export class BattleScene extends BaseScene {
             statChanges = this.#activePlayerMonster.updateMonsterExp(gainedExpForActiveMonster);
             messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`);
           } else {
-            statChanges = this.#activePlayerMonster.updateMonsterExp(gainedExpForInactiveMonster);
+            // TODO
             messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForInactiveMonster} exp.`);
           }
           if (statChanges.level !== 0) {

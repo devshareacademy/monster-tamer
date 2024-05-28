@@ -122,6 +122,19 @@ World Scene Part 3:
   ✔ npc event data structure @done(24-03-29 17:57)
   ✔ respawn next to npc @done(24-03-29 17:57)
 
+Leveling & Experience:
+  ✔ review math for leveling and exp gain @done(24-05-27 13:58)
+  ✔ update monseters json file and types to include exp info @done(24-05-27 13:04)
+  ✔ add new assets for exp bar @done(24-05-27 11:31)
+  ✔ refactor hp bar into re-usable class @done(24-05-27 11:31)
+  ✔ update battle scene to display exp bar @done(24-05-27 11:51)
+  ✔ update monster details scene to display exp bar @done(24-05-27 11:51)
+  ✔ gain exp when battle is over @done(24-05-27 13:04)
+    ✔ add new battle state for tracking @done(24-05-27 13:04)
+    ✔ new leveling utils for updates @done(24-05-27 13:58)
+    ✔ update monster classes to support @done(24-05-27 13:04)
+    ✔ update battle menu ui to have wordwrap @done(24-05-27 13:04)
+
 -------------------------------
 
 Future Content:

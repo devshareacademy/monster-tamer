@@ -4,11 +4,11 @@ import { AnimatedBar } from './animated-bar.js';
 
 export class ExpBar extends AnimatedBar {
   /**
-   * @param {Phaser.Scene} scene the Phaser 3 Scene the health bar will be added to
-   * @param {number} x the x position to place the health bar container
-   * @param {number} y the y position to place the health bar container
-   * @param {number} [width=360] the full width of our health bar component
-   * @param {number} [scaleY=0.4] the scale Y factor of our health bar component
+   * @param {Phaser.Scene} scene the Phaser 3 Scene the exp bar will be added to
+   * @param {number} x the x position to place the exp bar container
+   * @param {number} y the y position to place the exp bar container
+   * @param {number} [width=360] the full width of our exp bar component
+   * @param {number} [scaleY=0.4] the scale Y factor of our exp bar component
    */
   constructor(scene, x, y, width = 360, scaleY = 0.4) {
     super({

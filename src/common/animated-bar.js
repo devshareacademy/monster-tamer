@@ -3,7 +3,7 @@ import Phaser from '../lib/phaser.js';
 /**
  * @typedef AnimatedBarConfig
  * @type {object}
- * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
+ * @property {Phaser.Scene} scene the Phaser 3 Scene the animated bar will be added to
  * @property {number} x the x position to place the animated bar container
  * @property {number} y the y position to place the animated bar container
  * @property {number} width the full width of our animated bar component
@@ -17,27 +17,27 @@ import Phaser from '../lib/phaser.js';
  */
 
 export class AnimatedBar {
-  /** @type {Phaser.Scene} */
+  /** @protected @type {Phaser.Scene} */
   _scene;
-  /** @type {Phaser.GameObjects.Container} */
-  _healthBarContainer;
-  /** @type {number} */
+  /** @protected @type {Phaser.GameObjects.Container} */
+  _container;
+  /** @protected @type {number} */
   _fullWidth;
-  /** @type {number} */
+  /** @protected @type {number} */
   _scaleY;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _leftCap;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _middle;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _rightCap;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _leftShadowCap;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _middleShadow;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _rightShadowCap;
-  /** @type {AnimatedBarConfig} */
+  /** @protected @type {AnimatedBarConfig} */
   _config;
 
   /**
@@ -50,27 +50,27 @@ export class AnimatedBar {
 
     this._scene = config.scene;
     this._fullWidth = config.width;
-    this._scaleY = config.scaleY || 0.7;
+    this._scaleY = config.scaleY;
     this._config = config;
 
-    this._healthBarContainer = this._scene.add.container(config.x, config.y, []);
-    this._createHealthBarShadowImages(config.x, config.y);
-    this._createHealthBarImages(config.x, config.y);
+    this._container = this._scene.add.container(config.x, config.y, []);
+    this._createBarShadowImages(config.x, config.y);
+    this._createBarImages(config.x, config.y);
     this._setMeterPercentage(1);
   }
 
   /** @type {Phaser.GameObjects.Container} */
   get container() {
-    return this._healthBarContainer;
+    return this._container;
   }
 
   /**
    * @protected
-   * @param {number} x the x position to place the health bar game object
-   * @param {number} y the y position to place the health bar game object
+   * @param {number} x the x position to place the animated bar game object
+   * @param {number} y the y position to place the animated bar game object
    * @returns {void}
    */
-  _createHealthBarShadowImages(x, y) {
+  _createBarShadowImages(x, y) {
     this._leftShadowCap = this._scene.add
       .image(x, y, this._config.leftShadowCapAssetKey)
       .setOrigin(0, 0.5)
@@ -87,16 +87,16 @@ export class AnimatedBar {
       .setOrigin(0, 0.5)
       .setScale(1, this._scaleY);
 
-    this._healthBarContainer.add([this._leftShadowCap, this._middleShadow, this._rightShadowCap]);
+    this._container.add([this._leftShadowCap, this._middleShadow, this._rightShadowCap]);
   }
 
   /**
    * @protected
-   * @param {number} x the x position to place the health bar game object
-   * @param {number} y the y position to place the health bar game object
+   * @param {number} x the x position to place the animated bar game object
+   * @param {number} y the y position to place the animated bar game object
    * @returns {void}
    */
-  _createHealthBarImages(x, y) {
+  _createBarImages(x, y) {
     this._leftCap = this._scene.add
       .image(x, y, this._config.leftCapAssetKey)
       .setOrigin(0, 0.5)
@@ -112,25 +112,25 @@ export class AnimatedBar {
       .setOrigin(0, 0.5)
       .setScale(1, this._scaleY);
 
-    this._healthBarContainer.add([this._leftCap, this._middle, this._rightCap]);
+    this._container.add([this._leftCap, this._middle, this._rightCap]);
   }
 
   /**
    * @protected
-   * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the health bar is
+   * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the animated bar is
    * @returns {void}
    */
   _setMeterPercentage(percent = 1) {
     const width = this._fullWidth * percent;
     this._middle.displayWidth = width;
-    this._updateHealthBarGameObjects();
+    this._updateBarGameObjects();
   }
 
   /**
    * @protected
    * @returns {void}
    */
-  _updateHealthBarGameObjects() {
+  _updateBarGameObjects() {
     this._rightCap.x = this._middle.x + this._middle.displayWidth;
     const isVisible = this._middle.displayWidth > 0;
     this._leftCap.visible = isVisible;
@@ -139,11 +139,11 @@ export class AnimatedBar {
   }
 
   /**
-   * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the health bar is
+   * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the animated bar is
    * @param {object} [options] optional configuration options that can be provided for the animation
-   * @param {number} [options.duration=1000] the duration of the health bar animation
+   * @param {number} [options.duration=1000] the duration of the animated bar animation
    * @param {() => void} [options.callback] an optional callback that will be called when the animation is complete
-   * @param {boolean} [options.skipBattleAnimations=false] determines if we skip the health bar animation
+   * @param {boolean} [options.skipBattleAnimations=false] determines if we skip the animated bar animation
    * @returns {void}
    */
   setMeterPercentageAnimated(percent, options) {
@@ -163,7 +163,7 @@ export class AnimatedBar {
       duration: options?.duration || options?.duration === 0 ? 0 : 1000,
       ease: Phaser.Math.Easing.Sine.Out,
       onUpdate: () => {
-        this._updateHealthBarGameObjects();
+        this._updateBarGameObjects();
       },
       onComplete: options?.callback,
     });

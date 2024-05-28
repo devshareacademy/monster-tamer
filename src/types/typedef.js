@@ -30,6 +30,9 @@ import Phaser from '../lib/phaser.js';
  * @property {string} assetKey the name of the asset key that should be used for this monster
  * @property {number} [assetFrame=0] if the asset key is tied to a spritesheet, this frame will be used, defaults to 0
  * @property {number[]} attackIds the ids of the attacks this monster uses
+ * @property {number} currentAttack the current attack value of this monster
+ * @property {number} baseExp the base exp value of this monster
+ * @property {number} currentExp the current exp this monster has
  */
 
 /**
