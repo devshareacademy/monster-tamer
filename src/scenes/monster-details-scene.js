@@ -110,10 +110,9 @@ export class MonsterDetailsScene extends BaseScene {
     }
 
     // add monster exp details
-    // TODO: update with real exp
     this.add.text(20, 340, 'Current Exp.', MONSTER_EXP_TEXT_STYLE).setOrigin(0, 0);
     this.add.text(516, 340, `${this.#monsterDetails.currentExp}`, MONSTER_EXP_TEXT_STYLE).setOrigin(1, 0);
-    this.add.text(20, 365, 'Exp. to next level', MONSTER_EXP_TEXT_STYLE).setOrigin(0, 0);
+    this.add.text(20, 365, 'Exp. to next level', MONSTER_EXP_TEXT_STYLE);
     this.add
       .text(
         516,

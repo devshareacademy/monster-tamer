@@ -531,11 +531,9 @@ export class BattleScene extends BaseScene {
           }
           if (statChanges.level !== 0) {
             messages.push(
-              `${this.#sceneData.playerMonsters[index].name} level increase to ${
+              `${this.#sceneData.playerMonsters[index].name} level increased to ${
                 this.#sceneData.playerMonsters[index].currentLevel
-              }!`
-            );
-            messages.push(
+              }!`,
               `${this.#sceneData.playerMonsters[index].name} attack increased by ${
                 statChanges.attack
               } and health increased by ${statChanges.health}`

@@ -181,6 +181,8 @@ export class PlayerBattleMonster extends BattleMonster {
   }
 
   /**
+   * Updates the current monsters total experience and handles level increases.
+   * Will return the stat increases so we can display in the UI.
    * @param {number} gainedExp
    * @returns {import('../../utils/leveling-utils.js').StatChanges}
    */
@@ -188,6 +190,13 @@ export class PlayerBattleMonster extends BattleMonster {
     return handleMonsterGainingExperience(this._monsterDetails, gainedExp);
   }
 
+  /**
+   * Updates the exp bar in the UI, and updates the monsters level text incase
+   * the monsters level increased. This is called from the battle scene
+   * after the `updateMonsterExp` method is called.
+   * @param {() => void} callback
+   * @returns {void}
+   */
   updateMonsterExpBar(callback) {
     this.#expBar.setMeterPercentageAnimated(
       calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),

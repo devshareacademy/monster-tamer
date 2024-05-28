@@ -1,5 +1,4 @@
 import Phaser from '../lib/phaser.js';
-import { HEALTH_BAR_ASSET_KEYS } from '../assets/asset-keys.js';
 
 /**
  * @typedef AnimatedBarConfig
