@@ -14,6 +14,11 @@ export class EnemyBattleMonster extends BattleMonster {
     super({ ...config, scaleHealthBarBackgroundImageByY: 0.8 }, ENEMY_POSITION);
   }
 
+  /** @type {number} */
+  get baseExpValue() {
+    return this._monsterDetails.baseExp;
+  }
+
   /**
    * @param {() => void} callback
    * @returns {void}

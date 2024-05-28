@@ -30,6 +30,12 @@ export const HEALTH_BAR_ASSET_KEYS = Object.freeze({
   RIGHT_CAP_SHADOW: 'RIGHT_CAP_SHADOW',
 });
 
+export const EXP_BAR_ASSET_KEYS = Object.freeze({
+  EXP_LEFT_CAP: 'EXP_LEFT_CAP',
+  EXP_MIDDLE: 'EXP_MIDDLE',
+  EXP_RIGHT_CAP: 'EXP_RIGHT_CAP',
+});
+
 export const UI_ASSET_KEYS = Object.freeze({
   CURSOR: 'CURSOR',
   CURSOR_WHITE: 'CURSOR_WHITE',
