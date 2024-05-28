@@ -3,7 +3,7 @@ import Phaser from '../lib/phaser.js';
 /**
  * @typedef AnimatedBarConfig
  * @type {object}
- * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
+ * @property {Phaser.Scene} scene the Phaser 3 Scene the animated bar will be added to
  * @property {number} x the x position to place the animated bar container
  * @property {number} y the y position to place the animated bar container
  * @property {number} width the full width of our animated bar component
@@ -17,27 +17,27 @@ import Phaser from '../lib/phaser.js';
  */
 
 export class AnimatedBar {
-  /** @type {Phaser.Scene} */
+  /** @protected @type {Phaser.Scene} */
   _scene;
-  /** @type {Phaser.GameObjects.Container} */
+  /** @protected @type {Phaser.GameObjects.Container} */
   _container;
-  /** @type {number} */
+  /** @protected @type {number} */
   _fullWidth;
-  /** @type {number} */
+  /** @protected @type {number} */
   _scaleY;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _leftCap;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _middle;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _rightCap;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _leftShadowCap;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _middleShadow;
-  /** @type {Phaser.GameObjects.Image} */
+  /** @protected @type {Phaser.GameObjects.Image} */
   _rightShadowCap;
-  /** @type {AnimatedBarConfig} */
+  /** @protected @type {AnimatedBarConfig} */
   _config;
 
   /**
@@ -50,7 +50,7 @@ export class AnimatedBar {
 
     this._scene = config.scene;
     this._fullWidth = config.width;
-    this._scaleY = config.scaleY || 0.7;
+    this._scaleY = config.scaleY;
     this._config = config;
 
     this._container = this._scene.add.container(config.x, config.y, []);

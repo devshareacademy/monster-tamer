@@ -24,7 +24,7 @@ export class BattleMonster {
   /** @protected @type {boolean} */
   _skipBattleAnimations;
   /** @protected @type {Phaser.GameObjects.Text} */
-  _monsterLevelTextGameObject;
+  _monsterHealthBarLevelText;
 
   /**
    * @param {import('../../types/typedef.js').BattleMonsterConfig} config
@@ -158,9 +158,10 @@ export class BattleMonster {
 
   /**
    * @protected
+   * @returns {void}
    */
   _setMonsterLevelText() {
-    this._monsterLevelTextGameObject.setText(`L${this.level}`);
+    this._monsterHealthBarLevelText.setText(`L${this.level}`);
   }
 
   /**
@@ -181,7 +182,7 @@ export class BattleMonster {
       .setOrigin(0)
       .setScale(1, scaleHealthBarBackgroundImageByY);
 
-    this._monsterLevelTextGameObject = this._scene.add.text(monsterNameGameText.width + 35, 23, '', {
+    this._monsterHealthBarLevelText = this._scene.add.text(monsterNameGameText.width + 35, 23, '', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#ED474B',
       fontSize: '28px',
@@ -200,7 +201,7 @@ export class BattleMonster {
         healthBarBgImage,
         monsterNameGameText,
         this._healthBar.container,
-        this._monsterLevelTextGameObject,
+        this._monsterHealthBarLevelText,
         monsterHpText,
       ])
       .setAlpha(0);

@@ -160,6 +160,9 @@ export class PlayerBattleMonster extends BattleMonster {
     this.#setHealthBarText();
   }
 
+  /**
+   * @returns {void}
+   */
   #addExpBarComponents() {
     this.#expBar = new ExpBar(this._scene, 34, 54);
     this.#expBar.setMeterPercentageAnimated(
