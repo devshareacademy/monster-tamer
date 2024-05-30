@@ -66,6 +66,8 @@ export class BattleMenu {
   #usedItem;
   /** @type {boolean} */
   #fleeAttempt;
+  /** @type {boolean} */
+  #switchMonsterAttempt;
 
   /**
    *
@@ -87,6 +89,7 @@ export class BattleMenu {
     this.#queuedMessageAnimationPlaying = false;
     this.#usedItem = false;
     this.#fleeAttempt = false;
+    this.#switchMonsterAttempt = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -120,6 +123,11 @@ export class BattleMenu {
     return this.#fleeAttempt;
   }
 
+  /** @type {boolean} */
+  get isAttemptingToSwitchMonsters() {
+    return this.#switchMonsterAttempt;
+  }
+
   showMainBattleMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#battleTextGameObjectLine1.setText('what should');
@@ -132,6 +140,7 @@ export class BattleMenu {
     this.#selectedAttackIndex = undefined;
     this.#usedItem = false;
     this.#fleeAttempt = false;
+    this.#switchMonsterAttempt = false;
   }
 
   hideMainBattleMenu() {
@@ -601,15 +610,8 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.SWITCH) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player having no more monsters
-        and allow the player to navigate back to the main menu
-      */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_SWITCH;
-      this.updateInfoPaneMessagesAndWaitForInput(['You have no other monsters in your party...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.#switchMonsterAttempt = true;
       return;
     }
 
