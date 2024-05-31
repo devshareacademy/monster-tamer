@@ -210,4 +210,13 @@ export class PlayerBattleMonster extends BattleMonster {
       }
     );
   }
+
+  /**
+   * @param {import('../../types/typedef.js').Monster} monster
+   * @returns {void}
+   */
+  switchMonster(monster) {
+    super.switchMonster(monster);
+    this.#setHealthBarText();
+  }
 }

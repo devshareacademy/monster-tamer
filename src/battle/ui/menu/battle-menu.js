@@ -667,13 +667,18 @@ export class BattleMenu {
 
   /**
    * @param {Phaser.Scenes.Systems} sys
-   * @param {import('../../../scenes/inventory-scene.js').InventorySceneItemUsedData} data
+   * @param {import('../../../scenes/battle-scene.js').BattleSceneWasResumedData} data
    * @returns {void}
    */
   #handleSceneResume(sys, data) {
     console.log(
       `[${BattleMenu.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
     );
+
+    if (data && data.wasMonsterSelected) {
+      // do nothing since new active monster was chosen to switch to
+      return;
+    }
 
     if (!data || !data.itemUsed) {
       this.#switchToMainBattleMenu();

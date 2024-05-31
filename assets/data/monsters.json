@@ -35,14 +35,14 @@
     "name": "ignivolt",
     "assetKey": "IGNIVOLT",
     "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
-    "attackIds": [2],
+    "currentHp": 35,
+    "maxHp": 40,
+    "attackIds": [2, 1],
     "baseAttack": 5,
-    "currentAttack": 5,
-    "currentLevel": 5,
+    "currentAttack": 6,
+    "currentLevel": 6,
     "baseExp": 51,
-    "currentExp": 125
+    "currentExp": 220
   },
   {
     "id": 4,

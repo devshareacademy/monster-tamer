@@ -118,7 +118,8 @@ class DataManager extends Phaser.Events.EventEmitter {
   init(scene) {
     const startingMonster = DataUtils.getMonsterById(scene, 1);
     const startingMonster2 = DataUtils.getMonsterById(scene, 2);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, [startingMonster, startingMonster2]);
+    const startingMonster3 = DataUtils.getMonsterById(scene, 3);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, [startingMonster, startingMonster2, startingMonster3]);
   }
 
   /**

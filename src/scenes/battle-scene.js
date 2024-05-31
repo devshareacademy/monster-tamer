@@ -37,6 +37,15 @@ const BATTLE_STATES = Object.freeze({
  * @property {import('../types/typedef.js').Monster[]} enemyMonsters
  */
 
+/**
+ * @typedef BattleSceneWasResumedData
+ * @type {object}
+ * @property {boolean} wasMonsterSelected
+ * @property {number} [selectedMonsterIndex]
+ * @property {boolean} itemUsed
+ * @property {import('../types/typedef.js').Item} [item]
+ */
+
 export class BattleScene extends BaseScene {
   /** @type {BattleMenu} */
   #battleMenu;
@@ -60,6 +69,8 @@ export class BattleScene extends BaseScene {
   #activePlayerMonsterPartyIndex;
   /** @type {boolean} */
   #playerKnockedOut;
+  /** @type {boolean} */
+  #switchingActiveMonster;
 
   constructor() {
     super({
@@ -79,7 +90,11 @@ export class BattleScene extends BaseScene {
     if (Object.keys(data).length === 0) {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getMonsterById(this, 2)],
-        playerMonsters: [dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0]],
+        playerMonsters: [
+          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0],
+          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[1],
+          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[2],
+        ],
       };
     }
 
@@ -95,6 +110,7 @@ export class BattleScene extends BaseScene {
     }
     this.#skipAnimations = true;
     this.#playerKnockedOut = false;
+    this.#switchingActiveMonster = false;
   }
 
   /**
@@ -396,6 +412,10 @@ export class BattleScene extends BaseScene {
           this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
             // wait for text animation to complete and move to next state
             this.time.delayedCall(1200, () => {
+              if (this.#switchingActiveMonster) {
+                this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+                return;
+              }
               this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
             });
           });
@@ -449,6 +469,17 @@ export class BattleScene extends BaseScene {
         if (this.#battleMenu.isAttemptingToFlee) {
           this.time.delayedCall(500, () => {
             this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+          return;
+        }
+
+        // if player switched active monster, only have enemy attack
+        if (this.#switchingActiveMonster) {
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#switchingActiveMonster = false;
               this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
             });
           });
@@ -528,17 +559,28 @@ export class BattleScene extends BaseScene {
         /** @type {string[]} */
         const messages = [];
         this.#sceneData.playerMonsters.forEach((monster, index) => {
+          // ensure only monsters that are not knocked out gain exp
+          if (this.#sceneData.playerMonsters[index].currentHp <= 0) {
+            return;
+          }
+
           /** @type {import('../utils/leveling-utils.js').StatChanges} */
           let statChanges;
-          if (index === this.#activePlayerAttackIndex) {
+          /** @type {string[]} */
+          const monsterMessages = [];
+          if (index === this.#activePlayerMonsterPartyIndex) {
             statChanges = this.#activePlayerMonster.updateMonsterExp(gainedExpForActiveMonster);
-            messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`);
+            monsterMessages.push(
+              `${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`
+            );
           } else {
             // TODO
-            messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForInactiveMonster} exp.`);
+            monsterMessages.push(
+              `${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForInactiveMonster} exp.`
+            );
           }
-          if (statChanges.level !== 0) {
-            messages.push(
+          if (statChanges !== undefined && statChanges.level !== 0) {
+            monsterMessages.push(
               `${this.#sceneData.playerMonsters[index].name} level increased to ${
                 this.#sceneData.playerMonsters[index].currentLevel
               }!`,
@@ -546,6 +588,11 @@ export class BattleScene extends BaseScene {
                 statChanges.attack
               } and health increased by ${statChanges.health}`
             );
+          }
+          if (index === this.#activePlayerMonsterPartyIndex) {
+            messages.unshift(...monsterMessages);
+          } else {
+            messages.push(...monsterMessages);
           }
         });
 
@@ -566,13 +613,62 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.SWITCH_MONSTER,
       onEnter: () => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You have no other monsters in your party...'], () => {
-          this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+        // check to see if the player has other monsters they can switch to
+        const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
+          return (
+            monster.id !== this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].id &&
+            monster.currentHp > 0
+          );
         });
+        if (!hasOtherActiveMonsters) {
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+            ['You have no other monsters able to fight in your party'],
+            () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            }
+          );
+          return;
+        }
+
+        // otherwise, there are other available monsters to switch to, need to show ui so player can select monster
+        // pause this scene and launch the monster party scene
+        /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+        const sceneDataToPass = {
+          previousSceneName: SCENE_KEYS.BATTLE_SCENE,
+          activeBattleMonsterPartyIndex: this.#activePlayerMonsterPartyIndex,
+        };
+        this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+        this.scene.pause(SCENE_KEYS.BATTLE_SCENE);
       },
     });
 
     // start state machine
     this.#battleStateMachine.setState(BATTLE_STATES.INTRO);
+  }
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {BattleSceneWasResumedData | undefined} [data]
+   * @returns {void}
+   */
+  handleSceneResume(sys, data) {
+    super.handleSceneResume(sys, data);
+
+    if (!data || !data.wasMonsterSelected || data.selectedMonsterIndex === undefined) {
+      this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+      return;
+    }
+
+    this._controls.lockInput = true;
+    this.#switchingActiveMonster = true;
+
+    // if monster was selected, then we need to play animation for switching monsters and let enemy monster attack
+    // if previous monster was not knocked out
+    this.#activePlayerMonster.playDeathAnimation(() => {
+      this.#activePlayerMonsterPartyIndex = data.selectedMonsterIndex;
+      this.#activePlayerMonster.switchMonster(this.#sceneData.playerMonsters[data.selectedMonsterIndex]);
+      this._controls.lockInput = false;
+      this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
+    });
   }
 }
