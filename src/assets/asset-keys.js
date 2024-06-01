@@ -21,6 +21,7 @@ export const MONSTER_ASSET_KEYS = Object.freeze({
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
   HEALTH_BAR_BACKGROUND: 'HEALTH_BAR_BACKGROUND',
+  BALL_THUMBNAIL: 'BALL_THUMBNAIL',
 });
 
 export const HEALTH_BAR_ASSET_KEYS = Object.freeze({

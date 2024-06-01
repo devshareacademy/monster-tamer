@@ -12,9 +12,14 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, BATTLE_ASSET_KEYS } from '../assets/asset-keys.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { calculateExpGainedFromMonster, handleMonsterGainingExperience } from '../utils/leveling-utils.js';
+
+const MONSTER_PARTY_UI_ALPHA = Object.freeze({
+  active: 1,
+  inactive: 0.45,
+});
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -73,6 +78,8 @@ export class BattleScene extends BaseScene {
   #switchingActiveMonster;
   /** @type {boolean} */
   #activeMonsterKnockedOut;
+  /** @type {Phaser.GameObjects.Container} */
+  #availableMonstersUiContainer;
 
   constructor() {
     super({
@@ -92,7 +99,11 @@ export class BattleScene extends BaseScene {
     if (Object.keys(data).length === 0) {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getMonsterById(this, 2)],
-        playerMonsters: [dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0]],
+        playerMonsters: [
+          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0],
+          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[1],
+          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[2],
+        ],
       };
     }
 
@@ -141,6 +152,7 @@ export class BattleScene extends BaseScene {
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
+    this.#createAvailableMonstersUi();
 
     this._controls.lockInput = true;
 
@@ -324,6 +336,12 @@ export class BattleScene extends BaseScene {
     if (this.#activePlayerMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
       this.#activePlayerMonster.playDeathAnimation(() => {
+        // update ui to show monster fainted
+        /** @type {Phaser.GameObjects.Image} */
+        (this.#availableMonstersUiContainer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(
+          MONSTER_PARTY_UI_ALPHA.inactive
+        );
+
         // check to see if we have other monsters that are able to battle
         const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
           return monster.currentHp > 0;
@@ -428,7 +446,9 @@ export class BattleScene extends BaseScene {
       onEnter: () => {
         // wait for player monster to appear on the screen and notify the player about monster
         this.#activePlayerMonster.playMonsterAppearAnimation(() => {
-          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => {
+            this.#availableMonstersUiContainer.setAlpha(1);
+          });
           this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
             // wait for text animation to complete and move to next state
             this.time.delayedCall(1200, () => {
@@ -696,5 +716,24 @@ export class BattleScene extends BaseScene {
       this._controls.lockInput = false;
       this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
     });
+  }
+
+  /**
+   * Creates the UI component that shows the ball icons that represent the available monsters in the
+   * players current party. A transparent ball means a monster is knocked out, while a non-transparent
+   * ball means the monster is eligible to battle.
+   * @returns {void}
+   */
+  #createAvailableMonstersUi() {
+    this.#availableMonstersUiContainer = this.add.container(this.scale.width - 24, 304, []);
+    this.#sceneData.playerMonsters.forEach((monster, index) => {
+      const alpha = monster.currentHp > 0 ? MONSTER_PARTY_UI_ALPHA.active : MONSTER_PARTY_UI_ALPHA.inactive;
+      const ball = this.add
+        .image(30 * -index, 0, BATTLE_ASSET_KEYS.BALL_THUMBNAIL, 0)
+        .setScale(0.8)
+        .setAlpha(alpha);
+      this.#availableMonstersUiContainer.add(ball);
+    });
+    this.#availableMonstersUiContainer.setAlpha(0);
   }
 }
