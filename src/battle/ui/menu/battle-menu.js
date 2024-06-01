@@ -128,6 +128,20 @@ export class BattleMenu {
     return this.#switchMonsterAttempt;
   }
 
+  /**
+   * Trigger to update the attack names after a monster has changed in the battle scene.
+   * @returns {void}
+   */
+  updateMonsterAttackSubMenu() {
+    this.#activePlayerMonster.attacks.forEach((attack, index) => {
+      /** @type {Phaser.GameObjects.Text} */
+      (this.#moveSelectionSubBattleMenuPhaserContainerGameObject.getAt(index)).setText(attack.name);
+    });
+  }
+
+  /**
+   * @returns {void}
+   */
   showMainBattleMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#battleTextGameObjectLine1.setText('what should');
@@ -143,22 +157,34 @@ export class BattleMenu {
     this.#switchMonsterAttempt = false;
   }
 
+  /**
+   * @returns {void}
+   */
   hideMainBattleMenu() {
     this.#mainBattleMenuPhaserContainerGameObject.setAlpha(0);
     this.#battleTextGameObjectLine1.setAlpha(0);
     this.#battleTextGameObjectLine2.setAlpha(0);
   }
 
+  /**
+   * @returns {void}
+   */
   showMonsterAttackSubMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT;
     this.#moveSelectionSubBattleMenuPhaserContainerGameObject.setAlpha(1);
   }
 
+  /**
+   * @returns {void}
+   */
   hideMonsterAttackSubMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#moveSelectionSubBattleMenuPhaserContainerGameObject.setAlpha(0);
   }
 
+  /**
+   * @returns {void}
+   */
   playInputCursorAnimation() {
     this.#userInputCursorPhaserImageGameObject.setPosition(
       this.#battleTextGameObjectLine1.displayWidth + this.#userInputCursorPhaserImageGameObject.displayWidth * 2.7,
@@ -168,14 +194,17 @@ export class BattleMenu {
     this.#userInputCursorPhaserTween.restart();
   }
 
+  /**
+   * @returns {void}
+   */
   hideInputCursor() {
     this.#userInputCursorPhaserImageGameObject.setAlpha(0);
     this.#userInputCursorPhaserTween.pause();
   }
 
   /**
-   *
    * @param {import('../../../common/direction.js').Direction|'OK'|'CANCEL'} input
+   * @returns {void}
    */
   handlePlayerInput(input) {
     if (this.#queuedMessageAnimationPlaying && input === 'OK') {
@@ -248,6 +277,9 @@ export class BattleMenu {
     this.#updateInfoPaneWithMessage();
   }
 
+  /**
+   * @returns {void}
+   */
   #updateInfoPaneWithMessage() {
     this.#waitingForPlayerInput = false;
     this.#battleTextGameObjectLine1.setText('').setAlpha(1);
@@ -284,12 +316,15 @@ export class BattleMenu {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #createMainBattleMenu() {
     this.#battleTextGameObjectLine1 = this.#scene.add.text(20, 468, 'what should', {
       ...BATTLE_UI_TEXT_STYLE,
       ...{
         wordWrap: {
-          width: this.#scene.scale.width - 20,
+          width: this.#scene.scale.width - 55,
         },
       },
     });
@@ -317,6 +352,9 @@ export class BattleMenu {
     this.hideMainBattleMenu();
   }
 
+  /**
+   * @returns {void}
+   */
   #createMonsterAttackSubMenu() {
     this.#attackBattleMenuCursorPhaserImageGameObject = this.#scene.add
       .image(ATTACK_MENU_CURSOR_POS.x, ATTACK_MENU_CURSOR_POS.y, UI_ASSET_KEYS.CURSOR, 0)
@@ -339,6 +377,9 @@ export class BattleMenu {
     this.hideMonsterAttackSubMenu();
   }
 
+  /**
+   * @returns {void}
+   */
   #createMainInfoPane() {
     const padding = 4;
     const rectHeight = 124;
@@ -356,6 +397,9 @@ export class BattleMenu {
       .setStrokeStyle(8, 0xe4434a, 1);
   }
 
+  /**
+   * @returns {Phaser.GameObjects.Rectangle}
+   */
   #createMainInfoSubPane() {
     const rectWidth = 500;
     const rectHeight = 124;
@@ -449,6 +493,9 @@ export class BattleMenu {
     exhaustiveGuard(this.#selectedBattleMenuOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #moveMainBattleMenuCursor() {
     if (this.#activeBattleMenu !== ACTIVE_BATTLE_MENU.BATTLE_MAIN) {
       return;
@@ -555,6 +602,9 @@ export class BattleMenu {
     exhaustiveGuard(this.#selectedAttackMenuOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #moveMoveSelectBattleMenuCursor() {
     if (this.#activeBattleMenu !== ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
       return;
@@ -581,6 +631,9 @@ export class BattleMenu {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #switchToMainBattleMenu() {
     this.#waitingForPlayerInput = false;
     this.hideInputCursor();
@@ -588,6 +641,9 @@ export class BattleMenu {
     this.showMainBattleMenu();
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerChooseMainBattleOption() {
     this.hideMainBattleMenu();
 
@@ -624,6 +680,9 @@ export class BattleMenu {
     exhaustiveGuard(this.#selectedBattleMenuOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerChooseAttack() {
     let selectedMoveIndex = 0;
     switch (this.#selectedAttackMenuOption) {
@@ -646,6 +705,9 @@ export class BattleMenu {
     this.#selectedAttackIndex = selectedMoveIndex;
   }
 
+  /**
+   * @returns {void}
+   */
   #createPlayerInputCursor() {
     this.#userInputCursorPhaserImageGameObject = this.#scene.add.image(0, 0, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursorPhaserImageGameObject.setAngle(90).setScale(2.5, 1.25);

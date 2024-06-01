@@ -194,10 +194,11 @@ export class PlayerBattleMonster extends BattleMonster {
    * Updates the exp bar in the UI, and updates the monsters level text incase
    * the monsters level increased. This is called from the battle scene
    * after the `updateMonsterExp` method is called.
-   * @param {() => void} callback
+   * @param {() => void} [callback=(() => {})]
+   * @param {boolean} [skipBattleAnimations=false]
    * @returns {void}
    */
-  updateMonsterExpBar(callback) {
+  updateMonsterExpBar(callback = () => {}, skipBattleAnimations = false) {
     this.#expBar.setMeterPercentageAnimated(
       calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
       {
@@ -207,6 +208,7 @@ export class PlayerBattleMonster extends BattleMonster {
           this.updateMonsterHealth(this._currentHealth);
           callback();
         },
+        skipBattleAnimations,
       }
     );
   }
@@ -218,5 +220,6 @@ export class PlayerBattleMonster extends BattleMonster {
   switchMonster(monster) {
     super.switchMonster(monster);
     this.#setHealthBarText();
+    this.updateMonsterExpBar(undefined, true);
   }
 }

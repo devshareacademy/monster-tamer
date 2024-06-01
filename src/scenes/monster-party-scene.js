@@ -39,6 +39,8 @@ const MONSTER_PARTY_POSITIONS = Object.freeze({
  * @property {string} previousSceneName
  * @property {import('../types/typedef.js').Item} [itemSelected]
  * @property {number} [activeBattleMonsterPartyIndex] the current active monsters party index if we are attempting to switch monsters
+ * @property {boolean} [activeMonsterKnockedOut] flag to indicate if the current active monster was knocked out during battle, which means player has
+ *                                               to choose a new monster before going back to the battle scene
  */
 
 export class MonsterPartyScene extends BaseScene {
@@ -296,6 +298,17 @@ export class MonsterPartyScene extends BaseScene {
    * @returns {void}
    */
   #goBackToPreviousScene(itemUsed, wasMonsterSelected) {
+    if (
+      this.#sceneData.activeMonsterKnockedOut &&
+      this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE &&
+      !wasMonsterSelected
+    ) {
+      // if active monster was knocked out, return early since we need to pick a new monster for battle
+      this.#infoTextGameObject.setText('You must select a new monster for battle.');
+      this.#waitingForInput = true;
+      return;
+    }
+
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
     this.scene.resume(this.#sceneData.previousSceneName, {
