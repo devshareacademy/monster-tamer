@@ -15,6 +15,9 @@ export const MENU_OPTIONS = Object.freeze({
 });
 
 export class WorldMenu extends Menu {
+  /**
+   * @param {Phaser.Scene} scene
+   */
   constructor(scene) {
     super(scene, [MENU_OPTIONS.MONSTERS, MENU_OPTIONS.BAG, MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT]);
   }

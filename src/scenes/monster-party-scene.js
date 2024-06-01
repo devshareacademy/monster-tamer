@@ -13,6 +13,8 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
+import { MONSTER_PARTY_MENU_OPTIONS, MonsterPartyMenu } from '../party/monster-party-menu.js';
+import { CONFIRMATION_MENU_OPTIONS, ConfirmationMenu } from '../party/confirmation-menu.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -62,6 +64,10 @@ export class MonsterPartyScene extends BaseScene {
   #sceneData;
   /** @type {boolean} */
   #waitingForInput;
+  /** @type {MonsterPartyMenu} */
+  #menu;
+  /** @type {ConfirmationMenu} */
+  #confirmationMenu;
 
   constructor() {
     super({
@@ -75,6 +81,10 @@ export class MonsterPartyScene extends BaseScene {
    */
   init(data) {
     super.init(data);
+
+    if (!data || !data.previousSceneName) {
+      data.previousSceneName = SCENE_KEYS.WORLD_SCENE;
+    }
 
     this.#sceneData = data;
     this.#monsterPartyBackgrounds = [];
@@ -127,6 +137,10 @@ export class MonsterPartyScene extends BaseScene {
     });
     this.#movePlayerInputCursor(DIRECTION.NONE);
 
+    // create menu
+    this.#menu = new MonsterPartyMenu(this, this.#sceneData.previousSceneName);
+    this.#confirmationMenu = new ConfirmationMenu(this);
+
     // alpha is used for knowing if monster is selected, not selected, or knocked out
     /*
     this.add.image(0, 10, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
@@ -148,7 +162,21 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
 
-    if (this._controls.wasBackKeyPressed()) {
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const wasBackKeyPressed = this._controls.wasBackKeyPressed();
+
+    if (this.#confirmationMenu.isVisible) {
+      this.#handleInputForConfirmationMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection);
+      return;
+    }
+
+    if (this.#menu.isVisible) {
+      this.#handleInputForMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection);
+      return;
+    }
+
+    if (wasBackKeyPressed) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
         this.#waitingForInput = false;
@@ -159,7 +187,6 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
 
-    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
@@ -172,33 +199,35 @@ export class MonsterPartyScene extends BaseScene {
         return;
       }
 
-      // handle input based on what player intention was (use item, view monster details, select monster to switch to)
-      if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
-        this.#handleItemUsed();
-        return;
-      }
-      if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-        this.#handleMonsterSelectedForSwitch();
-        return;
-      }
-
-      this._controls.lockInput = true;
-      // pause this scene and launch the monster details scene
-      /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
-      const sceneDataToPass = {
-        monster: this.#monsters[this.#selectedPartyMonsterIndex],
-      };
-      this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
-      this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
-
+      this.#menu.show();
       return;
+
+      // // handle input based on what player intention was (use item, view monster details, select monster to switch to)
+      // if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
+      //   this.#handleItemUsed();
+      //   return;
+      // }
+      // if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+      //   this.#handleMonsterSelectedForSwitch();
+      //   return;
+      // }
+
+      // this._controls.lockInput = true;
+      // // pause this scene and launch the monster details scene
+      // /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
+      // const sceneDataToPass = {
+      //   monster: this.#monsters[this.#selectedPartyMonsterIndex],
+      // };
+      // this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
+      // this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+
+      // return;
     }
 
     if (this.#waitingForInput) {
       return;
     }
 
-    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
       this.#updateInfoContainerText();
@@ -450,5 +479,111 @@ export class MonsterPartyScene extends BaseScene {
     }
 
     this.#goBackToPreviousScene(false, true);
+  }
+
+  /**
+   * @param {boolean} wasBackKeyPressed
+   * @param {boolean} wasSpaceKeyPressed
+   * @param {import('../common/direction.js').Direction} selectedDirection
+   * @returns {void}
+   */
+  #handleInputForMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection) {
+    if (wasBackKeyPressed) {
+      this.#menu.hide();
+      return;
+    }
+
+    if (wasSpaceKeyPressed) {
+      this.#menu.handlePlayerInput('OK');
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.CANCEL) {
+        this.#menu.hide();
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SUMMARY) {
+        this._controls.lockInput = true;
+        // pause this scene and launch the monster details scene
+        /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
+        const sceneDataToPass = {
+          monster: this.#monsters[this.#selectedPartyMonsterIndex],
+        };
+        this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
+        this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SELECT) {
+        if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
+          this.#handleItemUsed();
+          return;
+        }
+        if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+          this.#handleMonsterSelectedForSwitch();
+          return;
+        }
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
+        this.#menu.hide();
+        this.#confirmationMenu.show();
+        this.#infoTextGameObject.setText(`Release ${this.#monsters[this.#selectedPartyMonsterIndex].name}?`);
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.MOVE) {
+        console.log(this.#menu.selectedMenuOption);
+        return;
+      }
+
+      return;
+    }
+
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#menu.handlePlayerInput(selectedDirection);
+      return;
+    }
+  }
+
+  /**
+   * @param {boolean} wasBackKeyPressed
+   * @param {boolean} wasSpaceKeyPressed
+   * @param {import('../common/direction.js').Direction} selectedDirection
+   * @returns {void}
+   */
+  #handleInputForConfirmationMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection) {
+    if (wasBackKeyPressed) {
+      this.#confirmationMenu.hide();
+      this.#updateInfoContainerText();
+      return;
+    }
+
+    if (wasSpaceKeyPressed) {
+      this.#confirmationMenu.handlePlayerInput('OK');
+
+      if (this.#confirmationMenu.selectedMenuOption === CONFIRMATION_MENU_OPTIONS.YES) {
+        this.#confirmationMenu.hide();
+
+        if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
+          // TODO: display message to player
+          // TODO: validate not last monster in party
+          this.#monsters.splice(this.#selectedPartyMonsterIndex, 1);
+          dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
+          this.scene.restart(this.#sceneData);
+          return;
+        }
+
+        return;
+      }
+
+      this.#confirmationMenu.hide();
+      this.#menu.show();
+      this.#updateInfoContainerText();
+    }
+
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#confirmationMenu.handlePlayerInput(selectedDirection);
+      return;
+    }
   }
 }
