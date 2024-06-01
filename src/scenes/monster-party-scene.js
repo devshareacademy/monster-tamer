@@ -68,6 +68,12 @@ export class MonsterPartyScene extends BaseScene {
   #menu;
   /** @type {ConfirmationMenu} */
   #confirmationMenu;
+  /** @type {boolean} */
+  #isMovingMonster;
+  /** @type {number | undefined} */
+  #monsterToBeMovedIndex;
+  /** @type {Phaser.GameObjects.Container[]} */
+  #monsterContainers;
 
   constructor() {
     super({
@@ -93,6 +99,9 @@ export class MonsterPartyScene extends BaseScene {
     this.#selectedPartyMonsterIndex = 0;
     this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
     this.#waitingForInput = false;
+    this.#isMovingMonster = false;
+    this.#monsterToBeMovedIndex = undefined;
+    this.#monsterContainers = [];
   }
 
   /**
@@ -133,7 +142,8 @@ export class MonsterPartyScene extends BaseScene {
       const y =
         (isEven ? MONSTER_PARTY_POSITIONS.EVEN.y : MONSTER_PARTY_POSITIONS.ODD.y) +
         MONSTER_PARTY_POSITIONS.increment * Math.floor(index / 2);
-      this.#createMonster(x, y, monster);
+      const monsterContainer = this.#createMonster(x, y, monster);
+      this.#monsterContainers.push(monsterContainer);
     });
     this.#movePlayerInputCursor(DIRECTION.NONE);
 
@@ -183,6 +193,13 @@ export class MonsterPartyScene extends BaseScene {
         return;
       }
 
+      if (this.#isMovingMonster) {
+        // if we are attempting to switch monsters location, cancel action
+        this.#isMovingMonster = false;
+        this.#updateInfoContainerText();
+        return;
+      }
+
       this.#goBackToPreviousScene(false, false);
       return;
     }
@@ -195,33 +212,29 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#selectedPartyMonsterIndex === -1) {
+        // if we are attempting to switch monsters location, cancel action
+        if (this.#isMovingMonster) {
+          this.#isMovingMonster = false;
+          this.#updateInfoContainerText();
+          return;
+        }
+
         this.#goBackToPreviousScene(false, false);
+        return;
+      }
+
+      if (this.#isMovingMonster) {
+        // make sure we select a different monster
+        if (this.#selectedPartyMonsterIndex === this.#monsterToBeMovedIndex) {
+          return;
+        }
+
+        this.#moveMonsters();
         return;
       }
 
       this.#menu.show();
       return;
-
-      // // handle input based on what player intention was (use item, view monster details, select monster to switch to)
-      // if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
-      //   this.#handleItemUsed();
-      //   return;
-      // }
-      // if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-      //   this.#handleMonsterSelectedForSwitch();
-      //   return;
-      // }
-
-      // this._controls.lockInput = true;
-      // // pause this scene and launch the monster details scene
-      // /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
-      // const sceneDataToPass = {
-      //   monster: this.#monsters[this.#selectedPartyMonsterIndex],
-      // };
-      // this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
-      // this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
-
-      // return;
     }
 
     if (this.#waitingForInput) {
@@ -230,6 +243,10 @@ export class MonsterPartyScene extends BaseScene {
 
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
+      // if we are attempting to move a monster, we want to leave the text up on the screen
+      if (this.#isMovingMonster) {
+        return;
+      }
       this.#updateInfoContainerText();
     }
   }
@@ -525,6 +542,13 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
+        if (this.#monsters.length <= 1) {
+          this.#infoTextGameObject.setText('Cannot release last monster in party');
+          this.#waitingForInput = true;
+          this.#menu.hide();
+          return;
+        }
+
         this.#menu.hide();
         this.#confirmationMenu.show();
         this.#infoTextGameObject.setText(`Release ${this.#monsters[this.#selectedPartyMonsterIndex].name}?`);
@@ -532,7 +556,17 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.MOVE) {
-        console.log(this.#menu.selectedMenuOption);
+        if (this.#monsters.length <= 1) {
+          this.#infoTextGameObject.setText('Cannot move monster');
+          this.#waitingForInput = true;
+          this.#menu.hide();
+          return;
+        }
+
+        this.#isMovingMonster = true;
+        this.#monsterToBeMovedIndex = this.#selectedPartyMonsterIndex;
+        this.#infoTextGameObject.setText('Choose a monster to switch positions with');
+        this.#menu.hide();
         return;
       }
 
@@ -565,11 +599,14 @@ export class MonsterPartyScene extends BaseScene {
         this.#confirmationMenu.hide();
 
         if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
-          // TODO: display message to player
-          // TODO: validate not last monster in party
-          this.#monsters.splice(this.#selectedPartyMonsterIndex, 1);
-          dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
-          this.scene.restart(this.#sceneData);
+          this._controls.lockInput = true;
+          this.#infoTextGameObject.setText(
+            `You release ${this.#monsters[this.#selectedPartyMonsterIndex].name} into the wild`
+          );
+          this.time.delayedCall(1000, () => {
+            this.#removeMonster();
+            this._controls.lockInput = false;
+          });
           return;
         }
 
@@ -585,5 +622,78 @@ export class MonsterPartyScene extends BaseScene {
       this.#confirmationMenu.handlePlayerInput(selectedDirection);
       return;
     }
+  }
+
+  /**
+   * Updates the game objects positions and monsters in the party positions.
+   * @returns {void}
+   */
+  #moveMonsters() {
+    // update monsters in party
+    const monsterRef = this.#monsters[this.#monsterToBeMovedIndex];
+    this.#monsters[this.#monsterToBeMovedIndex] = this.#monsters[this.#selectedPartyMonsterIndex];
+    this.#monsters[this.#selectedPartyMonsterIndex] = monsterRef;
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
+
+    // update monster container positions
+    const monsterContainerRefPosition1 = {
+      x: this.#monsterContainers[this.#monsterToBeMovedIndex].x,
+      y: this.#monsterContainers[this.#monsterToBeMovedIndex].y,
+    };
+    const monsterContainerRefPosition2 = {
+      x: this.#monsterContainers[this.#selectedPartyMonsterIndex].x,
+      y: this.#monsterContainers[this.#selectedPartyMonsterIndex].y,
+    };
+    this.#monsterContainers[this.#monsterToBeMovedIndex].setPosition(
+      monsterContainerRefPosition2.x,
+      monsterContainerRefPosition2.y
+    );
+    this.#monsterContainers[this.#selectedPartyMonsterIndex].setPosition(
+      monsterContainerRefPosition1.x,
+      monsterContainerRefPosition1.y
+    );
+    const containerRef = this.#monsterContainers[this.#monsterToBeMovedIndex];
+    this.#monsterContainers[this.#monsterToBeMovedIndex] = this.#monsterContainers[this.#selectedPartyMonsterIndex];
+    this.#monsterContainers[this.#selectedPartyMonsterIndex] = containerRef;
+
+    // update monster backgrounds
+    const backgroundRef = this.#monsterPartyBackgrounds[this.#monsterToBeMovedIndex];
+    this.#monsterPartyBackgrounds[this.#monsterToBeMovedIndex] =
+      this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex];
+    this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex] = backgroundRef;
+
+    this.#isMovingMonster = false;
+    this.#selectedPartyMonsterIndex = this.#monsterToBeMovedIndex;
+    this.#monsterToBeMovedIndex = undefined;
+  }
+
+  #removeMonster() {
+    // remove monster from party
+    this.#monsters.splice(this.#selectedPartyMonsterIndex, 1);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
+
+    // remove background object
+    this.#monsterPartyBackgrounds.splice(this.#selectedPartyMonsterIndex, 1);
+
+    // remove container object and update other container positions
+    const containerToRemove = this.#monsterContainers.splice(this.#selectedPartyMonsterIndex, 1)[0];
+    let prevContainerPos = {
+      x: containerToRemove.x,
+      y: containerToRemove.y,
+    };
+    containerToRemove.destroy();
+
+    this.#monsterContainers.forEach((container, index) => {
+      if (index < this.#selectedPartyMonsterIndex) {
+        return;
+      }
+      const tempPosition = {
+        x: container.x,
+        y: container.y,
+      };
+      container.setPosition(prevContainerPos.x, prevContainerPos.y);
+      prevContainerPos = tempPosition;
+    });
+    this.#movePlayerInputCursor('UP');
   }
 }
