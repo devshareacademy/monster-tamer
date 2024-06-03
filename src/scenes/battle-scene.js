@@ -519,6 +519,7 @@ export class BattleScene extends BaseScene {
 
         /** @type {string[]} */
         const messages = [];
+        let didActiveMonsterLevelUp = false;
         this.#sceneData.playerMonsters.forEach((monster, index) => {
           // ensure only monsters that are not knocked out gain exp
           if (this.#sceneData.playerMonsters[index].currentHp <= 0) {
@@ -534,6 +535,9 @@ export class BattleScene extends BaseScene {
             monsterMessages.push(
               `${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`
             );
+            if (statChanges.level !== 0) {
+              didActiveMonsterLevelUp = true;
+            }
           } else {
             statChanges = handleMonsterGainingExperience(
               this.#sceneData.playerMonsters[index],
@@ -571,7 +575,7 @@ export class BattleScene extends BaseScene {
             });
           });
           this._controls.lockInput = false;
-        });
+        }, didActiveMonsterLevelUp);
       },
     });
 
