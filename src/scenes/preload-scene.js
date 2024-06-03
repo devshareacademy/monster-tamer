@@ -241,7 +241,7 @@ export class PreloadScene extends BaseScene {
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);
 
-    this.scene.start(SCENE_KEYS.MONSTER_PARTY_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
   /**
