@@ -66,6 +66,7 @@ export class PreloadScene extends BaseScene {
 
     // battle assets
     this.load.image(BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND, `${kenneysAssetPath}/ui-space-expansion/custom-ui.png`);
+    this.load.image(BATTLE_ASSET_KEYS.BALL_THUMBNAIL, `${monsterTamerAssetPath}/battle/cosmoball.png`);
 
     // health bar assets
     this.load.image(

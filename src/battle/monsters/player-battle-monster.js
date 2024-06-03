@@ -123,9 +123,12 @@ export class PlayerBattleMonster extends BattleMonster {
   playDeathAnimation(callback) {
     const startYPos = this._phaserGameObject.y;
     const endYPos = startYPos + 400;
+    const healthBarStartXPos = this._phaserHealthBarGameContainer.x;
+    const healthBarEndXPos = 1200;
 
     if (this._skipBattleAnimations) {
       this._phaserGameObject.setY(endYPos);
+      this._phaserHealthBarGameContainer.setAlpha(0);
       callback();
       return;
     }
@@ -141,6 +144,21 @@ export class PlayerBattleMonster extends BattleMonster {
       targets: this._phaserGameObject,
       onComplete: () => {
         callback();
+      },
+    });
+
+    this._scene.tweens.add({
+      delay: 0,
+      duration: 2000,
+      x: {
+        from: this._phaserHealthBarGameContainer.x,
+        start: this._phaserHealthBarGameContainer.x,
+        to: healthBarEndXPos,
+      },
+      targets: this._phaserHealthBarGameContainer,
+      onComplete: () => {
+        this._phaserHealthBarGameContainer.setAlpha(0);
+        this._phaserHealthBarGameContainer.setX(healthBarStartXPos);
       },
     });
   }
@@ -194,10 +212,11 @@ export class PlayerBattleMonster extends BattleMonster {
    * Updates the exp bar in the UI, and updates the monsters level text incase
    * the monsters level increased. This is called from the battle scene
    * after the `updateMonsterExp` method is called.
-   * @param {() => void} callback
+   * @param {() => void} [callback=(() => {})]
+   * @param {boolean} [skipBattleAnimations=false]
    * @returns {void}
    */
-  updateMonsterExpBar(callback) {
+  updateMonsterExpBar(callback = () => {}, skipBattleAnimations = false) {
     this.#expBar.setMeterPercentageAnimated(
       calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
       {
@@ -207,7 +226,18 @@ export class PlayerBattleMonster extends BattleMonster {
           this.updateMonsterHealth(this._currentHealth);
           callback();
         },
+        skipBattleAnimations,
       }
     );
+  }
+
+  /**
+   * @param {import('../../types/typedef.js').Monster} monster
+   * @returns {void}
+   */
+  switchMonster(monster) {
+    super.switchMonster(monster);
+    this.#setHealthBarText();
+    this.updateMonsterExpBar(undefined, true);
   }
 }
