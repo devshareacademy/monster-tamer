@@ -14,7 +14,7 @@ import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
-import { calculateExpGainedFromMonster } from '../utils/leveling-utils.js';
+import { calculateExpGainedFromMonster, handleMonsterGainingExperience } from '../utils/leveling-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -520,17 +520,31 @@ export class BattleScene extends BaseScene {
         /** @type {string[]} */
         const messages = [];
         this.#sceneData.playerMonsters.forEach((monster, index) => {
+          // ensure only monsters that are not knocked out gain exp
+          if (this.#sceneData.playerMonsters[index].currentHp <= 0) {
+            return;
+          }
+
           /** @type {import('../utils/leveling-utils.js').StatChanges} */
           let statChanges;
+          /** @type {string[]} */
+          const monsterMessages = [];
           if (index === this.#activePlayerAttackIndex) {
             statChanges = this.#activePlayerMonster.updateMonsterExp(gainedExpForActiveMonster);
-            messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`);
+            monsterMessages.push(
+              `${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`
+            );
           } else {
-            // TODO
-            messages.push(`${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForInactiveMonster} exp.`);
+            statChanges = handleMonsterGainingExperience(
+              this.#sceneData.playerMonsters[index],
+              gainedExpForInactiveMonster
+            );
+            monsterMessages.push(
+              `${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForInactiveMonster} exp.`
+            );
           }
-          if (statChanges.level !== 0) {
-            messages.push(
+          if (statChanges !== undefined && statChanges.level !== 0) {
+            monsterMessages.push(
               `${this.#sceneData.playerMonsters[index].name} level increased to ${
                 this.#sceneData.playerMonsters[index].currentLevel
               }!`,
@@ -538,6 +552,12 @@ export class BattleScene extends BaseScene {
                 statChanges.attack
               } and health increased by ${statChanges.health}`
             );
+          }
+
+          if (index === this.#activePlayerMonsterPartyIndex) {
+            messages.unshift(...monsterMessages);
+          } else {
+            messages.push(...monsterMessages);
           }
         });
 
