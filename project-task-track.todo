@@ -138,13 +138,13 @@ Leveling & Experience:
 Multiple Monsters:
   ✔ load new assets @done(24-06-04 09:00)
   ☐ battle scene
-    ☐ battle monster class
-      ☐ add support for switching monster details
-    ☐ player battle monster class
-      ☐ add support for switching monster details
-      ☐ update deatch animation to hide health bar components
-    ☐ battle menu
-      ☐ update switch monster logic to align with flee attempt
+    ✔ battle monster class @done(24-06-04 11:15)
+      ✔ add support for switching monster details @done(24-06-04 11:15)
+    ✔ player battle monster class @done(24-06-04 11:15)
+      ✔ add support for switching monster details @done(24-06-04 11:15)
+      ✔ update deatch animation to hide health bar components @done(24-06-04 11:15)
+    ✔ battle menu @done(24-06-04 11:15)
+      ✔ update switch monster logic to align with flee attempt @done(24-06-04 11:15)
     ☐ battle scene
       ☐ new state for switching monsters and scene resume logic
       ☐ update existing states to support switching active monster
