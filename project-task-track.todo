@@ -146,8 +146,8 @@ Multiple Monsters:
     ✔ battle menu @done(24-06-04 11:15)
       ✔ update switch monster logic to align with flee attempt @done(24-06-04 11:15)
     ☐ battle scene
-      ☐ new state for switching monsters and scene resume logic
-      ☐ update existing states to support switching active monster
+      ✔ new state for switching monsters and scene resume logic @done(24-06-04 12:23)
+      ✔ update existing states to support switching active monster @done(24-06-04 12:23)
       ☐ update existing logic for switching monster when active monster is knocked out
       ☐ add ui to show number of monsters in party
     ☐ monster party scene
