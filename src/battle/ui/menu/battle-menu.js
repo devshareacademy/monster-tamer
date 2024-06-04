@@ -151,6 +151,7 @@ export class BattleMenu {
     this.#selectedAttackIndex = undefined;
     this.#usedItem = false;
     this.#fleeAttempt = false;
+    this.#switchMonsterAttempt = false;
   }
 
   hideMainBattleMenu() {
