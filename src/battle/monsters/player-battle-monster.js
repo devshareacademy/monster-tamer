@@ -194,11 +194,12 @@ export class PlayerBattleMonster extends BattleMonster {
    * Updates the exp bar in the UI, and updates the monsters level text incase
    * the monsters level increased. This is called from the battle scene
    * after the `updateMonsterExp` method is called.
-   * @param {() => void} callback
    * @param {boolean} leveledUp
+   * @param {boolean} skipBattleAnimations
+   * @param {() => void} [callback=(() => {})]
    * @returns {void}
    */
-  updateMonsterExpBar(callback, leveledUp) {
+  updateMonsterExpBar(leveledUp, skipBattleAnimations, callback = () => {}) {
     const cb = () => {
       this._setMonsterLevelText();
       this._maxHealth = this._monsterDetails.maxHp;
@@ -232,5 +233,15 @@ export class PlayerBattleMonster extends BattleMonster {
         callback: cb,
       }
     );
+  }
+
+  /**
+   * @param {import('../../types/typedef.js').Monster} monster
+   * @returns {void}
+   */
+  switchMonster(monster) {
+    super.switchMonster(monster);
+    this.#setHealthBarText();
+    this.updateMonsterExpBar(false, true, undefined);
   }
 }

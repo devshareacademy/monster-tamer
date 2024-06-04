@@ -570,7 +570,7 @@ export class BattleScene extends BaseScene {
         });
 
         this._controls.lockInput = true;
-        this.#activePlayerMonster.updateMonsterExpBar(() => {
+        this.#activePlayerMonster.updateMonsterExpBar(didActiveMonsterLevelUp, false, () => {
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
             this.time.delayedCall(200, () => {
               // update the data manager with latest monster data
@@ -579,7 +579,7 @@ export class BattleScene extends BaseScene {
             });
           });
           this._controls.lockInput = false;
-        }, didActiveMonsterLevelUp);
+        });
       },
     });
 
