@@ -38,6 +38,7 @@ const MONSTER_PARTY_POSITIONS = Object.freeze({
  * @type {object}
  * @property {string} previousSceneName
  * @property {import('../types/typedef.js').Item} [itemSelected]
+ * @property {number} [activeBattleMonsterPartyIndex] the current active monsters party index if we are attempting to switch monsters
  */
 
 export class MonsterPartyScene extends BaseScene {
@@ -152,7 +153,7 @@ export class MonsterPartyScene extends BaseScene {
         return;
       }
 
-      this.#goBackToPreviousScene(false);
+      this.#goBackToPreviousScene(false, false);
       return;
     }
 
@@ -165,13 +166,18 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#selectedPartyMonsterIndex === -1) {
-        this.#goBackToPreviousScene(false);
+        this.#goBackToPreviousScene(false, false);
         return;
       }
 
       // handle input based on what player intention was (use item, view monster details, select monster to switch to)
       if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
         this.#handleItemUsed();
+        return;
+      }
+
+      if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+        this.#handleMonsterSelectedForSwitch();
         return;
       }
 
@@ -287,12 +293,17 @@ export class MonsterPartyScene extends BaseScene {
 
   /**
    * @param {boolean} itemUsed
+   * @param {boolean} wasMonsterSelected
    * @returns {void}
    */
-  #goBackToPreviousScene(itemUsed) {
+  #goBackToPreviousScene(itemUsed, wasMonsterSelected) {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
-    this.scene.resume(this.#sceneData.previousSceneName, { itemUsed });
+    this.scene.resume(this.#sceneData.previousSceneName, {
+      itemUsed,
+      selectedMonsterIndex: wasMonsterSelected ? this.#selectedPartyMonsterIndex : undefined,
+      wasMonsterSelected,
+    });
   }
 
   /**
@@ -401,10 +412,31 @@ export class MonsterPartyScene extends BaseScene {
           );
           dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
           this.time.delayedCall(300, () => {
-            this.#goBackToPreviousScene(true);
+            this.#goBackToPreviousScene(true, false);
           });
         },
       }
     );
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleMonsterSelectedForSwitch() {
+    // validate that the monster is not fainted
+    if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
+      this.#infoTextGameObject.setText('Selected monster is not able to fight');
+      this.#waitingForInput = true;
+      return;
+    }
+
+    // validate that the selected monster is not the current active monster in battle
+    if (this.#sceneData.activeBattleMonsterPartyIndex === this.#selectedPartyMonsterIndex) {
+      this.#infoTextGameObject.setText('Selected monster is already battling');
+      this.#waitingForInput = true;
+      return;
+    }
+
+    this.#goBackToPreviousScene(false, true);
   }
 }
