@@ -136,7 +136,7 @@ Leveling & Experience:
     ✔ update battle menu ui to have wordwrap @done(24-05-27 13:04)
 
 Multiple Monsters:
-  ☐ load new assets
+  ✔ load new assets @done(24-06-04 09:00)
   ☐ battle scene
     ☐ battle monster class
       ☐ add support for switching monster details
@@ -149,7 +149,6 @@ Multiple Monsters:
       ☐ new state for switching monsters and scene resume logic
       ☐ update existing states to support switching active monster
       ☐ update existing logic for switching monster when active monster is knocked out
-      ☐ update logic tied to exp gain and message ordering
       ☐ add ui to show number of monsters in party
     ☐ monster party scene
       ☐ add support for selecting monster for switching active monster during battle
