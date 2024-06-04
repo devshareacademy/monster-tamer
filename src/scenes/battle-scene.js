@@ -27,6 +27,7 @@ const BATTLE_STATES = Object.freeze({
   FINISHED: 'FINISHED',
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
   GAIN_EXPERIENCE: 'GAIN_EXPERIENCE',
+  SWITCH_MONSTER: 'SWITCH_MONSTER',
 });
 
 /**
@@ -162,6 +163,7 @@ export class BattleScene extends BaseScene {
       (this.#battleStateMachine.currentStateName === BATTLE_STATES.PRE_BATTLE_INFO ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.POST_ATTACK_CHECK ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.GAIN_EXPERIENCE ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.SWITCH_MONSTER ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT)
     ) {
       this.#battleMenu.handlePlayerInput('OK');
@@ -183,6 +185,12 @@ export class BattleScene extends BaseScene {
       // check if the player attempted to flee
       if (this.#battleMenu.isAttemptingToFlee) {
         this.#battleStateMachine.setState(BATTLE_STATES.FLEE_ATTEMPT);
+        return;
+      }
+
+      // check if the player attempted to switch monsters
+      if (this.#battleMenu.isAttemptingToSwitchMonsters) {
+        this.#battleStateMachine.setState(BATTLE_STATES.SWITCH_MONSTER);
         return;
       }
 
@@ -588,6 +596,15 @@ export class BattleScene extends BaseScene {
             });
           });
           this._controls.lockInput = false;
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.SWITCH_MONSTER,
+      onEnter: () => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You have no other monsters in your party...'], () => {
+          this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
         });
       },
     });
