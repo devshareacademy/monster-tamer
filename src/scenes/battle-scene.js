@@ -676,6 +676,7 @@ export class BattleScene extends BaseScene {
     this.#activePlayerMonster.playDeathAnimation(() => {
       this.#activePlayerMonsterPartyIndex = data.selectedMonsterIndex;
       this.#activePlayerMonster.switchMonster(this.#sceneData.playerMonsters[data.selectedMonsterIndex]);
+      this.#battleMenu.updateMonsterAttackSubMenu();
       this._controls.lockInput = false;
       this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
     });
