@@ -36,6 +36,15 @@ const BATTLE_STATES = Object.freeze({
  * @property {import('../types/typedef.js').Monster[]} enemyMonsters
  */
 
+/**
+ * @typedef BattleSceneWasResumedData
+ * @type {object}
+ * @property {boolean} wasMonsterSelected
+ * @property {number} [selectedMonsterIndex]
+ * @property {boolean} itemUsed
+ * @property {import('../types/typedef.js').Item} [item]
+ */
+
 export class BattleScene extends BaseScene {
   /** @type {BattleMenu} */
   #battleMenu;
