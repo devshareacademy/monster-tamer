@@ -67,6 +67,8 @@ export class BattleMenu {
   /** @type {boolean} */
   #fleeAttempt;
   /** @type {boolean} */
+  #switchMonsterAttempt;
+  /** @type {boolean} */
   #wasItemUsed;
 
   /**
@@ -90,6 +92,7 @@ export class BattleMenu {
     this.#wasItemUsed = false;
     this.#usedItem = undefined;
     this.#fleeAttempt = false;
+    this.#switchMonsterAttempt = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -128,6 +131,25 @@ export class BattleMenu {
     return this.#fleeAttempt;
   }
 
+  /** @type {boolean} */
+  get isAttemptingToSwitchMonsters() {
+    return this.#switchMonsterAttempt;
+  }
+
+  /**
+   * Trigger to update the attack names after a monster has changed in the battle scene.
+   * @returns {void}
+   */
+  updateMonsterAttackSubMenu() {
+    this.#activePlayerMonster.attacks.forEach((attack, index) => {
+      /** @type {Phaser.GameObjects.Text} */
+      (this.#moveSelectionSubBattleMenuPhaserContainerGameObject.getAt(index)).setText(attack.name);
+    });
+  }
+
+  /**
+   * @returns {void}
+   */
   showMainBattleMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#battleTextGameObjectLine1.setText('what should');
@@ -140,25 +162,38 @@ export class BattleMenu {
     this.#selectedAttackIndex = undefined;
     this.#wasItemUsed = false;
     this.#fleeAttempt = false;
+    this.#switchMonsterAttempt = false;
     this.#usedItem = undefined;
   }
 
+  /**
+   * @returns {void}
+   */
   hideMainBattleMenu() {
     this.#mainBattleMenuPhaserContainerGameObject.setAlpha(0);
     this.#battleTextGameObjectLine1.setAlpha(0);
     this.#battleTextGameObjectLine2.setAlpha(0);
   }
 
+  /**
+   * @returns {void}
+   */
   showMonsterAttackSubMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT;
     this.#moveSelectionSubBattleMenuPhaserContainerGameObject.setAlpha(1);
   }
 
+  /**
+   * @returns {void}
+   */
   hideMonsterAttackSubMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#moveSelectionSubBattleMenuPhaserContainerGameObject.setAlpha(0);
   }
 
+  /**
+   * @returns {void}
+   */
   playInputCursorAnimation() {
     this.#userInputCursorPhaserImageGameObject.setPosition(
       this.#battleTextGameObjectLine1.displayWidth + this.#userInputCursorPhaserImageGameObject.displayWidth * 2.7,
@@ -168,14 +203,17 @@ export class BattleMenu {
     this.#userInputCursorPhaserTween.restart();
   }
 
+  /**
+   * @returns {void}
+   */
   hideInputCursor() {
     this.#userInputCursorPhaserImageGameObject.setAlpha(0);
     this.#userInputCursorPhaserTween.pause();
   }
 
   /**
-   *
    * @param {import('../../../common/direction.js').Direction|'OK'|'CANCEL'} input
+   * @returns {void}
    */
   handlePlayerInput(input) {
     if (this.#queuedMessageAnimationPlaying && input === 'OK') {
@@ -248,6 +286,9 @@ export class BattleMenu {
     this.#updateInfoPaneWithMessage();
   }
 
+  /**
+   * @returns {void}
+   */
   #updateInfoPaneWithMessage() {
     this.#waitingForPlayerInput = false;
     this.#battleTextGameObjectLine1.setText('').setAlpha(1);
@@ -284,12 +325,15 @@ export class BattleMenu {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   #createMainBattleMenu() {
     this.#battleTextGameObjectLine1 = this.#scene.add.text(20, 468, 'what should', {
       ...BATTLE_UI_TEXT_STYLE,
       ...{
         wordWrap: {
-          width: this.#scene.scale.width - 20,
+          width: this.#scene.scale.width - 55,
         },
       },
     });
@@ -317,6 +361,9 @@ export class BattleMenu {
     this.hideMainBattleMenu();
   }
 
+  /**
+   * @returns {void}
+   */
   #createMonsterAttackSubMenu() {
     this.#attackBattleMenuCursorPhaserImageGameObject = this.#scene.add
       .image(ATTACK_MENU_CURSOR_POS.x, ATTACK_MENU_CURSOR_POS.y, UI_ASSET_KEYS.CURSOR, 0)
@@ -339,6 +386,9 @@ export class BattleMenu {
     this.hideMonsterAttackSubMenu();
   }
 
+  /**
+   * @returns {void}
+   */
   #createMainInfoPane() {
     const padding = 4;
     const rectHeight = 124;
@@ -356,6 +406,9 @@ export class BattleMenu {
       .setStrokeStyle(8, 0xe4434a, 1);
   }
 
+  /**
+   * @returns {Phaser.GameObjects.Rectangle}
+   */
   #createMainInfoSubPane() {
     const rectWidth = 500;
     const rectHeight = 124;
@@ -449,6 +502,9 @@ export class BattleMenu {
     exhaustiveGuard(this.#selectedBattleMenuOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #moveMainBattleMenuCursor() {
     if (this.#activeBattleMenu !== ACTIVE_BATTLE_MENU.BATTLE_MAIN) {
       return;
@@ -555,6 +611,9 @@ export class BattleMenu {
     exhaustiveGuard(this.#selectedAttackMenuOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #moveMoveSelectBattleMenuCursor() {
     if (this.#activeBattleMenu !== ACTIVE_BATTLE_MENU.BATTLE_MOVE_SELECT) {
       return;
@@ -581,6 +640,9 @@ export class BattleMenu {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   #switchToMainBattleMenu() {
     this.#waitingForPlayerInput = false;
     this.hideInputCursor();
@@ -588,6 +650,9 @@ export class BattleMenu {
     this.showMainBattleMenu();
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerChooseMainBattleOption() {
     this.hideMainBattleMenu();
 
@@ -610,15 +675,8 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.SWITCH) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player having no more monsters
-        and allow the player to navigate back to the main menu
-      */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_SWITCH;
-      this.updateInfoPaneMessagesAndWaitForInput(['You have no other monsters in your party...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.#switchMonsterAttempt = true;
       return;
     }
 
@@ -631,6 +689,9 @@ export class BattleMenu {
     exhaustiveGuard(this.#selectedBattleMenuOption);
   }
 
+  /**
+   * @returns {void}
+   */
   #handlePlayerChooseAttack() {
     let selectedMoveIndex = 0;
     switch (this.#selectedAttackMenuOption) {
@@ -653,6 +714,9 @@ export class BattleMenu {
     this.#selectedAttackIndex = selectedMoveIndex;
   }
 
+  /**
+   * @returns {void}
+   */
   #createPlayerInputCursor() {
     this.#userInputCursorPhaserImageGameObject = this.#scene.add.image(0, 0, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursorPhaserImageGameObject.setAngle(90).setScale(2.5, 1.25);
@@ -674,13 +738,18 @@ export class BattleMenu {
 
   /**
    * @param {Phaser.Scenes.Systems} sys
-   * @param {import('../../../scenes/inventory-scene.js').InventorySceneItemUsedData} data
+   * @param {import('../../../scenes/battle-scene.js').BattleSceneWasResumedData} data
    * @returns {void}
    */
   #handleSceneResume(sys, data) {
     console.log(
       `[${BattleMenu.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
     );
+
+    if (data && data.wasMonsterSelected) {
+      // do nothing since new active monster was chosen to switch to
+      return;
+    }
 
     if (!data || !data.itemUsed) {
       this.#switchToMainBattleMenu();
