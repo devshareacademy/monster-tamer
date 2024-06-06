@@ -17,6 +17,9 @@ import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { calculateExpGainedFromMonster, handleMonsterGainingExperience } from '../utils/leveling-utils.js';
 import { ITEM_CATEGORY } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
+import { Ball } from '../battle/ball.js';
+import { sleep } from '../utils/time-utils.js';
 
 const MONSTER_PARTY_UI_ALPHA = Object.freeze({
   active: 1,
@@ -85,6 +88,10 @@ export class BattleScene extends BaseScene {
   #activeMonsterKnockedOut;
   /** @type {Phaser.GameObjects.Container} */
   #availableMonstersUiContainer;
+  /** @type {boolean} */
+  #monsterCaptured;
+  /** @type {Ball} */
+  #ball;
 
   constructor() {
     super({
@@ -126,6 +133,7 @@ export class BattleScene extends BaseScene {
     this.#playerKnockedOut = false;
     this.#switchingActiveMonster = false;
     this.#activeMonsterKnockedOut = false;
+    this.#monsterCaptured = false;
   }
 
   /**
@@ -158,6 +166,13 @@ export class BattleScene extends BaseScene {
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
     this.#createAvailableMonstersUi();
+    this.#ball = new Ball({
+      scene: this,
+      assetKey: BATTLE_ASSET_KEYS.DAMAGED_BALL,
+      assetFrame: 0,
+      scale: 0.1,
+      skipBattleAnimations: this.#skipAnimations,
+    });
 
     this._controls.lockInput = true;
 
@@ -186,6 +201,7 @@ export class BattleScene extends BaseScene {
         this.#battleStateMachine.currentStateName === BATTLE_STATES.POST_ATTACK_CHECK ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.GAIN_EXPERIENCE ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.SWITCH_MONSTER ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.CAPTURE_ITEM_USED ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT)
     ) {
       this.#battleMenu.handlePlayerInput('OK');
@@ -324,6 +340,16 @@ export class BattleScene extends BaseScene {
     // update monster details in scene data and data manager to align with changes from battle
     this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp = this.#activePlayerMonster.currentHp;
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+
+    if (this.#monsterCaptured) {
+      // enemy monster was captured
+      this.#activeEnemyMonster.playDeathAnimation(() => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`You caught ${this.#activeEnemyMonster.name}.`], () => {
+          this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
+        });
+      });
+      return;
+    }
 
     if (this.#activeEnemyMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
@@ -473,8 +499,6 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.PLAYER_INPUT,
       onEnter: () => {
-        const ball = this.add.image(0, 450, BATTLE_ASSET_KEYS.DAMAGED_BALL, 0).setScale(0.1);
-
         this.#battleMenu.showMainBattleMenu();
       },
     });
@@ -719,12 +743,50 @@ export class BattleScene extends BaseScene {
 
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.CAPTURE_ITEM_USED,
-      onEnter: () => {
-        // TODO: figure out logic
-        console.log('attempting to capture');
-        this.time.delayedCall(500, () => {
-          this.#enemyAttack(() => {
-            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+      onEnter: async () => {
+        // TODO: fix bug when using ball and item is not decremented from inventory
+        // TODO: when monster is caught, add to party
+
+        // we throw the monster ball to attempt to capture the monster
+        // play ball shake animation depending on success of capture
+        // 3 shakes - caught, 2 shakes - off by 10, 1 shakes off by 30, 0 shakes off by more than 30
+        // 1. throw ball animation, 2. shake ball animation, 3. break animation if needed, 4. monster re-appear if needed
+
+        const captureResults = calculateMonsterCaptureResults(this.#activeEnemyMonster);
+        console.log(captureResults);
+        const diffInCapture = captureResults.requiredCaptureValue - captureResults.actualCaptureValue;
+        let numberOfShakes = 0;
+        if (diffInCapture <= 10) {
+          numberOfShakes = 2;
+        } else if (diffInCapture <= 30) {
+          numberOfShakes = 1;
+        }
+        if (captureResults.wasCaptured) {
+          numberOfShakes = 3;
+        }
+
+        await this.#ball.playThrowBallAnimation();
+        await this.#activeEnemyMonster.playCatchAnimation();
+        if (numberOfShakes > 0) {
+          await this.#ball.playShakeBallAnimation(numberOfShakes - 1);
+        }
+
+        if (captureResults.wasCaptured) {
+          this.#monsterCaptured = true;
+          this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          return;
+        }
+
+        await sleep(500);
+        this.#ball.hide();
+        await this.#activeEnemyMonster.playCatchFailedAnimation();
+
+        // TODO: refactor to use async/await
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['The wild monster breaks free'], () => {
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
           });
         });
       },

@@ -4,9 +4,11 @@ import { Background } from '../battle/background.js';
 import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
 import { IceShard } from '../battle/attacks/ice-shard.js';
 import { Slash } from '../battle/attacks/slash.js';
-import { MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
+import { BATTLE_ASSET_KEYS, MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { makeDraggable } from '../utils/draggable.js';
+import { Ball } from '../battle/ball.js';
+import { sleep } from '../utils/time-utils.js';
 
 export class TestScene extends Phaser.Scene {
   /** @type {import('../battle/attacks/attack-keys.js').AttackKeys} */
@@ -19,6 +21,8 @@ export class TestScene extends Phaser.Scene {
   #playerMonster;
   /** @type {Phaser.GameObjects.Image} */
   #enemyMonster;
+  /** @type {Ball} */
+  #ball;
 
   constructor() {
     super({ key: SCENE_KEYS.TEST_SCENE });
@@ -45,6 +49,14 @@ export class TestScene extends Phaser.Scene {
     this.#iceShardAttack = new IceShard(this, { x: 256, y: 344 });
     this.#slashAttack = new Slash(this, { x: 745, y: 140 });
 
+    this.#ball = new Ball({
+      scene: this,
+      assetKey: BATTLE_ASSET_KEYS.DAMAGED_BALL,
+      assetFrame: 0,
+      scale: 0.1,
+    });
+    this.#ball.showBallPath();
+
     this.#addDataGui();
   }
 
@@ -56,7 +68,7 @@ export class TestScene extends Phaser.Scene {
 
     const f1 = pane.addFolder({
       title: 'Monsters',
-      expanded: true,
+      expanded: false,
     });
     const playerMonsterFolder = f1.addFolder({
       title: 'Player',
@@ -87,7 +99,7 @@ export class TestScene extends Phaser.Scene {
     };
     const f2 = pane.addFolder({
       title: 'Attacks',
-      expanded: true,
+      expanded: false,
     });
     f2.addBinding(f2Params, 'attack', {
       options: {
@@ -139,6 +151,34 @@ export class TestScene extends Phaser.Scene {
     }).on('change', (ev) => {
       this.#updateAttackGameObjectPosition('y', ev.value);
     });
+
+    const f3 = pane.addFolder({
+      title: 'Monster Ball',
+      expanded: true,
+    });
+    const f3Params = {
+      showPath: true,
+    };
+    f3.addBinding(f3Params, 'showPath', {
+      label: 'show path',
+    }).on('change', (ev) => {
+      if (ev.value) {
+        this.#ball.showBallPath();
+      } else {
+        this.#ball.hideBallPath();
+      }
+    });
+    const playThrowBallButton = f3.addButton({
+      title: 'Play Catch Animation',
+    });
+    playThrowBallButton.on('click', async () => {
+      await this.#ball.playThrowBallAnimation();
+      await this.#catchEnemy();
+      await this.#ball.playShakeBallAnimation(2);
+      await sleep(500);
+      this.#ball.hide();
+      await this.#catchEnemyFailed();
+    });
   }
 
   /**
@@ -165,5 +205,41 @@ export class TestScene extends Phaser.Scene {
       this.#iceShardAttack.gameObject.setY(value);
       return;
     }
+  }
+
+  #catchEnemy() {
+    return new Promise((resolve) => {
+      this.tweens.add({
+        duration: 500,
+        targets: this.#enemyMonster,
+        alpha: {
+          from: 1,
+          start: 1,
+          to: 0,
+        },
+        ease: Phaser.Math.Easing.Sine.InOut,
+        onComplete: () => {
+          resolve();
+        },
+      });
+    });
+  }
+
+  #catchEnemyFailed() {
+    return new Promise((resolve) => {
+      this.tweens.add({
+        duration: 500,
+        targets: this.#enemyMonster,
+        alpha: {
+          from: 0,
+          start: 0,
+          to: 1,
+        },
+        ease: Phaser.Math.Easing.Sine.InOut,
+        onComplete: () => {
+          resolve();
+        },
+      });
+    });
   }
 }

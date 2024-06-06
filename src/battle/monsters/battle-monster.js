@@ -64,6 +64,11 @@ export class BattleMonster {
     return this._currentHealth;
   }
 
+  /** @type {number} */
+  get maxHp() {
+    return this._maxHealth;
+  }
+
   /** @type {boolean} */
   get isFainted() {
     return this._currentHealth <= 0;
