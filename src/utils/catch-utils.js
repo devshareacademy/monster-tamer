@@ -8,7 +8,7 @@ import Phaser from '../lib/phaser.js';
 export function calculateMinValueForCapture(monster) {
   const baseMin = 80;
   const healthRatio = monster.currentHp / monster.maxHp;
-  console.log(healthRatio);
+
   let healthFactor = 0;
   if (healthRatio < 0.25) {
     healthFactor = 4;

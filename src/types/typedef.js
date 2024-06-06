@@ -12,7 +12,7 @@ import Phaser from '../lib/phaser.js';
 /**
  * @typedef BaseMonster
  * @type {object}
- * @property {number} id the unique identifier for this monster
+ * @property {string} id the unique identifier for this monster
  * @property {number} monsterId the unique identifier for this monster type
  * @property {number} currentLevel the current level of this monster
  * @property {number} maxHp the max health of this monster
@@ -31,8 +31,6 @@ import Phaser from '../lib/phaser.js';
  * @property {number} [assetFrame=0] if the asset key is tied to a spritesheet, this frame will be used, defaults to 0
  * @property {number[]} attackIds the ids of the attacks this monster uses
  * @property {number} currentAttack the current attack value of this monster
- * @property {number} baseExp the base exp value of this monster
- * @property {number} currentExp the current exp this monster has
  */
 
 /**

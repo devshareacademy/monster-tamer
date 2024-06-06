@@ -228,10 +228,19 @@ export class InventoryScene extends BaseScene {
 
       // validate that the item can be used if we are outside battle (capture ball example)
       if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+        // TODO: this logic will need to be updated if we support a monster storage system
+        // validate we have room in our party before attempting capture
+        if (dataManager.isPartyFull()) {
+          this.#selectedInventoryDescriptionText.setText('You have no room in your party! Cannot use that item.');
+          this.#waitingForInput = true;
+          return;
+        }
+
         // check to see if the selected item needs a target monster, example if selecting
         // a capture ball, no monster needed, vs selecting a potion, player needs to choose the
         // target monster
         if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
+          this.#handleItemUsed();
           this.#goBackToPreviousScene(true, selectedItem);
           return;
         }
@@ -282,17 +291,12 @@ export class InventoryScene extends BaseScene {
       return;
     }
 
-    const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
-    selectedItem.quantity -= 1;
-    selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
-
+    const updatedItem = this.#handleItemUsed();
     // TODO: add logic to handle when the last of an item was just used
-
-    dataManager.updateInventory(this.#inventory);
 
     // if previous scene was battle scene, switch back to that scene
     if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-      this.#goBackToPreviousScene(true, selectedItem.item);
+      this.#goBackToPreviousScene(true, updatedItem.item);
     }
   }
 
@@ -363,5 +367,16 @@ export class InventoryScene extends BaseScene {
     const y = 30 + this.#selectedInventoryOptionIndex * 50;
 
     this.#userInputCursor.setY(y);
+  }
+
+  /**
+   * @returns {InventoryItemWithGameObjects}
+   */
+  #handleItemUsed() {
+    const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
+    selectedItem.quantity -= 1;
+    selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
+    dataManager.updateInventory(this.#inventory);
+    return selectedItem;
   }
 }

@@ -286,6 +286,14 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @returns {boolean}
+   */
+  isPartyFull() {
+    const partySize = this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length;
+    return partySize === 6;
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */

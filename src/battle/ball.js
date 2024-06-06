@@ -35,6 +35,7 @@ export class Ball {
     if (config.skipBattleAnimations === undefined) {
       config.skipBattleAnimations = false;
     }
+    this.#skipBattleAnimations = config.skipBattleAnimations;
     this.#scene = config.scene;
     this.#createCurvePath();
     this.#ball = this.#scene.add
