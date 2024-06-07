@@ -14,6 +14,7 @@ import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
 import { MONSTER_PARTY_MENU_OPTIONS, MonsterPartyMenu } from '../party/monster-party-menu.js';
+import { CONFIRMATION_MENU_OPTIONS, ConfirmationMenu } from '../common/menu/confirmation-menu.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -65,6 +66,8 @@ export class MonsterPartyScene extends BaseScene {
   #waitingForInput;
   /** @type {MonsterPartyMenu} */
   #menu;
+  /** @type {ConfirmationMenu} */
+  #confirmationMenu;
   /** @type {boolean} */
   #isMovingMonster;
   /** @type {number | undefined} */
@@ -146,6 +149,7 @@ export class MonsterPartyScene extends BaseScene {
 
     // create menu
     this.#menu = new MonsterPartyMenu(this, this.#sceneData.previousSceneName);
+    this.#confirmationMenu = new ConfirmationMenu(this);
 
     // alpha is used for knowing if monster is selected, not selected, or knocked out
     /*
@@ -171,6 +175,11 @@ export class MonsterPartyScene extends BaseScene {
     const selectedDirection = this._controls.getDirectionKeyJustPressed();
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     const wasBackKeyPressed = this._controls.wasBackKeyPressed();
+
+    if (this.#confirmationMenu.isVisible) {
+      this.#handleInputForConfirmationMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection);
+      return;
+    }
 
     if (this.#menu.isVisible) {
       this.#handleInputForMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection);
@@ -538,7 +547,16 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
-        // TODO
+        if (this.#monsters.length <= 1) {
+          this.#infoTextGameObject.setText('Cannot release last monster in party');
+          this.#waitingForInput = true;
+          this.#menu.hide();
+          return;
+        }
+
+        this.#menu.hide();
+        this.#confirmationMenu.show();
+        this.#infoTextGameObject.setText(`Release ${this.#monsters[this.#selectedPartyMonsterIndex].name}?`);
         return;
       }
 
@@ -562,6 +580,52 @@ export class MonsterPartyScene extends BaseScene {
 
     if (selectedDirection !== DIRECTION.NONE) {
       this.#menu.handlePlayerInput(selectedDirection);
+      return;
+    }
+  }
+
+  /**
+   * @param {boolean} wasBackKeyPressed
+   * @param {boolean} wasSpaceKeyPressed
+   * @param {import('../common/direction.js').Direction} selectedDirection
+   * @returns {void}
+   */
+  #handleInputForConfirmationMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection) {
+    if (wasBackKeyPressed) {
+      this.#confirmationMenu.hide();
+      this.#menu.show();
+      this.#updateInfoContainerText();
+      return;
+    }
+
+    if (wasSpaceKeyPressed) {
+      this.#confirmationMenu.handlePlayerInput('OK');
+
+      if (this.#confirmationMenu.selectedMenuOption === CONFIRMATION_MENU_OPTIONS.YES) {
+        this.#confirmationMenu.hide();
+
+        if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
+          this._controls.lockInput = true;
+          this.#infoTextGameObject.setText(
+            `You release ${this.#monsters[this.#selectedPartyMonsterIndex].name} into the wild`
+          );
+          this.time.delayedCall(1000, () => {
+            this.#removeMonster();
+            this._controls.lockInput = false;
+          });
+          return;
+        }
+
+        return;
+      }
+
+      this.#confirmationMenu.hide();
+      this.#menu.show();
+      this.#updateInfoContainerText();
+    }
+
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#confirmationMenu.handlePlayerInput(selectedDirection);
       return;
     }
   }
@@ -607,5 +671,35 @@ export class MonsterPartyScene extends BaseScene {
     this.#isMovingMonster = false;
     this.#selectedPartyMonsterIndex = this.#monsterToBeMovedIndex;
     this.#monsterToBeMovedIndex = undefined;
+  }
+
+  #removeMonster() {
+    // remove monster from party
+    this.#monsters.splice(this.#selectedPartyMonsterIndex, 1);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
+
+    // remove background object
+    this.#monsterPartyBackgrounds.splice(this.#selectedPartyMonsterIndex, 1);
+
+    // remove container object and update other container positions
+    const containerToRemove = this.#monsterContainers.splice(this.#selectedPartyMonsterIndex, 1)[0];
+    let prevContainerPos = {
+      x: containerToRemove.x,
+      y: containerToRemove.y,
+    };
+    containerToRemove.destroy();
+
+    this.#monsterContainers.forEach((container, index) => {
+      if (index < this.#selectedPartyMonsterIndex) {
+        return;
+      }
+      const tempPosition = {
+        x: container.x,
+        y: container.y,
+      };
+      container.setPosition(prevContainerPos.x, prevContainerPos.y);
+      prevContainerPos = tempPosition;
+    });
+    this.#movePlayerInputCursor('UP');
   }
 }
