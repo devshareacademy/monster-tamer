@@ -153,7 +153,7 @@ Multiple Monsters:
     ✔ monster party scene @done(24-06-06 22:03)
       ✔ add support for selecting monster for switching active monster during battle @done(24-06-06 22:03)
   ☐ world scene
-    ☐ refactor monster party menu into reusable component
+    ✔ refactor world menu into reusable component @done(24-06-06 22:37)
     ☐ create confirmation sub menu
     ☐ switch monsters positions in party
     ☐ relase monster into the wild
