@@ -148,7 +148,7 @@ Multiple Monsters:
     ☐ battle scene
       ✔ new state for switching monsters and scene resume logic @done(24-06-04 12:23)
       ✔ update existing states to support switching active monster @done(24-06-04 12:23)
-      ☐ update existing logic for switching monster when active monster is knocked out
+      ✔ update existing logic for switching monster when active monster is knocked out @done(24-06-06 17:40)
       ☐ add ui to show number of monsters in party
     ☐ monster party scene
       ☐ add support for selecting monster for switching active monster during battle
