@@ -486,7 +486,7 @@ export class MonsterPartyScene extends BaseScene {
   #handleMonsterSelectedForSwitch() {
     // validate that the monster is not fainted
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
-      this.#infoTextGameObject.setText('Selected monster is not able to fight');
+      this.#infoTextGameObject.setText('Selected monster is not able to fight.');
       this.#waitingForInput = true;
       this.#menu.hide();
       return;
@@ -536,10 +536,12 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SELECT) {
+        // handle input based on what player intention was (use item, view monster details, select monster to switch to)
         if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
           this.#handleItemUsed();
           return;
         }
+
         if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
           this.#handleMonsterSelectedForSwitch();
           return;

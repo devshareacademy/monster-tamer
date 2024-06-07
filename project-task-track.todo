@@ -137,23 +137,23 @@ Leveling & Experience:
 
 Multiple Monsters:
   ✔ load new assets @done(24-06-04 09:00)
-  ☐ battle scene
-    ☐ battle monster class
-      ☐ add support for switching monster details
-    ☐ player battle monster class
-      ☐ add support for switching monster details
-      ☐ update deatch animation to hide health bar components
-    ☐ battle menu
-      ☐ update switch monster logic to align with flee attempt
-    ☐ battle scene
-      ☐ new state for switching monsters and scene resume logic
-      ☐ update existing states to support switching active monster
-      ☐ update existing logic for switching monster when active monster is knocked out
-      ☐ add ui to show number of monsters in party
-    ☐ monster party scene
-      ☐ add support for selecting monster for switching active monster during battle
+  ✔ battle scene @done(24-06-06 22:03)
+    ✔ battle monster class @done(24-06-04 11:15)
+      ✔ add support for switching monster details @done(24-06-04 11:15)
+    ✔ player battle monster class @done(24-06-04 11:15)
+      ✔ add support for switching monster details @done(24-06-04 11:15)
+      ✔ update deatch animation to hide health bar components @done(24-06-04 11:15)
+    ✔ battle menu @done(24-06-04 11:15)
+      ✔ update switch monster logic to align with flee attempt @done(24-06-04 11:15)
+    ✔ battle scene @done(24-06-06 22:03)
+      ✔ new state for switching monsters and scene resume logic @done(24-06-04 12:23)
+      ✔ update existing states to support switching active monster @done(24-06-04 12:23)
+      ✔ update existing logic for switching monster when active monster is knocked out @done(24-06-06 17:40)
+      ✔ add ui to show number of monsters in party @done(24-06-06 22:03)
+    ✔ monster party scene @done(24-06-06 22:03)
+      ✔ add support for selecting monster for switching active monster during battle @done(24-06-06 22:03)
   ☐ world scene
-    ☐ refactor monster party menu into reusable component
+    ✔ refactor world menu into reusable component @done(24-06-06 22:37)
     ☐ create confirmation sub menu
     ☐ switch monsters positions in party
     ☐ relase monster into the wild

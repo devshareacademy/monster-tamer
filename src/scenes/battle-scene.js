@@ -144,7 +144,7 @@ export class BattleScene extends BaseScene {
     this.#activePlayerMonsterPartyIndex = eligibleMonsterIndex;
     this.#activePlayerMonster = new PlayerBattleMonster({
       scene: this,
-      monsterDetails: this.#sceneData.playerMonsters[eligibleMonsterIndex],
+      monsterDetails: this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex],
       skipBattleAnimations: this.#skipAnimations,
     });
 
@@ -338,13 +338,14 @@ export class BattleScene extends BaseScene {
       this.#activePlayerMonster.playDeathAnimation(() => {
         // update ui to show monster fainted
         /** @type {Phaser.GameObjects.Image} */
-        (this.#availableMonstersUiContainer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(
-          MONSTER_PARTY_UI_ALPHA.inactive
-        );
+        (this.#availableMonstersUiContainer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(0.4);
 
         // check to see if we have other monsters that are able to battle
         const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
-          return monster.currentHp > 0;
+          return (
+            monster.id !== this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].id &&
+            monster.currentHp > 0
+          );
         });
 
         // if not, player faints and battle is over
@@ -611,7 +612,7 @@ export class BattleScene extends BaseScene {
           let statChanges;
           /** @type {string[]} */
           const monsterMessages = [];
-          if (index === this.#activePlayerAttackIndex) {
+          if (index === this.#activePlayerMonsterPartyIndex) {
             statChanges = this.#activePlayerMonster.updateMonsterExp(gainedExpForActiveMonster);
             monsterMessages.push(
               `${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`
@@ -733,7 +734,7 @@ export class BattleScene extends BaseScene {
   #createAvailableMonstersUi() {
     this.#availableMonstersUiContainer = this.add.container(this.scale.width - 24, 304, []);
     this.#sceneData.playerMonsters.forEach((monster, index) => {
-      const alpha = monster.currentHp > 0 ? MONSTER_PARTY_UI_ALPHA.active : MONSTER_PARTY_UI_ALPHA.inactive;
+      const alpha = monster.currentHp > 0 ? 1 : 0.4;
       const ball = this.add
         .image(30 * -index, 0, BATTLE_ASSET_KEYS.BALL_THUMBNAIL, 0)
         .setScale(0.8)

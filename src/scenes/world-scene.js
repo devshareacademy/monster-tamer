@@ -9,7 +9,7 @@ import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/gr
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC } from '../world/characters/npc.js';
-import { WorldMenu } from '../world-menu.js';
+import { WorldMenu } from '../world/world-menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
