@@ -6,20 +6,6 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../../utils/data-manager.j
 import { exhaustiveGuard } from '../../utils/guard.js';
 import { MENU_COLOR } from './menu-config.js';
 
-/**
- * @typedef {keyof typeof MENU_OPTIONS} MenuOptions
- */
-
-/** @enum {MenuOptions} */
-export const MENU_OPTIONS = Object.freeze({
-  MONSTERDEX: 'MONSTERDEX',
-  MONSTERS: 'MONSTERS',
-  BAG: 'BAG',
-  SAVE: 'SAVE',
-  OPTIONS: 'OPTIONS',
-  EXIT: 'EXIT',
-});
-
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const MENU_TEXT_STYLE = {
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
@@ -42,25 +28,26 @@ export class Menu {
   #container;
   /** @type {boolean} */
   #isVisible;
-  /** @type {MenuOptions[]} */
+  /** @type {string[]} */
   #availableMenuOptions;
   /** @type {Phaser.GameObjects.Text[]} */
   #menuOptionsTextGameObjects;
   /** @type {number} */
   #selectedMenuOptionIndex;
-  /** @type {MenuOptions} */
+  /** @type {string} */
   #selectedMenuOption;
   /** @type {Phaser.GameObjects.Image} */
   #userInputCursor;
 
   /**
    * @param {Phaser.Scene} scene
+   * @param {string[]} menuOptions
    */
-  constructor(scene) {
+  constructor(scene, menuOptions) {
     this.#scene = scene;
     this.#padding = 4;
     this.#width = 300;
-    this.#availableMenuOptions = [MENU_OPTIONS.MONSTERS, MENU_OPTIONS.BAG, MENU_OPTIONS.SAVE, MENU_OPTIONS.EXIT];
+    this.#availableMenuOptions = menuOptions;
     this.#menuOptionsTextGameObjects = [];
     this.#selectedMenuOptionIndex = 0;
 
@@ -91,7 +78,7 @@ export class Menu {
     return this.#isVisible;
   }
 
-  /** @type {MenuOptions} */
+  /** @type {string} */
   get selectedMenuOption() {
     return this.#selectedMenuOption;
   }
