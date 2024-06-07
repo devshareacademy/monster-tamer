@@ -5,7 +5,7 @@
     "name": "iguanignite",
     "assetKey": "IGUANIGNITE",
     "assetFrame": 0,
-    "currentHp": 0,
+    "currentHp": 25,
     "maxHp": 25,
     "attackIds": [2],
     "baseAttack": 5,

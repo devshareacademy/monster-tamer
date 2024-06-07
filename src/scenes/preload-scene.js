@@ -239,7 +239,7 @@ export class PreloadScene extends BaseScene {
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);
 
-    this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
   /**

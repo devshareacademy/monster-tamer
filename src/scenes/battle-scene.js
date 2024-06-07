@@ -12,7 +12,7 @@ import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, BATTLE_ASSET_KEYS } from '../assets/asset-keys.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { calculateExpGainedFromMonster, handleMonsterGainingExperience } from '../utils/leveling-utils.js';
 
@@ -73,6 +73,8 @@ export class BattleScene extends BaseScene {
   #switchingActiveMonster;
   /** @type {boolean} */
   #activeMonsterKnockedOut;
+  /** @type {Phaser.GameObjects.Container} */
+  #availableMonstersUiContainer;
 
   constructor() {
     super({
@@ -144,6 +146,7 @@ export class BattleScene extends BaseScene {
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
+    this.#createAvailableMonstersUi();
 
     this._controls.lockInput = true;
 
@@ -327,6 +330,8 @@ export class BattleScene extends BaseScene {
     if (this.#activePlayerMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
       this.#activePlayerMonster.playDeathAnimation(() => {
+        /** @type {Phaser.GameObjects.Image} */
+        (this.#availableMonstersUiContainer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(0.4);
         const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
           return (
             monster.id !== this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].id &&
@@ -411,7 +416,7 @@ export class BattleScene extends BaseScene {
       onEnter: () => {
         // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
-          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {});
           this._controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
@@ -429,7 +434,9 @@ export class BattleScene extends BaseScene {
       onEnter: () => {
         // wait for player monster to appear on the screen and notify the player about monster
         this.#activePlayerMonster.playMonsterAppearAnimation(() => {
-          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => {
+            this.#availableMonstersUiContainer.setAlpha(1);
+          });
           this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
             // wait for text animation to complete and move to next state
             this.time.delayedCall(1200, () => {
@@ -697,5 +704,18 @@ export class BattleScene extends BaseScene {
       this._controls.lockInput = false;
       this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
     });
+  }
+
+  #createAvailableMonstersUi() {
+    this.#availableMonstersUiContainer = this.add.container(this.scale.width - 24, 304, []);
+    this.#sceneData.playerMonsters.forEach((monster, index) => {
+      const alpha = monster.currentHp > 0 ? 1 : 0.4;
+      const ball = this.add
+        .image(30 * -index, 0, BATTLE_ASSET_KEYS.BALL_THUMBNAIL, 0)
+        .setScale(0.8)
+        .setAlpha(alpha);
+      this.#availableMonstersUiContainer.add(ball);
+    });
+    this.#availableMonstersUiContainer.setAlpha(0);
   }
 }
