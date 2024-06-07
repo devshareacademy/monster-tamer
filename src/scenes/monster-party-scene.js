@@ -14,7 +14,7 @@ import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
 import { MONSTER_PARTY_MENU_OPTIONS, MonsterPartyMenu } from '../party/monster-party-menu.js';
-import { CONFIRMATION_MENU_OPTIONS, ConfirmationMenu } from '../party/confirmation-menu.js';
+import { CONFIRMATION_MENU_OPTIONS, ConfirmationMenu } from '../common/menu/confirmation-menu.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {

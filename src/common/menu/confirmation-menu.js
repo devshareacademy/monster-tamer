@@ -1,4 +1,4 @@
-import { Menu } from '../common/menu/menu.js';
+import { Menu } from './menu.js';
 
 /**
  * @typedef {keyof typeof CONFIRMATION_MENU_OPTIONS} ConfirmationMenuOptions
