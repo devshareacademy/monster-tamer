@@ -13,6 +13,7 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
+import { MONSTER_PARTY_MENU_OPTIONS, MonsterPartyMenu } from '../party/monster-party-menu.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -62,6 +63,8 @@ export class MonsterPartyScene extends BaseScene {
   #sceneData;
   /** @type {boolean} */
   #waitingForInput;
+  /** @type {MonsterPartyMenu} */
+  #menu;
 
   constructor() {
     super({
@@ -127,6 +130,9 @@ export class MonsterPartyScene extends BaseScene {
     });
     this.#movePlayerInputCursor(DIRECTION.NONE);
 
+    // create menu
+    this.#menu = new MonsterPartyMenu(this, this.#sceneData.previousSceneName);
+
     // alpha is used for knowing if monster is selected, not selected, or knocked out
     /*
     this.add.image(0, 10, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND).setOrigin(0).setScale(1.1, 1.2);
@@ -148,7 +154,16 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
 
-    if (this._controls.wasBackKeyPressed()) {
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const wasBackKeyPressed = this._controls.wasBackKeyPressed();
+
+    if (this.#menu.isVisible) {
+      this.#handleInputForMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection);
+      return;
+    }
+
+    if (wasBackKeyPressed) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
         this.#waitingForInput = false;
@@ -159,7 +174,6 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
 
-    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
@@ -172,26 +186,7 @@ export class MonsterPartyScene extends BaseScene {
         return;
       }
 
-      // handle input based on what player intention was (use item, view monster details, select monster to switch to)
-      if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
-        this.#handleItemUsed();
-        return;
-      }
-
-      if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-        this.#handleMonsterSelectedForSwitch();
-        return;
-      }
-
-      this._controls.lockInput = true;
-      // pause this scene and launch the monster details scene
-      /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
-      const sceneDataToPass = {
-        monster: this.#monsters[this.#selectedPartyMonsterIndex],
-      };
-      this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
-      this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
-
+      this.#menu.show();
       return;
     }
 
@@ -199,7 +194,6 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
 
-    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
       this.#updateInfoContainerText();
@@ -307,6 +301,7 @@ export class MonsterPartyScene extends BaseScene {
       // if active monster was knocked out, return early since we need to pick a new monster for battle
       this.#infoTextGameObject.setText('You must select a new monster for battle.');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -392,6 +387,7 @@ export class MonsterPartyScene extends BaseScene {
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
       this.#infoTextGameObject.setText('Cannot heal fainted monster');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -402,6 +398,7 @@ export class MonsterPartyScene extends BaseScene {
     ) {
       this.#infoTextGameObject.setText('Monster is already fully healed');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -440,6 +437,7 @@ export class MonsterPartyScene extends BaseScene {
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
       this.#infoTextGameObject.setText('Selected monster is not able to fight');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -447,9 +445,72 @@ export class MonsterPartyScene extends BaseScene {
     if (this.#sceneData.activeBattleMonsterPartyIndex === this.#selectedPartyMonsterIndex) {
       this.#infoTextGameObject.setText('Selected monster is already battling');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
     this.#goBackToPreviousScene(false, true);
+  }
+
+  /**
+   * @param {boolean} wasBackKeyPressed
+   * @param {boolean} wasSpaceKeyPressed
+   * @param {import('../common/direction.js').Direction} selectedDirection
+   * @returns {void}
+   */
+  #handleInputForMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection) {
+    if (wasBackKeyPressed) {
+      this.#menu.hide();
+      return;
+    }
+
+    if (wasSpaceKeyPressed) {
+      this.#menu.handlePlayerInput('OK');
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.CANCEL) {
+        this.#menu.hide();
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SUMMARY) {
+        this._controls.lockInput = true;
+        // pause this scene and launch the monster details scene
+        /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
+        const sceneDataToPass = {
+          monster: this.#monsters[this.#selectedPartyMonsterIndex],
+        };
+        this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
+        this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SELECT) {
+        if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
+          this.#handleItemUsed();
+          return;
+        }
+        if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+          this.#handleMonsterSelectedForSwitch();
+          return;
+        }
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
+        // TODO
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.MOVE) {
+        // TODO
+        return;
+      }
+
+      return;
+    }
+
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#menu.handlePlayerInput(selectedDirection);
+      return;
+    }
   }
 }
