@@ -609,7 +609,7 @@ export class MonsterPartyScene extends BaseScene {
         if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
           this._controls.lockInput = true;
           this.#infoTextGameObject.setText(
-            `You release ${this.#monsters[this.#selectedPartyMonsterIndex].name} into the wild`
+            `You released ${this.#monsters[this.#selectedPartyMonsterIndex].name} into the wild.`
           );
           this.time.delayedCall(1000, () => {
             this.#removeMonster();
@@ -624,6 +624,7 @@ export class MonsterPartyScene extends BaseScene {
       this.#confirmationMenu.hide();
       this.#menu.show();
       this.#updateInfoContainerText();
+      return;
     }
 
     if (selectedDirection !== DIRECTION.NONE) {

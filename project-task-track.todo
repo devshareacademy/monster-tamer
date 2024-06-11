@@ -152,11 +152,11 @@ Multiple Monsters:
       ✔ add ui to show number of monsters in party @done(24-06-06 22:03)
     ✔ monster party scene @done(24-06-06 22:03)
       ✔ add support for selecting monster for switching active monster during battle @done(24-06-06 22:03)
-  ☐ world scene
+  ✔ world scene @done(24-06-11 12:18)
     ✔ refactor world menu into reusable component @done(24-06-06 22:37)
-    ☐ create confirmation sub menu
-    ☐ switch monsters positions in party
-    ☐ relase monster into the wild
+    ✔ create confirmation sub menu @done(24-06-11 12:18)
+    ✔ switch monsters positions in party @done(24-06-11 11:55)
+    ✔ release monster into the wild @done(24-06-11 12:18)
 
 -------------------------------
 
