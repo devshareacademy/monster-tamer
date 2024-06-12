@@ -133,6 +133,12 @@ export class BattleMenu {
    * @returns {void}
    */
   updateMonsterAttackSubMenu() {
+    this.#moveSelectionSubBattleMenuPhaserContainerGameObject.getAll().forEach((gameObject) => {
+      if (gameObject.type === 'text') {
+        /** @type {Phaser.GameObjects.Text} */
+        (gameObject).setText('-');
+      }
+    });
     this.#activePlayerMonster.attacks.forEach((attack, index) => {
       /** @type {Phaser.GameObjects.Text} */
       (this.#moveSelectionSubBattleMenuPhaserContainerGameObject.getAt(index)).setText(attack.name);

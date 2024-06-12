@@ -212,21 +212,43 @@ export class PlayerBattleMonster extends BattleMonster {
    * Updates the exp bar in the UI, and updates the monsters level text incase
    * the monsters level increased. This is called from the battle scene
    * after the `updateMonsterExp` method is called.
+   * @param {boolean} leveledUp
+   * @param {boolean} skipBattleAnimations
    * @param {() => void} [callback=(() => {})]
-   * @param {boolean} [skipBattleAnimations=false]
    * @returns {void}
    */
-  updateMonsterExpBar(callback = () => {}, skipBattleAnimations = false) {
+  updateMonsterExpBar(leveledUp, skipBattleAnimations, callback = () => {}) {
+    const cb = () => {
+      this._setMonsterLevelText();
+      this._maxHealth = this._monsterDetails.maxHp;
+      this.updateMonsterHealth(this._currentHealth);
+      callback();
+    };
+
+    // if monster leveled up, we want to show the bar being filled up to 100%, waiting a small
+    // period of time, and then animate to the proper value
+    if (leveledUp) {
+      this.#expBar.setMeterPercentageAnimated(1, {
+        callback: () => {
+          this._scene.time.delayedCall(500, () => {
+            this.#expBar.setMeterPercentageAnimated(0, { skipBattleAnimations: true });
+            this.#expBar.setMeterPercentageAnimated(
+              calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
+              {
+                callback: cb,
+              }
+            );
+          });
+        },
+      });
+      return;
+    }
+
+    // if the monster did not level up, we can just animate the bar to the proper value
     this.#expBar.setMeterPercentageAnimated(
       calculateExpBarCurrentValue(this._monsterDetails.currentLevel, this._monsterDetails.currentExp),
       {
-        callback: () => {
-          this._setMonsterLevelText();
-          this._maxHealth = this._monsterDetails.maxHp;
-          this.updateMonsterHealth(this._currentHealth);
-          callback();
-        },
-        skipBattleAnimations,
+        callback: cb,
       }
     );
   }
@@ -238,6 +260,6 @@ export class PlayerBattleMonster extends BattleMonster {
   switchMonster(monster) {
     super.switchMonster(monster);
     this.#setHealthBarText();
-    this.updateMonsterExpBar(undefined, true);
+    this.updateMonsterExpBar(false, true, undefined);
   }
 }
