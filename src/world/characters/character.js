@@ -48,10 +48,10 @@ export class Character {
   _idleFrameConfig;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
   _origin;
-  /** @protected @type {Character[]} */
-  _otherCharactersToCheckForCollisionsWith;
   /** @protected @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   _collisionLayer;
+  /** @protected @type {Character[]} */
+  _otherCharactersToCheckForCollisionsWith;
   /** @protected @type {() => void | undefined} */
   _spriteChangedDirectionCallback;
   /** @protected @type {{position: import('../../types/typedef.js').Coordinate}[]} */
@@ -196,6 +196,9 @@ export class Character {
     );
   }
 
+  /**
+   * @returns {void}
+   */
   #handleSpriteMovement() {
     if (this._direction === DIRECTION.NONE) {
       return;
