@@ -109,8 +109,6 @@ export class PreloadScene extends BaseScene {
     this.load.image(MONSTER_ASSET_KEYS.AQUAVALOR, `${monsterTamerAssetPath}/monsters/aquavalor.png`);
     this.load.image(MONSTER_ASSET_KEYS.FROSTSABER, `${monsterTamerAssetPath}/monsters/frostsaber.png`);
     this.load.image(MONSTER_ASSET_KEYS.IGNIVOLT, `${monsterTamerAssetPath}/monsters/ignivolt.png`);
-    this.load.image(MONSTER_ASSET_KEYS.JIVY, `${monsterTamerAssetPath}/monsters/jivy.png`);
-    this.load.image(MONSTER_ASSET_KEYS.PARAZOID, `${monsterTamerAssetPath}/monsters/parazoid.png`);
 
     // ui assets
     this.load.image(UI_ASSET_KEYS.CURSOR, `${monsterTamerAssetPath}/ui/cursor.png`);
