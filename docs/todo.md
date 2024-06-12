@@ -3,7 +3,6 @@
 Before I wrap up the video series, I need to come up with some helpful guides for how people can extend the game, and continue to refine. Some initial ideas include:
 
 - Adding new npcs
-  - multiple lines of dialog (need to include `::`)
 - Adding new areas/buildings
   - connecting the two
 - Adding new monsters

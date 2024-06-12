@@ -6,12 +6,10 @@ export class Controls {
   #scene;
   /** @type {Phaser.Types.Input.Keyboard.CursorKeys | undefined} */
   #cursorKeys;
-  /** @type {Phaser.Input.Keyboard.Key | undefined} */
-  #enterKey;
-  /** @type {Phaser.Input.Keyboard.Key | undefined} */
-  #eKey;
   /** @type {boolean} */
   #lockPlayerInput;
+  /** @type {Phaser.Input.Keyboard.Key | undefined} */
+  #enterKey;
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the cursor keys will be created in
@@ -20,7 +18,6 @@ export class Controls {
     this.#scene = scene;
     this.#cursorKeys = this.#scene.input.keyboard?.createCursorKeys();
     this.#enterKey = this.#scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-    this.#eKey = this.#scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.#lockPlayerInput = false;
   }
 
@@ -56,14 +53,6 @@ export class Controls {
       return false;
     }
     return Phaser.Input.Keyboard.JustDown(this.#cursorKeys.shift);
-  }
-
-  /** @returns {boolean} */
-  wasEKeyPressed() {
-    if (this.#eKey === undefined) {
-      return false;
-    }
-    return Phaser.Input.Keyboard.JustDown(this.#eKey);
   }
 
   /** @returns {import('../common/direction.js').Direction} */

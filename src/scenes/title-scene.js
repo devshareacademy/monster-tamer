@@ -131,15 +131,7 @@ export class TitleScene extends BaseScene {
         dataManager.startNewGame(this);
       }
 
-      /** @type {import('../utils/data-manager.js').PlayerLocation} */
-      const playerLocation = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION);
-      /** @type {import('./world-scene.js').WorldSceneData} */
-      const dataToPass = {
-        area: playerLocation.area,
-        isInterior: playerLocation.isInterior,
-      };
-
-      this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
+      this.scene.start(SCENE_KEYS.WORLD_SCENE);
     });
 
     // play background music
