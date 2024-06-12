@@ -6,12 +6,12 @@ export class Controls {
   #scene;
   /** @type {Phaser.Types.Input.Keyboard.CursorKeys | undefined} */
   #cursorKeys;
+  /** @type {boolean} */
+  #lockPlayerInput;
   /** @type {Phaser.Input.Keyboard.Key | undefined} */
   #enterKey;
   /** @type {Phaser.Input.Keyboard.Key | undefined} */
   #eKey;
-  /** @type {boolean} */
-  #lockPlayerInput;
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the cursor keys will be created in
