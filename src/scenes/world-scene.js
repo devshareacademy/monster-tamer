@@ -351,8 +351,6 @@ export class WorldScene extends BaseScene {
         if (this.#menu.selectedMenuOption === 'EXIT') {
           this.#menu.hide();
         }
-
-        // TODO: handle other selected menu options
       }
 
       if (this._controls.wasBackKeyPressed()) {
