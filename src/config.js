@@ -20,6 +20,3 @@ export const MENU_COLOR = Object.freeze({
     border: 0x796da8,
   },
 });
-// original dialog colors
-// 0xede4f3
-// 0x905ac2
