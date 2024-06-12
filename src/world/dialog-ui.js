@@ -9,7 +9,7 @@ import { exhaustiveGuard } from '../utils/guard.js';
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = Object.freeze({
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
-  color: 'black',
+  color: 'white',
   fontSize: '32px',
   wordWrap: { width: 0 },
 });
