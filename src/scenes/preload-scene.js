@@ -14,6 +14,7 @@ import {
   WORLD_ASSET_KEYS,
   AUDIO_ASSET_KEYS,
   BUILDING_ASSET_KEYS,
+  EXP_BAR_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
@@ -65,6 +66,7 @@ export class PreloadScene extends BaseScene {
 
     // battle assets
     this.load.image(BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND, `${kenneysAssetPath}/ui-space-expansion/custom-ui.png`);
+    this.load.image(BATTLE_ASSET_KEYS.BALL_THUMBNAIL, `${monsterTamerAssetPath}/battle/cosmoball.png`);
 
     // health bar assets
     this.load.image(
@@ -75,6 +77,17 @@ export class PreloadScene extends BaseScene {
     this.load.image(
       HEALTH_BAR_ASSET_KEYS.LEFT_CAP,
       `${kenneysAssetPath}/ui-space-expansion/barHorizontal_green_left.png`
+    );
+
+    // exp bar assets
+    this.load.image(
+      EXP_BAR_ASSET_KEYS.EXP_RIGHT_CAP,
+      `${kenneysAssetPath}/ui-space-expansion/barHorizontal_blue_right.png`
+    );
+    this.load.image(EXP_BAR_ASSET_KEYS.EXP_MIDDLE, `${kenneysAssetPath}/ui-space-expansion/barHorizontal_blue_mid.png`);
+    this.load.image(
+      EXP_BAR_ASSET_KEYS.EXP_LEFT_CAP,
+      `${kenneysAssetPath}/ui-space-expansion/barHorizontal_blue_left.png`
     );
 
     this.load.image(

@@ -1,5 +1,5 @@
 import Phaser from '../../lib/phaser.js';
-import { HealthBar } from '../ui/health-bar.js';
+import { HealthBar } from '../../common/health-bar.js';
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DataUtils } from '../../utils/data-utils.js';
@@ -23,6 +23,10 @@ export class BattleMonster {
   _phaserHealthBarGameContainer;
   /** @protected @type {boolean} */
   _skipBattleAnimations;
+  /** @protected @type {Phaser.GameObjects.Text} */
+  _monsterHealthBarLevelText;
+  /** @protected @type {Phaser.GameObjects.Text} */
+  _monsterNameText;
 
   /**
    * @param {import('../../types/typedef.js').BattleMonsterConfig} config
@@ -77,12 +81,36 @@ export class BattleMonster {
 
   /** @type {number} */
   get baseAttack() {
-    return this._monsterDetails.baseAttack;
+    return this._monsterDetails.currentAttack;
   }
 
   /** @type {number} */
   get level() {
     return this._monsterDetails.currentLevel;
+  }
+
+  /**
+   * @param {import('../../types/typedef.js').Monster} monster
+   * @returns {void}
+   */
+  switchMonster(monster) {
+    this._monsterDetails = monster;
+    this._currentHealth = this._monsterDetails.currentHp;
+    this._maxHealth = this._monsterDetails.maxHp;
+    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, {
+      skipBattleAnimations: true,
+    });
+    this._monsterAttacks = [];
+    this._monsterDetails.attackIds.forEach((attackId) => {
+      const monsterAttack = DataUtils.getMonsterAttack(this._scene, attackId);
+      if (monsterAttack !== undefined) {
+        this._monsterAttacks.push(monsterAttack);
+      }
+    });
+    this._phaserGameObject.setTexture(this._monsterDetails.assetKey, this._monsterDetails.assetFrame || 0);
+    this._monsterNameText.setText(this._monsterDetails.name);
+    this._setMonsterLevelText();
+    this._monsterHealthBarLevelText.setX(this._monsterNameText.width + 35);
   }
 
   /**
@@ -154,10 +182,22 @@ export class BattleMonster {
     });
   }
 
+  /**
+   * @protected
+   * @returns {void}
+   */
+  _setMonsterLevelText() {
+    this._monsterHealthBarLevelText.setText(`L${this.level}`);
+  }
+
+  /**
+   * Creates the base health bar components for this monster.
+   * @param {number} [scaleHealthBarBackgroundImageByY=1] the scaling factor applied to the phaser image game object Y value
+   */
   #createHealthBarComponents(scaleHealthBarBackgroundImageByY = 1) {
     this._healthBar = new HealthBar(this._scene, 34, 34);
 
-    const monsterNameGameText = this._scene.add.text(30, 20, this.name, {
+    this._monsterNameText = this._scene.add.text(30, 20, this.name, {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#7E3D3F',
       fontSize: '32px',
@@ -168,11 +208,12 @@ export class BattleMonster {
       .setOrigin(0)
       .setScale(1, scaleHealthBarBackgroundImageByY);
 
-    const monsterHealthBarLevelText = this._scene.add.text(monsterNameGameText.width + 35, 23, `L${this.level}`, {
+    this._monsterHealthBarLevelText = this._scene.add.text(this._monsterNameText.width + 35, 23, '', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#ED474B',
       fontSize: '28px',
     });
+    this._setMonsterLevelText();
 
     const monsterHpText = this._scene.add.text(30, 55, 'HP', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
@@ -184,9 +225,9 @@ export class BattleMonster {
     this._phaserHealthBarGameContainer = this._scene.add
       .container(0, 0, [
         healthBarBgImage,
-        monsterNameGameText,
+        this._monsterNameText,
         this._healthBar.container,
-        monsterHealthBarLevelText,
+        this._monsterHealthBarLevelText,
         monsterHpText,
       ])
       .setAlpha(0);

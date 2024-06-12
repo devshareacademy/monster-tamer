@@ -19,6 +19,7 @@ export const MONSTER_ASSET_KEYS = Object.freeze({
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
   HEALTH_BAR_BACKGROUND: 'HEALTH_BAR_BACKGROUND',
+  BALL_THUMBNAIL: 'BALL_THUMBNAIL',
 });
 
 export const HEALTH_BAR_ASSET_KEYS = Object.freeze({
@@ -28,6 +29,12 @@ export const HEALTH_BAR_ASSET_KEYS = Object.freeze({
   LEFT_CAP_SHADOW: 'LEFT_CAP_SHADOW',
   MIDDLE_SHADOW: 'MIDDLE_SHADOW',
   RIGHT_CAP_SHADOW: 'RIGHT_CAP_SHADOW',
+});
+
+export const EXP_BAR_ASSET_KEYS = Object.freeze({
+  EXP_LEFT_CAP: 'EXP_LEFT_CAP',
+  EXP_MIDDLE: 'EXP_MIDDLE',
+  EXP_RIGHT_CAP: 'EXP_RIGHT_CAP',
 });
 
 export const UI_ASSET_KEYS = Object.freeze({
