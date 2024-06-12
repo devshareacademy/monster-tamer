@@ -210,7 +210,7 @@ export class BattleMenu {
 
   /**
    * @param {import('../../../common/direction.js').Direction|'OK'|'CANCEL'} input
-   *  @returns {void}
+   * @returns {void}
    */
   handlePlayerInput(input) {
     if (this.#queuedMessageAnimationPlaying && input === 'OK') {
