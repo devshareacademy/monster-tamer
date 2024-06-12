@@ -9,7 +9,7 @@ import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/gr
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC } from '../world/characters/npc.js';
-import { Menu } from '../world/menu/menu.js';
+import { WorldMenu } from '../world/world-menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
@@ -83,7 +83,7 @@ export class WorldScene extends BaseScene {
   #npcs;
   /** @type {NPC | undefined} */
   #npcPlayerIsInteractingWith;
-  /** @type {Menu} */
+  /** @type {WorldMenu} */
   #menu;
   /** @type {WorldSceneData} */
   #sceneData;
@@ -162,6 +162,9 @@ export class WorldScene extends BaseScene {
     this.#items = [];
     this.#lastNpcEventHandledIndex = -1;
     this.#isProcessingNpcEvent = false;
+    this.#encounterLayer = undefined;
+    this.#signLayer = undefined;
+    this.#entranceLayer = undefined;
   }
 
   /**
@@ -255,7 +258,7 @@ export class WorldScene extends BaseScene {
     this.#dialogUi = new DialogUi(this, 1280);
 
     // create menu
-    this.#menu = new Menu(this);
+    this.#menu = new WorldMenu(this);
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
@@ -348,8 +351,6 @@ export class WorldScene extends BaseScene {
         if (this.#menu.selectedMenuOption === 'EXIT') {
           this.#menu.hide();
         }
-
-        // TODO: handle other selected menu options
       }
 
       if (this._controls.wasBackKeyPressed()) {

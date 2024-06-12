@@ -24,7 +24,9 @@ export class BattleMonster {
   /** @protected @type {boolean} */
   _skipBattleAnimations;
   /** @protected @type {Phaser.GameObjects.Text} */
-  _monsterLevelTextGameObject;
+  _monsterHealthBarLevelText;
+  /** @protected @type {Phaser.GameObjects.Text} */
+  _monsterNameText;
 
   /**
    * @param {import('../../types/typedef.js').BattleMonsterConfig} config
@@ -85,6 +87,30 @@ export class BattleMonster {
   /** @type {number} */
   get level() {
     return this._monsterDetails.currentLevel;
+  }
+
+  /**
+   * @param {import('../../types/typedef.js').Monster} monster
+   * @returns {void}
+   */
+  switchMonster(monster) {
+    this._monsterDetails = monster;
+    this._currentHealth = this._monsterDetails.currentHp;
+    this._maxHealth = this._monsterDetails.maxHp;
+    this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, {
+      skipBattleAnimations: true,
+    });
+    this._monsterAttacks = [];
+    this._monsterDetails.attackIds.forEach((attackId) => {
+      const monsterAttack = DataUtils.getMonsterAttack(this._scene, attackId);
+      if (monsterAttack !== undefined) {
+        this._monsterAttacks.push(monsterAttack);
+      }
+    });
+    this._phaserGameObject.setTexture(this._monsterDetails.assetKey, this._monsterDetails.assetFrame || 0);
+    this._monsterNameText.setText(this._monsterDetails.name);
+    this._setMonsterLevelText();
+    this._monsterHealthBarLevelText.setX(this._monsterNameText.width + 35);
   }
 
   /**
@@ -158,9 +184,10 @@ export class BattleMonster {
 
   /**
    * @protected
+   * @returns {void}
    */
   _setMonsterLevelText() {
-    this._monsterLevelTextGameObject.setText(`L${this.level}`);
+    this._monsterHealthBarLevelText.setText(`L${this.level}`);
   }
 
   /**
@@ -170,7 +197,7 @@ export class BattleMonster {
   #createHealthBarComponents(scaleHealthBarBackgroundImageByY = 1) {
     this._healthBar = new HealthBar(this._scene, 34, 34);
 
-    const monsterNameGameText = this._scene.add.text(30, 20, this.name, {
+    this._monsterNameText = this._scene.add.text(30, 20, this.name, {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#7E3D3F',
       fontSize: '32px',
@@ -181,7 +208,7 @@ export class BattleMonster {
       .setOrigin(0)
       .setScale(1, scaleHealthBarBackgroundImageByY);
 
-    this._monsterLevelTextGameObject = this._scene.add.text(monsterNameGameText.width + 35, 23, '', {
+    this._monsterHealthBarLevelText = this._scene.add.text(this._monsterNameText.width + 35, 23, '', {
       fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       color: '#ED474B',
       fontSize: '28px',
@@ -198,9 +225,9 @@ export class BattleMonster {
     this._phaserHealthBarGameContainer = this._scene.add
       .container(0, 0, [
         healthBarBgImage,
-        monsterNameGameText,
+        this._monsterNameText,
         this._healthBar.container,
-        this._monsterLevelTextGameObject,
+        this._monsterHealthBarLevelText,
         monsterHpText,
       ])
       .setAlpha(0);

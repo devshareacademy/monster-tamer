@@ -123,28 +123,51 @@ World Scene Part 3:
   ☐ respawn next to npc
 
 Leveling & Experience:
-  review math for leveling and exp gain
-  update monseters json file and types to include exp info
-  add new assets for exp bar
-  refactor hp bar into re-usable class
-  update battle scene to display exp bar
-  update monster details scene to display exp bar
-  gain exp when battle is over
-    add new battle state for tracking
-    new leveling utils for updates
-    update monster classes to support
-    update battle menu ui to have wordwrap
+  ☐ review math for leveling and exp gain
+  ☐ update monseters json file and types to include exp info
+  ☐ add new assets for exp bar
+  ☐ refactor hp bar into re-usable class
+  ☐ update battle scene to display exp bar
+  ☐ update monster details scene to display exp bar
+  ☐ gain exp when battle is over
+    ☐ add new battle state for tracking
+    ☐ new leveling utils for updates
+    ☐ update monster classes to support
+    ☐ update battle menu ui to have wordwrap
+
+Multiple Monsters:
+  ☐ load new assets
+  ☐ battle scene
+    ☐ battle monster class
+      ☐ add support for switching monster details
+    ☐ player battle monster class
+      ☐ add support for switching monster details
+      ☐ update deatch animation to hide health bar components
+    ☐ battle menu
+      ☐ update switch monster logic to align with flee attempt
+    ☐ battle scene
+      ☐ new state for switching monsters and scene resume logic
+      ☐ update existing states to support switching active monster
+      ☐ update existing logic for switching monster when active monster is knocked out
+      ☐ update logic tied to exp gain and message ordering
+      ☐ add ui to show number of monsters in party
+    ☐ monster party scene
+      ☐ add support for selecting monster for switching active monster during battle
+  ☐ world scene
+    ☐ refactor world menu into reusable component
+    ☐ create confirmation sub menu
+    ☐ switch monsters positions in party
+    ☐ release monster into the wild
 
 -------------------------------
 
-Future Content:
+Possible Future Content:
   ☐ cutscenes
   ☐ in game events and tracking
   ☐ shops
   ☐ battle npcs
   ☐ monster encyclopedia
   ☐ monster league/gyms
-  ☐ leveling & experience
 
 -------------------------------
 ☐ ✔ ✘

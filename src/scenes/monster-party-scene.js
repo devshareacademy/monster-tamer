@@ -13,6 +13,8 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
+import { MONSTER_PARTY_MENU_OPTIONS, MonsterPartyMenu } from '../party/monster-party-menu.js';
+import { CONFIRMATION_MENU_OPTIONS, ConfirmationMenu } from '../common/menu/confirmation-menu.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -38,6 +40,9 @@ const MONSTER_PARTY_POSITIONS = Object.freeze({
  * @type {object}
  * @property {string} previousSceneName
  * @property {import('../types/typedef.js').Item} [itemSelected]
+ * @property {number} [activeBattleMonsterPartyIndex] the current active monsters party index if we are attempting to switch monsters
+ * @property {boolean} [activeMonsterKnockedOut] flag to indicate if the current active monster was knocked out during battle, which means player has
+ *                                               to choose a new monster before going back to the battle scene
  */
 
 export class MonsterPartyScene extends BaseScene {
@@ -59,6 +64,16 @@ export class MonsterPartyScene extends BaseScene {
   #sceneData;
   /** @type {boolean} */
   #waitingForInput;
+  /** @type {MonsterPartyMenu} */
+  #menu;
+  /** @type {ConfirmationMenu} */
+  #confirmationMenu;
+  /** @type {boolean} */
+  #isMovingMonster;
+  /** @type {number | undefined} */
+  #monsterToBeMovedIndex;
+  /** @type {Phaser.GameObjects.Container[]} */
+  #monsterContainers;
 
   constructor() {
     super({
@@ -73,6 +88,10 @@ export class MonsterPartyScene extends BaseScene {
   init(data) {
     super.init(data);
 
+    if (!data || !data.previousSceneName) {
+      data.previousSceneName = SCENE_KEYS.WORLD_SCENE;
+    }
+
     this.#sceneData = data;
     this.#monsterPartyBackgrounds = [];
     this.#healthBars = [];
@@ -80,6 +99,9 @@ export class MonsterPartyScene extends BaseScene {
     this.#selectedPartyMonsterIndex = 0;
     this.#monsters = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
     this.#waitingForInput = false;
+    this.#isMovingMonster = false;
+    this.#monsterToBeMovedIndex = undefined;
+    this.#monsterContainers = [];
   }
 
   /**
@@ -120,9 +142,14 @@ export class MonsterPartyScene extends BaseScene {
       const y =
         (isEven ? MONSTER_PARTY_POSITIONS.EVEN.y : MONSTER_PARTY_POSITIONS.ODD.y) +
         MONSTER_PARTY_POSITIONS.increment * Math.floor(index / 2);
-      this.#createMonster(x, y, monster);
+      const monsterContainer = this.#createMonster(x, y, monster);
+      this.#monsterContainers.push(monsterContainer);
     });
     this.#movePlayerInputCursor(DIRECTION.NONE);
+
+    // create menu
+    this.#menu = new MonsterPartyMenu(this, this.#sceneData.previousSceneName);
+    this.#confirmationMenu = new ConfirmationMenu(this);
 
     // alpha is used for knowing if monster is selected, not selected, or knocked out
     /*
@@ -145,18 +172,38 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
 
-    if (this._controls.wasBackKeyPressed()) {
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const wasBackKeyPressed = this._controls.wasBackKeyPressed();
+
+    if (this.#confirmationMenu.isVisible) {
+      this.#handleInputForConfirmationMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection);
+      return;
+    }
+
+    if (this.#menu.isVisible) {
+      this.#handleInputForMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection);
+      return;
+    }
+
+    if (wasBackKeyPressed) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
         this.#waitingForInput = false;
         return;
       }
 
-      this.#goBackToPreviousScene(false);
+      if (this.#isMovingMonster) {
+        // if we are attempting to switch monsters location, cancel action
+        this.#isMovingMonster = false;
+        this.#updateInfoContainerText();
+        return;
+      }
+
+      this.#goBackToPreviousScene(false, false);
       return;
     }
 
-    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (this.#waitingForInput) {
         this.#updateInfoContainerText();
@@ -165,25 +212,28 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#selectedPartyMonsterIndex === -1) {
-        this.#goBackToPreviousScene(false);
+        // if we are attempting to switch monsters location, cancel action
+        if (this.#isMovingMonster) {
+          this.#isMovingMonster = false;
+          this.#updateInfoContainerText();
+          return;
+        }
+
+        this.#goBackToPreviousScene(false, false);
         return;
       }
 
-      // handle input based on what player intention was (use item, view monster details, select monster to switch to)
-      if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
-        this.#handleItemUsed();
+      if (this.#isMovingMonster) {
+        // make sure we select a different monster
+        if (this.#selectedPartyMonsterIndex === this.#monsterToBeMovedIndex) {
+          return;
+        }
+
+        this.#moveMonsters();
         return;
       }
 
-      this._controls.lockInput = true;
-      // pause this scene and launch the monster details scene
-      /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
-      const sceneDataToPass = {
-        monster: this.#monsters[this.#selectedPartyMonsterIndex],
-      };
-      this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
-      this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
-
+      this.#menu.show();
       return;
     }
 
@@ -191,9 +241,12 @@ export class MonsterPartyScene extends BaseScene {
       return;
     }
 
-    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
+      // if we are attempting to move a monster, we want to leave the text up on the screen
+      if (this.#isMovingMonster) {
+        return;
+      }
       this.#updateInfoContainerText();
     }
   }
@@ -287,12 +340,29 @@ export class MonsterPartyScene extends BaseScene {
 
   /**
    * @param {boolean} itemUsed
+   * @param {boolean} wasMonsterSelected
    * @returns {void}
    */
-  #goBackToPreviousScene(itemUsed) {
+  #goBackToPreviousScene(itemUsed, wasMonsterSelected) {
+    if (
+      this.#sceneData.activeMonsterKnockedOut &&
+      this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE &&
+      !wasMonsterSelected
+    ) {
+      // if active monster was knocked out, return early since we need to pick a new monster for battle
+      this.#infoTextGameObject.setText('You must select a new monster for battle.');
+      this.#waitingForInput = true;
+      this.#menu.hide();
+      return;
+    }
+
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
-    this.scene.resume(this.#sceneData.previousSceneName, { itemUsed });
+    this.scene.resume(this.#sceneData.previousSceneName, {
+      itemUsed,
+      selectedMonsterIndex: wasMonsterSelected ? this.#selectedPartyMonsterIndex : undefined,
+      wasMonsterSelected,
+    });
   }
 
   /**
@@ -368,6 +438,7 @@ export class MonsterPartyScene extends BaseScene {
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
       this.#infoTextGameObject.setText('Cannot heal fainted monster');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -378,6 +449,7 @@ export class MonsterPartyScene extends BaseScene {
     ) {
       this.#infoTextGameObject.setText('Monster is already fully healed');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -401,10 +473,236 @@ export class MonsterPartyScene extends BaseScene {
           );
           dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
           this.time.delayedCall(300, () => {
-            this.#goBackToPreviousScene(true);
+            this.#goBackToPreviousScene(true, false);
           });
         },
       }
     );
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handleMonsterSelectedForSwitch() {
+    // validate that the monster is not fainted
+    if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
+      this.#infoTextGameObject.setText('Selected monster is not able to fight.');
+      this.#waitingForInput = true;
+      this.#menu.hide();
+      return;
+    }
+
+    // validate that the selected monster is not the current active monster in battle
+    if (this.#sceneData.activeBattleMonsterPartyIndex === this.#selectedPartyMonsterIndex) {
+      this.#infoTextGameObject.setText('Selected monster is already battling');
+      this.#waitingForInput = true;
+      this.#menu.hide();
+      return;
+    }
+
+    this.#goBackToPreviousScene(false, true);
+  }
+
+  /**
+   * @param {boolean} wasBackKeyPressed
+   * @param {boolean} wasSpaceKeyPressed
+   * @param {import('../common/direction.js').Direction} selectedDirection
+   * @returns {void}
+   */
+  #handleInputForMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection) {
+    if (wasBackKeyPressed) {
+      this.#menu.hide();
+      return;
+    }
+
+    if (wasSpaceKeyPressed) {
+      this.#menu.handlePlayerInput('OK');
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.CANCEL) {
+        this.#menu.hide();
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SUMMARY) {
+        this._controls.lockInput = true;
+        // pause this scene and launch the monster details scene
+        /** @type {import('./monster-details-scene.js').MonsterDetailsSceneData} */
+        const sceneDataToPass = {
+          monster: this.#monsters[this.#selectedPartyMonsterIndex],
+        };
+        this.scene.launch(SCENE_KEYS.MONSTER_DETAILS_SCENE, sceneDataToPass);
+        this.scene.pause(SCENE_KEYS.MONSTER_PARTY_SCENE);
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SELECT) {
+        // handle input based on what player intention was (use item, view monster details, select monster to switch to)
+        if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
+          this.#handleItemUsed();
+          return;
+        }
+
+        if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+          this.#handleMonsterSelectedForSwitch();
+          return;
+        }
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
+        if (this.#monsters.length <= 1) {
+          this.#infoTextGameObject.setText('Cannot release last monster in party');
+          this.#waitingForInput = true;
+          this.#menu.hide();
+          return;
+        }
+
+        this.#menu.hide();
+        this.#confirmationMenu.show();
+        this.#infoTextGameObject.setText(`Release ${this.#monsters[this.#selectedPartyMonsterIndex].name}?`);
+        return;
+      }
+
+      if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.MOVE) {
+        if (this.#monsters.length <= 1) {
+          this.#infoTextGameObject.setText('Cannot move monster');
+          this.#waitingForInput = true;
+          this.#menu.hide();
+          return;
+        }
+
+        this.#isMovingMonster = true;
+        this.#monsterToBeMovedIndex = this.#selectedPartyMonsterIndex;
+        this.#infoTextGameObject.setText('Choose a monster to switch positions with');
+        this.#menu.hide();
+        return;
+      }
+
+      return;
+    }
+
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#menu.handlePlayerInput(selectedDirection);
+      return;
+    }
+  }
+
+  /**
+   * @param {boolean} wasBackKeyPressed
+   * @param {boolean} wasSpaceKeyPressed
+   * @param {import('../common/direction.js').Direction} selectedDirection
+   * @returns {void}
+   */
+  #handleInputForConfirmationMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection) {
+    if (wasBackKeyPressed) {
+      this.#confirmationMenu.hide();
+      this.#menu.show();
+      this.#updateInfoContainerText();
+      return;
+    }
+
+    if (wasSpaceKeyPressed) {
+      this.#confirmationMenu.handlePlayerInput('OK');
+
+      if (this.#confirmationMenu.selectedMenuOption === CONFIRMATION_MENU_OPTIONS.YES) {
+        this.#confirmationMenu.hide();
+
+        if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
+          this._controls.lockInput = true;
+          this.#infoTextGameObject.setText(
+            `You released ${this.#monsters[this.#selectedPartyMonsterIndex].name} into the wild.`
+          );
+          this.time.delayedCall(1000, () => {
+            this.#removeMonster();
+            this._controls.lockInput = false;
+          });
+          return;
+        }
+
+        return;
+      }
+
+      this.#confirmationMenu.hide();
+      this.#menu.show();
+      this.#updateInfoContainerText();
+      return;
+    }
+
+    if (selectedDirection !== DIRECTION.NONE) {
+      this.#confirmationMenu.handlePlayerInput(selectedDirection);
+      return;
+    }
+  }
+
+  /**
+   * Updates the game objects positions and monsters in the party positions.
+   * @returns {void}
+   */
+  #moveMonsters() {
+    // update monsters in party
+    const monsterRef = this.#monsters[this.#monsterToBeMovedIndex];
+    this.#monsters[this.#monsterToBeMovedIndex] = this.#monsters[this.#selectedPartyMonsterIndex];
+    this.#monsters[this.#selectedPartyMonsterIndex] = monsterRef;
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
+
+    // update monster container positions
+    const monsterContainerRefPosition1 = {
+      x: this.#monsterContainers[this.#monsterToBeMovedIndex].x,
+      y: this.#monsterContainers[this.#monsterToBeMovedIndex].y,
+    };
+    const monsterContainerRefPosition2 = {
+      x: this.#monsterContainers[this.#selectedPartyMonsterIndex].x,
+      y: this.#monsterContainers[this.#selectedPartyMonsterIndex].y,
+    };
+    this.#monsterContainers[this.#monsterToBeMovedIndex].setPosition(
+      monsterContainerRefPosition2.x,
+      monsterContainerRefPosition2.y
+    );
+    this.#monsterContainers[this.#selectedPartyMonsterIndex].setPosition(
+      monsterContainerRefPosition1.x,
+      monsterContainerRefPosition1.y
+    );
+    const containerRef = this.#monsterContainers[this.#monsterToBeMovedIndex];
+    this.#monsterContainers[this.#monsterToBeMovedIndex] = this.#monsterContainers[this.#selectedPartyMonsterIndex];
+    this.#monsterContainers[this.#selectedPartyMonsterIndex] = containerRef;
+
+    // update monster backgrounds
+    const backgroundRef = this.#monsterPartyBackgrounds[this.#monsterToBeMovedIndex];
+    this.#monsterPartyBackgrounds[this.#monsterToBeMovedIndex] =
+      this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex];
+    this.#monsterPartyBackgrounds[this.#selectedPartyMonsterIndex] = backgroundRef;
+
+    this.#isMovingMonster = false;
+    this.#selectedPartyMonsterIndex = this.#monsterToBeMovedIndex;
+    this.#monsterToBeMovedIndex = undefined;
+  }
+
+  #removeMonster() {
+    // remove monster from party
+    this.#monsters.splice(this.#selectedPartyMonsterIndex, 1);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#monsters);
+
+    // remove background object
+    this.#monsterPartyBackgrounds.splice(this.#selectedPartyMonsterIndex, 1);
+
+    // remove container object and update other container positions
+    const containerToRemove = this.#monsterContainers.splice(this.#selectedPartyMonsterIndex, 1)[0];
+    let prevContainerPos = {
+      x: containerToRemove.x,
+      y: containerToRemove.y,
+    };
+    containerToRemove.destroy();
+
+    this.#monsterContainers.forEach((container, index) => {
+      if (index < this.#selectedPartyMonsterIndex) {
+        return;
+      }
+      const tempPosition = {
+        x: container.x,
+        y: container.y,
+      };
+      container.setPosition(prevContainerPos.x, prevContainerPos.y);
+      prevContainerPos = tempPosition;
+    });
+    this.#movePlayerInputCursor('UP');
   }
 }
