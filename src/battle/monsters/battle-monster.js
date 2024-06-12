@@ -102,10 +102,10 @@ export class BattleMonster {
     this._monsterDetails = monster;
     this._currentHealth = this._monsterDetails.currentHp;
     this._maxHealth = this._monsterDetails.maxHp;
-    this._monsterAttacks = [];
     this._healthBar.setMeterPercentageAnimated(this._currentHealth / this._maxHealth, {
       skipBattleAnimations: true,
     });
+    this._monsterAttacks = [];
     this._monsterDetails.attackIds.forEach((attackId) => {
       const monsterAttack = DataUtils.getMonsterAttack(this._scene, attackId);
       if (monsterAttack !== undefined) {

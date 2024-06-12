@@ -14,7 +14,7 @@ import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { ITEM_EFFECT } from '../types/typedef.js';
 import { MONSTER_PARTY_MENU_OPTIONS, MonsterPartyMenu } from '../party/monster-party-menu.js';
-import { CONFIRMATION_MENU_OPTIONS, ConfirmationMenu } from '../party/confirmation-menu.js';
+import { CONFIRMATION_MENU_OPTIONS, ConfirmationMenu } from '../common/menu/confirmation-menu.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = {
@@ -352,6 +352,7 @@ export class MonsterPartyScene extends BaseScene {
       // if active monster was knocked out, return early since we need to pick a new monster for battle
       this.#infoTextGameObject.setText('You must select a new monster for battle.');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -440,6 +441,7 @@ export class MonsterPartyScene extends BaseScene {
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
       this.#infoTextGameObject.setText('Cannot heal fainted monster');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -450,6 +452,7 @@ export class MonsterPartyScene extends BaseScene {
     ) {
       this.#infoTextGameObject.setText('Monster is already fully healed');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -486,8 +489,9 @@ export class MonsterPartyScene extends BaseScene {
   #handleMonsterSelectedForSwitch() {
     // validate that the monster is not fainted
     if (this.#monsters[this.#selectedPartyMonsterIndex].currentHp === 0) {
-      this.#infoTextGameObject.setText('Selected monster is not able to fight');
+      this.#infoTextGameObject.setText('Selected monster is not able to fight.');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -495,6 +499,7 @@ export class MonsterPartyScene extends BaseScene {
     if (this.#sceneData.activeBattleMonsterPartyIndex === this.#selectedPartyMonsterIndex) {
       this.#infoTextGameObject.setText('Selected monster is already battling');
       this.#waitingForInput = true;
+      this.#menu.hide();
       return;
     }
 
@@ -534,10 +539,12 @@ export class MonsterPartyScene extends BaseScene {
       }
 
       if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.SELECT) {
+        // handle input based on what player intention was (use item, view monster details, select monster to switch to)
         if (this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE && this.#sceneData.itemSelected) {
           this.#handleItemUsed();
           return;
         }
+
         if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
           this.#handleMonsterSelectedForSwitch();
           return;
@@ -591,6 +598,7 @@ export class MonsterPartyScene extends BaseScene {
   #handleInputForConfirmationMenu(wasBackKeyPressed, wasSpaceKeyPressed, selectedDirection) {
     if (wasBackKeyPressed) {
       this.#confirmationMenu.hide();
+      this.#menu.show();
       this.#updateInfoContainerText();
       return;
     }
@@ -604,7 +612,7 @@ export class MonsterPartyScene extends BaseScene {
         if (this.#menu.selectedMenuOption === MONSTER_PARTY_MENU_OPTIONS.RELEASE) {
           this._controls.lockInput = true;
           this.#infoTextGameObject.setText(
-            `You release ${this.#monsters[this.#selectedPartyMonsterIndex].name} into the wild`
+            `You released ${this.#monsters[this.#selectedPartyMonsterIndex].name} into the wild.`
           );
           this.time.delayedCall(1000, () => {
             this.#removeMonster();
@@ -619,6 +627,7 @@ export class MonsterPartyScene extends BaseScene {
       this.#confirmationMenu.hide();
       this.#menu.show();
       this.#updateInfoContainerText();
+      return;
     }
 
     if (selectedDirection !== DIRECTION.NONE) {

@@ -159,7 +159,7 @@ export class BattleScene extends BaseScene {
     this.#activePlayerMonsterPartyIndex = eligibleMonsterIndex;
     this.#activePlayerMonster = new PlayerBattleMonster({
       scene: this,
-      monsterDetails: this.#sceneData.playerMonsters[eligibleMonsterIndex],
+      monsterDetails: this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex],
       skipBattleAnimations: this.#skipAnimations,
     });
 
@@ -371,13 +371,14 @@ export class BattleScene extends BaseScene {
       this.#activePlayerMonster.playDeathAnimation(() => {
         // update ui to show monster fainted
         /** @type {Phaser.GameObjects.Image} */
-        (this.#availableMonstersUiContainer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(
-          MONSTER_PARTY_UI_ALPHA.inactive
-        );
+        (this.#availableMonstersUiContainer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(0.4);
 
         // check to see if we have other monsters that are able to battle
         const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
-          return monster.currentHp > 0;
+          return (
+            monster.id !== this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].id &&
+            monster.currentHp > 0
+          );
         });
 
         // if not, player faints and battle is over
@@ -461,7 +462,7 @@ export class BattleScene extends BaseScene {
       onEnter: () => {
         // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
-          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => undefined);
+          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {});
           this._controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`wild ${this.#activeEnemyMonster.name} appeared!`],
@@ -489,6 +490,7 @@ export class BattleScene extends BaseScene {
                 this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
                 return;
               }
+
               this.#switchingActiveMonster = false;
               this.#activeMonsterKnockedOut = false;
               this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
@@ -625,6 +627,7 @@ export class BattleScene extends BaseScene {
 
         /** @type {string[]} */
         const messages = [];
+        let didActiveMonsterLevelUp = false;
         this.#sceneData.playerMonsters.forEach((monster, index) => {
           // ensure only monsters that are not knocked out gain exp
           if (this.#sceneData.playerMonsters[index].currentHp <= 0) {
@@ -640,6 +643,9 @@ export class BattleScene extends BaseScene {
             monsterMessages.push(
               `${this.#sceneData.playerMonsters[index].name} gained ${gainedExpForActiveMonster} exp.`
             );
+            if (statChanges.level !== 0) {
+              didActiveMonsterLevelUp = true;
+            }
           } else {
             statChanges = handleMonsterGainingExperience(
               this.#sceneData.playerMonsters[index],
@@ -659,6 +665,7 @@ export class BattleScene extends BaseScene {
               } and health increased by ${statChanges.health}`
             );
           }
+
           if (index === this.#activePlayerMonsterPartyIndex) {
             messages.unshift(...monsterMessages);
           } else {
@@ -667,7 +674,7 @@ export class BattleScene extends BaseScene {
         });
 
         this._controls.lockInput = true;
-        this.#activePlayerMonster.updateMonsterExpBar(() => {
+        this.#activePlayerMonster.updateMonsterExpBar(didActiveMonsterLevelUp, false, () => {
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
             this.time.delayedCall(200, () => {
               if (this.#monsterCaptured) {
@@ -678,7 +685,40 @@ export class BattleScene extends BaseScene {
             });
           });
           this._controls.lockInput = false;
-        }, false);
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.SWITCH_MONSTER,
+      onEnter: () => {
+        // check to see if the player has other monsters they can switch to
+        const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
+          return (
+            monster.id !== this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].id &&
+            monster.currentHp > 0
+          );
+        });
+        if (!hasOtherActiveMonsters) {
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+            ['You have no other monsters able to fight in your party'],
+            () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            }
+          );
+          return;
+        }
+
+        // otherwise, there are other available monsters to switch to, need to show ui so player can select monster
+        // pause this scene and launch the monster party scene
+        /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+        const sceneDataToPass = {
+          previousSceneName: SCENE_KEYS.BATTLE_SCENE,
+          activeBattleMonsterPartyIndex: this.#activePlayerMonsterPartyIndex,
+          activeMonsterKnockedOut: this.#activeMonsterKnockedOut,
+        };
+        this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+        this.scene.pause(SCENE_KEYS.BATTLE_SCENE);
       },
     });
 
@@ -850,7 +890,7 @@ export class BattleScene extends BaseScene {
   #createAvailableMonstersUi() {
     this.#availableMonstersUiContainer = this.add.container(this.scale.width - 24, 304, []);
     this.#sceneData.playerMonsters.forEach((monster, index) => {
-      const alpha = monster.currentHp > 0 ? MONSTER_PARTY_UI_ALPHA.active : MONSTER_PARTY_UI_ALPHA.inactive;
+      const alpha = monster.currentHp > 0 ? 1 : 0.4;
       const ball = this.add
         .image(30 * -index, 0, BATTLE_ASSET_KEYS.BALL_THUMBNAIL, 0)
         .setScale(0.8)
