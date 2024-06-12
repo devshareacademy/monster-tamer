@@ -244,7 +244,9 @@ export class Character {
 
     const { x, y } = position;
     const tile = this._collisionLayer.getTileAtWorldXY(x, y, true);
-
+    if (!tile) {
+      return false;
+    }
     return tile.index !== -1;
   }
 
