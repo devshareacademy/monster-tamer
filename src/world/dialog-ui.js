@@ -1,8 +1,10 @@
 import Phaser from '../lib/phaser.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text-utils.js';
+import { animateText } from '../utils/text-utils.js';
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
-import { dataManager } from '../utils/data-manager.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { MENU_COLOR } from '../config.js';
+import { exhaustiveGuard } from '../utils/guard.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
 const UI_TEXT_STYLE = Object.freeze({
@@ -48,12 +50,13 @@ export class DialogUi {
     this.#textAnimationPlaying = false;
     this.#messagesToShow = [];
 
+    const menuColor = this.#getMenuColorsFromDataManager();
     const panel = this.#scene.add
-      .rectangle(0, 0, this.#width, this.#height, 0xede4f3, 0.9)
+      .rectangle(0, 0, this.#width, this.#height, menuColor.main, 0.9)
       .setOrigin(0)
-      .setStrokeStyle(8, 0x905ac2, 1);
+      .setStrokeStyle(8, menuColor.border, 1);
     this.#container = this.#scene.add.container(0, 0, [panel]);
-    this.#uiText = this.#scene.add.text(18, 12, CANNOT_READ_SIGN_TEXT, {
+    this.#uiText = this.#scene.add.text(18, 12, '', {
       ...UI_TEXT_STYLE,
       ...{ wordWrap: { width: this.#width - 18 } },
     });
@@ -144,5 +147,27 @@ export class DialogUi {
     });
     this.#userInputCursorTween.pause();
     this.#container.add(this.#userInputCursor);
+  }
+
+  /**
+   * @returns {{ main: number; border: number}}
+   */
+  #getMenuColorsFromDataManager() {
+    /** @type {import('../common/options.js').MenuColorOptions} */
+    const chosenMenuColor = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
+    if (chosenMenuColor === undefined) {
+      return MENU_COLOR[1];
+    }
+
+    switch (chosenMenuColor) {
+      case 0:
+        return MENU_COLOR[1];
+      case 1:
+        return MENU_COLOR[2];
+      case 2:
+        return MENU_COLOR[3];
+      default:
+        exhaustiveGuard(chosenMenuColor);
+    }
   }
 }
