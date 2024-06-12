@@ -1,18 +1,18 @@
 import Phaser from '../lib/phaser.js';
-import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
-import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { animateText } from '../utils/text-utils.js';
+import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { MENU_COLOR } from '../config.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
-const UI_TEXT_STYLE = {
+const UI_TEXT_STYLE = Object.freeze({
   fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
-  color: 'white',
+  color: 'black',
   fontSize: '32px',
   wordWrap: { width: 0 },
-};
+});
 
 export class DialogUi {
   /** @type {Phaser.Scene} */

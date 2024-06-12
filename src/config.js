@@ -6,7 +6,6 @@ export const TEXT_SPEED = Object.freeze({
   MEDIUM: 30,
   FAST: 15,
 });
-export const WALK_FRAME_RATE = 6;
 export const MENU_COLOR = Object.freeze({
   1: {
     main: 0x32454c,
