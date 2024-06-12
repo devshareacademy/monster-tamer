@@ -66,6 +66,8 @@ export class BattleMenu {
   #usedItem;
   /** @type {boolean} */
   #fleeAttempt;
+  /** @type {boolean} */
+  #switchMonsterAttempt;
 
   /**
    *
@@ -87,6 +89,7 @@ export class BattleMenu {
     this.#queuedMessageAnimationPlaying = false;
     this.#usedItem = false;
     this.#fleeAttempt = false;
+    this.#switchMonsterAttempt = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -120,6 +123,28 @@ export class BattleMenu {
     return this.#fleeAttempt;
   }
 
+  /** @type {boolean} */
+  get isAttemptingToSwitchMonsters() {
+    return this.#switchMonsterAttempt;
+  }
+
+  /**
+   * Trigger to update the attack names after a monster has changed in the battle scene.
+   * @returns {void}
+   */
+  updateMonsterAttackSubMenu() {
+    this.#moveSelectionSubBattleMenuPhaserContainerGameObject.getAll().forEach((gameObject) => {
+      if (gameObject.type === 'text') {
+        /** @type {Phaser.GameObjects.Text} */
+        (gameObject).setText('-');
+      }
+    });
+    this.#activePlayerMonster.attacks.forEach((attack, index) => {
+      /** @type {Phaser.GameObjects.Text} */
+      (this.#moveSelectionSubBattleMenuPhaserContainerGameObject.getAt(index)).setText(attack.name);
+    });
+  }
+
   showMainBattleMenu() {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#battleTextGameObjectLine1.setText('what should');
@@ -132,6 +157,7 @@ export class BattleMenu {
     this.#selectedAttackIndex = undefined;
     this.#usedItem = false;
     this.#fleeAttempt = false;
+    this.#switchMonsterAttempt = false;
   }
 
   hideMainBattleMenu() {
@@ -280,7 +306,7 @@ export class BattleMenu {
       ...BATTLE_UI_TEXT_STYLE,
       ...{
         wordWrap: {
-          width: this.#scene.scale.width - 20,
+          width: this.#scene.scale.width - 55,
         },
       },
     });
@@ -601,15 +627,8 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.SWITCH) {
-      // TODO: add feature in a future update
-      /*
-        for the time being, we will display text about the player having no more monsters
-        and allow the player to navigate back to the main menu
-      */
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_SWITCH;
-      this.updateInfoPaneMessagesAndWaitForInput(['You have no other monsters in your party...'], () => {
-        this.#switchToMainBattleMenu();
-      });
+      this.#switchMonsterAttempt = true;
       return;
     }
 
@@ -665,13 +684,18 @@ export class BattleMenu {
 
   /**
    * @param {Phaser.Scenes.Systems} sys
-   * @param {import('../../../scenes/inventory-scene.js').InventorySceneItemUsedData} data
+   * @param {import('../../../scenes/battle-scene.js').BattleSceneWasResumedData} data
    * @returns {void}
    */
   #handleSceneResume(sys, data) {
     console.log(
       `[${BattleMenu.name}:handleSceneResume] scene has been resumed, data provided: ${JSON.stringify(data)}`
     );
+
+    if (data && data.wasMonsterSelected) {
+      // do nothing since new active monster was chosen to switch to
+      return;
+    }
 
     if (!data || !data.itemUsed) {
       this.#switchToMainBattleMenu();
