@@ -15,8 +15,6 @@ export const MONSTER_ASSET_KEYS = Object.freeze({
   IGNIVOLT: 'IGNIVOLT',
   AQUAVALOR: 'AQUAVALOR',
   FROSTSABER: 'FROSTSABER',
-  JIVY: 'JIVY',
-  PARAZOID: 'PARAZOID',
 });
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
