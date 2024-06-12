@@ -403,6 +403,9 @@ export class BattleMenu {
       .setStrokeStyle(8, 0xe4434a, 1);
   }
 
+  /**
+   * @returns {Phaser.GameObjects.Rectangle}
+   */
   #createMainInfoSubPane() {
     const rectWidth = 500;
     const rectHeight = 124;
