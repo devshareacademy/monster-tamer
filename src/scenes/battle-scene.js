@@ -648,54 +648,16 @@ export class BattleScene extends BaseScene {
         });
 
         this._controls.lockInput = true;
-        this.#activePlayerMonster.updateMonsterExpBar(
-          didActiveMonsterLevelUp,
-          false,
-          () => {
-            this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
-              this.time.delayedCall(200, () => {
-                // update the data manager with latest monster data
-                dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
-                this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-              });
+        this.#activePlayerMonster.updateMonsterExpBar(didActiveMonsterLevelUp, false, () => {
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
+            this.time.delayedCall(200, () => {
+              // update the data manager with latest monster data
+              dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
             });
-            this._controls.lockInput = false;
-          },
-          false
-        );
-      },
-    });
-
-    this.#battleStateMachine.addState({
-      name: BATTLE_STATES.SWITCH_MONSTER,
-      onEnter: () => {
-        // check to see if the player has other monsters they can switch to
-        const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
-          return (
-            monster.id !== this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].id &&
-            monster.currentHp > 0
-          );
+          });
+          this._controls.lockInput = false;
         });
-        if (!hasOtherActiveMonsters) {
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            ['You have no other monsters able to fight in your party'],
-            () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
-            }
-          );
-          return;
-        }
-
-        // otherwise, there are other available monsters to switch to, need to show ui so player can select monster
-        // pause this scene and launch the monster party scene
-        /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
-        const sceneDataToPass = {
-          previousSceneName: SCENE_KEYS.BATTLE_SCENE,
-          activeBattleMonsterPartyIndex: this.#activePlayerMonsterPartyIndex,
-          activeMonsterKnockedOut: this.#activeMonsterKnockedOut,
-        };
-        this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
-        this.scene.pause(SCENE_KEYS.BATTLE_SCENE);
       },
     });
 
