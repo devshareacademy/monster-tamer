@@ -60,7 +60,7 @@ export class DataUtils {
   static getMonsterById(scene, monsterId) {
     /** @type {import('../types/typedef.js').Monster[]} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
-    return data.find((monster) => monster.id === monsterId);
+    return data.find((monster) => monster.monsterId === monsterId);
   }
 
   /**

@@ -75,6 +75,12 @@ const initialState = {
       },
       quantity: 10,
     },
+    {
+      item: {
+        id: 2,
+      },
+      quantity: 5,
+    },
   ],
   itemsPickedUp: [],
 };
@@ -277,6 +283,14 @@ class DataManager extends Phaser.Events.EventEmitter {
     const itemsPickedUp = this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
     itemsPickedUp.push(itemId);
     this.#store.set(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP, itemsPickedUp);
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  isPartyFull() {
+    const partySize = this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length;
+    return partySize === 6;
   }
 
   /**
