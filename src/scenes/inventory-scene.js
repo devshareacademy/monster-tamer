@@ -285,7 +285,6 @@ export class InventoryScene extends BaseScene {
    * @returns {void}
    */
   handleSceneResume(sys, data) {
-    console.log(data);
     super.handleSceneResume(sys, data);
 
     if (!data || !data.wasItemUsed) {
