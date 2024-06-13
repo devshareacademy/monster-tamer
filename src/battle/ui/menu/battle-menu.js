@@ -62,12 +62,14 @@ export class BattleMenu {
   #skipAnimations;
   /** @type {boolean} */
   #queuedMessageAnimationPlaying;
-  /** @type {boolean} */
+  /** @type {import('../../../types/typedef.js').Item | undefined} */
   #usedItem;
   /** @type {boolean} */
   #fleeAttempt;
   /** @type {boolean} */
   #switchMonsterAttempt;
+  /** @type {boolean} */
+  #wasItemUsed;
 
   /**
    *
@@ -87,7 +89,8 @@ export class BattleMenu {
     this.#selectedAttackIndex = undefined;
     this.#skipAnimations = skipBattleAnimations;
     this.#queuedMessageAnimationPlaying = false;
-    this.#usedItem = false;
+    this.#wasItemUsed = false;
+    this.#usedItem = undefined;
     this.#fleeAttempt = false;
     this.#switchMonsterAttempt = false;
     this.#createMainInfoPane();
@@ -115,6 +118,11 @@ export class BattleMenu {
 
   /** @type {boolean} */
   get wasItemUsed() {
+    return this.#wasItemUsed;
+  }
+
+  /** @type {import('../../../types/typedef.js').Item | undefined} */
+  get itemUsed() {
     return this.#usedItem;
   }
 
@@ -158,9 +166,10 @@ export class BattleMenu {
     this.#selectedBattleMenuOption = BATTLE_MENU_OPTIONS.FIGHT;
     this.#mainBattleMenuCursorPhaserImageGameObject.setPosition(BATTLE_MENU_CURSOR_POS.x, BATTLE_MENU_CURSOR_POS.y);
     this.#selectedAttackIndex = undefined;
-    this.#usedItem = false;
+    this.#wasItemUsed = false;
     this.#fleeAttempt = false;
     this.#switchMonsterAttempt = false;
+    this.#usedItem = undefined;
   }
 
   /**
@@ -748,12 +757,14 @@ export class BattleMenu {
       return;
     }
 
-    if (!data || !data.itemUsed) {
+    if (!data || !data.wasItemUsed) {
       this.#switchToMainBattleMenu();
       return;
     }
 
-    this.#usedItem = true;
+    this.#wasItemUsed = true;
+    this.#usedItem = data.item;
+    // TODO: might need to change for capture flows
     this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
   }
 }
