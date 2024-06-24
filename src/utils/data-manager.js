@@ -75,6 +75,12 @@ const initialState = {
       },
       quantity: 10,
     },
+    {
+      item: {
+        id: 2,
+      },
+      quantity: 10,
+    },
   ],
   itemsPickedUp: [],
 };

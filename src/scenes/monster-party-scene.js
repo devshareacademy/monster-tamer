@@ -424,6 +424,9 @@ export class MonsterPartyScene extends BaseScene {
       case ITEM_EFFECT.HEAL_30:
         this.#handleHealItemUsed(30);
         break;
+      case ITEM_EFFECT.CAPTURE_1:
+        // these items should not be useable in this scene
+        break;
       default:
         exhaustiveGuard(this.#sceneData.itemSelected.effect);
     }

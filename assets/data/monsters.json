@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "id": "1",
     "monsterId": 1,
     "name": "iguanignite",
     "assetKey": "IGUANIGNITE",
@@ -15,7 +15,7 @@
     "currentExp": 125
   },
   {
-    "id": 2,
+    "id": "2",
     "monsterId": 2,
     "name": "carnodusk",
     "assetKey": "CARNODUSK",
@@ -30,7 +30,7 @@
     "currentExp": 125
   },
   {
-    "id": 3,
+    "id": "3",
     "monsterId": 3,
     "name": "ignivolt",
     "assetKey": "IGNIVOLT",
@@ -45,7 +45,7 @@
     "currentExp": 125
   },
   {
-    "id": 4,
+    "id": "4",
     "monsterId": 4,
     "name": "aquavalor",
     "assetKey": "AQUAVALOR",
@@ -60,7 +60,7 @@
     "currentExp": 125
   },
   {
-    "id": 5,
+    "id": "5",
     "monsterId": 5,
     "name": "frostsaber",
     "assetKey": "FROSTSABER",
