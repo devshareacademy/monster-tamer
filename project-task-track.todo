@@ -158,6 +158,27 @@ Multiple Monsters:
     ✔ switch monsters positions in party @done(24-06-11 11:55)
     ✔ release monster into the wild @done(24-06-11 12:18)
 
+Catching Monsters:
+  ✔ review feature and load assets @done(24-06-24 09:35)
+  ☐ item and monster model updates
+    ☐ add category to items
+    ☐ add new item type for capture
+    ☐ update monster id field to be a string
+    ☐ add new item to json data
+    ☐ add new item to data manager
+  ☐ create ball class
+    ☐ test new animations in test scene
+    ☐ add new animations to battle monster class
+  ☐ inventory scene
+    ☐ support for capture items
+    ☐ safe guard if monster party is full
+  ☐ battle menu
+    ☐ support to get used item details
+  ☐ battle scene
+    ☐ new battle states for using items
+    ☐ new battle state for catching monster with stubbed logic
+  ☐ review monster catching logic
+
 -------------------------------
 
 Possible Future Content:
