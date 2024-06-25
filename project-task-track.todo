@@ -174,9 +174,9 @@ Catching Monsters:
     ✔ safe guard if monster party is full @done(24-06-25 14:05)
   ✔ battle menu @done(24-06-25 14:05)
     ✔ support to get used item details @done(24-06-25 14:05)
-  ☐ battle scene
-    ☐ new battle states for using items
-    ☐ new battle state for catching monster with stubbed logic
+  ✔ battle scene @done(24-06-25 14:54)
+    ✔ new battle states for using items @done(24-06-25 14:54)
+    ✔ new battle state for catching monster with stubbed logic @done(24-06-25 14:54)
   ☐ review monster catching logic
 
 -------------------------------

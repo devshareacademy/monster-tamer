@@ -79,7 +79,7 @@ const initialState = {
       item: {
         id: 2,
       },
-      quantity: 10,
+      quantity: 5,
     },
   ],
   itemsPickedUp: [],

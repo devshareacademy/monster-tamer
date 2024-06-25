@@ -15,11 +15,11 @@ import { DataUtils } from '../utils/data-utils.js';
 import { AUDIO_ASSET_KEYS, BATTLE_ASSET_KEYS } from '../assets/asset-keys.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { calculateExpGainedFromMonster, handleMonsterGainingExperience } from '../utils/leveling-utils.js';
-
-const MONSTER_PARTY_UI_ALPHA = Object.freeze({
-  active: 1,
-  inactive: 0.45,
-});
+import { ITEM_CATEGORY } from '../types/typedef.js';
+import { exhaustiveGuard } from '../utils/guard.js';
+import { Ball } from '../battle/ball.js';
+import { sleep } from '../utils/time-utils.js';
+import { generateUuid } from '../utils/random.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -33,6 +33,10 @@ const BATTLE_STATES = Object.freeze({
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
   GAIN_EXPERIENCE: 'GAIN_EXPERIENCE',
   SWITCH_MONSTER: 'SWITCH_MONSTER',
+  USED_ITEM: 'USED_ITEM',
+  HEAL_ITEM_USED: 'HEAL_ITEM_USED',
+  CAPTURE_ITEM_USED: 'CAPTURE_ITEM_USED',
+  CAUGHT_MONSTER: 'CAUGHT_MONSTER',
 });
 
 /**
@@ -80,6 +84,10 @@ export class BattleScene extends BaseScene {
   #activeMonsterKnockedOut;
   /** @type {Phaser.GameObjects.Container} */
   #availableMonstersUiContainer;
+  /** @type {boolean} */
+  #monsterCaptured;
+  /** @type {Ball} */
+  #ball;
 
   constructor() {
     super({
@@ -99,11 +107,7 @@ export class BattleScene extends BaseScene {
     if (Object.keys(data).length === 0) {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getMonsterById(this, 2)],
-        playerMonsters: [
-          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0],
-          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[1],
-          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[2],
-        ],
+        playerMonsters: [...dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
       };
     }
 
@@ -121,6 +125,7 @@ export class BattleScene extends BaseScene {
     this.#playerKnockedOut = false;
     this.#switchingActiveMonster = false;
     this.#activeMonsterKnockedOut = false;
+    this.#monsterCaptured = false;
   }
 
   /**
@@ -153,6 +158,13 @@ export class BattleScene extends BaseScene {
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
     this.#createAvailableMonstersUi();
+    this.#ball = new Ball({
+      scene: this,
+      assetKey: BATTLE_ASSET_KEYS.DAMAGED_BALL,
+      assetFrame: 0,
+      scale: 0.1,
+      skipBattleAnimations: this.#skipAnimations,
+    });
 
     this._controls.lockInput = true;
 
@@ -181,6 +193,7 @@ export class BattleScene extends BaseScene {
         this.#battleStateMachine.currentStateName === BATTLE_STATES.POST_ATTACK_CHECK ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.GAIN_EXPERIENCE ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.SWITCH_MONSTER ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.CAPTURE_ITEM_USED ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT)
     ) {
       this.#battleMenu.handlePlayerInput('OK');
@@ -319,6 +332,16 @@ export class BattleScene extends BaseScene {
     // update monster details in scene data and data manager to align with changes from battle
     this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp = this.#activePlayerMonster.currentHp;
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+
+    if (this.#monsterCaptured) {
+      // enemy monster was captured
+      this.#activeEnemyMonster.playDeathAnimation(() => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`You caught ${this.#activeEnemyMonster.name}.`], () => {
+          this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
+        });
+      });
+      return;
+    }
 
     if (this.#activeEnemyMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
@@ -495,16 +518,7 @@ export class BattleScene extends BaseScene {
 
         // if item was used, only have enemy attack
         if (this.#battleMenu.wasItemUsed) {
-          this.#activePlayerMonster.updateMonsterHealth(
-            /** @type {import('../types/typedef.js').Monster[]} */ (
-              dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
-            )[this.#activePlayerMonsterPartyIndex].currentHp
-          );
-          this.time.delayedCall(500, () => {
-            this.#enemyAttack(() => {
-              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
-            });
-          });
+          this.#battleStateMachine.setState(BATTLE_STATES.USED_ITEM);
           return;
         }
 
@@ -557,6 +571,8 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FINISHED,
       onEnter: () => {
+        // update the data manager with latest monster data
+        dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
         this.#transitionToNextScene();
       },
     });
@@ -651,8 +667,10 @@ export class BattleScene extends BaseScene {
         this.#activePlayerMonster.updateMonsterExpBar(didActiveMonsterLevelUp, false, () => {
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
             this.time.delayedCall(200, () => {
-              // update the data manager with latest monster data
-              dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+              if (this.#monsterCaptured) {
+                this.#battleStateMachine.setState(BATTLE_STATES.CAUGHT_MONSTER);
+                return;
+              }
               this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
             });
           });
@@ -691,6 +709,81 @@ export class BattleScene extends BaseScene {
         };
         this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
         this.scene.pause(SCENE_KEYS.BATTLE_SCENE);
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.USED_ITEM,
+      onEnter: () => {
+        switch (this.#battleMenu.itemUsed.category) {
+          case ITEM_CATEGORY.CAPTURE:
+            this.#battleStateMachine.setState(BATTLE_STATES.CAPTURE_ITEM_USED);
+            break;
+          case ITEM_CATEGORY.HEAL:
+            this.#battleStateMachine.setState(BATTLE_STATES.HEAL_ITEM_USED);
+            break;
+          default:
+            exhaustiveGuard(this.#battleMenu.itemUsed.category);
+        }
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.HEAL_ITEM_USED,
+      onEnter: () => {
+        this.#activePlayerMonster.updateMonsterHealth(
+          /** @type {import('../types/typedef.js').Monster[]} */ (
+            dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)
+          )[this.#activePlayerMonsterPartyIndex].currentHp
+        );
+        this.time.delayedCall(500, () => {
+          this.#enemyAttack(() => {
+            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          });
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.CAPTURE_ITEM_USED,
+      onEnter: async () => {
+        const wasCaptured = true;
+        await this.#ball.playThrowBallAnimation();
+        await this.#activeEnemyMonster.playCatchAnimation();
+        await this.#ball.playShakeBallAnimation(2);
+
+        if (wasCaptured) {
+          this.#monsterCaptured = true;
+          this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          return;
+        }
+
+        await sleep(500);
+        this.#ball.hide();
+        await this.#activeEnemyMonster.playCatchAnimationFailed();
+
+        // TODO: refactor to use async/await
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['The wild monster breaks free!'], () => {
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+            });
+          });
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.CAUGHT_MONSTER,
+      onEnter: () => {
+        const updatedMonster = {
+          ...this.#sceneData.enemyMonsters[0],
+          id: generateUuid(),
+          currentHp: this.#activeEnemyMonster.currentHp,
+        };
+        this.#sceneData.playerMonsters.push(updatedMonster);
+
+        this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
       },
     });
 
