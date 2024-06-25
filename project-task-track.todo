@@ -166,9 +166,9 @@ Catching Monsters:
     ✔ update monster id field to be a string @done(24-06-24 09:59)
     ✔ add new item to json data @done(24-06-24 09:49)
     ✔ add new item to data manager @done(24-06-24 09:49)
-  ☐ create ball class
-    ☐ test new animations in test scene
-    ☐ add new animations to battle monster class
+  ✔ create ball class @done(24-06-25 13:29)
+    ✔ test new animations in test scene @done(24-06-25 13:29)
+    ✔ add new animations to battle monster class @done(24-06-25 13:29)
   ☐ inventory scene
     ☐ support for capture items
     ☐ safe guard if monster party is full

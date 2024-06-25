@@ -116,4 +116,52 @@ export class EnemyBattleMonster extends BattleMonster {
   pickRandomMove() {
     return Phaser.Math.Between(0, this._monsterAttacks.length - 1);
   }
+
+  playCatchAnimation() {
+    return new Promise((resolve) => {
+      if (this._skipBattleAnimations) {
+        this._phaserGameObject.setAlpha(0);
+        resolve();
+        return;
+      }
+
+      this._scene.tweens.add({
+        duration: 500,
+        targets: this._phaserGameObject,
+        alpha: {
+          from: 1,
+          start: 1,
+          to: 0,
+        },
+        ease: Phaser.Math.Easing.Sine.InOut,
+        onComplete: () => {
+          resolve();
+        },
+      });
+    });
+  }
+
+  playCatchAnimationFailed() {
+    return new Promise((resolve) => {
+      if (this._skipBattleAnimations) {
+        this._phaserGameObject.setAlpha(1);
+        resolve();
+        return;
+      }
+
+      this._scene.tweens.add({
+        duration: 500,
+        targets: this._phaserGameObject,
+        alpha: {
+          from: 0,
+          start: 0,
+          to: 1,
+        },
+        ease: Phaser.Math.Easing.Sine.InOut,
+        onComplete: () => {
+          resolve();
+        },
+      });
+    });
+  }
 }

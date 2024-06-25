@@ -8,6 +8,7 @@ import { BATTLE_ASSET_KEYS, MONSTER_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { makeDraggable } from '../utils/draggable.js';
 import { Ball } from '../battle/ball.js';
+import { sleep } from '../utils/time-utils.js';
 
 export class TestScene extends Phaser.Scene {
   /** @type {import('../battle/attacks/attack-keys.js').AttackKeys} */
@@ -54,6 +55,7 @@ export class TestScene extends Phaser.Scene {
       assetFrame: 0,
       scale: 0.1,
     });
+    this.#ball.showBallPath();
 
     this.#addDataGui();
   }
@@ -149,6 +151,34 @@ export class TestScene extends Phaser.Scene {
     }).on('change', (ev) => {
       this.#updateAttackGameObjectPosition('y', ev.value);
     });
+
+    const f3 = pane.addFolder({
+      title: 'Monster Ball',
+      expanded: true,
+    });
+    const f3Params = {
+      showPath: true,
+    };
+    f3.addBinding(f3Params, 'showPath', {
+      label: 'show path',
+    }).on('change', (ev) => {
+      if (ev.value) {
+        this.#ball.showBallPath();
+      } else {
+        this.#ball.hideBallPath();
+      }
+    });
+    const playThrowBallButton = f3.addButton({
+      title: 'Play Catch Animation',
+    });
+    playThrowBallButton.on('click', async () => {
+      await this.#ball.playThrowBallAnimation();
+      await this.#catchEnemy();
+      await this.#ball.playShakeBallAnimation(2);
+      await sleep(500);
+      this.#ball.hide();
+      await this.#catchEnemyFailed();
+    });
   }
 
   /**
@@ -175,5 +205,41 @@ export class TestScene extends Phaser.Scene {
       this.#iceShardAttack.gameObject.setY(value);
       return;
     }
+  }
+
+  #catchEnemy() {
+    return new Promise((resolve) => {
+      this.tweens.add({
+        duration: 500,
+        targets: this.#enemyMonster,
+        alpha: {
+          from: 1,
+          start: 1,
+          to: 0,
+        },
+        ease: Phaser.Math.Easing.Sine.InOut,
+        onComplete: () => {
+          resolve();
+        },
+      });
+    });
+  }
+
+  #catchEnemyFailed() {
+    return new Promise((resolve) => {
+      this.tweens.add({
+        duration: 500,
+        targets: this.#enemyMonster,
+        alpha: {
+          from: 0,
+          start: 0,
+          to: 1,
+        },
+        ease: Phaser.Math.Easing.Sine.InOut,
+        onComplete: () => {
+          resolve();
+        },
+      });
+    });
   }
 }
