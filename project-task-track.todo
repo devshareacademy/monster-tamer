@@ -169,11 +169,11 @@ Catching Monsters:
   ✔ create ball class @done(24-06-25 13:29)
     ✔ test new animations in test scene @done(24-06-25 13:29)
     ✔ add new animations to battle monster class @done(24-06-25 13:29)
-  ☐ inventory scene
-    ☐ support for capture items
-    ☐ safe guard if monster party is full
-  ☐ battle menu
-    ☐ support to get used item details
+  ✔ inventory scene @done(24-06-25 14:05)
+    ✔ support for capture items @done(24-06-25 14:05)
+    ✔ safe guard if monster party is full @done(24-06-25 14:05)
+  ✔ battle menu @done(24-06-25 14:05)
+    ✔ support to get used item details @done(24-06-25 14:05)
   ☐ battle scene
     ☐ new battle states for using items
     ☐ new battle state for catching monster with stubbed logic

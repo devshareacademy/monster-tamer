@@ -47,7 +47,7 @@ const BATTLE_STATES = Object.freeze({
  * @type {object}
  * @property {boolean} wasMonsterSelected
  * @property {number} [selectedMonsterIndex]
- * @property {boolean} itemUsed
+ * @property {boolean} wasItemUsed
  * @property {import('../types/typedef.js').Item} [item]
  */
 

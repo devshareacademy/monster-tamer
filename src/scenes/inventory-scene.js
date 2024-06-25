@@ -7,8 +7,10 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import { BaseScene } from './base-scene.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import { ITEM_CATEGORY } from '../types/typedef.js';
 
 const CANCEL_TEXT_DESCRIPTION = 'Close your bag, and go back to adventuring!';
+const CANNOT_USE_ITEM_TEXT = 'That item cannot be used right now.';
 
 const INVENTORY_ITEM_POSITION = Object.freeze({
   x: 50,
@@ -49,13 +51,13 @@ const INVENTORY_TEXT_STYLE = {
 /**
  * @typedef InventorySceneWasResumedData
  * @type {object}
- * @property {boolean} itemUsed
+ * @property {boolean} wasItemUsed
  */
 
 /**
  * @typedef InventorySceneItemUsedData
  * @type {object}
- * @property {boolean} itemUsed
+ * @property {boolean} wasItemUsed
  * @property {import('../types/typedef.js').Item} [item]
  */
 
@@ -72,6 +74,8 @@ export class InventoryScene extends BaseScene {
   #inventory;
   /** @type {number} */
   #selectedInventoryOptionIndex;
+  /** @type {boolean} */
+  #waitingForInput;
 
   constructor() {
     super({
@@ -86,6 +90,7 @@ export class InventoryScene extends BaseScene {
   init(data) {
     super.init(data);
 
+    this.#waitingForInput = false;
     this.#sceneData = data;
     this.#selectedInventoryOptionIndex = 0;
     const inventory = dataManager.getInventory(this);
@@ -191,18 +196,53 @@ export class InventoryScene extends BaseScene {
     }
 
     if (this._controls.wasBackKeyPressed()) {
+      if (this.#waitingForInput) {
+        this.#updateItemDescriptionText();
+        this.#waitingForInput = false;
+        return;
+      }
+
       this.#goBackToPreviousScene(false);
       return;
     }
 
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
+      if (this.#waitingForInput) {
+        this.#updateItemDescriptionText();
+        this.#waitingForInput = false;
+        return;
+      }
+
       if (this.#isCancelButtonSelected()) {
         this.#goBackToPreviousScene(false);
         return;
       }
 
       if (this.#inventory[this.#selectedInventoryOptionIndex].quantity < 1) {
+        return;
+      }
+
+      const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex].item;
+
+      if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+        if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
+          // TODO: this logic will need to be updated if we support a monster storage system
+          if (dataManager.isPartyFull()) {
+            this.#selectedInventoryDescriptionText.setText('You have no room in your party! Cannot use that item.');
+            this.#waitingForInput = true;
+            return;
+          }
+
+          this.#handleItemUsed();
+          this.#goBackToPreviousScene(true, selectedItem);
+          return;
+        }
+      }
+
+      if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
+        this.#selectedInventoryDescriptionText.setText(CANNOT_USE_ITEM_TEXT);
+        this.#waitingForInput = true;
         return;
       }
 
@@ -221,6 +261,10 @@ export class InventoryScene extends BaseScene {
       return;
     }
 
+    if (this.#waitingForInput) {
+      return;
+    }
+
     const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#movePlayerInputCursor(selectedDirection);
@@ -236,21 +280,16 @@ export class InventoryScene extends BaseScene {
   handleSceneResume(sys, data) {
     super.handleSceneResume(sys, data);
 
-    if (!data || !data.itemUsed) {
+    if (!data || !data.wasItemUsed) {
       return;
     }
 
-    const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
-    selectedItem.quantity -= 1;
-    selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
-
+    const updateItem = this.#handleItemUsed();
     // TODO: add logic to handle when the last of an item was just used
-
-    dataManager.updateInventory(this.#inventory);
 
     // if previous scene was battle scene, switch back to that scene
     if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-      this.#goBackToPreviousScene(true, selectedItem.item);
+      this.#goBackToPreviousScene(true, updateItem.item);
     }
   }
 
@@ -285,7 +324,7 @@ export class InventoryScene extends BaseScene {
     this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
     /** @type {InventorySceneItemUsedData} */
     const sceneDataToPass = {
-      itemUsed: wasItemUsed,
+      wasItemUsed,
       item,
     };
     this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);
@@ -321,5 +360,13 @@ export class InventoryScene extends BaseScene {
     const y = 30 + this.#selectedInventoryOptionIndex * 50;
 
     this.#userInputCursor.setY(y);
+  }
+
+  #handleItemUsed() {
+    const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
+    selectedItem.quantity -= 1;
+    selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
+    dataManager.updateInventory(this.#inventory);
+    return selectedItem;
   }
 }
