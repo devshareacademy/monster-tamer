@@ -15,7 +15,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { NPC_EVENT_TYPE } from '../types/typedef.js';
+import { GAME_FLAG, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 
 /**
@@ -109,6 +109,7 @@ export class WorldScene extends BaseScene {
   init(data) {
     super.init(data);
     this.#sceneData = data;
+    dataManager.startNewGame(this);
 
     // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
     /** @type {string} */
@@ -244,6 +245,7 @@ export class WorldScene extends BaseScene {
         this.#handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
       },
     });
+
     this.cameras.main.startFollow(this.#player.sprite);
 
     // update our collisions with npcs
@@ -259,6 +261,13 @@ export class WorldScene extends BaseScene {
 
     // create menu
     this.#menu = new WorldMenu(this);
+
+    // check for new game and play first event
+    if (!dataManager.getFlag(GAME_FLAG.WATCHED_INTRO)) {
+      console.log('need to watch intro');
+      const introEvent = DataUtils.getEventData(this, 1);
+      console.log(introEvent);
+    }
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {

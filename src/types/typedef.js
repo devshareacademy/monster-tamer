@@ -155,3 +155,62 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcData
  * @type {Object.<string, NpcDetails>}
  */
+
+/** Events JSON Data Types */
+
+/**
+ * @typedef {keyof typeof GAME_EVENT_TYPE} GameEventType
+ */
+
+/** @enum {GameEventType} */
+export const GAME_EVENT_TYPE = Object.freeze({
+  POSITION: 'POSITION',
+});
+
+/**
+ * @typedef {keyof typeof GAME_EVENT_POSITION_TARGET_TYPE} GameEventPositionObjectTargetType
+ */
+
+/** @enum {GameEventPositionObjectTargetType} */
+export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
+  NPC: 'NPC',
+  PLAYER: 'PLAYER',
+});
+
+/**
+ * @typedef GameEventPosition
+ * @type {object}
+ * @property {'POSITION'} type
+ * @property {object} data
+ * @property {GameEventPositionObjectTargetType} data.target
+ * @property {import('../common/direction.js').Direction} data.direction
+ * @property {number} data.x
+ * @property {number} data.y
+ * @property {string} data.id
+ */
+
+/**
+ * @typedef GameEvent
+ * @type {GameEventPosition}
+ */
+
+/**
+ * @typedef EventDetails
+ * @type {object}
+ * @property {GameEvent[]} events
+ */
+
+/**
+ * @typedef EventData
+ * @type {Object.<string, EventDetails>}
+ */
+
+/** Game Flags Data Types */
+/**
+ * @typedef {keyof typeof GAME_FLAG} GameFlag
+ */
+
+/** @enum {GameFlag} */
+export const GAME_FLAG = Object.freeze({
+  WATCHED_INTRO: 'WATCHED_INTRO',
+});

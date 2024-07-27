@@ -84,4 +84,15 @@ export class DataUtils {
     const data = scene.cache.json.get(DATA_ASSET_KEYS.NPCS);
     return data[npcId];
   }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} eventId
+   * @returns {import('../types/typedef.js').EventDetails}
+   */
+  static getEventData(scene, eventId) {
+    /** @type {import('../types/typedef.js').EventData} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.EVENTS);
+    return data[eventId];
+  }
 }

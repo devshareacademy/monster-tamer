@@ -1,0 +1,25 @@
+{
+  "1": {
+    "events": [
+      {
+        "type": "POSITION",
+        "data": {
+          "target": "NPC",
+          "direction": "LEFT",
+          "x": 7,
+          "y": 4,
+          "id": "1"
+        }
+      },
+      {
+        "type": "POSITION",
+        "data": {
+          "target": "PLAYER",
+          "direction": "RIGHT",
+          "x": 5,
+          "y": 4
+        }
+      }
+    ]
+  }
+}
