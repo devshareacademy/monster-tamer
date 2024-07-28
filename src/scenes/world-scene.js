@@ -5,7 +5,11 @@ import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
-import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
+import {
+  getTargetDirectionFromGameObjectPosition,
+  getTargetPathToGameObject,
+  getTargetPositionFromGameObjectPositionAndDirection,
+} from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC, NPC_MOVEMENT_PATTERN } from '../world/characters/npc.js';
@@ -18,6 +22,7 @@ import { Item } from '../world/item.js';
 import { GAME_EVENT_TYPE, GAME_FLAG, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { CutsceneScene } from './cutscene-scene.js';
+import { sleep } from '../utils/time-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -633,6 +638,8 @@ export class WorldScene extends BaseScene {
         npcPath,
         movementPattern: npcMovement,
         events: npcDetails.events,
+        id: npcId,
+        animationKeyPrefix: npcDetails.animationKeyPrefix,
       });
       this.#npcs.push(npc);
     });
@@ -851,7 +858,7 @@ export class WorldScene extends BaseScene {
   async #startCutScene() {
     this.#isProcessingCutSceneEvent = true;
     await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).startCutScene();
-
+    // await sleep(500);
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }
@@ -868,7 +875,6 @@ export class WorldScene extends BaseScene {
     }
 
     const eventToProcess = DataUtils.getEventData(this, this.#currentCutSceneId);
-    console.log(eventToProcess);
 
     // check to see if the cut scene has any more events to be processed
     const isMoreEventsToProcess = eventToProcess.events.length - 1 !== this.#lastCutSceneEventHandledIndex;
@@ -883,13 +889,19 @@ export class WorldScene extends BaseScene {
     this.#lastCutSceneEventHandledIndex += 1;
     const eventToHandle = eventToProcess.events[this.#lastCutSceneEventHandledIndex];
     const eventType = eventToHandle.type;
-    console.log(eventType);
 
     this.#isProcessingCutSceneEvent = true;
     switch (eventType) {
       case GAME_EVENT_TYPE.ADD_NPC:
         this.#createNpcForCutScene(eventToHandle);
-        this.#isProcessingCutSceneEvent = true;
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+        break;
+      case GAME_EVENT_TYPE.MOVE_TO_PLAYER:
+        this.#moveNpcToPlayer(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.RETRACE_PATH:
+        this.#haveNpcRetracePath(eventToHandle);
         break;
       default:
         exhaustiveGuard(eventType);
@@ -906,11 +918,100 @@ export class WorldScene extends BaseScene {
       position: { x: gameEvent.data.x * TILE_SIZE, y: gameEvent.data.y * TILE_SIZE },
       direction: gameEvent.data.direction,
       frame: gameEvent.data.frame,
-      npcPath: {},
+      npcPath: {
+        0: { x: gameEvent.data.x * TILE_SIZE, y: gameEvent.data.y * TILE_SIZE },
+      },
       movementPattern: NPC_MOVEMENT_PATTERN.IDLE,
       events: [],
+      id: gameEvent.data.id,
+      animationKeyPrefix: gameEvent.data.animationKeyPrefix,
     });
-    console.log(npc);
     this.#npcs.push(npc);
+    npc.addCharacterToCheckForCollisionsWith(this.#player);
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventMoveToPlayer} gameEvent
+   * @returns {void}
+   */
+  #moveNpcToPlayer(gameEvent) {
+    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
+    if (targetNpc === undefined) {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+      return;
+    }
+
+    // determine direction to move based on distance from player
+    const targetPath = getTargetPathToGameObject(targetNpc.sprite, this.#player.sprite);
+    const pathToFollow = targetPath.pathToFollow.splice(0, targetPath.pathToFollow.length - 1);
+
+    // if npc is already next to player, just update directions
+    if (pathToFollow.length === 0) {
+      this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+      targetNpc.facePlayer(this.#player.direction);
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+      return;
+    }
+
+    // move npc according to the path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
+    const npcPath = {
+      0: { x: targetNpc.sprite.x, y: targetNpc.sprite.y },
+    };
+    pathToFollow.forEach((coordinate, index) => {
+      npcPath[index + 1] = coordinate;
+    });
+
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.npcPath = npcPath;
+    targetNpc.resetMovementTime();
+    targetNpc.finishedMovementCallback = () => {
+      if (
+        pathToFollow[pathToFollow.length - 1].x === targetNpc.sprite.x &&
+        pathToFollow[pathToFollow.length - 1].y === targetNpc.sprite.y
+      ) {
+        this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+        targetNpc.facePlayer(this.#player.direction);
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      }
+    };
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventRetracePath} gameEvent
+   * @returns {void}
+   */
+  #haveNpcRetracePath(gameEvent) {
+    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
+    if (targetNpc === undefined) {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+      return;
+    }
+
+    // have npc retrace their steps by reversing the existing npc path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
+    const updatedPath = {};
+    const pathKeys = Object.keys(targetNpc.npcPath);
+    for (let i = pathKeys.length; i > 0; i -= 1) {
+      updatedPath[pathKeys[i - 1]] = targetNpc.npcPath[pathKeys[i - 1]];
+    }
+    targetNpc.npcPath = updatedPath;
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.resetMovementTime();
+
+    targetNpc.finishedMovementCallback = () => {
+      if (
+        updatedPath[pathKeys.length - 1].x === targetNpc.sprite.x &&
+        updatedPath[pathKeys.length - 1].y === targetNpc.sprite.y
+      ) {
+        console.log('hit');
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      }
+    };
   }
 }

@@ -12,6 +12,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
 export const NPC_MOVEMENT_PATTERN = Object.freeze({
   IDLE: 'IDLE',
   CLOCKWISE: 'CLOCKWISE',
+  SET_PATH: 'SET_PATH',
 });
 
 /**
@@ -26,6 +27,8 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @property {NPCPath} npcPath
  * @property {NpcMovementPattern} movementPattern
  * @property {import('../../types/typedef.js').NpcEvent[]} events
+ * @property {number} id
+ * @property {string} animationKeyPrefix
  */
 
 /**
@@ -33,6 +36,8 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  */
 
 export class NPC extends Character {
+  /** @type {number} */
+  #id;
   /** @type {boolean} */
   #talkingToPlayer;
   /** @type {NPCPath} */
@@ -45,6 +50,8 @@ export class NPC extends Character {
   #lastMovementTime;
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
   #events;
+  /** @type {string} */
+  #animationKeyPrefix;
 
   /**
    * @param {NPCConfig} config
@@ -63,6 +70,7 @@ export class NPC extends Character {
       },
     });
 
+    this.#id = config.id;
     this.#talkingToPlayer = false;
     this.#npcPath = config.npcPath;
     this.#currentPathIndex = 0;
@@ -70,6 +78,7 @@ export class NPC extends Character {
     this.#lastMovementTime = Phaser.Math.Between(3500, 5000);
     this._phaserGameObject.setScale(4);
     this.#events = config.events;
+    this.#animationKeyPrefix = config.animationKeyPrefix;
   }
 
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
@@ -87,6 +96,47 @@ export class NPC extends Character {
    */
   set isTalkingToPlayer(val) {
     this.#talkingToPlayer = val;
+  }
+
+  /** @type {number} */
+  get id() {
+    return this.#id;
+  }
+
+  /** @type {NPCPath} */
+  get npcPath() {
+    return this.#npcPath;
+  }
+
+  /**
+   * @param {NPCPath} val
+   */
+  set npcPath(val) {
+    this.#npcPath = val;
+  }
+
+  /**
+   * @param {NpcMovementPattern} val
+   */
+  set npcMovementPattern(val) {
+    this.#movementPattern = val;
+  }
+
+  /**
+   * @param {() => void | undefined} val
+   */
+  set finishedMovementCallback(val) {
+    this._spriteGridMovementFinishedCallback = val;
+  }
+
+  /**
+   * Resets the lastMovementTime, which is used for when we want to have an npc start moving
+   * immediately. This is needed for cutscene support so after the npc appears, that npc starts
+   * moving directly to the player.
+   * @returns {void}
+   */
+  resetMovementTime() {
+    this.#lastMovementTime = 0;
   }
 
   /**
@@ -138,10 +188,18 @@ export class NPC extends Character {
 
       // validate if we actually moved to the next position, if not, skip updating index
       const prevPosition = this.#npcPath[this.#currentPathIndex];
+      console.log(prevPosition, this.#npcPath);
       if (prevPosition.x !== this._phaserGameObject.x || prevPosition.y !== this._phaserGameObject.y) {
         nextPosition = this.#npcPath[this.#currentPathIndex];
       } else {
         if (nextPosition === undefined) {
+          // if npc is following a set path, once we reach the end, stop moving the npc
+          if (this.#movementPattern === NPC_MOVEMENT_PATTERN.SET_PATH) {
+            this.#movementPattern = NPC_MOVEMENT_PATTERN.IDLE;
+            this.#currentPathIndex = 0;
+            return;
+          }
+
           nextPosition = this.#npcPath[0];
           this.#currentPathIndex = 0;
         } else {
@@ -160,7 +218,11 @@ export class NPC extends Character {
       }
 
       this.moveCharacter(characterDirection);
-      this.#lastMovementTime = time + Phaser.Math.Between(2000, 5000);
+      if (this.#movementPattern === NPC_MOVEMENT_PATTERN.SET_PATH) {
+        this.#lastMovementTime = time;
+      } else {
+        this.#lastMovementTime = time + Phaser.Math.Between(2000, 5000);
+      }
     }
   }
 
@@ -177,18 +239,18 @@ export class NPC extends Character {
       case DIRECTION.UP:
         if (
           !this._phaserGameObject.anims.isPlaying ||
-          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${this._direction}`
+          this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}${this._direction}`
         ) {
-          this._phaserGameObject.play(`NPC_1_${this._direction}`);
+          this._phaserGameObject.play(`${this.#animationKeyPrefix}${this._direction}`);
           this._phaserGameObject.setFlipX(false);
         }
         break;
       case DIRECTION.LEFT:
         if (
           !this._phaserGameObject.anims.isPlaying ||
-          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${DIRECTION.RIGHT}`
+          this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}${DIRECTION.RIGHT}`
         ) {
-          this._phaserGameObject.play(`NPC_1_${DIRECTION.RIGHT}`);
+          this._phaserGameObject.play(`${this.#animationKeyPrefix}${DIRECTION.RIGHT}`);
           this._phaserGameObject.setFlipX(true);
         }
         break;

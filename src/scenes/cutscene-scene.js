@@ -47,7 +47,7 @@ export class CutsceneScene extends BaseScene {
       this.tweens.add({
         targets: target,
         delay: 0,
-        duration: 800,
+        duration: 1, // TODO: revert to 800
         y: {
           from: startY,
           start: startY,

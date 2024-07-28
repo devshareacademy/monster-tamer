@@ -85,5 +85,32 @@
     "delay": 0,
     "yoyo": true,
     "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_2_RIGHT",
+    "frames": [38, 32, 39],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_2_UP",
+    "frames": [36, 31, 37],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_2_DOWN",
+    "frames": [34, 30, 35],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
   }
 ]

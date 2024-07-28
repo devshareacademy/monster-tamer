@@ -160,6 +160,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcDetails
  * @type {object}
  * @property {number} frame
+ * @property {string} animationKeyPrefix
  * @property {NpcEvent[]} events
  */
 
@@ -177,6 +178,8 @@ export const NPC_EVENT_TYPE = Object.freeze({
 /** @enum {GameEventType} */
 export const GAME_EVENT_TYPE = Object.freeze({
   ADD_NPC: 'ADD_NPC',
+  MOVE_TO_PLAYER: 'MOVE_TO_PLAYER',
+  RETRACE_PATH: 'RETRACE_PATH',
 });
 
 /**
@@ -198,11 +201,28 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  * @property {number} data.y
  * @property {number} data.frame
  * @property {number} data.id
+ * @property {string} data.animationKeyPrefix
+ */
+
+/**
+ * @typedef GameEventMoveToPlayer
+ * @type {object}
+ * @property {'MOVE_TO_PLAYER'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
+ * @typedef GameEventRetracePath
+ * @type {object}
+ * @property {'RETRACE_PATH'} type
+ * @property {object} data
+ * @property {number} data.id
  */
 
 /**
  * @typedef GameEvent
- * @type {GameEventAddNpc}
+ * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath}
  */
 
 /**

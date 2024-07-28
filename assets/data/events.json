@@ -9,6 +9,19 @@
           "x": 6,
           "y": 21,
           "frame": 30,
+          "id": 1001,
+          "animationKeyPrefix": "NPC_2_"
+        }
+      },
+      {
+        "type": "MOVE_TO_PLAYER",
+        "data": {
+          "id": 1001
+        }
+      },
+      {
+        "type": "RETRACE_PATH",
+        "data": {
           "id": 1001
         }
       }
