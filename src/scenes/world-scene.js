@@ -851,6 +851,7 @@ export class WorldScene extends BaseScene {
   async #startCutScene() {
     this.#isProcessingCutSceneEvent = true;
     await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).startCutScene();
+
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }
