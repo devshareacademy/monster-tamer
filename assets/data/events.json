@@ -1,23 +1,15 @@
 {
   "1": {
+    "requires": [],
     "events": [
       {
-        "type": "POSITION",
+        "type": "ADD_NPC",
         "data": {
-          "target": "NPC",
-          "direction": "LEFT",
-          "x": 7,
-          "y": 4,
-          "id": "1"
-        }
-      },
-      {
-        "type": "POSITION",
-        "data": {
-          "target": "PLAYER",
-          "direction": "RIGHT",
-          "x": 5,
-          "y": 4
+          "direction": "DOWN",
+          "x": 6,
+          "y": 21,
+          "frame": 30,
+          "id": 1001
         }
       }
     ]

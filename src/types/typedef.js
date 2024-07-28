@@ -164,7 +164,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
 
 /** @enum {GameEventType} */
 export const GAME_EVENT_TYPE = Object.freeze({
-  POSITION: 'POSITION',
+  ADD_NPC: 'ADD_NPC',
 });
 
 /**
@@ -174,24 +174,23 @@ export const GAME_EVENT_TYPE = Object.freeze({
 /** @enum {GameEventPositionObjectTargetType} */
 export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
   NPC: 'NPC',
-  PLAYER: 'PLAYER',
 });
 
 /**
- * @typedef GameEventPosition
+ * @typedef GameEventAddNpc
  * @type {object}
- * @property {'POSITION'} type
+ * @property {'ADD_NPC'} type
  * @property {object} data
- * @property {GameEventPositionObjectTargetType} data.target
  * @property {import('../common/direction.js').Direction} data.direction
  * @property {number} data.x
  * @property {number} data.y
- * @property {string} data.id
+ * @property {number} data.frame
+ * @property {number} data.id
  */
 
 /**
  * @typedef GameEvent
- * @type {GameEventPosition}
+ * @type {GameEventAddNpc}
  */
 
 /**

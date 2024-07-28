@@ -22,6 +22,11 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  */
 
 /**
+ * @typedef GameFlags
+ * @type {{[key in GAME_FLAG]?: boolean }}
+ */
+
+/**
  * @typedef GlobalState
  * @type {object}
  * @property {object} player
@@ -43,19 +48,20 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../types/typedef.js').Inventory} inventory
  * @property {number[]} itemsPickedUp
  * @property {{[key in GAME_FLAG]?: boolean }} flags
+ * @property {string[]} viewedEvents
  */
 
 /** @type {GlobalState} */
 const initialState = {
   player: {
     position: {
-      x: 0,
-      y: 0,
+      x: 4 * TILE_SIZE,
+      y: 21 * TILE_SIZE,
     },
-    direction: DIRECTION.RIGHT,
+    direction: DIRECTION.DOWN,
     location: {
-      area: 'building_1',
-      isInterior: true,
+      area: 'main_1',
+      isInterior: false,
     },
   },
   options: {
@@ -80,6 +86,7 @@ const initialState = {
   ],
   itemsPickedUp: [],
   flags: {},
+  viewedEvents: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -97,6 +104,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   INVENTORY: 'INVENTORY',
   ITEMS_PICKED_UP: 'ITEMS_PICKED_UP',
   FLAGS: 'FLAGS',
+  VIEWED_EVENTS: 'VIEWED_EVENTS',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -189,6 +197,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.inventory = initialState.inventory;
     existingData.itemsPickedUp = [...initialState.itemsPickedUp];
     existingData.flags = { ...initialState.flags };
+    existingData.viewedEvents = initialState.viewedEvents;
 
     this.#store.reset();
     this.#updateDataManger(existingData);
@@ -288,6 +297,13 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @returns {GameFlags}
+   */
+  getFlags() {
+    return this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS);
+  }
+
+  /**
    * @param {GAME_FLAG} flag
    * @returns {boolean}
    */
@@ -301,7 +317,7 @@ class DataManager extends Phaser.Events.EventEmitter {
    * @returns {void}
    */
   setFlag(flag, value) {
-    /** @type {{[key in GAME_FLAG]?: boolean }} */
+    /** @type {GameFlags} */
     const existingFlags = this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS)[flag];
     existingFlags[flag] = value;
     this.#store.set(DATA_MANAGER_STORE_KEYS.FLAGS, existingFlags);
@@ -327,6 +343,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
       [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
       [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || { ...initialState.flags },
+      [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
     });
   }
 
@@ -358,6 +375,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
       itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
       flags: { ...this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) },
+      viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
     };
   }
 }
