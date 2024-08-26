@@ -20,6 +20,7 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { Ball } from '../battle/ball.js';
 import { sleep } from '../utils/time-utils.js';
 import { generateUuid } from '../utils/random.js';
+import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -747,12 +748,28 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.CAPTURE_ITEM_USED,
       onEnter: async () => {
-        const wasCaptured = true;
+        const captureResults = calculateMonsterCaptureResults(this.#activeEnemyMonster);
+        console.log(captureResults);
+        const diffInCapture = captureResults.requiredCaptureValue - captureResults.actualCaptureValue;
+        let numberOfShakes = 0;
+        if (diffInCapture <= 10) {
+          numberOfShakes = 2;
+        } else if (diffInCapture <= 30) {
+          numberOfShakes = 1;
+        }
+        if (captureResults.wasCaptured) {
+          numberOfShakes = 3;
+        }
+
         await this.#ball.playThrowBallAnimation();
         await this.#activeEnemyMonster.playCatchAnimation();
-        await this.#ball.playShakeBallAnimation(2);
+        if (numberOfShakes > 0) {
+          await this.#ball.playShakeBallAnimation(numberOfShakes - 1);
+        } else {
+          await this.#ball.playShakeBallAnimation(0);
+        }
 
-        if (wasCaptured) {
+        if (captureResults.wasCaptured) {
           this.#monsterCaptured = true;
           this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
           return;
