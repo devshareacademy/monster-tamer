@@ -775,7 +775,7 @@ export class BattleScene extends BaseScene {
           return;
         }
 
-        await sleep(500);
+        await sleep(500, this);
         this.#ball.hide();
         await this.#activeEnemyMonster.playCatchAnimationFailed();
 

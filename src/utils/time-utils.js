@@ -1,3 +1,7 @@
-export function sleep(milliseconds) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+export function sleep(milliseconds, scene) {
+  return new Promise((resolve) => {
+    scene.time.delayedCall(milliseconds, () => {
+      resolve();
+    });
+  });
 }
