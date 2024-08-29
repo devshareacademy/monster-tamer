@@ -46,7 +46,7 @@ Currently, the only supported way to play the game is with a Keyboard. The game 
 
 ## Credits
 
-This project uses both assets I developed as well as other assets that have been created by some wondering creators. This project would not have been possible without the following people/resources:
+This project uses both assets I developed as well as other assets that have been created by some wonderful creators. This project would not have been possible without the following people/resources:
 
 | Asset                       | Author           | Link                                                                                              |
 | --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
