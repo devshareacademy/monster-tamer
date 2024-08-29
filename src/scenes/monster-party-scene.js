@@ -339,11 +339,11 @@ export class MonsterPartyScene extends BaseScene {
   }
 
   /**
-   * @param {boolean} itemUsed
+   * @param {boolean} wasItemUsed
    * @param {boolean} wasMonsterSelected
    * @returns {void}
    */
-  #goBackToPreviousScene(itemUsed, wasMonsterSelected) {
+  #goBackToPreviousScene(wasItemUsed, wasMonsterSelected) {
     if (
       this.#sceneData.activeMonsterKnockedOut &&
       this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE &&
@@ -359,7 +359,7 @@ export class MonsterPartyScene extends BaseScene {
     this._controls.lockInput = true;
     this.scene.stop(SCENE_KEYS.MONSTER_PARTY_SCENE);
     this.scene.resume(this.#sceneData.previousSceneName, {
-      itemUsed,
+      wasItemUsed,
       selectedMonsterIndex: wasMonsterSelected ? this.#selectedPartyMonsterIndex : undefined,
       wasMonsterSelected,
     });

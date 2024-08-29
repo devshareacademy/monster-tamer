@@ -147,7 +147,7 @@ export class EnemyBattleMonster extends BattleMonster {
   /**
    * @returns {Promise<void>}
    */
-  playCatchFailedAnimation() {
+  playCatchAnimationFailed() {
     return new Promise((resolve) => {
       if (this._skipBattleAnimations) {
         this._phaserGameObject.setAlpha(1);
