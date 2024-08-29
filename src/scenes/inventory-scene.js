@@ -197,6 +197,7 @@ export class InventoryScene extends BaseScene {
 
     if (this._controls.wasBackKeyPressed()) {
       if (this.#waitingForInput) {
+        // update text description and let player select new items
         this.#updateItemDescriptionText();
         this.#waitingForInput = false;
         return;
@@ -209,6 +210,7 @@ export class InventoryScene extends BaseScene {
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     if (wasSpaceKeyPressed) {
       if (this.#waitingForInput) {
+        // update text description and let player select new items
         this.#updateItemDescriptionText();
         this.#waitingForInput = false;
         return;
@@ -225,9 +227,14 @@ export class InventoryScene extends BaseScene {
 
       const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex].item;
 
+      // validate that the item can be used if we are outside battle (capture ball example)
       if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
+        // check to see if the selected item needs a target monster, example if selecting
+        // a capture ball, no monster needed, vs selecting a potion, player needs to choose the
+        // target monster
         if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
           // TODO: this logic will need to be updated if we support a monster storage system
+          // validate we have room in our party before attempting capture
           if (dataManager.isPartyFull()) {
             this.#selectedInventoryDescriptionText.setText('You have no room in your party! Cannot use that item.');
             this.#waitingForInput = true;
@@ -241,6 +248,7 @@ export class InventoryScene extends BaseScene {
       }
 
       if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
+        // display message to player that the item cant be used now
         this.#selectedInventoryDescriptionText.setText(CANNOT_USE_ITEM_TEXT);
         this.#waitingForInput = true;
         return;
@@ -284,12 +292,12 @@ export class InventoryScene extends BaseScene {
       return;
     }
 
-    const updateItem = this.#handleItemUsed();
+    const updatedItem = this.#handleItemUsed();
     // TODO: add logic to handle when the last of an item was just used
 
     // if previous scene was battle scene, switch back to that scene
     if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-      this.#goBackToPreviousScene(true, updateItem.item);
+      this.#goBackToPreviousScene(true, updatedItem.item);
     }
   }
 
@@ -362,6 +370,9 @@ export class InventoryScene extends BaseScene {
     this.#userInputCursor.setY(y);
   }
 
+  /**
+   * @returns {InventoryItemWithGameObjects}
+   */
   #handleItemUsed() {
     const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
     selectedItem.quantity -= 1;

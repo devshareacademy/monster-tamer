@@ -1,5 +1,10 @@
 import Phaser from '../lib/phaser.js';
+import { BattleMonster } from '../battle/monsters/battle-monster.js';
 
+/**
+ * @param {BattleMonster} monster
+ * @returns {number}
+ */
 export function calculateMinValueForCapture(monster) {
   let baseMin = 80;
   const healthRatio = monster.currentHp / monster.maxHp;
@@ -17,6 +22,18 @@ export function calculateMinValueForCapture(monster) {
   return baseMin;
 }
 
+/**
+ * @typedef CaptureMonsterResults
+ * @type {object}
+ * @property {number} requiredCaptureValue
+ * @property {number} actualCaptureValue
+ * @property {boolean} wasCaptured
+ */
+
+/**
+ * @param {BattleMonster} monster
+ * @returns {CaptureMonsterResults}
+ */
 export function calculateMonsterCaptureResults(monster) {
   const minValueRequiredForCapture = calculateMinValueForCapture(monster);
   const randomValue = Phaser.Math.Between(0, 100);

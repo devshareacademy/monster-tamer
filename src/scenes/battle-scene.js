@@ -748,8 +748,12 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.CAPTURE_ITEM_USED,
       onEnter: async () => {
+        // we throw the monster ball to attempt to capture the monster
+        // play ball shake animation depending on success of capture
+        // 3 shakes - caught, 2 shakes - off by 10, 1 shakes off by 30, 0 shakes off by more than 30
+        // 1. throw ball animation, 2. shake ball animation, 3. break animation if needed, 4. monster re-appear if needed
+
         const captureResults = calculateMonsterCaptureResults(this.#activeEnemyMonster);
-        console.log(captureResults);
         const diffInCapture = captureResults.requiredCaptureValue - captureResults.actualCaptureValue;
         let numberOfShakes = 0;
         if (diffInCapture <= 10) {
@@ -793,6 +797,8 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.CAUGHT_MONSTER,
       onEnter: () => {
+        // add monster to the players party
+        /** @type {import('../types/typedef.js').Monster} */
         const updatedMonster = {
           ...this.#sceneData.enemyMonsters[0],
           id: generateUuid(),

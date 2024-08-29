@@ -117,6 +117,9 @@ export class EnemyBattleMonster extends BattleMonster {
     return Phaser.Math.Between(0, this._monsterAttacks.length - 1);
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   playCatchAnimation() {
     return new Promise((resolve) => {
       if (this._skipBattleAnimations) {
@@ -141,7 +144,10 @@ export class EnemyBattleMonster extends BattleMonster {
     });
   }
 
-  playCatchAnimationFailed() {
+  /**
+   * @returns {Promise<void>}
+   */
+  playCatchFailedAnimation() {
     return new Promise((resolve) => {
       if (this._skipBattleAnimations) {
         this._phaserGameObject.setAlpha(1);
