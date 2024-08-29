@@ -17,15 +17,10 @@ import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { calculateExpGainedFromMonster, handleMonsterGainingExperience } from '../utils/leveling-utils.js';
 import { ITEM_CATEGORY } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
-import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
 import { Ball } from '../battle/ball.js';
 import { sleep } from '../utils/time-utils.js';
 import { generateUuid } from '../utils/random.js';
-
-const MONSTER_PARTY_UI_ALPHA = Object.freeze({
-  active: 1,
-  inactive: 0.45,
-});
+import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -57,7 +52,7 @@ const BATTLE_STATES = Object.freeze({
  * @type {object}
  * @property {boolean} wasMonsterSelected
  * @property {number} [selectedMonsterIndex]
- * @property {boolean} itemUsed
+ * @property {boolean} wasItemUsed
  * @property {import('../types/typedef.js').Item} [item]
  */
 
@@ -113,11 +108,7 @@ export class BattleScene extends BaseScene {
     if (Object.keys(data).length === 0) {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getMonsterById(this, 2)],
-        playerMonsters: [
-          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[0],
-          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[1],
-          dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)[2],
-        ],
+        playerMonsters: [...dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
       };
     }
 
@@ -778,6 +769,8 @@ export class BattleScene extends BaseScene {
         await this.#activeEnemyMonster.playCatchAnimation();
         if (numberOfShakes > 0) {
           await this.#ball.playShakeBallAnimation(numberOfShakes - 1);
+        } else {
+          await this.#ball.playShakeBallAnimation(0);
         }
 
         if (captureResults.wasCaptured) {
@@ -786,12 +779,12 @@ export class BattleScene extends BaseScene {
           return;
         }
 
-        await sleep(500);
+        await sleep(500, this);
         this.#ball.hide();
-        await this.#activeEnemyMonster.playCatchFailedAnimation();
+        await this.#activeEnemyMonster.playCatchAnimationFailed();
 
         // TODO: refactor to use async/await
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['The wild monster breaks free'], () => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['The wild monster breaks free!'], () => {
           this.time.delayedCall(500, () => {
             this.#enemyAttack(() => {
               this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);

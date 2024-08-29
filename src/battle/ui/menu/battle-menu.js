@@ -757,14 +757,13 @@ export class BattleMenu {
       return;
     }
 
-    if (!data || !data.itemUsed) {
+    if (!data || !data.wasItemUsed) {
       this.#switchToMainBattleMenu();
       return;
     }
 
     this.#wasItemUsed = true;
     this.#usedItem = data.item;
-    // TODO: might need to change for capture flows
     this.updateInfoPaneMessagesAndWaitForInput([`You used the following item: ${data.item.name}`]);
   }
 }

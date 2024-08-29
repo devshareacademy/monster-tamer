@@ -1,25 +1,25 @@
-import { BattleMonster } from '../battle/monsters/battle-monster.js';
 import Phaser from '../lib/phaser.js';
+import { BattleMonster } from '../battle/monsters/battle-monster.js';
 
 /**
  * @param {BattleMonster} monster
  * @returns {number}
  */
 export function calculateMinValueForCapture(monster) {
-  const baseMin = 80;
+  let baseMin = 80;
   const healthRatio = monster.currentHp / monster.maxHp;
 
-  let healthFactor = 0;
   if (healthRatio < 0.25) {
-    healthFactor = 4;
+    baseMin -= 20;
   } else if (healthRatio < 0.5) {
-    healthFactor = 3;
+    baseMin -= 15;
   } else if (healthRatio < 0.75) {
-    healthFactor = 2;
+    baseMin -= 10;
   } else if (healthRatio < 0.9) {
-    healthFactor = 1;
+    baseMin -= 5;
   }
-  return baseMin - healthFactor * 5;
+
+  return baseMin;
 }
 
 /**

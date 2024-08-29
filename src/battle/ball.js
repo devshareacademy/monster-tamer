@@ -44,6 +44,9 @@ export class Ball {
       .setScale(config.scale);
   }
 
+  /**
+   * @returns {void}
+   */
   #createCurvePath() {
     // create curved path for ball to follow
     const startPoint = new Phaser.Math.Vector2(0, 500);
@@ -56,19 +59,28 @@ export class Ball {
     // draw curve (for debugging)
     this.#ballPathGraphics = this.#scene.add.graphics();
     this.#ballPathGraphics.clear();
-    this.#ballPathGraphics.lineStyle(1, 0x00ff00, 1);
+    this.#ballPathGraphics.lineStyle(4, 0x00ff00, 1);
     this.#ballPath.draw(this.#ballPathGraphics);
     this.#ballPathGraphics.setAlpha(0);
   }
 
+  /**
+   * @returns {void}
+   */
   hide() {
     this.#ball.setAlpha(0);
   }
 
+  /**
+   * @returns {void}
+   */
   showBallPath() {
     this.#ballPathGraphics.setAlpha(1);
   }
 
+  /**
+   * @returns {void}
+   */
   hideBallPath() {
     this.#ballPathGraphics.setAlpha(0);
   }

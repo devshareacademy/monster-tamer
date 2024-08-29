@@ -51,13 +51,13 @@ const INVENTORY_TEXT_STYLE = {
 /**
  * @typedef InventorySceneWasResumedData
  * @type {object}
- * @property {boolean} itemUsed
+ * @property {boolean} wasItemUsed
  */
 
 /**
  * @typedef InventorySceneItemUsedData
  * @type {object}
- * @property {boolean} itemUsed
+ * @property {boolean} wasItemUsed
  * @property {import('../types/typedef.js').Item} [item]
  */
 
@@ -202,6 +202,7 @@ export class InventoryScene extends BaseScene {
         this.#waitingForInput = false;
         return;
       }
+
       this.#goBackToPreviousScene(false);
       return;
     }
@@ -228,18 +229,18 @@ export class InventoryScene extends BaseScene {
 
       // validate that the item can be used if we are outside battle (capture ball example)
       if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
-        // TODO: this logic will need to be updated if we support a monster storage system
-        // validate we have room in our party before attempting capture
-        if (dataManager.isPartyFull()) {
-          this.#selectedInventoryDescriptionText.setText('You have no room in your party! Cannot use that item.');
-          this.#waitingForInput = true;
-          return;
-        }
-
         // check to see if the selected item needs a target monster, example if selecting
         // a capture ball, no monster needed, vs selecting a potion, player needs to choose the
         // target monster
         if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
+          // TODO: this logic will need to be updated if we support a monster storage system
+          // validate we have room in our party before attempting capture
+          if (dataManager.isPartyFull()) {
+            this.#selectedInventoryDescriptionText.setText('You have no room in your party! Cannot use that item.');
+            this.#waitingForInput = true;
+            return;
+          }
+
           this.#handleItemUsed();
           this.#goBackToPreviousScene(true, selectedItem);
           return;
@@ -287,7 +288,7 @@ export class InventoryScene extends BaseScene {
   handleSceneResume(sys, data) {
     super.handleSceneResume(sys, data);
 
-    if (!data || !data.itemUsed) {
+    if (!data || !data.wasItemUsed) {
       return;
     }
 
@@ -331,7 +332,7 @@ export class InventoryScene extends BaseScene {
     this.scene.stop(SCENE_KEYS.INVENTORY_SCENE);
     /** @type {InventorySceneItemUsedData} */
     const sceneDataToPass = {
-      itemUsed: wasItemUsed,
+      wasItemUsed,
       item,
     };
     this.scene.resume(this.#sceneData.previousSceneName, sceneDataToPass);

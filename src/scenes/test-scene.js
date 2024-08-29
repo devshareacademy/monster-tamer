@@ -175,7 +175,7 @@ export class TestScene extends Phaser.Scene {
       await this.#ball.playThrowBallAnimation();
       await this.#catchEnemy();
       await this.#ball.playShakeBallAnimation(2);
-      await sleep(500);
+      await sleep(500, this);
       this.#ball.hide();
       await this.#catchEnemyFailed();
     });
