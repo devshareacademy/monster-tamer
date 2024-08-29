@@ -1,3 +1,5 @@
+import Phaser from '../lib/phaser.js';
+
 /**
  * Picks the random item based on its weight.
  * The items with higher weight will be picked more often (with a higher probability).
@@ -35,4 +37,11 @@ export function weightedRandom(data) {
   // the random value. By filtering the array, we know the index of element in the cumulative
   // weights array that is the value we want to return
   return values[cumulativeWeights.filter((element) => element <= randomNumber).length];
+}
+
+/**
+ * @returns {string}
+ */
+export function generateUuid() {
+  return Phaser.Math.RND.uuid();
 }
