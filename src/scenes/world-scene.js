@@ -591,7 +591,7 @@ export class WorldScene extends BaseScene {
    */
   #createNPCs(map) {
     this.#npcs = [];
-
+    return;
     const npcLayers = map.getObjectLayerNames().filter((layerName) => layerName.includes('NPC'));
     npcLayers.forEach((layerName) => {
       const layer = map.getObjectLayer(layerName);
@@ -964,9 +964,6 @@ export class WorldScene extends BaseScene {
       npcPath[index + 1] = coordinate;
     });
 
-    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
-    targetNpc.npcPath = npcPath;
-    targetNpc.resetMovementTime();
     targetNpc.finishedMovementCallback = () => {
       if (
         pathToFollow[pathToFollow.length - 1].x === targetNpc.sprite.x &&
@@ -975,9 +972,14 @@ export class WorldScene extends BaseScene {
         this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
         targetNpc.facePlayer(this.#player.direction);
         this.#isProcessingCutSceneEvent = false;
-        this.#handleCutSceneInteraction();
+        this.time.delayedCall(500, () => {
+          this.#handleCutSceneInteraction();
+        });
       }
     };
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.npcPath = npcPath;
+    targetNpc.resetMovementTime();
   }
 
   /**
@@ -995,23 +997,24 @@ export class WorldScene extends BaseScene {
     // have npc retrace their steps by reversing the existing npc path
     /** @type {import('../world/characters/npc.js').NPCPath} */
     const updatedPath = {};
-    const pathKeys = Object.keys(targetNpc.npcPath);
-    for (let i = pathKeys.length; i > 0; i -= 1) {
-      updatedPath[pathKeys[i - 1]] = targetNpc.npcPath[pathKeys[i - 1]];
-    }
-    targetNpc.npcPath = updatedPath;
-    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
-    targetNpc.resetMovementTime();
+    const pathKeys = Object.keys(targetNpc.npcPath).reverse();
+    pathKeys.forEach((pathKey, index) => {
+      updatedPath[index] = targetNpc.npcPath[pathKey];
+    });
 
     targetNpc.finishedMovementCallback = () => {
       if (
         updatedPath[pathKeys.length - 1].x === targetNpc.sprite.x &&
         updatedPath[pathKeys.length - 1].y === targetNpc.sprite.y
       ) {
-        console.log('hit');
         this.#isProcessingCutSceneEvent = false;
-        this.#handleCutSceneInteraction();
+        this.time.delayedCall(500, () => {
+          this.#handleCutSceneInteraction();
+        });
       }
     };
+    targetNpc.npcPath = updatedPath;
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.resetMovementTime();
   }
 }

@@ -115,6 +115,11 @@ export class NPC extends Character {
     this.#npcPath = val;
   }
 
+  /** @type {NpcMovementPattern} */
+  get npcMovementPattern() {
+    return this.#movementPattern;
+  }
+
   /**
    * @param {NpcMovementPattern} val
    */
@@ -128,6 +133,14 @@ export class NPC extends Character {
   set finishedMovementCallback(val) {
     this._spriteGridMovementFinishedCallback = val;
   }
+
+  // /**
+  //  * @param {NPCPath} movementPath
+  //  */
+  // updateMovementPath(movementPath) {
+  //   this.#npcPath = movementPath;
+  //   this.#currentPathIndex = 0;
+  // }
 
   /**
    * Resets the lastMovementTime, which is used for when we want to have an npc start moving
@@ -188,7 +201,6 @@ export class NPC extends Character {
 
       // validate if we actually moved to the next position, if not, skip updating index
       const prevPosition = this.#npcPath[this.#currentPathIndex];
-      console.log(prevPosition, this.#npcPath);
       if (prevPosition.x !== this._phaserGameObject.x || prevPosition.y !== this._phaserGameObject.y) {
         nextPosition = this.#npcPath[this.#currentPathIndex];
       } else {
