@@ -13,6 +13,9 @@ export class CutsceneScene extends BaseScene {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   create() {
     this.#topBar = this.add.rectangle(0, 0, this.scale.width, 100, 0x000000, 0.8).setOrigin(0).setVisible(false);
     this.#bottomBar = this.add
@@ -22,6 +25,9 @@ export class CutsceneScene extends BaseScene {
     this.scene.bringToTop();
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async startCutScene() {
     this.#topBar.setY(-100).setVisible(true);
     this.#bottomBar.setY(this.scale.height).setVisible(true);
@@ -32,6 +38,9 @@ export class CutsceneScene extends BaseScene {
     ]);
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async endCutScene() {
     await Promise.all([
       this.#animateBar(this.#topBar, 0, -100),
@@ -42,8 +51,14 @@ export class CutsceneScene extends BaseScene {
     this.#bottomBar.setVisible(true);
   }
 
+  /**
+   * @param {Phaser.GameObjects.GameObject} target
+   * @param {number} startY
+   * @param {number} endY
+   * @returns {Promise<void>}
+   */
   #animateBar(target, startY, endY) {
-    return new Promise((resolve) => {
+    return new Promise((/** @type {() => void}*/ resolve) => {
       this.tweens.add({
         targets: target,
         delay: 0,
