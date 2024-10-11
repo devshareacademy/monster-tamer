@@ -581,7 +581,11 @@ export class WorldScene extends BaseScene {
    */
   #isPlayerInputLocked() {
     return (
-      this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible || this.#isProcessingNpcEvent
+      this._controls.isInputLocked ||
+      this.#dialogUi.isVisible ||
+      this.#menu.isVisible ||
+      this.#isProcessingNpcEvent ||
+      this.#currentCutSceneId !== undefined
     );
   }
 
@@ -591,7 +595,7 @@ export class WorldScene extends BaseScene {
    */
   #createNPCs(map) {
     this.#npcs = [];
-    return;
+
     const npcLayers = map.getObjectLayerNames().filter((layerName) => layerName.includes('NPC'));
     npcLayers.forEach((layerName) => {
       const layer = map.getObjectLayer(layerName);
@@ -864,9 +868,9 @@ export class WorldScene extends BaseScene {
   }
 
   /**
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  #handleCutSceneInteraction() {
+  async #handleCutSceneInteraction() {
     if (this.#isProcessingCutSceneEvent) {
       return;
     }
@@ -880,8 +884,20 @@ export class WorldScene extends BaseScene {
     const isMoreEventsToProcess = eventToProcess.events.length - 1 !== this.#lastCutSceneEventHandledIndex;
 
     if (!isMoreEventsToProcess) {
+      // once we are done processing the events for the cutscene, we need to do the following:
+      //   1. update our data manager to show we watched the event
+      //   2. cleanup zone game object used for the event and overlap detection
+      //   3. reset our current cut scene property
+      //   4. remove the cut scene bars from the scene
       this.#lastCutSceneEventHandledIndex = -1;
       this.#isProcessingCutSceneEvent = false;
+      dataManager.viewedEvent(this.#currentCutSceneId);
+      this.#eventZones[this.#currentCutSceneId].destroy();
+      delete this.#eventZones[this.#currentCutSceneId];
+      this.#currentCutSceneId = undefined;
+      // TODO: make this configurable, or cleanup
+      this.#gfx.clear();
+      await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).endCutScene();
       return;
     }
 
@@ -902,6 +918,12 @@ export class WorldScene extends BaseScene {
         break;
       case GAME_EVENT_TYPE.RETRACE_PATH:
         this.#haveNpcRetracePath(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.REMOVE_NPC:
+        this.#removeNpcForCutScene(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.TALK_TO_PLAYER:
+        this.#haveNpcTalkToPlayer(eventToHandle);
         break;
       default:
         exhaustiveGuard(eventType);
@@ -928,6 +950,37 @@ export class WorldScene extends BaseScene {
     });
     this.#npcs.push(npc);
     npc.addCharacterToCheckForCollisionsWith(this.#player);
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventRemoveNpc} gameEvent
+   * @returns {void}
+   */
+  #removeNpcForCutScene(gameEvent) {
+    // once we are done with an npc for a cutscene, we can remove that npc
+    // from our npc array and then start the cleanup process of destroying the game object
+    console.log('removing npc');
+    const npcToRemoveIndex = this.#npcs.findIndex((npc) => npc.id === gameEvent.data.id);
+    /** @type {NPC | undefined} */
+    let npcToRemove;
+    if (npcToRemoveIndex !== -1) {
+      npcToRemove = this.#npcs.splice(npcToRemoveIndex)[0];
+    }
+    this.time.delayedCall(100, () => {
+      if (npcToRemove !== undefined) {
+        npcToRemove.sprite.destroy();
+      }
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+    });
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventTalkToPlayer} gameEvent
+   * @returns {void}
+   */
+  #haveNpcTalkToPlayer(gameEvent) {
+    // TODO
   }
 
   /**
@@ -971,8 +1024,8 @@ export class WorldScene extends BaseScene {
       ) {
         this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
         targetNpc.facePlayer(this.#player.direction);
-        this.#isProcessingCutSceneEvent = false;
         this.time.delayedCall(500, () => {
+          this.#isProcessingCutSceneEvent = false;
           this.#handleCutSceneInteraction();
         });
       }
@@ -1007,8 +1060,8 @@ export class WorldScene extends BaseScene {
         updatedPath[pathKeys.length - 1].x === targetNpc.sprite.x &&
         updatedPath[pathKeys.length - 1].y === targetNpc.sprite.y
       ) {
-        this.#isProcessingCutSceneEvent = false;
         this.time.delayedCall(500, () => {
+          this.#isProcessingCutSceneEvent = false;
           this.#handleCutSceneInteraction();
         });
       }

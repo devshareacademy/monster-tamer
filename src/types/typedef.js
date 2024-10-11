@@ -180,6 +180,8 @@ export const GAME_EVENT_TYPE = Object.freeze({
   ADD_NPC: 'ADD_NPC',
   MOVE_TO_PLAYER: 'MOVE_TO_PLAYER',
   RETRACE_PATH: 'RETRACE_PATH',
+  TALK_TO_PLAYER: 'TALK_TO_PLAYER',
+  REMOVE_NPC: 'REMOVE_NPC',
 });
 
 /**
@@ -221,8 +223,24 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef GameEventTalkToPlayer
+ * @type {object}
+ * @property {'TALK_TO_PLAYER'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
+ * @typedef GameEventRemoveNpc
+ * @type {object}
+ * @property {'REMOVE_NPC'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
  * @typedef GameEvent
- * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath}
+ * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer}
  */
 
 /**

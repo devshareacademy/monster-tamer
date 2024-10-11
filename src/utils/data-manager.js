@@ -292,14 +292,16 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
-   * @param {number} itemId
+   * Adds the provided eventId to the viewed events in the data manager so player does
+   * not see the event again.
+   * @param {string} eventId
    * @returns {void}
    */
-  addItemPickedUp(itemId) {
-    /** @type {number[]} */
-    const itemsPickedUp = this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
-    itemsPickedUp.push(itemId);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP, itemsPickedUp);
+  viewedEvent(eventId) {
+    /** @type {Set<string>} */
+    const viewedEvents = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || []);
+    viewedEvents.add(eventId);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS, Array.from(viewedEvents));
   }
 
   /*
@@ -335,6 +337,17 @@ class DataManager extends Phaser.Events.EventEmitter {
     const existingFlags = this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS)[flag];
     existingFlags[flag] = value;
     this.#store.set(DATA_MANAGER_STORE_KEYS.FLAGS, existingFlags);
+  }
+
+  /**
+   * @param {number} itemId
+   * @returns {void}
+   */
+  addItemPickedUp(itemId) {
+    /** @type {number[]} */
+    const itemsPickedUp = this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
+    itemsPickedUp.push(itemId);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP, itemsPickedUp);
   }
 
   /**

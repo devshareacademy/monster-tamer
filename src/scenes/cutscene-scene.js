@@ -47,8 +47,8 @@ export class CutsceneScene extends BaseScene {
       this.#animateBar(this.#bottomBar, this.scale.height - 100, this.scale.height),
     ]);
 
-    this.#topBar.setVisible(true);
-    this.#bottomBar.setVisible(true);
+    this.#topBar.setVisible(false);
+    this.#bottomBar.setVisible(false);
   }
 
   /**
@@ -62,7 +62,7 @@ export class CutsceneScene extends BaseScene {
       this.tweens.add({
         targets: target,
         delay: 0,
-        duration: 1, // TODO: revert to 800
+        duration: 800, // TODO: revert to 800
         y: {
           from: startY,
           start: startY,
