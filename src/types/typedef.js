@@ -228,6 +228,7 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  * @property {'TALK_TO_PLAYER'} type
  * @property {object} data
  * @property {number} data.id
+ * @property {string[]} data.messages
  */
 
 /**

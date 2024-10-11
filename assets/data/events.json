@@ -20,6 +20,17 @@
         }
       },
       {
+        "type": "TALK_TO_PLAYER",
+        "data": {
+          "id": 1001,
+          "messages": [
+            "I know all kids must leave home one day...",
+            "Right! I must be strong.",
+            "The professor next door was looking for you."
+          ]
+        }
+      },
+      {
         "type": "RETRACE_PATH",
         "data": {
           "id": 1001

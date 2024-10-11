@@ -11,7 +11,6 @@ import {
   getTargetPositionFromGameObjectPositionAndDirection,
 } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
-import { DialogUi } from '../world/dialog-ui.js';
 import { NPC, NPC_MOVEMENT_PATTERN } from '../world/characters/npc.js';
 import { WorldMenu } from '../world/world-menu.js';
 import { BaseScene } from './base-scene.js';
@@ -23,6 +22,7 @@ import { GAME_EVENT_TYPE, GAME_FLAG, NPC_EVENT_TYPE } from '../types/typedef.js'
 import { exhaustiveGuard } from '../utils/guard.js';
 import { CutsceneScene } from './cutscene-scene.js';
 import { sleep } from '../utils/time-utils.js';
+import { DialogScene } from './dialog-scene.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -87,7 +87,7 @@ export class WorldScene extends BaseScene {
   #wildMonsterEncountered;
   /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #signLayer;
-  /** @type {DialogUi} */
+  /** @type {DialogScene} */
   #dialogUi;
   /** @type {NPC[]} */
   #npcs;
@@ -135,6 +135,7 @@ export class WorldScene extends BaseScene {
   init(data) {
     super.init(data);
     this.#sceneData = data;
+    // TODO: need to remove after testing
     dataManager.startNewGame(this);
 
     // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
@@ -295,9 +296,6 @@ export class WorldScene extends BaseScene {
     // create foreground for depth
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_FOREGROUND`, 0).setOrigin(0);
 
-    // create dialog ui
-    this.#dialogUi = new DialogUi(this, 1280);
-
     // create menu
     this.#menu = new WorldMenu(this);
 
@@ -322,8 +320,10 @@ export class WorldScene extends BaseScene {
 
     // add audio
     playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
-    // add UI scene for cutscene
+    // add UI scene for cutscene and dialog
     this.scene.launch(SCENE_KEYS.CUTSCENE_SCENE);
+    this.scene.launch(SCENE_KEYS.DIALOG_SCENE);
+    this.#dialogUi = /** @type {DialogScene} */ (this.scene.get(SCENE_KEYS.DIALOG_SCENE));
   }
 
   /**
@@ -338,17 +338,21 @@ export class WorldScene extends BaseScene {
       return;
     }
 
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
+
     if (this.#isProcessingCutSceneEvent) {
       this.#player.update(time);
       this.#npcs.forEach((npc) => {
         npc.update(time);
       });
+      if (wasSpaceKeyPressed && this.#npcPlayerIsInteractingWith) {
+        this.#handlePlayerInteraction();
+      }
       return;
     }
 
-    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
-    const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
-    const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirectionHeldDown);
     }
@@ -431,6 +435,10 @@ export class WorldScene extends BaseScene {
 
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
+      if (this.#currentCutSceneId !== undefined) {
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      }
       if (this.#npcPlayerIsInteractingWith) {
         this.#handleNpcInteraction();
       }
@@ -959,7 +967,6 @@ export class WorldScene extends BaseScene {
   #removeNpcForCutScene(gameEvent) {
     // once we are done with an npc for a cutscene, we can remove that npc
     // from our npc array and then start the cleanup process of destroying the game object
-    console.log('removing npc');
     const npcToRemoveIndex = this.#npcs.findIndex((npc) => npc.id === gameEvent.data.id);
     /** @type {NPC | undefined} */
     let npcToRemove;
@@ -980,7 +987,16 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #haveNpcTalkToPlayer(gameEvent) {
-    // TODO
+    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
+    if (targetNpc === undefined) {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+      return;
+    }
+
+    targetNpc.isTalkingToPlayer = true;
+    this.#npcPlayerIsInteractingWith = targetNpc;
+    this.#dialogUi.showDialogModal(gameEvent.data.messages);
   }
 
   /**
