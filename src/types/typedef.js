@@ -132,6 +132,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {'MESSAGE'} type
  * @property {object} data
  * @property {string[]} data.messages
+ * @property {string[]} requires
  */
 
 /**
@@ -142,6 +143,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {number} data.fadeInDuration
  * @property {number} data.fadeOutDuration
  * @property {number} data.waitDuration
+ * @property {string[]} requires
  */
 
 /**
@@ -149,6 +151,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @type {object}
  * @property {'HEAL'} type
  * @property {object} data
+ * @property {string[]} requires
  */
 
 /**
@@ -182,6 +185,9 @@ export const GAME_EVENT_TYPE = Object.freeze({
   RETRACE_PATH: 'RETRACE_PATH',
   TALK_TO_PLAYER: 'TALK_TO_PLAYER',
   REMOVE_NPC: 'REMOVE_NPC',
+  ADD_FLAG: 'ADD_FLAG',
+  REMOVE_FLAG: 'REMOVE_FLAG',
+  GIVE_MONSTER: 'GIVE_MONSTER',
 });
 
 /**
@@ -220,6 +226,7 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  * @property {'RETRACE_PATH'} type
  * @property {object} data
  * @property {number} data.id
+ * @property {import('../common/direction.js').Direction} data.direction
  */
 
 /**
@@ -240,8 +247,32 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef GameEventAddFlag
+ * @type {object}
+ * @property {'ADD_FLAG'} type
+ * @property {object} data
+ * @property {GameFlag} data.flag
+ */
+
+/**
+ * @typedef GameEventRemoveFlag
+ * @type {object}
+ * @property {'REMOVE_FLAG'} type
+ * @property {object} data
+ * @property {GameFlag} data.flag
+ */
+
+/**
+ * @typedef GameEventGiveMonster
+ * @type {object}
+ * @property {'GIVE_MONSTER'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
  * @typedef GameEvent
- * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer}
+ * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer | GameEventAddFlag | GameEventRemoveFlag | GameEventGiveMonster}
  */
 
 /**
@@ -262,5 +293,6 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
 
 /** @enum {GameFlag} */
 export const GAME_FLAG = Object.freeze({
-  WATCHED_INTRO: 'WATCHED_INTRO',
+  LOOKING_FOR_PROFESSOR: 'LOOKING_FOR_PROFESSOR',
+  FOUND_PROFESSOR: 'FOUND_PROFESSOR',
 });

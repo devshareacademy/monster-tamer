@@ -112,5 +112,32 @@
     "delay": 0,
     "yoyo": true,
     "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_3_RIGHT",
+    "frames": [48, 42, 49],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_3_UP",
+    "frames": [46, 41, 47],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_3_DOWN",
+    "frames": [44, 40, 45],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
   }
 ]

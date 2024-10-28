@@ -136,7 +136,7 @@ export class WorldScene extends BaseScene {
     super.init(data);
     this.#sceneData = data;
     // TODO: need to remove after testing
-    dataManager.startNewGame(this);
+    // dataManager.startNewGame(this);
 
     // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
     /** @type {string} */
@@ -389,6 +389,11 @@ export class WorldScene extends BaseScene {
         }
 
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
+          if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length === 0) {
+            this.#dialogUi.showDialogModal(['You have no monsters in your party.']);
+            this.#menu.hide();
+            return;
+          }
           // pause this scene and launch the monster party scene
           /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
           const sceneDataToPass = {
@@ -525,6 +530,11 @@ export class WorldScene extends BaseScene {
       // get the bounds of the player and zone for checking for overlap
       this.#player.sprite.getBounds(this.#rectangleForOverlapCheck1);
       zone.getBounds(this.#rectangleForOverlapCheck2);
+
+      // reset rectangle overlap size, needed since method below will
+      // return the original rectangle unmodified if a previous match
+      // was found.
+      this.#rectangleOverlapResult.setSize(0, 0);
 
       Phaser.Geom.Intersects.GetRectangleIntersection(
         this.#rectangleForOverlapCheck1,
@@ -796,6 +806,18 @@ export class WorldScene extends BaseScene {
     const eventToHandle = this.#npcPlayerIsInteractingWith.events[this.#lastNpcEventHandledIndex];
     const eventType = eventToHandle.type;
 
+    // check to see if this event should be handled based on story flags
+    const currentGameFlags = dataManager.getFlags();
+
+    const eventRequirementsMet = eventToHandle.requires.every((flag) => {
+      return currentGameFlags.has(flag);
+    });
+    if (!eventRequirementsMet) {
+      // jump to next event
+      this.#handleNpcInteraction();
+      return;
+    }
+
     switch (eventType) {
       case NPC_EVENT_TYPE.MESSAGE:
         this.#dialogUi.showDialogModal(eventToHandle.data.messages);
@@ -860,10 +882,14 @@ export class WorldScene extends BaseScene {
 
       //create event zones for cut scenes
       const encounterZone = this.add
-        .zone(tiledItem.x - TILE_SIZE, tiledItem.y - TILE_SIZE * 2, tiledItem.width, tiledItem.height)
+        .zone(tiledItem.x, tiledItem.y - TILE_SIZE * 2, tiledItem.width, tiledItem.height)
         .setOrigin(0)
         .setName(eventId);
       this.#eventZones[eventId] = encounterZone;
+      // TODO: cleanup zone event
+      this.add
+        .rectangle(encounterZone.x, encounterZone.y, encounterZone.width, encounterZone.height, 0xff0000, 0.5)
+        .setOrigin(0);
     }
   }
 
@@ -890,7 +916,6 @@ export class WorldScene extends BaseScene {
 
     // check to see if the cut scene has any more events to be processed
     const isMoreEventsToProcess = eventToProcess.events.length - 1 !== this.#lastCutSceneEventHandledIndex;
-
     if (!isMoreEventsToProcess) {
       // once we are done processing the events for the cutscene, we need to do the following:
       //   1. update our data manager to show we watched the event
@@ -932,6 +957,15 @@ export class WorldScene extends BaseScene {
         break;
       case GAME_EVENT_TYPE.TALK_TO_PLAYER:
         this.#haveNpcTalkToPlayer(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.ADD_FLAG:
+        this.#addGameFlag(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.REMOVE_FLAG:
+        this.#removeGameFlag(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.GIVE_MONSTER:
+        this.#addMonsterFromNpc(eventToHandle);
         break;
       default:
         exhaustiveGuard(eventType);
@@ -1067,6 +1101,18 @@ export class WorldScene extends BaseScene {
     /** @type {import('../world/characters/npc.js').NPCPath} */
     const updatedPath = {};
     const pathKeys = Object.keys(targetNpc.npcPath).reverse();
+
+    // if npc is already next to player, there will be only 1 position in the npc path
+    // when this happens, we need to just updates the npcs direction
+    if (pathKeys.length === 1) {
+      targetNpc.facePlayer(gameEvent.data.direction);
+      this.time.delayedCall(500, () => {
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      });
+      return;
+    }
+
     pathKeys.forEach((pathKey, index) => {
       updatedPath[index] = targetNpc.npcPath[pathKey];
     });
@@ -1085,5 +1131,40 @@ export class WorldScene extends BaseScene {
     targetNpc.npcPath = updatedPath;
     targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
     targetNpc.resetMovementTime();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventAddFlag} gameEvent
+   * @returns {void}
+   */
+  #addGameFlag(gameEvent) {
+    dataManager.addFlag(gameEvent.data.flag);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventRemoveFlag} gameEvent
+   * @returns {void}
+   */
+  #removeGameFlag(gameEvent) {
+    dataManager.removeFlag(gameEvent.data.flag);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventGiveMonster} gameEvent
+   * @returns {void}
+   */
+  #addMonsterFromNpc(gameEvent) {
+    // TODO: add check to see if party is full and do something with 7th monster that is being added
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monstersInParty = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);
+    monstersInParty.push(newMonster);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
   }
 }

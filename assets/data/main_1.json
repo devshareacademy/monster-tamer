@@ -809,6 +809,7 @@
         {
          "draworder":"topdown",
          "id":28,
+         "locked":true,
          "name":"Events",
          "objects":[
                 {
@@ -826,8 +827,26 @@
                  "type":"event",
                  "visible":true,
                  "width":192,
-                 "x":256,
+                 "x":192,
                  "y":1472
+                }, 
+                {
+                 "gid":189,
+                 "height":128,
+                 "id":26,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"2"
+                        }],
+                 "rotation":0,
+                 "type":"event",
+                 "visible":true,
+                 "width":128,
+                 "x":640,
+                 "y":1152
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1003,7 +1022,7 @@
          "y":0
         }],
  "nextlayerid":29,
- "nextobjectid":26,
+ "nextobjectid":27,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

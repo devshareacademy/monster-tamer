@@ -22,11 +22,6 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  */
 
 /**
- * @typedef GameFlags
- * @type {{[key in GAME_FLAG]?: boolean }}
- */
-
-/**
  * @typedef GlobalState
  * @type {object}
  * @property {object} player
@@ -47,7 +42,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {MonsterData} monsters
  * @property {import('../types/typedef.js').Inventory} inventory
  * @property {number[]} itemsPickedUp
- * @property {{[key in GAME_FLAG]?: boolean }} flags
+ * @property {GAME_FLAG[]} flags
  * @property {string[]} viewedEvents
  */
 
@@ -91,7 +86,7 @@ const initialState = {
     },
   ],
   itemsPickedUp: [],
-  flags: {},
+  flags: [],
   viewedEvents: [],
 };
 
@@ -127,18 +122,6 @@ class DataManager extends Phaser.Events.EventEmitter {
   /** @type {Phaser.Data.DataManager} */
   get store() {
     return this.#store;
-  }
-
-  /**
-   * @param {Phaser.Scene} scene
-   * @returns {void}
-   */
-  init(scene) {
-    // TODO: GH-138 cleanup if not needed
-    // const startingMonster = DataUtils.getMonsterById(scene, 1);
-    // const startingMonster2 = DataUtils.getMonsterById(scene, 2);
-    // const startingMonster3 = DataUtils.getMonsterById(scene, 3);
-    // this.#store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, [startingMonster, startingMonster2, startingMonster3]);
   }
 
   /**
@@ -202,12 +185,12 @@ class DataManager extends Phaser.Events.EventEmitter {
     };
     existingData.inventory = initialState.inventory;
     existingData.itemsPickedUp = [...initialState.itemsPickedUp];
-    existingData.flags = { ...initialState.flags };
+    existingData.flags = [...initialState.flags];
     existingData.viewedEvents = initialState.viewedEvents;
 
     this.#store.reset();
     this.#updateDataManger(existingData);
-    this.init(scene);
+    // this.init(scene);
     this.saveData();
   }
 
@@ -313,10 +296,10 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
-   * @returns {GameFlags}
+   * @returns {Set<string>}
    */
   getFlags() {
-    return this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS);
+    return new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || []);
   }
 
   /**
@@ -329,14 +312,24 @@ class DataManager extends Phaser.Events.EventEmitter {
 
   /**
    * @param {GAME_FLAG} flag
-   * @param {boolean} value
    * @returns {void}
    */
-  setFlag(flag, value) {
-    /** @type {GameFlags} */
-    const existingFlags = this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS)[flag];
-    existingFlags[flag] = value;
-    this.#store.set(DATA_MANAGER_STORE_KEYS.FLAGS, existingFlags);
+  addFlag(flag) {
+    /** @type {Set<string>} */
+    const existingFlags = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || []);
+    existingFlags.add(flag);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.FLAGS, Array.from(existingFlags));
+  }
+
+  /**
+   * @param {GAME_FLAG} flag
+   * @returns {void}
+   */
+  removeFlag(flag) {
+    /** @type {Set<string>} */
+    const existingFlags = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || []);
+    existingFlags.delete(flag);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.FLAGS, Array.from(existingFlags));
   }
 
   /**
@@ -369,7 +362,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
       [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
-      [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || { ...initialState.flags },
+      [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
       [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
     });
   }
@@ -401,7 +394,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       },
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
       itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
-      flags: { ...this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) },
+      flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
       viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
     };
   }
