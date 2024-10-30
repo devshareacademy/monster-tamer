@@ -554,6 +554,7 @@ export class WorldScene extends BaseScene {
         npcPath,
         movementPattern: npcMovement,
         events: npcDetails.events,
+        animationKeyPrefix: npcDetails.animationKeyPrefix,
       });
       this.#npcs.push(npc);
     });

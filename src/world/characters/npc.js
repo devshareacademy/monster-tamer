@@ -26,6 +26,7 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @property {NPCPath} npcPath
  * @property {NpcMovementPattern} movementPattern
  * @property {import('../../types/typedef.js').NpcEvent[]} events
+ * @property {string} animationKeyPrefix
  */
 
 /**
@@ -45,6 +46,8 @@ export class NPC extends Character {
   #lastMovementTime;
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
   #events;
+  /** @type {string} */
+  #animationKeyPrefix;
 
   /**
    * @param {NPCConfig} config
@@ -70,6 +73,7 @@ export class NPC extends Character {
     this.#lastMovementTime = Phaser.Math.Between(3500, 5000);
     this._phaserGameObject.setScale(4);
     this.#events = config.events;
+    this.#animationKeyPrefix = config.animationKeyPrefix;
   }
 
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
@@ -177,18 +181,18 @@ export class NPC extends Character {
       case DIRECTION.UP:
         if (
           !this._phaserGameObject.anims.isPlaying ||
-          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${this._direction}`
+          this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}${this._direction}`
         ) {
-          this._phaserGameObject.play(`NPC_1_${this._direction}`);
+          this._phaserGameObject.play(`${this.#animationKeyPrefix}${this._direction}`);
           this._phaserGameObject.setFlipX(false);
         }
         break;
       case DIRECTION.LEFT:
         if (
           !this._phaserGameObject.anims.isPlaying ||
-          this._phaserGameObject.anims.currentAnim?.key !== `NPC_1_${DIRECTION.RIGHT}`
+          this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}${DIRECTION.RIGHT}`
         ) {
-          this._phaserGameObject.play(`NPC_1_${DIRECTION.RIGHT}`);
+          this._phaserGameObject.play(`${this.#animationKeyPrefix}${DIRECTION.RIGHT}`);
           this._phaserGameObject.setFlipX(true);
         }
         break;
