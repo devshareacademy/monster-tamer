@@ -3,7 +3,7 @@ import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
-import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
+import { ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
@@ -55,6 +55,10 @@ const TILED_AREA_METADATA_PROPERTY = Object.freeze({
   ID: 'id',
 });
 
+const TILED_EVENT_PROPERTY = Object.freeze({
+  ID: 'id',
+});
+
 /**
  * @typedef WorldSceneData
  * @type {object}
@@ -95,6 +99,10 @@ export class WorldScene extends BaseScene {
   #lastNpcEventHandledIndex;
   /** @type {boolean} */
   #isProcessingNpcEvent;
+  /** @type {{[key: string]: Phaser.GameObjects.Zone}} */
+  #eventZones;
+  /** @type {{[key: string]: Phaser.GameObjects.Rectangle}} */
+  #debugEventZoneObjects;
 
   constructor() {
     super({
@@ -165,6 +173,8 @@ export class WorldScene extends BaseScene {
     this.#encounterLayer = undefined;
     this.#signLayer = undefined;
     this.#entranceLayer = undefined;
+    this.#eventZones = {};
+    this.#debugEventZoneObjects = {};
   }
 
   /**
@@ -259,6 +269,9 @@ export class WorldScene extends BaseScene {
 
     // create menu
     this.#menu = new WorldMenu(this);
+
+    // create events
+    this.#createEventEncounterZones(map);
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
@@ -730,6 +743,56 @@ export class WorldScene extends BaseScene {
         break;
       default:
         exhaustiveGuard(eventType);
+    }
+  }
+
+  /**
+   * Creates the Phaser Zone game objects based on the `Events` tilemap data from the Tiled Map.
+   * These game objects are used for creating the various in game events and cut scenes for the game.
+   * The Zone game objects allow for us to check for overlaps between the player and the area that
+   * is defined in the map data.
+   *
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createEventEncounterZones(map) {
+    const eventObjectLayer = map.getObjectLayer('Events');
+
+    if (!eventObjectLayer) {
+      return;
+    }
+    const events = eventObjectLayer.objects;
+    const validEvents = events.filter((event) => {
+      return event.x !== undefined && event.y !== undefined;
+    });
+
+    // TODO: update this to pull data from data manager
+    /** @type {string[]} */
+    const viewedEvents = [];
+
+    for (const tiledItem of validEvents) {
+      /** @type {string} */
+      const eventId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+        (property) => property.name === TILED_EVENT_PROPERTY.ID
+      )?.value;
+
+      if (viewedEvents.includes(eventId)) {
+        continue;
+      }
+
+      const encounterZone = this.add
+        .zone(tiledItem.x, tiledItem.y - TILE_SIZE * 2, tiledItem.width, tiledItem.height)
+        .setOrigin(0)
+        .setName(eventId);
+      this.#eventZones[eventId] = encounterZone;
+
+      if (ENABLE_ZONE_DEBUGGING) {
+        // used for debugging
+        const debugZoneRectangle = this.add
+          .rectangle(encounterZone.x, encounterZone.y, encounterZone.width, encounterZone.height, 0xff0000, 0.5)
+          .setOrigin(0);
+        this.#debugEventZoneObjects[eventId] = debugZoneRectangle;
+      }
     }
   }
 }
