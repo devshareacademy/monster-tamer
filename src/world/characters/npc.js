@@ -27,6 +27,7 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @property {NpcMovementPattern} movementPattern
  * @property {import('../../types/typedef.js').NpcEvent[]} events
  * @property {string} animationKeyPrefix
+ * @property {number} id
  */
 
 /**
@@ -48,6 +49,8 @@ export class NPC extends Character {
   #events;
   /** @type {string} */
   #animationKeyPrefix;
+  /** @type {number} */
+  #id;
 
   /**
    * @param {NPCConfig} config
@@ -74,6 +77,7 @@ export class NPC extends Character {
     this._phaserGameObject.setScale(4);
     this.#events = config.events;
     this.#animationKeyPrefix = config.animationKeyPrefix;
+    this.#id = config.id;
   }
 
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
@@ -91,6 +95,11 @@ export class NPC extends Character {
    */
   set isTalkingToPlayer(val) {
     this.#talkingToPlayer = val;
+  }
+
+  /** @type {number} */
+  get id() {
+    return this.#id;
   }
 
   /**
