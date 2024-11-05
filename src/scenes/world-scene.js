@@ -914,7 +914,6 @@ export class WorldScene extends BaseScene {
     }
 
     const eventToProcess = DataUtils.getEventData(this, this.#currentCutSceneId);
-    console.log(eventToProcess);
 
     // check to see if the cut scene has any more events to be processed
     const isMoreEventsToProcess = eventToProcess.events.length - 1 !== this.#lastCutSceneEventHandledIndex;
