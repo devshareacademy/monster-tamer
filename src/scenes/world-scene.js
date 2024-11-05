@@ -11,7 +11,6 @@ import {
   getTargetPositionFromGameObjectPositionAndDirection,
 } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
-import { DialogUi } from '../world/dialog-ui.js';
 import { NPC, NPC_MOVEMENT_PATTERN } from '../world/characters/npc.js';
 import { WorldMenu } from '../world/world-menu.js';
 import { BaseScene } from './base-scene.js';
@@ -19,9 +18,11 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { GAME_EVENT_TYPE, GAME_FLAG, NPC_EVENT_TYPE } from '../types/typedef.js';
+import { GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { CutsceneScene } from './cutscene-scene.js';
 import { sleep } from '../utils/time-utils.js';
+import { DialogScene } from './dialog-scene.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -86,7 +87,7 @@ export class WorldScene extends BaseScene {
   #wildMonsterEncountered;
   /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #signLayer;
-  /** @type {DialogUi} */
+  /** @type {DialogScene} */
   #dialogUi;
   /** @type {NPC[]} */
   #npcs;
@@ -295,9 +296,6 @@ export class WorldScene extends BaseScene {
     // create foreground for depth
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_FOREGROUND`, 0).setOrigin(0);
 
-    // create dialog ui
-    this.#dialogUi = new DialogUi(this, 1280);
-
     // create menu
     this.#menu = new WorldMenu(this);
 
@@ -325,6 +323,10 @@ export class WorldScene extends BaseScene {
 
     // add audio
     playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
+    // add UI scene for cutscene and dialog
+    this.scene.launch(SCENE_KEYS.CUTSCENE_SCENE);
+    this.scene.launch(SCENE_KEYS.DIALOG_SCENE);
+    this.#dialogUi = /** @type {DialogScene} */ (this.scene.get(SCENE_KEYS.DIALOG_SCENE));
   }
 
   /**
@@ -908,7 +910,7 @@ export class WorldScene extends BaseScene {
 
   async #startCutScene() {
     this.#isProcessingCutSceneEvent = true;
-    // TODO: start cutscene
+    await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).startCutScene();
     await sleep(500, this);
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
@@ -944,8 +946,7 @@ export class WorldScene extends BaseScene {
       if (ENABLE_ZONE_DEBUGGING) {
         this.#gfx.clear();
       }
-
-      // TODO: end cutscene
+      await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).endCutScene();
       await sleep(500, this);
       return;
     }
