@@ -559,6 +559,9 @@ export class WorldScene extends BaseScene {
         break;
       }
     }
+    if (this.#currentCutSceneId !== undefined) {
+      return;
+    }
 
     if (!this.#encounterLayer) {
       return;
@@ -601,7 +604,11 @@ export class WorldScene extends BaseScene {
    */
   #isPlayerInputLocked() {
     return (
-      this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible || this.#isProcessingNpcEvent
+      this._controls.isInputLocked ||
+      this.#dialogUi.isVisible ||
+      this.#menu.isVisible ||
+      this.#isProcessingNpcEvent ||
+      this.#currentCutSceneId !== undefined
     );
   }
 
