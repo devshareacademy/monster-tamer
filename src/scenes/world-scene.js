@@ -3,7 +3,7 @@ import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
-import { TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
+import { ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import {
   getTargetDirectionFromGameObjectPosition,
@@ -107,6 +107,8 @@ export class WorldScene extends BaseScene {
   #isProcessingNpcEvent;
   /** @type {{[key: string]: Phaser.GameObjects.Zone}} */
   #eventZones;
+  /** @type {{[key: string]: Phaser.GameObjects.Rectangle}} */
+  #debugEventZoneObjects;
   /** @type {Phaser.Geom.Rectangle} */
   #rectangleForOverlapCheck1;
   /** @type {Phaser.Geom.Rectangle} */
@@ -135,8 +137,6 @@ export class WorldScene extends BaseScene {
   init(data) {
     super.init(data);
     this.#sceneData = data;
-    // TODO: need to remove after testing
-    // dataManager.startNewGame(this);
 
     // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
     /** @type {string} */
@@ -194,6 +194,7 @@ export class WorldScene extends BaseScene {
     this.#signLayer = undefined;
     this.#entranceLayer = undefined;
     this.#eventZones = {};
+    this.#debugEventZoneObjects = {};
     this.#rectangleForOverlapCheck1 = undefined;
     this.#rectangleForOverlapCheck2 = undefined;
     this.#rectangleOverlapResult = undefined;
@@ -285,7 +286,6 @@ export class WorldScene extends BaseScene {
         this.#handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
       },
     });
-
     this.cameras.main.startFollow(this.#player.sprite);
 
     // update our collisions with npcs
@@ -301,8 +301,11 @@ export class WorldScene extends BaseScene {
 
     // create events
     this.#createEventEncounterZones(map);
-    // used for debugging the overlaps for event zones
-    this.#gfx = this.add.graphics({ lineStyle: { width: 1, color: 0xff0000 } });
+
+    if (ENABLE_ZONE_DEBUGGING) {
+      // used for debugging the overlaps for event zones
+      this.#gfx = this.add.graphics({ lineStyle: { width: 4, color: 0x00ffff } });
+    }
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
@@ -389,11 +392,13 @@ export class WorldScene extends BaseScene {
         }
 
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
+          // at start of the game, handle when we have no monsters in our party
           if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length === 0) {
             this.#dialogUi.showDialogModal(['You have no monsters in your party.']);
             this.#menu.hide();
             return;
           }
+
           // pause this scene and launch the monster party scene
           /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
           const sceneDataToPass = {
@@ -544,9 +549,11 @@ export class WorldScene extends BaseScene {
       const isOverlapping =
         this.#rectangleOverlapResult.width >= TILE_SIZE - 10 && this.#rectangleOverlapResult.height >= TILE_SIZE - 10;
 
-      // for debugging the overlap checks for the events
-      this.#gfx.clear();
-      this.#gfx.strokeRectShape(this.#rectangleOverlapResult);
+      if (ENABLE_ZONE_DEBUGGING) {
+        // for debugging the overlap checks for the events
+        this.#gfx.clear();
+        this.#gfx.strokeRectShape(this.#rectangleOverlapResult);
+      }
 
       if (isOverlapping) {
         this.#currentCutSceneId = zone.name;
@@ -660,8 +667,8 @@ export class WorldScene extends BaseScene {
         npcPath,
         movementPattern: npcMovement,
         events: npcDetails.events,
-        id: npcId,
         animationKeyPrefix: npcDetails.animationKeyPrefix,
+        id: npcId,
       });
       this.#npcs.push(npc);
     });
@@ -853,6 +860,11 @@ export class WorldScene extends BaseScene {
   }
 
   /**
+   * Creates the Phaser Zone game objects based on the `Events` tilemap data from the Tiled Map.
+   * These game objects are used for creating the various in game events and cut scenes for the game.
+   * The Zone game objects allow for us to check for overlaps between the player and the area that
+   * is defined in the map data.
+   *
    * @param {Phaser.Tilemaps.Tilemap} map
    * @returns {void}
    */
@@ -880,23 +892,26 @@ export class WorldScene extends BaseScene {
         continue;
       }
 
-      //create event zones for cut scenes
       const encounterZone = this.add
         .zone(tiledItem.x, tiledItem.y - TILE_SIZE * 2, tiledItem.width, tiledItem.height)
         .setOrigin(0)
         .setName(eventId);
       this.#eventZones[eventId] = encounterZone;
-      // TODO: cleanup zone event
-      this.add
-        .rectangle(encounterZone.x, encounterZone.y, encounterZone.width, encounterZone.height, 0xff0000, 0.5)
-        .setOrigin(0);
+
+      if (ENABLE_ZONE_DEBUGGING) {
+        // used for debugging
+        const debugZoneRectangle = this.add
+          .rectangle(encounterZone.x, encounterZone.y, encounterZone.width, encounterZone.height, 0xff0000, 0.5)
+          .setOrigin(0);
+        this.#debugEventZoneObjects[eventId] = debugZoneRectangle;
+      }
     }
   }
 
   async #startCutScene() {
     this.#isProcessingCutSceneEvent = true;
     await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).startCutScene();
-    // await sleep(500);
+    await sleep(500, this);
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }
@@ -928,9 +943,11 @@ export class WorldScene extends BaseScene {
       this.#eventZones[this.#currentCutSceneId].destroy();
       delete this.#eventZones[this.#currentCutSceneId];
       this.#currentCutSceneId = undefined;
-      // TODO: make this configurable, or cleanup
-      this.#gfx.clear();
+      if (ENABLE_ZONE_DEBUGGING) {
+        this.#gfx.clear();
+      }
       await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).endCutScene();
+      await sleep(500, this);
       return;
     }
 
@@ -1014,23 +1031,6 @@ export class WorldScene extends BaseScene {
       this.#isProcessingCutSceneEvent = false;
       this.#handleCutSceneInteraction();
     });
-  }
-
-  /**
-   * @param {import('../types/typedef.js').GameEventTalkToPlayer} gameEvent
-   * @returns {void}
-   */
-  #haveNpcTalkToPlayer(gameEvent) {
-    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
-    if (targetNpc === undefined) {
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
-      return;
-    }
-
-    targetNpc.isTalkingToPlayer = true;
-    this.#npcPlayerIsInteractingWith = targetNpc;
-    this.#dialogUi.showDialogModal(gameEvent.data.messages);
   }
 
   /**
@@ -1131,6 +1131,23 @@ export class WorldScene extends BaseScene {
     targetNpc.npcPath = updatedPath;
     targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
     targetNpc.resetMovementTime();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventTalkToPlayer} gameEvent
+   * @returns {void}
+   */
+  #haveNpcTalkToPlayer(gameEvent) {
+    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
+    if (targetNpc === undefined) {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+      return;
+    }
+
+    targetNpc.isTalkingToPlayer = true;
+    this.#npcPlayerIsInteractingWith = targetNpc;
+    this.#dialogUi.showDialogModal(gameEvent.data.messages);
   }
 
   /**
