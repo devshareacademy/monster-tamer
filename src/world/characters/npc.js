@@ -27,8 +27,8 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @property {NPCPath} npcPath
  * @property {NpcMovementPattern} movementPattern
  * @property {import('../../types/typedef.js').NpcEvent[]} events
- * @property {number} id
  * @property {string} animationKeyPrefix
+ * @property {number} id
  */
 
 /**
@@ -36,8 +36,6 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  */
 
 export class NPC extends Character {
-  /** @type {number} */
-  #id;
   /** @type {boolean} */
   #talkingToPlayer;
   /** @type {NPCPath} */
@@ -52,6 +50,8 @@ export class NPC extends Character {
   #events;
   /** @type {string} */
   #animationKeyPrefix;
+  /** @type {number} */
+  #id;
 
   /**
    * @param {NPCConfig} config
@@ -70,7 +70,6 @@ export class NPC extends Character {
       },
     });
 
-    this.#id = config.id;
     this.#talkingToPlayer = false;
     this.#npcPath = config.npcPath;
     this.#currentPathIndex = 0;
@@ -79,6 +78,7 @@ export class NPC extends Character {
     this._phaserGameObject.setScale(4);
     this.#events = config.events;
     this.#animationKeyPrefix = config.animationKeyPrefix;
+    this.#id = config.id;
   }
 
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
@@ -115,11 +115,6 @@ export class NPC extends Character {
     this.#npcPath = val;
   }
 
-  /** @type {NpcMovementPattern} */
-  get npcMovementPattern() {
-    return this.#movementPattern;
-  }
-
   /**
    * @param {NpcMovementPattern} val
    */
@@ -133,14 +128,6 @@ export class NPC extends Character {
   set finishedMovementCallback(val) {
     this._spriteGridMovementFinishedCallback = val;
   }
-
-  // /**
-  //  * @param {NPCPath} movementPath
-  //  */
-  // updateMovementPath(movementPath) {
-  //   this.#npcPath = movementPath;
-  //   this.#currentPathIndex = 0;
-  // }
 
   /**
    * Resets the lastMovementTime, which is used for when we want to have an npc start moving

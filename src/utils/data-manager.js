@@ -42,8 +42,8 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {MonsterData} monsters
  * @property {import('../types/typedef.js').Inventory} inventory
  * @property {number[]} itemsPickedUp
- * @property {GAME_FLAG[]} flags
  * @property {string[]} viewedEvents
+ * @property {GAME_FLAG[]} flags
  */
 
 /** @type {GlobalState} */
@@ -86,8 +86,8 @@ const initialState = {
     },
   ],
   itemsPickedUp: [],
-  flags: [],
   viewedEvents: [],
+  flags: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -104,8 +104,8 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
   INVENTORY: 'INVENTORY',
   ITEMS_PICKED_UP: 'ITEMS_PICKED_UP',
-  FLAGS: 'FLAGS',
   VIEWED_EVENTS: 'VIEWED_EVENTS',
+  FLAGS: 'FLAGS',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -184,8 +184,8 @@ class DataManager extends Phaser.Events.EventEmitter {
     };
     existingData.inventory = initialState.inventory;
     existingData.itemsPickedUp = [...initialState.itemsPickedUp];
-    existingData.flags = [...initialState.flags];
     existingData.viewedEvents = initialState.viewedEvents;
+    existingData.flags = [...initialState.flags];
 
     this.#store.reset();
     this.#updateDataManger(existingData);
@@ -273,6 +273,25 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {number} itemId
+   * @returns {void}
+   */
+  addItemPickedUp(itemId) {
+    /** @type {number[]} */
+    const itemsPickedUp = this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
+    itemsPickedUp.push(itemId);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP, itemsPickedUp);
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  isPartyFull() {
+    const partySize = this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length;
+    return partySize === 6;
+  }
+
+  /**
    * Adds the provided eventId to the viewed events in the data manager so player does
    * not see the event again.
    * @param {string} eventId
@@ -283,14 +302,6 @@ class DataManager extends Phaser.Events.EventEmitter {
     const viewedEvents = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || []);
     viewedEvents.add(eventId);
     this.#store.set(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS, Array.from(viewedEvents));
-  }
-
-  /*
-   * @returns {boolean}
-   */
-  isPartyFull() {
-    const partySize = this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length;
-    return partySize === 6;
   }
 
   /**
@@ -331,17 +342,6 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
-   * @param {number} itemId
-   * @returns {void}
-   */
-  addItemPickedUp(itemId) {
-    /** @type {number[]} */
-    const itemsPickedUp = this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
-    itemsPickedUp.push(itemId);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP, itemsPickedUp);
-  }
-
-  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -360,8 +360,8 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
       [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
-      [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
       [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
+      [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
     });
   }
 
@@ -392,8 +392,8 @@ class DataManager extends Phaser.Events.EventEmitter {
       },
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
       itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
-      flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
       viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
+      flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
     };
   }
 }

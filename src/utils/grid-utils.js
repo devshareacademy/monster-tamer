@@ -44,7 +44,29 @@ export function getTargetPathToGameObject(currentPosition, targetPosition) {
   const pathToFollow = [];
   let position = { x: currentPosition.x, y: currentPosition.y };
 
-  let escapeCounter = 0;
+  // check to see if the current position is on 2d grid
+  if (position.x % TILE_SIZE !== 0 || position.y % TILE_SIZE !== 0) {
+    console.warn(
+      'getTargetPathToGameObject: game object position does not line up with grid based on tile size, will attempt to convert'
+    );
+    position.x = Math.floor(position.x / TILE_SIZE) * TILE_SIZE;
+    position.y = Math.floor(position.y / TILE_SIZE) * TILE_SIZE;
+  } else {
+    console.log('safe!');
+  }
+
+  // check to see if target position is on 2d grid
+  const positionToMoveTo = { x: targetPosition.x, y: targetPosition.y };
+  if (positionToMoveTo.x % TILE_SIZE !== 0 || positionToMoveTo.y % TILE_SIZE !== 0) {
+    console.warn(
+      'getTargetPathToGameObject: target position does not line up with grid based on tile size, will attempt to convert'
+    );
+    positionToMoveTo.x = Math.floor(positionToMoveTo.x / TILE_SIZE) * TILE_SIZE;
+    positionToMoveTo.y = Math.floor(positionToMoveTo.y / TILE_SIZE) * TILE_SIZE;
+  } else {
+    console.log('safe!');
+  }
+
   while (position.x !== targetPosition.x || position.y !== targetPosition.y) {
     /** @type {import('../common/direction.js').Direction} */
     let targetDirection = DIRECTION.RIGHT;
@@ -58,12 +80,6 @@ export function getTargetPathToGameObject(currentPosition, targetPosition) {
     directionsToFollow.push(targetDirection);
     position = getTargetPositionFromGameObjectPositionAndDirection(position, targetDirection);
     pathToFollow.push(position);
-
-    // TODO: remove and replace with a better safe guard in case we are off by some pixels
-    escapeCounter += 1;
-    if (escapeCounter > 20) {
-      break;
-    }
   }
 
   return {
