@@ -1,3 +1,4 @@
+export const ENABLE_ZONE_DEBUGGING = true;
 export const SHOW_SOCIAL_LINKS = true;
 export const TILE_SIZE = 64;
 export const TILED_COLLISION_LAYER_ALPHA = 0;

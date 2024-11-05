@@ -169,10 +169,9 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
-   * @param {Phaser.Scene} scene
    * @returns {void}
    */
-  startNewGame(scene) {
+  startNewGame() {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
@@ -190,7 +189,6 @@ class DataManager extends Phaser.Events.EventEmitter {
 
     this.#store.reset();
     this.#updateDataManger(existingData);
-    // this.init(scene);
     this.saveData();
   }
 
