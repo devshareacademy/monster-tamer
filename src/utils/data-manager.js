@@ -84,7 +84,7 @@ const initialState = {
     },
   ],
   itemsPickedUp: [],
-  viewedEvents: ['1'],
+  viewedEvents: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -248,6 +248,7 @@ class DataManager extends Phaser.Events.EventEmitter {
   /**
    * @param {import('../types/typedef.js').Item} item
    * @param {number} quantity
+   * @returns {void}
    */
   addItem(item, quantity) {
     /** @type {import('../types/typedef.js').Inventory} */
@@ -268,6 +269,7 @@ class DataManager extends Phaser.Events.EventEmitter {
 
   /**
    * @param {number} itemId
+   * @returns {void}
    */
   addItemPickedUp(itemId) {
     /** @type {number[]} */
