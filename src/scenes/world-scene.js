@@ -18,7 +18,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { GAME_EVENT_TYPE, GAME_FLAG, NPC_EVENT_TYPE } from '../types/typedef.js';
+import { GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { CutsceneScene } from './cutscene-scene.js';
 import { sleep } from '../utils/time-utils.js';

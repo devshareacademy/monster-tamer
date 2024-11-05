@@ -155,10 +155,14 @@ export class PreloadScene extends BaseScene {
     this.load.image(WORLD_ASSET_KEYS.WORLD_COLLISION, `${monsterTamerAssetPath}/map/collision.png`);
     this.load.image(WORLD_ASSET_KEYS.MAIN_1_FOREGROUND, `${monsterTamerAssetPath}/map/main_1_level_foreground.png`);
     this.load.image(WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE, `${monsterTamerAssetPath}/map/encounter.png`);
-    this.load.spritesheet(WORLD_ASSET_KEYS.BEACH, `${axulArtAssetPath}/beach/crushed.png`, {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
+    this.load.spritesheet(
+      WORLD_ASSET_KEYS.BEACH,
+      `${axulArtAssetPath}/beach/AxulArtīs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png`,
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
+    );
     this.load.image(
       BUILDING_ASSET_KEYS.BUILDING_1_FOREGROUND,
       `${monsterTamerAssetPath}/map/buildings/building_1_level_foreground.png`
