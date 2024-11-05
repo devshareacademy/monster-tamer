@@ -10,7 +10,7 @@
           "y": 21,
           "frame": 30,
           "id": 1001,
-          "animationKeyPrefix": "NPC_2_"
+          "animationKeyPrefix": "NPC_4_"
         }
       },
       {
@@ -62,7 +62,7 @@
           "y": 11,
           "frame": 40,
           "id": 1002,
-          "animationKeyPrefix": "NPC_3_"
+          "animationKeyPrefix": "NPC_5_"
         }
       },
       {

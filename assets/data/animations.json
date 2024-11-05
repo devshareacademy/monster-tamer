@@ -61,7 +61,7 @@
   },
   {
     "key": "NPC_1_RIGHT",
-    "frames": [28, 22, 29],
+    "frames": [8, 2, 9],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -70,7 +70,7 @@
   },
   {
     "key": "NPC_1_UP",
-    "frames": [26, 21, 27],
+    "frames": [6, 1, 7],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -79,7 +79,7 @@
   },
   {
     "key": "NPC_1_DOWN",
-    "frames": [24, 20, 25],
+    "frames": [4, 0, 5],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -88,7 +88,7 @@
   },
   {
     "key": "NPC_2_RIGHT",
-    "frames": [38, 32, 39],
+    "frames": [18, 12, 19],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -97,7 +97,7 @@
   },
   {
     "key": "NPC_2_UP",
-    "frames": [36, 31, 37],
+    "frames": [16, 11, 17],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -106,7 +106,7 @@
   },
   {
     "key": "NPC_2_DOWN",
-    "frames": [34, 30, 35],
+    "frames": [14, 10, 15],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -115,7 +115,7 @@
   },
   {
     "key": "NPC_3_RIGHT",
-    "frames": [48, 42, 49],
+    "frames": [28, 22, 29],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -124,7 +124,7 @@
   },
   {
     "key": "NPC_3_UP",
-    "frames": [46, 41, 47],
+    "frames": [26, 21, 27],
     "frameRate": 6,
     "repeat": -1,
     "delay": 0,
@@ -133,6 +133,60 @@
   },
   {
     "key": "NPC_3_DOWN",
+    "frames": [24, 20, 25],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_4_RIGHT",
+    "frames": [38, 32, 39],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_4_UP",
+    "frames": [36, 31, 37],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_4_DOWN",
+    "frames": [34, 30, 35],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_5_RIGHT",
+    "frames": [48, 42, 49],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_5_UP",
+    "frames": [46, 41, 47],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_5_DOWN",
     "frames": [44, 40, 45],
     "frameRate": 6,
     "repeat": -1,
