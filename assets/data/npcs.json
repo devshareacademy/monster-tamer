@@ -1,7 +1,7 @@
 {
   "1": {
     "frame": 30,
-    "animationKeyPrefix": "NPC_2_",
+    "animationKeyPrefix": "NPC_4_",
     "events": [
       {
         "requires": ["LOOKING_FOR_PROFESSOR"],
@@ -42,7 +42,7 @@
   },
   "2": {
     "frame": 20,
-    "animationKeyPrefix": "NPC_1_",
+    "animationKeyPrefix": "NPC_3_",
     "events": [
       {
         "requires": ["LOOKING_FOR_PROFESSOR"],
