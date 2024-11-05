@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2016", "dom"],
+    "lib": ["es2016", "dom", "es2017"],
     "module": "es6",
     "target": "es6",
     "checkJs": true
