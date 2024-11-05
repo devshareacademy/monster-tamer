@@ -5,7 +5,11 @@ import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
 import { ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
-import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
+import {
+  getTargetDirectionFromGameObjectPosition,
+  getTargetPathToGameObject,
+  getTargetPositionFromGameObjectPositionAndDirection,
+} from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { NPC, NPC_MOVEMENT_PATTERN } from '../world/characters/npc.js';
@@ -386,6 +390,13 @@ export class WorldScene extends BaseScene {
         }
 
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
+          // at start of the game, handle when we have no monsters in our party
+          if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length === 0) {
+            this.#dialogUi.showDialogModal(['You have no monsters in your party.']);
+            this.#menu.hide();
+            return;
+          }
+
           // pause this scene and launch the monster party scene
           /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
           const sceneDataToPass = {
@@ -1009,11 +1020,44 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    console.log('moving npc to player');
-    this.time.delayedCall(500, () => {
+    // determine direction to move based on distance from player
+    const targetPath = getTargetPathToGameObject(targetNpc.sprite, this.#player.sprite);
+    const pathToFollow = targetPath.pathToFollow.splice(0, targetPath.pathToFollow.length - 1);
+
+    // if npc is already next to player, just update directions
+    if (pathToFollow.length === 0) {
+      this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+      targetNpc.facePlayer(this.#player.direction);
       this.#isProcessingCutSceneEvent = false;
       this.#handleCutSceneInteraction();
+      return;
+    }
+
+    // move npc according to the path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
+    const npcPath = {
+      0: { x: targetNpc.sprite.x, y: targetNpc.sprite.y },
+    };
+    pathToFollow.forEach((coordinate, index) => {
+      npcPath[index + 1] = coordinate;
     });
+
+    targetNpc.finishedMovementCallback = () => {
+      if (
+        pathToFollow[pathToFollow.length - 1].x === targetNpc.sprite.x &&
+        pathToFollow[pathToFollow.length - 1].y === targetNpc.sprite.y
+      ) {
+        this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+        targetNpc.facePlayer(this.#player.direction);
+        this.time.delayedCall(500, () => {
+          this.#isProcessingCutSceneEvent = false;
+          this.#handleCutSceneInteraction();
+        });
+      }
+    };
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.npcPath = npcPath;
+    targetNpc.resetMovementTime();
   }
 
   /**
@@ -1028,11 +1072,40 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    console.log('moving npc to back to original position');
-    this.time.delayedCall(500, () => {
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
+    // have npc retrace their steps by reversing the existing npc path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
+    const updatedPath = {};
+    const pathKeys = Object.keys(targetNpc.npcPath).reverse();
+
+    // if npc is already next to player, there will be only 1 position in the npc path
+    // when this happens, we need to just updates the npcs direction
+    if (pathKeys.length === 1) {
+      targetNpc.facePlayer(gameEvent.data.direction);
+      this.time.delayedCall(500, () => {
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      });
+      return;
+    }
+
+    pathKeys.forEach((pathKey, index) => {
+      updatedPath[index] = targetNpc.npcPath[pathKey];
     });
+
+    targetNpc.finishedMovementCallback = () => {
+      if (
+        updatedPath[pathKeys.length - 1].x === targetNpc.sprite.x &&
+        updatedPath[pathKeys.length - 1].y === targetNpc.sprite.y
+      ) {
+        this.time.delayedCall(500, () => {
+          this.#isProcessingCutSceneEvent = false;
+          this.#handleCutSceneInteraction();
+        });
+      }
+    };
+    targetNpc.npcPath = updatedPath;
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.resetMovementTime();
   }
 
   /**
@@ -1057,10 +1130,13 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #addMonsterFromNpc(gameEvent) {
-    console.log('adding monster from npc');
-    this.time.delayedCall(500, () => {
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
-    });
+    // TODO: add check to see if party is full and do something with 7th monster that is being added
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monstersInParty = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);
+    monstersInParty.push(newMonster);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
   }
 }

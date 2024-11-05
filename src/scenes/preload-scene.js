@@ -236,7 +236,6 @@ export class PreloadScene extends BaseScene {
     this.#createAnimations();
 
     // attempt to populate data manager with saved data and initialize
-    dataManager.init(this);
     dataManager.loadData();
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);

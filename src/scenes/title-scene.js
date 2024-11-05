@@ -128,7 +128,7 @@ export class TitleScene extends BaseScene {
       }
 
       if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
-        dataManager.startNewGame(this);
+        dataManager.startNewGame();
       }
 
       this.scene.start(SCENE_KEYS.WORLD_SCENE);

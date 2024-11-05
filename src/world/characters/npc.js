@@ -12,6 +12,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
 export const NPC_MOVEMENT_PATTERN = Object.freeze({
   IDLE: 'IDLE',
   CLOCKWISE: 'CLOCKWISE',
+  SET_PATH: 'SET_PATH',
 });
 
 /**
@@ -102,6 +103,42 @@ export class NPC extends Character {
     return this.#id;
   }
 
+  /** @type {NPCPath} */
+  get npcPath() {
+    return this.#npcPath;
+  }
+
+  /**
+   * @param {NPCPath} val
+   */
+  set npcPath(val) {
+    this.#npcPath = val;
+  }
+
+  /**
+   * @param {NpcMovementPattern} val
+   */
+  set npcMovementPattern(val) {
+    this.#movementPattern = val;
+  }
+
+  /**
+   * @param {() => void | undefined} val
+   */
+  set finishedMovementCallback(val) {
+    this._spriteGridMovementFinishedCallback = val;
+  }
+
+  /**
+   * Resets the lastMovementTime, which is used for when we want to have an npc start moving
+   * immediately. This is needed for cutscene support so after the npc appears, that npc starts
+   * moving directly to the player.
+   * @returns {void}
+   */
+  resetMovementTime() {
+    this.#lastMovementTime = 0;
+  }
+
   /**
    * @param {import('../../common/direction.js').Direction} playerDirection
    * @returns {void}
@@ -155,6 +192,13 @@ export class NPC extends Character {
         nextPosition = this.#npcPath[this.#currentPathIndex];
       } else {
         if (nextPosition === undefined) {
+          // if npc is following a set path, once we reach the end, stop moving the npc
+          if (this.#movementPattern === NPC_MOVEMENT_PATTERN.SET_PATH) {
+            this.#movementPattern = NPC_MOVEMENT_PATTERN.IDLE;
+            this.#currentPathIndex = 0;
+            return;
+          }
+
           nextPosition = this.#npcPath[0];
           this.#currentPathIndex = 0;
         } else {
@@ -173,7 +217,11 @@ export class NPC extends Character {
       }
 
       this.moveCharacter(characterDirection);
-      this.#lastMovementTime = time + Phaser.Math.Between(2000, 5000);
+      if (this.#movementPattern === NPC_MOVEMENT_PATTERN.SET_PATH) {
+        this.#lastMovementTime = time;
+      } else {
+        this.#lastMovementTime = time + Phaser.Math.Between(2000, 5000);
+      }
     }
   }
 
