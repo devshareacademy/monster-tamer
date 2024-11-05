@@ -1,5 +1,6 @@
 {
   "1": {
+    "requires": [],
     "events": [
       {
         "type": "ADD_NPC",
@@ -41,10 +42,17 @@
         "data": {
           "id": 1001
         }
+      },
+      {
+        "type": "ADD_FLAG",
+        "data": {
+          "flag": "LOOKING_FOR_PROFESSOR"
+        }
       }
     ]
   },
   "2": {
+    "requires": ["LOOKING_FOR_PROFESSOR"],
     "events": [
       {
         "type": "ADD_NPC",
@@ -91,6 +99,18 @@
         "type": "REMOVE_NPC",
         "data": {
           "id": 1002
+        }
+      },
+      {
+        "type": "REMOVE_FLAG",
+        "data": {
+          "flag": "LOOKING_FOR_PROFESSOR"
+        }
+      },
+      {
+        "type": "ADD_FLAG",
+        "data": {
+          "flag": "FOUND_PROFESSOR"
         }
       }
     ]

@@ -19,7 +19,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
+import { GAME_EVENT_TYPE, GAME_FLAG, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 
@@ -811,6 +811,18 @@ export class WorldScene extends BaseScene {
     const eventToHandle = this.#npcPlayerIsInteractingWith.events[this.#lastNpcEventHandledIndex];
     const eventType = eventToHandle.type;
 
+    // check to see if this event should be handled based on story flags
+    const currentGameFlags = dataManager.getFlags();
+
+    const eventRequirementsMet = eventToHandle.requires.every((flag) => {
+      return currentGameFlags.has(flag);
+    });
+    if (!eventRequirementsMet) {
+      // jump to next event
+      this.#handleNpcInteraction();
+      return;
+    }
+
     switch (eventType) {
       case NPC_EVENT_TYPE.MESSAGE:
         this.#dialogUi.showDialogModal(eventToHandle.data.messages);
@@ -964,6 +976,12 @@ export class WorldScene extends BaseScene {
         break;
       case GAME_EVENT_TYPE.GIVE_MONSTER:
         this.#addMonsterFromNpc(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.ADD_FLAG:
+        this.#addGameFlag(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.REMOVE_FLAG:
+        this.#removeGameFlag(eventToHandle);
         break;
       default:
         exhaustiveGuard(eventType);
@@ -1142,6 +1160,26 @@ export class WorldScene extends BaseScene {
     const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);
     monstersInParty.push(newMonster);
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventAddFlag} gameEvent
+   * @returns {void}
+   */
+  #addGameFlag(gameEvent) {
+    dataManager.addFlag(gameEvent.data.flag);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventRemoveFlag} gameEvent
+   * @returns {void}
+   */
+  #removeGameFlag(gameEvent) {
+    dataManager.removeFlag(gameEvent.data.flag);
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }

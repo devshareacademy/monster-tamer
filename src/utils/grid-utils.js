@@ -51,8 +51,6 @@ export function getTargetPathToGameObject(currentPosition, targetPosition) {
     );
     position.x = Math.floor(position.x / TILE_SIZE) * TILE_SIZE;
     position.y = Math.floor(position.y / TILE_SIZE) * TILE_SIZE;
-  } else {
-    console.log('safe!');
   }
 
   // check to see if target position is on 2d grid
@@ -63,8 +61,6 @@ export function getTargetPathToGameObject(currentPosition, targetPosition) {
     );
     positionToMoveTo.x = Math.floor(positionToMoveTo.x / TILE_SIZE) * TILE_SIZE;
     positionToMoveTo.y = Math.floor(positionToMoveTo.y / TILE_SIZE) * TILE_SIZE;
-  } else {
-    console.log('safe!');
   }
 
   while (position.x !== targetPosition.x || position.y !== targetPosition.y) {

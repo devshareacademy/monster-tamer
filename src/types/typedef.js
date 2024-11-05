@@ -132,6 +132,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {'MESSAGE'} type
  * @property {object} data
  * @property {string[]} data.messages
+ * @property {string[]} requires
  */
 
 /**
@@ -142,6 +143,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {number} data.fadeInDuration
  * @property {number} data.fadeOutDuration
  * @property {number} data.waitDuration
+ * @property {string[]} requires
  */
 
 /**
@@ -149,6 +151,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @type {object}
  * @property {'HEAL'} type
  * @property {object} data
+ * @property {string[]} requires
  */
 
 /**
@@ -183,6 +186,8 @@ export const GAME_EVENT_TYPE = Object.freeze({
   TALK_TO_PLAYER: 'TALK_TO_PLAYER',
   REMOVE_NPC: 'REMOVE_NPC',
   GIVE_MONSTER: 'GIVE_MONSTER',
+  ADD_FLAG: 'ADD_FLAG',
+  REMOVE_FLAG: 'REMOVE_FLAG',
 });
 
 /**
@@ -250,8 +255,24 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef GameEventAddFlag
+ * @type {object}
+ * @property {'ADD_FLAG'} type
+ * @property {object} data
+ * @property {GameFlag} data.flag
+ */
+
+/**
+ * @typedef GameEventRemoveFlag
+ * @type {object}
+ * @property {'REMOVE_FLAG'} type
+ * @property {object} data
+ * @property {GameFlag} data.flag
+ */
+
+/**
  * @typedef GameEvent
- * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer | GameEventGiveMonster}
+ * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer | GameEventGiveMonster | GameEventAddFlag | GameEventRemoveFlag}
  */
 
 /**
@@ -264,3 +285,14 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  * @typedef EventData
  * @type {Object.<string, EventDetails>}
  */
+
+/** Game Flags Data Types */
+/**
+ * @typedef {keyof typeof GAME_FLAG} GameFlag
+ */
+
+/** @enum {GameFlag} */
+export const GAME_FLAG = Object.freeze({
+  LOOKING_FOR_PROFESSOR: 'LOOKING_FOR_PROFESSOR',
+  FOUND_PROFESSOR: 'FOUND_PROFESSOR',
+});
