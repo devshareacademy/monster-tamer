@@ -975,14 +975,14 @@ export class WorldScene extends BaseScene {
       case GAME_EVENT_TYPE.TALK_TO_PLAYER:
         this.#haveNpcTalkToPlayer(eventToHandle);
         break;
+      case GAME_EVENT_TYPE.GIVE_MONSTER:
+        this.#addMonsterFromNpc(eventToHandle);
+        break;
       case GAME_EVENT_TYPE.ADD_FLAG:
         this.#addGameFlag(eventToHandle);
         break;
       case GAME_EVENT_TYPE.REMOVE_FLAG:
         this.#removeGameFlag(eventToHandle);
-        break;
-      case GAME_EVENT_TYPE.GIVE_MONSTER:
-        this.#addMonsterFromNpc(eventToHandle);
         break;
       default:
         exhaustiveGuard(eventType);
@@ -1151,6 +1151,21 @@ export class WorldScene extends BaseScene {
   }
 
   /**
+   * @param {import('../types/typedef.js').GameEventGiveMonster} gameEvent
+   * @returns {void}
+   */
+  #addMonsterFromNpc(gameEvent) {
+    // TODO: add check to see if party is full and do something with 7th monster that is being added
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monstersInParty = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);
+    monstersInParty.push(newMonster);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  /**
    * @param {import('../types/typedef.js').GameEventAddFlag} gameEvent
    * @returns {void}
    */
@@ -1166,21 +1181,6 @@ export class WorldScene extends BaseScene {
    */
   #removeGameFlag(gameEvent) {
     dataManager.removeFlag(gameEvent.data.flag);
-    this.#isProcessingCutSceneEvent = false;
-    this.#handleCutSceneInteraction();
-  }
-
-  /**
-   * @param {import('../types/typedef.js').GameEventGiveMonster} gameEvent
-   * @returns {void}
-   */
-  #addMonsterFromNpc(gameEvent) {
-    // TODO: add check to see if party is full and do something with 7th monster that is being added
-    /** @type {import('../types/typedef.js').Monster[]} */
-    const monstersInParty = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
-    const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);
-    monstersInParty.push(newMonster);
-    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }

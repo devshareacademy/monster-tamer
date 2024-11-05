@@ -185,9 +185,9 @@ export const GAME_EVENT_TYPE = Object.freeze({
   RETRACE_PATH: 'RETRACE_PATH',
   TALK_TO_PLAYER: 'TALK_TO_PLAYER',
   REMOVE_NPC: 'REMOVE_NPC',
+  GIVE_MONSTER: 'GIVE_MONSTER',
   ADD_FLAG: 'ADD_FLAG',
   REMOVE_FLAG: 'REMOVE_FLAG',
-  GIVE_MONSTER: 'GIVE_MONSTER',
 });
 
 /**
@@ -247,6 +247,14 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef GameEventGiveMonster
+ * @type {object}
+ * @property {'GIVE_MONSTER'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
  * @typedef GameEventAddFlag
  * @type {object}
  * @property {'ADD_FLAG'} type
@@ -263,16 +271,8 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
  */
 
 /**
- * @typedef GameEventGiveMonster
- * @type {object}
- * @property {'GIVE_MONSTER'} type
- * @property {object} data
- * @property {number} data.id
- */
-
-/**
  * @typedef GameEvent
- * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer | GameEventAddFlag | GameEventRemoveFlag | GameEventGiveMonster}
+ * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer | GameEventGiveMonster | GameEventAddFlag | GameEventRemoveFlag}
  */
 
 /**
