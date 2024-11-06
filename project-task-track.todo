@@ -185,7 +185,7 @@ Cutscenes & In Game Events:
     ✔ update npc json file to support animation key prefix @done(24-11-06 09:30)
     ✔ update npc class to support animation prefix @done(24-11-06 09:30)
   ☐ update map data
-    ☐ update tilemap to show event areas
+    ✔ update tilemap to show event areas @done(24-11-06 12:47)
     ☐ update world scene to create event zone areas
     ☐ update world scene update logic to check for overlaps with event zones
   ☐ story events
