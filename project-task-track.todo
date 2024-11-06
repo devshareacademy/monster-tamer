@@ -179,11 +179,34 @@ Catching Monsters:
     ✔ new battle state for catching monster with stubbed logic @done(24-06-25 14:54)
   ✔ review monster catching logic @done(24-08-26 10:09)
 
+Cutscenes & In Game Events:
+  ☐ update npc animation logic
+    ☐ add new npc animations to animation json file
+    ☐ update npc json file to support animation key prefix
+    ☐ update npc class to support animation prefix
+  ☐ update map data
+    ☐ update tilemap to show event areas
+    ☐ update world scene to create event zone areas
+    ☐ update world scene update logic to check for overlaps with event zones
+  ☐ story events
+    ☐ create events json file for cutscenes
+    ☐ add events data types
+    ☐ update data utils for parsing events data
+    ☐ update data manager for viewed events
+    ☐ update npc class to support custom movement path
+    ☐ update world scene to handle custom events
+  ☐ story flags
+    ☐ update data manager for story flags
+    ☐ update npc json file to support required story flags
+    ☐ update events json file to support setting and removing flags
+    ☐ add data types for story flags
+  ☐ cutscenes
+    ☐ create new cutscene class and trigger from world scene
+    ☐ update dialog ui to be a new scene
+
 -------------------------------
 
 Possible Future Content:
-  ☐ cutscenes
-  ☐ in game events and tracking
   ☐ shops
   ☐ battle npcs
   ☐ monster encyclopedia
