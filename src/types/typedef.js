@@ -160,6 +160,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcDetails
  * @type {object}
  * @property {number} frame
+ * @property {string} animationKeyPrefix
  * @property {NpcEvent[]} events
  */
 
