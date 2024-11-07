@@ -189,9 +189,9 @@ Cutscenes & In Game Events:
     ✔ update world scene to create event zone areas @done(24-11-07 10:20)
     ✔ update world scene update logic to check for overlaps with event zones @done(24-11-07 10:20)
   ☐ story events
-    ☐ create events json file for cutscenes
-    ☐ add events data types
-    ☐ update data utils for parsing events data
+    ✔ create events json file for cutscenes @done(24-11-07 11:17)
+    ✔ add events data types @done(24-11-07 11:17)
+    ✔ update data utils for parsing events data @done(24-11-07 11:17)
     ☐ update data manager for viewed events
     ☐ update npc class to support custom movement path
     ☐ update world scene to handle custom events
