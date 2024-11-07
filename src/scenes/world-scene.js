@@ -103,6 +103,14 @@ export class WorldScene extends BaseScene {
   #eventZones;
   /** @type {{[key: string]: Phaser.GameObjects.Rectangle}} */
   #debugEventZoneObjects;
+  /** @type {Phaser.Geom.Rectangle} */
+  #rectangleForOverlapCheck1;
+  /** @type {Phaser.Geom.Rectangle} */
+  #rectangleForOverlapCheck2;
+  /** @type {Phaser.Geom.Rectangle} */
+  #rectangleOverlapResult;
+  /** @type {Phaser.GameObjects.Graphics} */
+  #gfx;
 
   constructor() {
     super({
@@ -175,6 +183,10 @@ export class WorldScene extends BaseScene {
     this.#entranceLayer = undefined;
     this.#eventZones = {};
     this.#debugEventZoneObjects = {};
+    this.#rectangleForOverlapCheck1 = undefined;
+    this.#rectangleForOverlapCheck2 = undefined;
+    this.#rectangleOverlapResult = undefined;
+    this.#gfx = undefined;
   }
 
   /**
@@ -182,6 +194,10 @@ export class WorldScene extends BaseScene {
    */
   create() {
     super.create();
+
+    this.#rectangleForOverlapCheck1 = new Phaser.Geom.Rectangle();
+    this.#rectangleForOverlapCheck2 = new Phaser.Geom.Rectangle();
+    this.#rectangleOverlapResult = new Phaser.Geom.Rectangle();
 
     // create map and collision layer
     const map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
@@ -272,6 +288,11 @@ export class WorldScene extends BaseScene {
 
     // create event zones
     this.#createEventEncounterZones(map);
+    if (ENABLE_ZONE_DEBUGGING) {
+      this.#gfx = this.add.graphics({
+        lineStyle: { width: 4, color: 0x00ffff },
+      });
+    }
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
       if (progress === 1) {
@@ -468,6 +489,31 @@ export class WorldScene extends BaseScene {
       x: this.#player.sprite.x,
       y: this.#player.sprite.y,
     });
+
+    this.#player.sprite.getBounds(this.#rectangleForOverlapCheck1);
+    for (const zone of Object.values(this.#eventZones)) {
+      zone.getBounds(this.#rectangleForOverlapCheck2);
+      this.#rectangleOverlapResult.setSize(0, 0);
+      Phaser.Geom.Intersects.GetRectangleIntersection(
+        this.#rectangleForOverlapCheck1,
+        this.#rectangleForOverlapCheck2,
+        this.#rectangleOverlapResult
+      );
+
+      if (ENABLE_ZONE_DEBUGGING) {
+        this.#gfx.clear();
+        this.#gfx.strokeRectShape(this.#rectangleOverlapResult);
+      }
+
+      const isOverlapping =
+        this.#rectangleOverlapResult.width >= TILE_SIZE - 10 && this.#rectangleOverlapResult.height >= TILE_SIZE - 10;
+
+      if (isOverlapping) {
+        console.log(`overlapping with zone: ${zone.name}`);
+        // TODO: add cutscene support
+        break;
+      }
+    }
 
     if (!this.#encounterLayer) {
       return;

@@ -184,10 +184,10 @@ Cutscenes & In Game Events:
     ✔ add new npc animations to animation json file @done(24-11-06 09:30)
     ✔ update npc json file to support animation key prefix @done(24-11-06 09:30)
     ✔ update npc class to support animation prefix @done(24-11-06 09:30)
-  ☐ update map data
+  ✔ update map data @done(24-11-07 10:20)
     ✔ update tilemap to show event areas @done(24-11-06 12:47)
-    ☐ update world scene to create event zone areas
-    ☐ update world scene update logic to check for overlaps with event zones
+    ✔ update world scene to create event zone areas @done(24-11-07 10:20)
+    ✔ update world scene update logic to check for overlaps with event zones @done(24-11-07 10:20)
   ☐ story events
     ☐ create events json file for cutscenes
     ☐ add events data types

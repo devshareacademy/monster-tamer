@@ -47,7 +47,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 const initialState = {
   player: {
     position: {
-      x: 6 * TILE_SIZE,
+      x: 4 * TILE_SIZE,
       y: 21 * TILE_SIZE,
     },
     direction: DIRECTION.DOWN,
