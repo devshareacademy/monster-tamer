@@ -84,4 +84,16 @@ export class DataUtils {
     const data = scene.cache.json.get(DATA_ASSET_KEYS.NPCS);
     return data[npcId];
   }
+
+  /**
+   * Utility function for retrieving a Monster object from the monsters.json data file.
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {string} eventId the monster id to retrieve from the monsters.json file
+   * @returns {import('../types/typedef.js').Monster}
+   */
+  static getEventData(scene, eventId) {
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.EVENTS);
+    return data[eventId];
+  }
 }

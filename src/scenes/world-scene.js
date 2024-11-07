@@ -510,6 +510,8 @@ export class WorldScene extends BaseScene {
 
       if (isOverlapping) {
         console.log(`overlapping with zone: ${zone.name}`);
+        const eventsToProcess = DataUtils.getEventData(this, zone.name);
+        console.log(eventsToProcess);
         // TODO: add cutscene support
         break;
       }
