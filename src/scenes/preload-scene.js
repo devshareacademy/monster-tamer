@@ -130,6 +130,7 @@ export class PreloadScene extends BaseScene {
     this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
     this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
     this.load.json(DATA_ASSET_KEYS.NPCS, 'assets/data/npcs.json');
+    this.load.json(DATA_ASSET_KEYS.EVENTS, 'assets/data/events.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -235,7 +236,6 @@ export class PreloadScene extends BaseScene {
     this.#createAnimations();
 
     // attempt to populate data manager with saved data and initialize
-    dataManager.init(this);
     dataManager.loadData();
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);

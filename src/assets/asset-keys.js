@@ -55,6 +55,7 @@ export const DATA_ASSET_KEYS = Object.freeze({
   MONSTERS: 'MONSTERS',
   ENCOUNTERS: 'ENCOUNTERS',
   NPCS: 'NPCS',
+  EVENTS: 'EVENTS',
 });
 
 export const ATTACK_ASSET_KEYS = Object.freeze({
