@@ -191,15 +191,6 @@ export const GAME_EVENT_TYPE = Object.freeze({
 });
 
 /**
- * @typedef {keyof typeof GAME_EVENT_POSITION_TARGET_TYPE} GameEventPositionObjectTargetType
- */
-
-/** @enum {GameEventPositionObjectTargetType} */
-export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
-  NPC: 'NPC',
-});
-
-/**
  * @typedef GameEventAddNpc
  * @type {object}
  * @property {'ADD_NPC'} type
