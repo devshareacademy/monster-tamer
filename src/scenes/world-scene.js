@@ -15,8 +15,9 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { NPC_EVENT_TYPE } from '../types/typedef.js';
+import { GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
+import { sleep } from '../utils/time-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -111,6 +112,12 @@ export class WorldScene extends BaseScene {
   #rectangleOverlapResult;
   /** @type {Phaser.GameObjects.Graphics} */
   #gfx;
+  /** @type {number | undefined} */
+  #currentCutSceneId;
+  /** @type {boolean} */
+  #isProcessingCutSceneEvent;
+  /** @type {number} */
+  #lastCutSceneEventHandledIndex;
 
   constructor() {
     super({
@@ -187,6 +194,9 @@ export class WorldScene extends BaseScene {
     this.#rectangleForOverlapCheck2 = undefined;
     this.#rectangleOverlapResult = undefined;
     this.#gfx = undefined;
+    this.#currentCutSceneId = undefined;
+    this.#isProcessingCutSceneEvent = false;
+    this.#lastCutSceneEventHandledIndex = -1;
   }
 
   /**
@@ -327,6 +337,18 @@ export class WorldScene extends BaseScene {
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
+
+    if (this.#isProcessingCutSceneEvent) {
+      this.#player.update(time);
+      this.#npcs.forEach((npc) => {
+        npc.update(time);
+      });
+      if (wasSpaceKeyPressed && this.#npcPlayerIsInteractingWith) {
+        this.#handlePlayerInteraction();
+      }
+      return;
+    }
+
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
       this.#player.moveCharacter(selectedDirectionHeldDown);
     }
@@ -409,6 +431,10 @@ export class WorldScene extends BaseScene {
 
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
+      if (this.#currentCutSceneId !== undefined) {
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      }
       if (this.#npcPlayerIsInteractingWith) {
         this.#handleNpcInteraction();
       }
@@ -490,9 +516,15 @@ export class WorldScene extends BaseScene {
       y: this.#player.sprite.y,
     });
 
+    // check to see if the player encountered cut scene zone
     this.#player.sprite.getBounds(this.#rectangleForOverlapCheck1);
     for (const zone of Object.values(this.#eventZones)) {
+      // get the bounds of the player and zone for checking for overlap
       zone.getBounds(this.#rectangleForOverlapCheck2);
+
+      // reset rectangle overlap size, needed since method below will
+      // return the original rectangle unmodified if a previous match
+      // was found.
       this.#rectangleOverlapResult.setSize(0, 0);
       Phaser.Geom.Intersects.GetRectangleIntersection(
         this.#rectangleForOverlapCheck1,
@@ -501,6 +533,7 @@ export class WorldScene extends BaseScene {
       );
 
       if (ENABLE_ZONE_DEBUGGING) {
+        // for debugging the overlap checks for the events
         this.#gfx.clear();
         this.#gfx.strokeRectShape(this.#rectangleOverlapResult);
       }
@@ -509,12 +542,13 @@ export class WorldScene extends BaseScene {
         this.#rectangleOverlapResult.width >= TILE_SIZE - 10 && this.#rectangleOverlapResult.height >= TILE_SIZE - 10;
 
       if (isOverlapping) {
-        console.log(`overlapping with zone: ${zone.name}`);
-        const eventsToProcess = DataUtils.getEventData(this, zone.name);
-        console.log(eventsToProcess);
-        // TODO: add cutscene support
+        this.#currentCutSceneId = parseInt(zone.name, 10);
+        this.#startCutScene();
         break;
       }
+    }
+    if (this.#currentCutSceneId !== undefined) {
+      return;
     }
 
     if (!this.#encounterLayer) {
@@ -558,7 +592,11 @@ export class WorldScene extends BaseScene {
    */
   #isPlayerInputLocked() {
     return (
-      this._controls.isInputLocked || this.#dialogUi.isVisible || this.#menu.isVisible || this.#isProcessingNpcEvent
+      this._controls.isInputLocked ||
+      this.#dialogUi.isVisible ||
+      this.#menu.isVisible ||
+      this.#isProcessingNpcEvent ||
+      this.#currentCutSceneId !== undefined
     );
   }
 
@@ -616,6 +654,7 @@ export class WorldScene extends BaseScene {
         movementPattern: npcMovement,
         events: npcDetails.events,
         animationKeyPrefix: npcDetails.animationKeyPrefix,
+        id: npcId,
       });
       this.#npcs.push(npc);
     });
@@ -813,9 +852,8 @@ export class WorldScene extends BaseScene {
       return event.x !== undefined && event.y !== undefined;
     });
 
-    // TODO: update this to pull data from data manager
     /** @type {string[]} */
-    const viewedEvents = [];
+    const viewedEvents = dataManager.store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS);
 
     for (const tiledEvent of validEvents) {
       /** @type {string} */
@@ -840,5 +878,151 @@ export class WorldScene extends BaseScene {
         this.#debugEventZoneObjects[eventId] = debugZoneRectangle;
       }
     }
+  }
+
+  async #startCutScene() {
+    this.#isProcessingCutSceneEvent = true;
+    await sleep(500, this);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  async #handleCutSceneInteraction() {
+    if (this.#isProcessingCutSceneEvent) {
+      return;
+    }
+    if (this.#currentCutSceneId === undefined) {
+      return;
+    }
+
+    const eventsToProcess = DataUtils.getEventData(this, this.#currentCutSceneId);
+    console.log(eventsToProcess);
+
+    const isMoreEventsToProcess = eventsToProcess.events.length - 1 !== this.#lastCutSceneEventHandledIndex;
+    if (!isMoreEventsToProcess) {
+      this.#lastCutSceneEventHandledIndex = -1;
+      this.#isProcessingCutSceneEvent = false;
+      dataManager.viewedEvent(this.#currentCutSceneId);
+      this.#eventZones[this.#currentCutSceneId].destroy();
+      delete this.#eventZones[this.#currentCutSceneId];
+      if (ENABLE_ZONE_DEBUGGING) {
+        this.#gfx.clear();
+        this.#debugEventZoneObjects[this.#currentCutSceneId].destroy();
+        delete this.#debugEventZoneObjects[this.#currentCutSceneId];
+      }
+      this.#currentCutSceneId = undefined;
+
+      // TODO: end cutscene
+      await sleep(500, this);
+      return;
+    }
+
+    this.#lastCutSceneEventHandledIndex += 1;
+    const eventToHandle = eventsToProcess.events[this.#lastCutSceneEventHandledIndex];
+    const eventType = eventToHandle.type;
+    this.#isProcessingCutSceneEvent = true;
+
+    switch (eventType) {
+      case GAME_EVENT_TYPE.ADD_NPC:
+        this.#createNpcForCutScene(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.MOVE_TO_PLAYER:
+        this.#moveNpcToPlayer(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.RETRACE_PATH:
+        this.#haveNpcRetracePath(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.REMOVE_NPC:
+        this.#removeNpcForCutScene(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.TALK_TO_PLAYER:
+        this.#haveNpcTalkToPlayer(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.GIVE_MONSTER:
+        this.#addMonsterFromNpc(eventToHandle);
+        break;
+      case GAME_EVENT_TYPE.ADD_FLAG:
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+        break;
+      case GAME_EVENT_TYPE.REMOVE_FLAG:
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+        break;
+      default:
+        exhaustiveGuard(eventType);
+    }
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventAddNpc} gameEvent
+   * @returns {void}
+   */
+  #createNpcForCutScene(gameEvent) {
+    console.log('createNpcForCutScene');
+    this.time.delayedCall(500, () => {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+    });
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventMoveToPlayer} gameEvent
+   * @returns {void}
+   */
+  #moveNpcToPlayer(gameEvent) {
+    console.log('moveNpcToPlayer');
+    this.time.delayedCall(500, () => {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+    });
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventRetracePath} gameEvent
+   * @returns {void}
+   */
+  #haveNpcRetracePath(gameEvent) {
+    console.log('haveNpcRetracePath');
+    this.time.delayedCall(500, () => {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+    });
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventRemoveNpc} gameEvent
+   * @returns {void}
+   */
+  #removeNpcForCutScene(gameEvent) {
+    console.log('removeNpcForCutScene');
+    this.time.delayedCall(500, () => {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+    });
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventTalkToPlayer} gameEvent
+   * @returns {void}
+   */
+  #haveNpcTalkToPlayer(gameEvent) {
+    console.log('haveNpcTalkToPlayer');
+    this.time.delayedCall(500, () => {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+    });
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventGiveMonster} gameEvent
+   * @returns {void}
+   */
+  #addMonsterFromNpc(gameEvent) {
+    console.log('addMonsterFromNpc');
+    this.time.delayedCall(500, () => {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+    });
   }
 }

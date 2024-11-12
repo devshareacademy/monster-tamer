@@ -41,6 +41,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {MonsterData} monsters
  * @property {import('../types/typedef.js').Inventory} inventory
  * @property {number[]} itemsPickedUp
+ * @property {number[]} viewedEvents
  */
 
 /** @type {GlobalState} */
@@ -83,6 +84,7 @@ const initialState = {
     },
   ],
   itemsPickedUp: [],
+  viewedEvents: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -99,6 +101,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
   INVENTORY: 'INVENTORY',
   ITEMS_PICKED_UP: 'ITEMS_PICKED_UP',
+  VIEWED_EVENTS: 'VIEWED_EVENTS',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -189,6 +192,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     };
     existingData.inventory = initialState.inventory;
     existingData.itemsPickedUp = [...initialState.itemsPickedUp];
+    existingData.viewedEvents = [...initialState.viewedEvents];
 
     this.#store.reset();
     this.#updateDataManger(existingData);
@@ -294,6 +298,19 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * Adds the provided eventId to the viewed events in the data manager so player does
+   * not see the event again.
+   * @param {number} eventId
+   * @returns {void}
+   */
+  viewedEvent(eventId) {
+    /** @type {Set<number>} */
+    const viewedEvents = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || []);
+    viewedEvents.add(eventId);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS, Array.from(viewedEvents));
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -312,6 +329,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
       [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
+      [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
     });
   }
 
@@ -342,6 +360,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       },
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
       itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
+      viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
     };
   }
 }
