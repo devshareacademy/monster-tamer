@@ -5,10 +5,14 @@ import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
 import { ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
-import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
+import {
+  getTargetDirectionFromGameObjectPosition,
+  getTargetPathToGameObject,
+  getTargetPositionFromGameObjectPositionAndDirection,
+} from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { DialogUi } from '../world/dialog-ui.js';
-import { NPC } from '../world/characters/npc.js';
+import { NPC, NPC_MOVEMENT_PATTERN } from '../world/characters/npc.js';
 import { WorldMenu } from '../world/world-menu.js';
 import { BaseScene } from './base-scene.js';
 import { DataUtils } from '../utils/data-utils.js';
@@ -898,8 +902,14 @@ export class WorldScene extends BaseScene {
     const eventsToProcess = DataUtils.getEventData(this, this.#currentCutSceneId);
     console.log(eventsToProcess);
 
+    // check to see if the cut scene has any more events to be processed
     const isMoreEventsToProcess = eventsToProcess.events.length - 1 !== this.#lastCutSceneEventHandledIndex;
     if (!isMoreEventsToProcess) {
+      // once we are done processing the events for the cutscene, we need to do the following:
+      //   1. update our data manager to show we watched the event
+      //   2. cleanup zone game object used for the event and overlap detection
+      //   3. reset our current cut scene property
+      //   4. remove the cut scene bars from the scene
       this.#lastCutSceneEventHandledIndex = -1;
       this.#isProcessingCutSceneEvent = false;
       dataManager.viewedEvent(this.#currentCutSceneId);
@@ -917,11 +927,12 @@ export class WorldScene extends BaseScene {
       return;
     }
 
+    // get the next event from the queue and process for this npc
     this.#lastCutSceneEventHandledIndex += 1;
     const eventToHandle = eventsToProcess.events[this.#lastCutSceneEventHandledIndex];
     const eventType = eventToHandle.type;
-    this.#isProcessingCutSceneEvent = true;
 
+    this.#isProcessingCutSceneEvent = true;
     switch (eventType) {
       case GAME_EVENT_TYPE.ADD_NPC:
         this.#createNpcForCutScene(eventToHandle);
@@ -959,11 +970,24 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #createNpcForCutScene(gameEvent) {
-    console.log('createNpcForCutScene');
-    this.time.delayedCall(500, () => {
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
+    const npc = new NPC({
+      scene: this,
+      position: { x: gameEvent.data.x * TILE_SIZE, y: gameEvent.data.y * TILE_SIZE },
+      direction: gameEvent.data.direction,
+      frame: gameEvent.data.frame,
+      npcPath: {
+        0: { x: gameEvent.data.x * TILE_SIZE, y: gameEvent.data.y * TILE_SIZE },
+      },
+      movementPattern: NPC_MOVEMENT_PATTERN.IDLE,
+      events: [],
+      animationKeyPrefix: gameEvent.data.animationKeyPrefix,
+      id: gameEvent.data.id,
     });
+    this.#npcs.push(npc);
+    npc.addCharacterToCheckForCollisionsWith(this.#player);
+
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
   }
 
   /**
@@ -971,11 +995,51 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #moveNpcToPlayer(gameEvent) {
-    console.log('moveNpcToPlayer');
-    this.time.delayedCall(500, () => {
+    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
+    if (targetNpc === undefined) {
       this.#isProcessingCutSceneEvent = false;
       this.#handleCutSceneInteraction();
+      return;
+    }
+
+    // determine direction to move based on distance from player
+    const targetPath = getTargetPathToGameObject(targetNpc.sprite, this.#player.sprite);
+    const pathToFollow = targetPath.pathToFollow.splice(0, targetPath.pathToFollow.length - 1);
+
+    // if npc is already next to player, just update directions
+    if (pathToFollow.length === 0) {
+      this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+      targetNpc.facePlayer(this.#player.direction);
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+      return;
+    }
+
+    // move npc according to the path
+    const npcPath = {
+      0: { x: targetNpc.sprite.x, y: targetNpc.sprite.y },
+    };
+    pathToFollow.forEach((coordinate, index) => {
+      npcPath[index + 1] = coordinate;
     });
+
+    targetNpc.finishedMovementCallback = () => {
+      if (
+        pathToFollow[pathToFollow.length - 1].x === targetNpc.sprite.x &&
+        pathToFollow[pathToFollow.length - 1].y === targetNpc.sprite.y
+      ) {
+        this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+        targetNpc.facePlayer(this.#player.direction);
+        this.time.delayedCall(500, () => {
+          this.#isProcessingCutSceneEvent = false;
+          this.#handleCutSceneInteraction();
+        });
+      }
+    };
+
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.npcPath = npcPath;
+    targetNpc.resetMovementTime();
   }
 
   /**
@@ -983,6 +1047,13 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #haveNpcRetracePath(gameEvent) {
+    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
+    if (targetNpc === undefined) {
+      this.#isProcessingCutSceneEvent = false;
+      this.#handleCutSceneInteraction();
+      return;
+    }
+
     console.log('haveNpcRetracePath');
     this.time.delayedCall(500, () => {
       this.#isProcessingCutSceneEvent = false;
@@ -995,8 +1066,18 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #removeNpcForCutScene(gameEvent) {
-    console.log('removeNpcForCutScene');
-    this.time.delayedCall(500, () => {
+    // once we are done with an npc for a cutscene, we can remove that npc
+    // from our npc array and then start the cleanup process of destroying the game object
+    const npcToRemoveIndex = this.#npcs.findIndex((npc) => npc.id === gameEvent.data.id);
+    /** @type {NPC | undefined} */
+    let npcToRemove;
+    if (npcToRemoveIndex !== -1) {
+      npcToRemove = this.#npcs.splice(npcToRemoveIndex)[0];
+    }
+    this.time.delayedCall(100, () => {
+      if (npcToRemove !== undefined) {
+        npcToRemove.sprite.destroy();
+      }
       this.#isProcessingCutSceneEvent = false;
       this.#handleCutSceneInteraction();
     });
@@ -1007,11 +1088,16 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #haveNpcTalkToPlayer(gameEvent) {
-    console.log('haveNpcTalkToPlayer');
-    this.time.delayedCall(500, () => {
+    const targetNpc = this.#npcs.find((npc) => npc.id === gameEvent.data.id);
+    if (targetNpc === undefined) {
       this.#isProcessingCutSceneEvent = false;
       this.#handleCutSceneInteraction();
-    });
+      return;
+    }
+
+    targetNpc.isTalkingToPlayer = true;
+    this.#npcPlayerIsInteractingWith = targetNpc;
+    this.#dialogUi.showDialogModal(gameEvent.data.messages);
   }
 
   /**
