@@ -200,9 +200,9 @@ Cutscenes & In Game Events:
     ✔ update npc json file to support required story flags @done(24-11-13 12:50)
     ✔ update events json file to support setting and removing flags @done(24-11-13 12:50)
     ✔ add data types for story flags @done(24-11-13 12:50)
-  ☐ cutscenes
-    ☐ create new cutscene class and trigger from world scene
-    ☐ update dialog ui to be a new scene
+  ✔ cutscenes @done(24-11-13 13:52)
+    ✔ create new cutscene class and trigger from world scene @done(24-11-13 13:26)
+    ✔ update dialog ui to be a new scene @done(24-11-13 13:52)
 
 -------------------------------
 
