@@ -121,17 +121,6 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
-   * @param {Phaser.Scene} scene
-   * @returns {void}
-   */
-  init(scene) {
-    const startingMonster = DataUtils.getMonsterById(scene, 1);
-    const startingMonster2 = DataUtils.getMonsterById(scene, 2);
-    const startingMonster3 = DataUtils.getMonsterById(scene, 3);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, [startingMonster, startingMonster2, startingMonster3]);
-  }
-
-  /**
    * @returns {void}
    */
   loadData() {
@@ -175,11 +164,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
-  /**
-   * @param {Phaser.Scene} scene
-   * @returns {void}
-   */
-  startNewGame(scene) {
+  startNewGame() {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
@@ -196,7 +181,6 @@ class DataManager extends Phaser.Events.EventEmitter {
 
     this.#store.reset();
     this.#updateDataManger(existingData);
-    this.init(scene);
     this.saveData();
   }
 

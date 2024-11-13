@@ -389,6 +389,13 @@ export class WorldScene extends BaseScene {
         }
 
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
+          // at start of the game, handle when we have no monsters in our party
+          if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length === 0) {
+            this.#dialogUi.showDialogModal(['You have no monsters in your party.']);
+            this.#menu.hide();
+            return;
+          }
+
           // pause this scene and launch the monster party scene
           /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
           const sceneDataToPass = {
@@ -1054,11 +1061,41 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    console.log('haveNpcRetracePath');
-    this.time.delayedCall(500, () => {
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
+    // have npc retrace their steps by reversing the existing npc path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
+    const updatedPath = {};
+    const pathKeys = Object.keys(targetNpc.npcPath).reverse();
+
+    pathKeys.forEach((pathKey, index) => {
+      updatedPath[index] = targetNpc.npcPath[pathKey];
     });
+
+    // if npc is already next to player, there will be only 1 position in the npc path
+    // when this happens, we need to just updates the npcs direction
+    if (pathKeys.length === 1) {
+      targetNpc.facePlayer(gameEvent.data.direction);
+      this.time.delayedCall(500, () => {
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      });
+      return;
+    }
+
+    targetNpc.finishedMovementCallback = () => {
+      if (
+        updatedPath[pathKeys.length - 1].x === targetNpc.sprite.x &&
+        updatedPath[pathKeys.length - 1].y === targetNpc.sprite.y
+      ) {
+        this.time.delayedCall(500, () => {
+          this.#isProcessingCutSceneEvent = false;
+          this.#handleCutSceneInteraction();
+        });
+      }
+    };
+
+    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    targetNpc.npcPath = updatedPath;
+    targetNpc.resetMovementTime();
   }
 
   /**
@@ -1105,10 +1142,14 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #addMonsterFromNpc(gameEvent) {
-    console.log('addMonsterFromNpc');
-    this.time.delayedCall(500, () => {
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
-    });
+    // TODO: add check to see if party is full and do something with 7th monster that is being added
+    /** @type {import('../types/typedef.js').Monster[]} */
+    const monstersInParty = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
+    const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);
+    monstersInParty.push(newMonster);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
+
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
   }
 }
