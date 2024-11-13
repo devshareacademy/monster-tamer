@@ -553,9 +553,17 @@ export class WorldScene extends BaseScene {
         this.#rectangleOverlapResult.width >= TILE_SIZE - 10 && this.#rectangleOverlapResult.height >= TILE_SIZE - 10;
 
       if (isOverlapping) {
-        this.#currentCutSceneId = parseInt(zone.name, 10);
-        this.#startCutScene();
-        break;
+        const eventId = parseInt(zone.name, 10);
+        const eventData = DataUtils.getEventData(this, eventId);
+        const currentGameFlags = dataManager.getFlags();
+        const eventRequirementsMet = eventData.requires.every((flag) => {
+          return currentGameFlags.has(flag);
+        });
+        if (eventRequirementsMet) {
+          this.#currentCutSceneId = parseInt(zone.name, 10);
+          this.#startCutScene();
+          break;
+        }
       }
     }
     if (this.#currentCutSceneId !== undefined) {
@@ -810,6 +818,17 @@ export class WorldScene extends BaseScene {
     const eventToHandle = this.#npcPlayerIsInteractingWith.events[this.#lastNpcEventHandledIndex];
     const eventType = eventToHandle.type;
 
+    // check to see if this event should be handled based on story flags
+    const currentGameFlags = dataManager.getFlags();
+    const eventRequirementsMet = eventToHandle.requires.every((flag) => {
+      return currentGameFlags.has(flag);
+    });
+    if (!eventRequirementsMet) {
+      // jump to next event
+      this.#handleNpcInteraction();
+      return;
+    }
+
     switch (eventType) {
       case NPC_EVENT_TYPE.MESSAGE:
         this.#dialogUi.showDialogModal(eventToHandle.data.messages);
@@ -960,12 +979,10 @@ export class WorldScene extends BaseScene {
         this.#addMonsterFromNpc(eventToHandle);
         break;
       case GAME_EVENT_TYPE.ADD_FLAG:
-        this.#isProcessingCutSceneEvent = false;
-        this.#handleCutSceneInteraction();
+        this.#addGameFlag(eventToHandle);
         break;
       case GAME_EVENT_TYPE.REMOVE_FLAG:
-        this.#isProcessingCutSceneEvent = false;
-        this.#handleCutSceneInteraction();
+        this.#removeGameFlag(eventToHandle);
         break;
       default:
         exhaustiveGuard(eventType);
@@ -1149,6 +1166,26 @@ export class WorldScene extends BaseScene {
     monstersInParty.push(newMonster);
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
 
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventAddFlag} gameEvent
+   * @returns {void}
+   */
+  #addGameFlag(gameEvent) {
+    dataManager.addFlag(gameEvent.data.flag);
+    this.#isProcessingCutSceneEvent = false;
+    this.#handleCutSceneInteraction();
+  }
+
+  /**
+   * @param {import('../types/typedef.js').GameEventRemoveFlag} gameEvent
+   * @returns {void}
+   */
+  #removeGameFlag(gameEvent) {
+    dataManager.removeFlag(gameEvent.data.flag);
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }
