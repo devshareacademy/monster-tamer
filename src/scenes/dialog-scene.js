@@ -1,8 +1,10 @@
 import Phaser from '../lib/phaser.js';
+import { SCENE_KEYS } from './scene-keys.js';
+import { BaseScene } from './base-scene.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { animateText } from '../utils/text-utils.js';
-import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { MENU_COLOR } from '../config.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 
@@ -14,9 +16,7 @@ const UI_TEXT_STYLE = Object.freeze({
   wordWrap: { width: 0 },
 });
 
-export class DialogUi {
-  /** @type {Phaser.Scene} */
-  #scene;
+export class DialogScene extends BaseScene {
   /** @type {number} */
   #padding;
   /** @type {number} */
@@ -38,31 +38,10 @@ export class DialogUi {
   /** @type {string[]} */
   #messagesToShow;
 
-  /**
-   * @param {Phaser.Scene} scene
-   * @param {number} width
-   */
-  constructor(scene, width) {
-    this.#scene = scene;
-    this.#padding = 90;
-    this.#width = width - this.#padding * 2;
-    this.#height = 124;
-    this.#textAnimationPlaying = false;
-    this.#messagesToShow = [];
-
-    const menuColor = this.#getMenuColorsFromDataManager();
-    const panel = this.#scene.add
-      .rectangle(0, 0, this.#width, this.#height, menuColor.main, 0.9)
-      .setOrigin(0)
-      .setStrokeStyle(8, menuColor.border, 1);
-    this.#container = this.#scene.add.container(0, 0, [panel]);
-    this.#uiText = this.#scene.add.text(18, 12, '', {
-      ...UI_TEXT_STYLE,
-      ...{ wordWrap: { width: this.#width - 18 } },
+  constructor() {
+    super({
+      key: SCENE_KEYS.DIALOG_SCENE,
     });
-    this.#container.add(this.#uiText);
-    this.#createPlayerInputCursor();
-    this.hideDialogModal();
   }
 
   /** @type {boolean} */
@@ -81,13 +60,40 @@ export class DialogUi {
   }
 
   /**
+   * @returns {void}
+   */
+  create() {
+    this.#padding = 90;
+    this.#width = 1280 - this.#padding * 2;
+    this.#height = 124;
+    this.#textAnimationPlaying = false;
+    this.#messagesToShow = [];
+    this.cameras.main.setZoom(0.8);
+
+    const menuColor = this.#getMenuColorsFromDataManager();
+    const panel = this.add
+      .rectangle(0, 0, this.#width, this.#height, menuColor.main, 0.9)
+      .setOrigin(0)
+      .setStrokeStyle(8, menuColor.border, 1);
+    this.#container = this.add.container(0, 0, [panel]);
+    this.#uiText = this.add.text(18, 12, '', {
+      ...UI_TEXT_STYLE,
+      ...{ wordWrap: { width: this.#width - 18 } },
+    });
+    this.#container.add(this.#uiText);
+    this.#createPlayerInputCursor();
+    this.hideDialogModal();
+    this.scene.bringToTop();
+  }
+
+  /**
    * @param {string[]} messages
    * @returns {void}
    */
   showDialogModal(messages) {
     this.#messagesToShow = [...messages];
 
-    const { x, bottom } = this.#scene.cameras.main.worldView;
+    const { x, bottom } = this.cameras.main.worldView;
     const startX = x + this.#padding;
     const startY = bottom - this.#height - this.#padding / 4;
 
@@ -108,7 +114,7 @@ export class DialogUi {
     }
 
     this.#uiText.setText('').setAlpha(1);
-    animateText(this.#scene, this.#uiText, this.#messagesToShow.shift(), {
+    animateText(this, this.#uiText, this.#messagesToShow.shift(), {
       delay: dataManager.getAnimatedTextSpeed(),
       callback: () => {
         this.#textAnimationPlaying = false;
@@ -131,10 +137,10 @@ export class DialogUi {
    */
   #createPlayerInputCursor() {
     const y = this.#height - 24;
-    this.#userInputCursor = this.#scene.add.image(this.#width - 16, y, UI_ASSET_KEYS.CURSOR);
+    this.#userInputCursor = this.add.image(this.#width - 16, y, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursor.setAngle(90).setScale(4.5, 2);
 
-    this.#userInputCursorTween = this.#scene.add.tween({
+    this.#userInputCursorTween = this.add.tween({
       delay: 0,
       duration: 500,
       repeat: -1,

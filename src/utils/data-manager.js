@@ -4,6 +4,7 @@ import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
 import { DataUtils } from './data-utils.js';
+import { GAME_FLAG } from '../types/typedef.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 
@@ -41,13 +42,15 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {MonsterData} monsters
  * @property {import('../types/typedef.js').Inventory} inventory
  * @property {number[]} itemsPickedUp
+ * @property {number[]} viewedEvents
+ * @property {import('../types/typedef.js').GameFlag[]} flags
  */
 
 /** @type {GlobalState} */
 const initialState = {
   player: {
     position: {
-      x: 6 * TILE_SIZE,
+      x: 4 * TILE_SIZE,
       y: 21 * TILE_SIZE,
     },
     direction: DIRECTION.DOWN,
@@ -83,6 +86,8 @@ const initialState = {
     },
   ],
   itemsPickedUp: [],
+  viewedEvents: [],
+  flags: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -99,6 +104,8 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
   INVENTORY: 'INVENTORY',
   ITEMS_PICKED_UP: 'ITEMS_PICKED_UP',
+  VIEWED_EVENTS: 'VIEWED_EVENTS',
+  FLAGS: 'FLAGS',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -115,17 +122,6 @@ class DataManager extends Phaser.Events.EventEmitter {
   /** @type {Phaser.Data.DataManager} */
   get store() {
     return this.#store;
-  }
-
-  /**
-   * @param {Phaser.Scene} scene
-   * @returns {void}
-   */
-  init(scene) {
-    const startingMonster = DataUtils.getMonsterById(scene, 1);
-    const startingMonster2 = DataUtils.getMonsterById(scene, 2);
-    const startingMonster3 = DataUtils.getMonsterById(scene, 3);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, [startingMonster, startingMonster2, startingMonster3]);
   }
 
   /**
@@ -173,10 +169,9 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
-   * @param {Phaser.Scene} scene
    * @returns {void}
    */
-  startNewGame(scene) {
+  startNewGame() {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
@@ -189,10 +184,11 @@ class DataManager extends Phaser.Events.EventEmitter {
     };
     existingData.inventory = initialState.inventory;
     existingData.itemsPickedUp = [...initialState.itemsPickedUp];
+    existingData.viewedEvents = [...initialState.viewedEvents];
+    existingData.flags = [...initialState.flags];
 
     this.#store.reset();
     this.#updateDataManger(existingData);
-    this.init(scene);
     this.saveData();
   }
 
@@ -257,6 +253,7 @@ class DataManager extends Phaser.Events.EventEmitter {
   /**
    * @param {import('../types/typedef.js').Item} item
    * @param {number} quantity
+   * @returns {void}
    */
   addItem(item, quantity) {
     /** @type {import('../types/typedef.js').Inventory} */
@@ -277,6 +274,7 @@ class DataManager extends Phaser.Events.EventEmitter {
 
   /**
    * @param {number} itemId
+   * @returns {void}
    */
   addItemPickedUp(itemId) {
     /** @type {number[]} */
@@ -291,6 +289,48 @@ class DataManager extends Phaser.Events.EventEmitter {
   isPartyFull() {
     const partySize = this.#store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length;
     return partySize === 6;
+  }
+
+  /**
+   * Adds the provided eventId to the viewed events in the data manager so player does
+   * not see the event again.
+   * @param {number} eventId
+   * @returns {void}
+   */
+  viewedEvent(eventId) {
+    /** @type {Set<number>} */
+    const viewedEvents = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || []);
+    viewedEvents.add(eventId);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS, Array.from(viewedEvents));
+  }
+
+  /**
+   * @returns {Set<string>}
+   */
+  getFlags() {
+    return new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || []);
+  }
+
+  /**
+   * @param {GAME_FLAG} flag
+   * @returns {void}
+   */
+  addFlag(flag) {
+    /** @type {Set<string>} */
+    const existingFlags = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || []);
+    existingFlags.add(flag);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.FLAGS, Array.from(existingFlags));
+  }
+
+  /**
+   * @param {GAME_FLAG} flag
+   * @returns {void}
+   */
+  removeFlag(flag) {
+    /** @type {Set<string>} */
+    const existingFlags = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || []);
+    existingFlags.delete(flag);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.FLAGS, Array.from(existingFlags));
   }
 
   /**
@@ -312,6 +352,8 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY]: data.monsters.inParty,
       [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
       [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
+      [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
+      [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
     });
   }
 
@@ -342,6 +384,8 @@ class DataManager extends Phaser.Events.EventEmitter {
       },
       inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
       itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
+      viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
+      flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
     };
   }
 }
