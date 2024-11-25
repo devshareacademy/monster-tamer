@@ -313,14 +313,6 @@ class DataManager extends Phaser.Events.EventEmitter {
 
   /**
    * @param {GAME_FLAG} flag
-   * @returns {boolean}
-   */
-  getFlag(flag) {
-    return this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS)[flag] || false;
-  }
-
-  /**
-   * @param {GAME_FLAG} flag
    * @returns {void}
    */
   addFlag(flag) {
