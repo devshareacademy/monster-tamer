@@ -3,8 +3,8 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { BaseScene } from './base-scene.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { animateText } from '../utils/text-utils.js';
-import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { MENU_COLOR } from '../config.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 
@@ -83,7 +83,6 @@ export class DialogScene extends BaseScene {
     this.#container.add(this.#uiText);
     this.#createPlayerInputCursor();
     this.hideDialogModal();
-
     this.scene.bringToTop();
   }
 

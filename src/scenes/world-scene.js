@@ -210,6 +210,7 @@ export class WorldScene extends BaseScene {
   create() {
     super.create();
 
+    // create rectangles for checking for overlaps between game objects, added so we can recycle game objects
     this.#rectangleForOverlapCheck1 = new Phaser.Geom.Rectangle();
     this.#rectangleForOverlapCheck2 = new Phaser.Geom.Rectangle();
     this.#rectangleOverlapResult = new Phaser.Geom.Rectangle();
@@ -322,7 +323,6 @@ export class WorldScene extends BaseScene {
 
     // add audio
     playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
-
     // add UI scene for cutscene and dialog
     this.scene.launch(SCENE_KEYS.CUTSCENE_SCENE);
     this.scene.launch(SCENE_KEYS.DIALOG_SCENE);
@@ -913,6 +913,9 @@ export class WorldScene extends BaseScene {
     }
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async #startCutScene() {
     this.#isProcessingCutSceneEvent = true;
     await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).startCutScene();
@@ -921,6 +924,9 @@ export class WorldScene extends BaseScene {
     this.#handleCutSceneInteraction();
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async #handleCutSceneInteraction() {
     if (this.#isProcessingCutSceneEvent) {
       return;
@@ -930,7 +936,6 @@ export class WorldScene extends BaseScene {
     }
 
     const eventsToProcess = DataUtils.getEventData(this, this.#currentCutSceneId);
-    console.log(eventsToProcess);
 
     // check to see if the cut scene has any more events to be processed
     const isMoreEventsToProcess = eventsToProcess.events.length - 1 !== this.#lastCutSceneEventHandledIndex;
@@ -1044,6 +1049,7 @@ export class WorldScene extends BaseScene {
     }
 
     // move npc according to the path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
     const npcPath = {
       0: { x: targetNpc.sprite.x, y: targetNpc.sprite.y },
     };
@@ -1064,7 +1070,6 @@ export class WorldScene extends BaseScene {
         });
       }
     };
-
     targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
     targetNpc.npcPath = npcPath;
     targetNpc.resetMovementTime();
@@ -1169,7 +1174,6 @@ export class WorldScene extends BaseScene {
     const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);
     monstersInParty.push(newMonster);
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, monstersInParty);
-
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }

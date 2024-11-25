@@ -133,6 +133,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {string[]} requires
  * @property {object} data
  * @property {string[]} data.messages
+ * @property {string[]} requires
  */
 
 /**
@@ -144,6 +145,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {number} data.fadeInDuration
  * @property {number} data.fadeOutDuration
  * @property {number} data.waitDuration
+ * @property {string[]} requires
  */
 
 /**
@@ -152,6 +154,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {'HEAL'} type
  * @property {string[]} requires
  * @property {object} data
+ * @property {string[]} requires
  */
 
 /**
@@ -244,6 +247,7 @@ export const GAME_EVENT_TYPE = Object.freeze({
  * @property {object} data
  * @property {number} data.id
  */
+
 /**
  * @typedef GameEventAddFlag
  * @type {object}
@@ -278,7 +282,6 @@ export const GAME_EVENT_TYPE = Object.freeze({
  */
 
 /** Game Flags Data Types */
-
 /**
  * @typedef {keyof typeof GAME_FLAG} GameFlag
  */

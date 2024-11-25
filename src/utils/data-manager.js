@@ -168,6 +168,9 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
+  /**
+   * @returns {void}
+   */
   startNewGame() {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
@@ -250,6 +253,7 @@ class DataManager extends Phaser.Events.EventEmitter {
   /**
    * @param {import('../types/typedef.js').Item} item
    * @param {number} quantity
+   * @returns {void}
    */
   addItem(item, quantity) {
     /** @type {import('../types/typedef.js').Inventory} */
@@ -270,6 +274,7 @@ class DataManager extends Phaser.Events.EventEmitter {
 
   /**
    * @param {number} itemId
+   * @returns {void}
    */
   addItemPickedUp(itemId) {
     /** @type {number[]} */
