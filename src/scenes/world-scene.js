@@ -301,10 +301,10 @@ export class WorldScene extends BaseScene {
 
     // create event zones
     this.#createEventEncounterZones(map);
+
     if (ENABLE_ZONE_DEBUGGING) {
-      this.#gfx = this.add.graphics({
-        lineStyle: { width: 4, color: 0x00ffff },
-      });
+      // used for debugging the overlaps for event zones
+      this.#gfx = this.add.graphics({ lineStyle: { width: 4, color: 0x00ffff } });
     }
 
     this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
