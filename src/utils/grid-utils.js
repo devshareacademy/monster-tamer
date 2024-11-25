@@ -64,15 +64,7 @@ export function getTargetPathToGameObject(currentPosition, targetPosition) {
   }
 
   while (position.x !== targetPosition.x || position.y !== targetPosition.y) {
-    /** @type {import('../common/direction.js').Direction} */
-    let targetDirection = DIRECTION.RIGHT;
-    if (targetPosition.y > position.y) {
-      targetDirection = DIRECTION.DOWN;
-    } else if (targetPosition.y < position.y) {
-      targetDirection = DIRECTION.UP;
-    } else if (targetPosition.x < position.x) {
-      targetDirection = DIRECTION.LEFT;
-    }
+    const targetDirection = getTargetDirectionFromGameObjectPosition(position, targetPosition);
     directionsToFollow.push(targetDirection);
     position = getTargetPositionFromGameObjectPositionAndDirection(position, targetDirection);
     pathToFollow.push(position);

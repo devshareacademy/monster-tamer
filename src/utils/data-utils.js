@@ -87,7 +87,7 @@ export class DataUtils {
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {string} eventId
+   * @param {number} eventId the event id to retrieve from the events.json file
    * @returns {import('../types/typedef.js').EventDetails}
    */
   static getEventData(scene, eventId) {

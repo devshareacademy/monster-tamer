@@ -198,7 +198,10 @@ export class NPC extends Character {
             this.#currentPathIndex = 0;
             return;
           }
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
           nextPosition = this.#npcPath[0];
           this.#currentPathIndex = 0;
         } else {
@@ -238,18 +241,30 @@ export class NPC extends Character {
       case DIRECTION.UP:
         if (
           !this._phaserGameObject.anims.isPlaying ||
+<<<<<<< HEAD
           this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}${this._direction}`
         ) {
           this._phaserGameObject.play(`${this.#animationKeyPrefix}${this._direction}`);
+=======
+          this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}_${this._direction}`
+        ) {
+          this._phaserGameObject.play(`${this.#animationKeyPrefix}_${this._direction}`);
+>>>>>>> main
           this._phaserGameObject.setFlipX(false);
         }
         break;
       case DIRECTION.LEFT:
         if (
           !this._phaserGameObject.anims.isPlaying ||
+<<<<<<< HEAD
           this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}${DIRECTION.RIGHT}`
         ) {
           this._phaserGameObject.play(`${this.#animationKeyPrefix}${DIRECTION.RIGHT}`);
+=======
+          this._phaserGameObject.anims.currentAnim?.key !== `${this.#animationKeyPrefix}_${DIRECTION.RIGHT}`
+        ) {
+          this._phaserGameObject.play(`${this.#animationKeyPrefix}_${DIRECTION.RIGHT}`);
+>>>>>>> main
           this._phaserGameObject.setFlipX(true);
         }
         break;

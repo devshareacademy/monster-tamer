@@ -130,6 +130,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcEventMessage
  * @type {object}
  * @property {'MESSAGE'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {string[]} data.messages
  * @property {string[]} requires
@@ -139,6 +140,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcEventSceneFadeInAndOut
  * @type {object}
  * @property {'SCENE_FADE_IN_AND_OUT'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {number} data.fadeInDuration
  * @property {number} data.fadeOutDuration
@@ -150,6 +152,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcEventHeal
  * @type {object}
  * @property {'HEAL'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {string[]} requires
  */
@@ -188,15 +191,6 @@ export const GAME_EVENT_TYPE = Object.freeze({
   GIVE_MONSTER: 'GIVE_MONSTER',
   ADD_FLAG: 'ADD_FLAG',
   REMOVE_FLAG: 'REMOVE_FLAG',
-});
-
-/**
- * @typedef {keyof typeof GAME_EVENT_POSITION_TARGET_TYPE} GameEventPositionObjectTargetType
- */
-
-/** @enum {GameEventPositionObjectTargetType} */
-export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
-  NPC: 'NPC',
 });
 
 /**
@@ -278,6 +272,7 @@ export const GAME_EVENT_POSITION_TARGET_TYPE = Object.freeze({
 /**
  * @typedef EventDetails
  * @type {object}
+ * @property {string[]} requires
  * @property {GameEvent[]} events
  */
 

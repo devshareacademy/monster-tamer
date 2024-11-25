@@ -687,19 +687,18 @@
     {
       "draworder": "topdown",
       "id": 28,
-      "locked": true,
       "name": "Events",
       "objects": [
         {
           "gid": 189,
           "height": 128,
-          "id": 25,
+          "id": 27,
           "name": "",
           "properties": [
             {
               "name": "id",
-              "type": "string",
-              "value": "1"
+              "type": "int",
+              "value": 1
             }
           ],
           "rotation": 0,
@@ -712,13 +711,13 @@
         {
           "gid": 189,
           "height": 128,
-          "id": 26,
+          "id": 29,
           "name": "",
           "properties": [
             {
               "name": "id",
-              "type": "string",
-              "value": "2"
+              "type": "int",
+              "value": 2
             }
           ],
           "rotation": 0,
@@ -909,7 +908,7 @@
     }
   ],
   "nextlayerid": 29,
-  "nextobjectid": 27,
+  "nextobjectid": 30,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.10.0",
@@ -918,7 +917,7 @@
     {
       "columns": 8,
       "firstgid": 1,
-      "image": "cleanup/monster-tamer-tiled-assets/BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
+      "image": "monster-tamer-tiled-assets/BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
       "imageheight": 512,
       "imagewidth": 512,
       "margin": 0,
@@ -931,7 +930,7 @@
     {
       "columns": 15,
       "firstgid": 65,
-      "image": "cleanup/monster-tamer-tiled-assets/Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
+      "image": "monster-tamer-tiled-assets/Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
       "imageheight": 512,
       "imagewidth": 960,
       "margin": 0,
@@ -944,7 +943,7 @@
     {
       "columns": 2,
       "firstgid": 185,
-      "image": "cleanup/monster-tamer-tiled-assets/grass.png",
+      "image": "monster-tamer-tiled-assets/grass.png",
       "imageheight": 128,
       "imagewidth": 128,
       "margin": 0,
@@ -957,7 +956,7 @@
     {
       "columns": 1,
       "firstgid": 189,
-      "image": "cleanup/monster-tamer-tiled-assets/collision.png",
+      "image": "monster-tamer-tiled-assets/collision.png",
       "imageheight": 64,
       "imagewidth": 64,
       "margin": 0,
@@ -970,7 +969,7 @@
     {
       "columns": 2,
       "firstgid": 190,
-      "image": "cleanup/monster-tamer-tiled-assets/bushes.png",
+      "image": "monster-tamer-tiled-assets/bushes.png",
       "imageheight": 128,
       "imagewidth": 128,
       "margin": 0,
@@ -983,7 +982,7 @@
     {
       "columns": 1,
       "firstgid": 194,
-      "image": "cleanup/monster-tamer-tiled-assets/encounter.png",
+      "image": "monster-tamer-tiled-assets/encounter.png",
       "imageheight": 64,
       "imagewidth": 64,
       "margin": 0,
@@ -1002,7 +1001,7 @@
     {
       "columns": 4,
       "firstgid": 195,
-      "image": "cleanup/monster-tamer-tiled-assets/house2_scaled_4x_pngcrushed.png",
+      "image": "monster-tamer-tiled-assets/house2_scaled_4x_pngcrushed.png",
       "imageheight": 192,
       "imagewidth": 256,
       "margin": 0,
@@ -1016,7 +1015,7 @@
       "class": "npc",
       "columns": 1,
       "firstgid": 207,
-      "image": "cleanup/monster-tamer-tiled-assets/encounter.png",
+      "image": "monster-tamer-tiled-assets/encounter.png",
       "imageheight": 64,
       "imagewidth": 64,
       "margin": 0,
@@ -1042,7 +1041,7 @@
     {
       "columns": 12,
       "firstgid": 208,
-      "image": "cleanup/monster-tamer-tiled-assets/AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png",
+      "image": "monster-tamer-tiled-assets/AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png",
       "imageheight": 640,
       "imagewidth": 768,
       "margin": 0,
@@ -1055,7 +1054,7 @@
     {
       "columns": 3,
       "firstgid": 328,
-      "image": "cleanup/monster-tamer-tiled-assets/entrance.png",
+      "image": "monster-tamer-tiled-assets/entrance.png",
       "imageheight": 64,
       "imagewidth": 192,
       "margin": 0,

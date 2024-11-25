@@ -42,8 +42,8 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {MonsterData} monsters
  * @property {import('../types/typedef.js').Inventory} inventory
  * @property {number[]} itemsPickedUp
- * @property {string[]} viewedEvents
- * @property {GAME_FLAG[]} flags
+ * @property {number[]} viewedEvents
+ * @property {import('../types/typedef.js').GameFlag[]} flags
  */
 
 /** @type {GlobalState} */
@@ -184,7 +184,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     };
     existingData.inventory = initialState.inventory;
     existingData.itemsPickedUp = [...initialState.itemsPickedUp];
-    existingData.viewedEvents = initialState.viewedEvents;
+    existingData.viewedEvents = [...initialState.viewedEvents];
     existingData.flags = [...initialState.flags];
 
     this.#store.reset();
@@ -294,11 +294,11 @@ class DataManager extends Phaser.Events.EventEmitter {
   /**
    * Adds the provided eventId to the viewed events in the data manager so player does
    * not see the event again.
-   * @param {string} eventId
+   * @param {number} eventId
    * @returns {void}
    */
   viewedEvent(eventId) {
-    /** @type {Set<string>} */
+    /** @type {Set<number>} */
     const viewedEvents = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || []);
     viewedEvents.add(eventId);
     this.#store.set(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS, Array.from(viewedEvents));
@@ -309,14 +309,6 @@ class DataManager extends Phaser.Events.EventEmitter {
    */
   getFlags() {
     return new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || []);
-  }
-
-  /**
-   * @param {GAME_FLAG} flag
-   * @returns {boolean}
-   */
-  getFlag(flag) {
-    return this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS)[flag] || false;
   }
 
   /**
