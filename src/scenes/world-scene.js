@@ -299,7 +299,7 @@ export class WorldScene extends BaseScene {
     // create menu
     this.#menu = new WorldMenu(this);
 
-    // create events
+    // create event zones
     this.#createEventEncounterZones(map);
 
     if (ENABLE_ZONE_DEBUGGING) {
@@ -913,6 +913,9 @@ export class WorldScene extends BaseScene {
     }
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async #startCutScene() {
     this.#isProcessingCutSceneEvent = true;
     await /** @type {CutsceneScene} */ (this.scene.get(SCENE_KEYS.CUTSCENE_SCENE)).startCutScene();
