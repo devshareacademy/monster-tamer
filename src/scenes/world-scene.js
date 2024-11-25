@@ -323,10 +323,6 @@ export class WorldScene extends BaseScene {
 
     // add audio
     playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
-<<<<<<< HEAD
-=======
-
->>>>>>> main
     // add UI scene for cutscene and dialog
     this.scene.launch(SCENE_KEYS.CUTSCENE_SCENE);
     this.scene.launch(SCENE_KEYS.DIALOG_SCENE);
@@ -827,10 +823,6 @@ export class WorldScene extends BaseScene {
 
     // check to see if this event should be handled based on story flags
     const currentGameFlags = dataManager.getFlags();
-<<<<<<< HEAD
-
-=======
->>>>>>> main
     const eventRequirementsMet = eventToHandle.requires.every((flag) => {
       return currentGameFlags.has(flag);
     });
@@ -921,7 +913,7 @@ export class WorldScene extends BaseScene {
     }
   }
 
-    /**
+  /**
    * @returns {Promise<void>}
    */
   async #startCutScene() {
