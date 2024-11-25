@@ -130,6 +130,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcEventMessage
  * @type {object}
  * @property {'MESSAGE'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {string[]} data.messages
  * @property {string[]} requires
@@ -139,6 +140,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcEventSceneFadeInAndOut
  * @type {object}
  * @property {'SCENE_FADE_IN_AND_OUT'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {number} data.fadeInDuration
  * @property {number} data.fadeOutDuration
@@ -150,6 +152,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcEventHeal
  * @type {object}
  * @property {'HEAL'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {string[]} requires
  */
@@ -269,6 +272,7 @@ export const GAME_EVENT_TYPE = Object.freeze({
 /**
  * @typedef EventDetails
  * @type {object}
+ * @property {string[]} requires
  * @property {GameEvent[]} events
  */
 
