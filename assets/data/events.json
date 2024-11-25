@@ -1,0 +1,118 @@
+{
+  "1": {
+    "requires": [],
+    "events": [
+      {
+        "type": "ADD_NPC",
+        "data": {
+          "direction": "DOWN",
+          "x": 6,
+          "y": 21,
+          "frame": 30,
+          "id": 1001,
+          "animationKeyPrefix": "NPC_4"
+        }
+      },
+      {
+        "type": "MOVE_TO_PLAYER",
+        "data": {
+          "id": 1001
+        }
+      },
+      {
+        "type": "TALK_TO_PLAYER",
+        "data": {
+          "id": 1001,
+          "messages": [
+            "I know all kids must leave home one day...",
+            "Right! I must be strong.",
+            "The professor next door was looking for you."
+          ]
+        }
+      },
+      {
+        "type": "RETRACE_PATH",
+        "data": {
+          "id": 1001,
+          "direction": "DOWN"
+        }
+      },
+      {
+        "type": "REMOVE_NPC",
+        "data": {
+          "id": 1001
+        }
+      },
+      {
+        "type": "ADD_FLAG",
+        "data": {
+          "flag": "LOOKING_FOR_PROFESSOR"
+        }
+      }
+    ]
+  },
+  "2": {
+    "requires": ["LOOKING_FOR_PROFESSOR"],
+    "events": [
+      {
+        "type": "ADD_NPC",
+        "data": {
+          "direction": "DOWN",
+          "x": 10,
+          "y": 11,
+          "frame": 40,
+          "id": 1002,
+          "animationKeyPrefix": "NPC_5"
+        }
+      },
+      {
+        "type": "MOVE_TO_PLAYER",
+        "data": {
+          "id": 1002
+        }
+      },
+      {
+        "type": "TALK_TO_PLAYER",
+        "data": {
+          "id": 1002,
+          "messages": [
+            "Wait right there!",
+            "Going into the wild grass is dangerous without your own partner.",
+            "Please take this Iguanignite..."
+          ]
+        }
+      },
+      {
+        "type": "GIVE_MONSTER",
+        "data": {
+          "id": 1
+        }
+      },
+      {
+        "type": "RETRACE_PATH",
+        "data": {
+          "id": 1002,
+          "direction": "DOWN"
+        }
+      },
+      {
+        "type": "REMOVE_NPC",
+        "data": {
+          "id": 1002
+        }
+      },
+      {
+        "type": "REMOVE_FLAG",
+        "data": {
+          "flag": "LOOKING_FOR_PROFESSOR"
+        }
+      },
+      {
+        "type": "ADD_FLAG",
+        "data": {
+          "flag": "FOUND_PROFESSOR"
+        }
+      }
+    ]
+  }
+}

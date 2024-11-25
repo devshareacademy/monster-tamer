@@ -180,29 +180,29 @@ Catching Monsters:
   ✔ review monster catching logic @done(24-08-26 10:09)
 
 Cutscenes & In Game Events:
-  ☐ update npc animation logic
-    ☐ add new npc animations to animation json file
-    ☐ update npc json file to support animation key prefix
-    ☐ update npc class to support animation prefix
-  ☐ update map data
-    ☐ update tilemap to show event areas
-    ☐ update world scene to create event zone areas
-    ☐ update world scene update logic to check for overlaps with event zones
-  ☐ story events
-    ☐ create events json file for cutscenes
-    ☐ add events data types
-    ☐ update data utils for parsing events data
-    ☐ update data manager for viewed events
-    ☐ update npc class to support custom movement path
-    ☐ update world scene to handle custom events
-  ☐ story flags
-    ☐ update data manager for story flags
-    ☐ update npc json file to support required story flags
-    ☐ update events json file to support setting and removing flags
-    ☐ add data types for story flags
-  ☐ cutscenes
-    ☐ create new cutscene class and trigger from world scene
-    ☐ update dialog ui to be a new scene
+  ✔ update npc animation logic @done(24-11-06 09:30)
+    ✔ add new npc animations to animation json file @done(24-11-06 09:30)
+    ✔ update npc json file to support animation key prefix @done(24-11-06 09:30)
+    ✔ update npc class to support animation prefix @done(24-11-06 09:30)
+  ✔ update map data @done(24-11-07 10:20)
+    ✔ update tilemap to show event areas @done(24-11-06 12:47)
+    ✔ update world scene to create event zone areas @done(24-11-07 10:20)
+    ✔ update world scene update logic to check for overlaps with event zones @done(24-11-07 10:20)
+  ✔ story events @done(24-11-13 06:09)
+    ✔ create events json file for cutscenes @done(24-11-07 11:17)
+    ✔ add events data types @done(24-11-07 11:17)
+    ✔ update data utils for parsing events data @done(24-11-07 11:17)
+    ✔ update data manager for viewed events @done(24-11-08 15:51)
+    ✔ update npc class to support custom movement path @done(24-11-13 06:09)
+    ✔ update world scene to handle custom events @done(24-11-13 06:09)
+  ✔ story flags @done(24-11-13 12:50)
+    ✔ update data manager for story flags @done(24-11-13 12:50)
+    ✔ update npc json file to support required story flags @done(24-11-13 12:50)
+    ✔ update events json file to support setting and removing flags @done(24-11-13 12:50)
+    ✔ add data types for story flags @done(24-11-13 12:50)
+  ✔ cutscenes @done(24-11-13 13:52)
+    ✔ create new cutscene class and trigger from world scene @done(24-11-13 13:26)
+    ✔ update dialog ui to be a new scene @done(24-11-13 13:52)
 
 -------------------------------
 
