@@ -38,6 +38,15 @@ export class PreloadScene extends BaseScene {
   preload() {
     super.preload();
 
+    this.load.spritesheet('bush', 'assets/images/bushes.png', {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
+    this.load.spritesheet('beach2', `assets/images/axulart/beach/beach.png`, {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
+
     const monsterTamerAssetPath = 'assets/images/monster-tamer';
     const kenneysAssetPath = 'assets/images/kenneys-assets';
     const pimenAssetPath = 'assets/images/pimen';
@@ -236,7 +245,7 @@ export class PreloadScene extends BaseScene {
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);
 
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
   /**

@@ -23,6 +23,7 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
 import { DialogScene } from './dialog-scene.js';
+import { handleAnimateTiles, handleCreateTilesData } from '../utils/animated-tiles.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -123,6 +124,8 @@ export class WorldScene extends BaseScene {
   #isProcessingCutSceneEvent;
   /** @type {number} */
   #lastCutSceneEventHandledIndex;
+  /** @type {Phaser.GameObjects.Image} */
+  #bushImage;
 
   constructor() {
     super({
@@ -327,14 +330,22 @@ export class WorldScene extends BaseScene {
     this.scene.launch(SCENE_KEYS.CUTSCENE_SCENE);
     this.scene.launch(SCENE_KEYS.DIALOG_SCENE);
     this.#dialogUi = /** @type {DialogScene} */ (this.scene.get(SCENE_KEYS.DIALOG_SCENE));
+
+    this.#bushImage = this.add.image(0, 0, 'bush', 1).setOrigin(0);
+
+    const tiles = map.addTilesetImage('Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed', 'beach2');
+    const tLayer = map.createLayer('Water', tiles, 0, 0);
+
+    handleCreateTilesData(this, map);
   }
 
   /**
    * @param {DOMHighResTimeStamp} time
    * @returns {void}
    */
-  update(time) {
+  update(time, delta) {
     super.update(time);
+    handleAnimateTiles(this, delta);
 
     if (this.#wildMonsterEncountered) {
       this.#player.update(time);
@@ -582,6 +593,9 @@ export class WorldScene extends BaseScene {
     if (!isInEncounterZone) {
       return;
     }
+    const tile = this.#encounterLayer.getTileAtWorldXY(this.#player.sprite.x, this.#player.sprite.y, true);
+    this.#bushImage.setPosition(tile.pixelX, tile.pixelY);
+    return;
 
     console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
     playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);

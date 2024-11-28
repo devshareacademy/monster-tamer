@@ -51,7 +51,7 @@ export class BaseScene extends Phaser.Scene {
    * @param {DOMHighResTimeStamp} [time]
    * @returns {void}
    */
-  update(time) {}
+  update(time, delta = 0) {}
 
   /**
    * @param {Phaser.Scenes.Systems} sys
