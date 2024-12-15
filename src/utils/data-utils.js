@@ -60,7 +60,7 @@ export class DataUtils {
   static getMonsterById(scene, monsterId) {
     /** @type {import('../types/typedef.js').Monster[]} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
-    return data.find((monster) => monster.id === monsterId);
+    return data.find((monster) => monster.monsterId === monsterId);
   }
 
   /**
@@ -83,5 +83,16 @@ export class DataUtils {
     /** @type {import('../types/typedef.js').NpcData} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.NPCS);
     return data[npcId];
+  }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} eventId the event id to retrieve from the events.json file
+   * @returns {import('../types/typedef.js').EventDetails}
+   */
+  static getEventData(scene, eventId) {
+    /** @type {import('../types/typedef.js').EventData} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.EVENTS);
+    return data[eventId];
   }
 }

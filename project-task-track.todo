@@ -158,11 +158,55 @@ Multiple Monsters:
     ✔ switch monsters positions in party @done(24-06-11 11:55)
     ✔ release monster into the wild @done(24-06-11 12:18)
 
+Catching Monsters:
+  ✔ review feature and load assets @done(24-06-24 09:35)
+  ✔ item and monster model updates @done(24-06-24 09:59)
+    ✔ add category to items @done(24-06-24 09:49)
+    ✔ add new item type for capture @done(24-06-24 09:49)
+    ✔ update monster id field to be a string @done(24-06-24 09:59)
+    ✔ add new item to json data @done(24-06-24 09:49)
+    ✔ add new item to data manager @done(24-06-24 09:49)
+  ✔ create ball class @done(24-06-25 13:29)
+    ✔ test new animations in test scene @done(24-06-25 13:29)
+    ✔ add new animations to battle monster class @done(24-06-25 13:29)
+  ✔ inventory scene @done(24-06-25 14:05)
+    ✔ support for capture items @done(24-06-25 14:05)
+    ✔ safe guard if monster party is full @done(24-06-25 14:05)
+  ✔ battle menu @done(24-06-25 14:05)
+    ✔ support to get used item details @done(24-06-25 14:05)
+  ✔ battle scene @done(24-06-25 14:54)
+    ✔ new battle states for using items @done(24-06-25 14:54)
+    ✔ new battle state for catching monster with stubbed logic @done(24-06-25 14:54)
+  ✔ review monster catching logic @done(24-08-26 10:09)
+
+Cutscenes & In Game Events:
+  ✔ update npc animation logic @done(24-11-06 09:30)
+    ✔ add new npc animations to animation json file @done(24-11-06 09:30)
+    ✔ update npc json file to support animation key prefix @done(24-11-06 09:30)
+    ✔ update npc class to support animation prefix @done(24-11-06 09:30)
+  ✔ update map data @done(24-11-07 10:20)
+    ✔ update tilemap to show event areas @done(24-11-06 12:47)
+    ✔ update world scene to create event zone areas @done(24-11-07 10:20)
+    ✔ update world scene update logic to check for overlaps with event zones @done(24-11-07 10:20)
+  ✔ story events @done(24-11-13 06:09)
+    ✔ create events json file for cutscenes @done(24-11-07 11:17)
+    ✔ add events data types @done(24-11-07 11:17)
+    ✔ update data utils for parsing events data @done(24-11-07 11:17)
+    ✔ update data manager for viewed events @done(24-11-08 15:51)
+    ✔ update npc class to support custom movement path @done(24-11-13 06:09)
+    ✔ update world scene to handle custom events @done(24-11-13 06:09)
+  ✔ story flags @done(24-11-13 12:50)
+    ✔ update data manager for story flags @done(24-11-13 12:50)
+    ✔ update npc json file to support required story flags @done(24-11-13 12:50)
+    ✔ update events json file to support setting and removing flags @done(24-11-13 12:50)
+    ✔ add data types for story flags @done(24-11-13 12:50)
+  ✔ cutscenes @done(24-11-13 13:52)
+    ✔ create new cutscene class and trigger from world scene @done(24-11-13 13:26)
+    ✔ update dialog ui to be a new scene @done(24-11-13 13:52)
+
 -------------------------------
 
 Possible Future Content:
-  ☐ cutscenes
-  ☐ in game events and tracking
   ☐ shops
   ☐ battle npcs
   ☐ monster encyclopedia

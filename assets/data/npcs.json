@@ -1,18 +1,29 @@
 {
   "1": {
     "frame": 30,
+    "animationKeyPrefix": "NPC_1",
     "events": [
       {
+        "requires": ["LOOKING_FOR_PROFESSOR"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["The professor next door was looking for you."]
+        }
+      },
+      {
+        "requires": ["FOUND_PROFESSOR"],
         "type": "MESSAGE",
         "data": {
           "messages": ["You should take a quick rest."]
         }
       },
       {
+        "requires": ["FOUND_PROFESSOR"],
         "type": "HEAL",
         "data": {}
       },
       {
+        "requires": ["FOUND_PROFESSOR"],
         "type": "SCENE_FADE_IN_AND_OUT",
         "data": {
           "fadeInDuration": 1000,
@@ -21,6 +32,7 @@
         }
       },
       {
+        "requires": ["FOUND_PROFESSOR"],
         "type": "MESSAGE",
         "data": {
           "messages": ["Oh good! You and your monsters are looking great!"]
@@ -30,8 +42,17 @@
   },
   "2": {
     "frame": 20,
+    "animationKeyPrefix": "NPC_3",
     "events": [
       {
+        "requires": ["LOOKING_FOR_PROFESSOR"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["I last saw the professor heading out of town."]
+        }
+      },
+      {
+        "requires": ["FOUND_PROFESSOR"],
         "type": "MESSAGE",
         "data": {
           "messages": ["Make sure you read the signposts for helpful tips!"]
@@ -41,8 +62,10 @@
   },
   "3": {
     "frame": 0,
+    "animationKeyPrefix": "NPC_1",
     "events": [
       {
+        "requires": [],
         "type": "MESSAGE",
         "data": {
           "messages": ["You can save your game from the menu.", "To open the menu, press the ENTER key."]

@@ -13,3 +13,8 @@ rm -rf dist/assets/.gitkeep
 mkdir dist/src
 cp -R ./src/. dist/src
 cp ./index.html dist/index.html
+
+# copy the json files from the branch we are on
+rm -rf dist/assets/data
+mkdir dist/assets/data
+cp -R ./assets/data/. dist/assets/data

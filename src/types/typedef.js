@@ -12,7 +12,7 @@ import Phaser from '../lib/phaser.js';
 /**
  * @typedef Monster
  * @type {object}
- * @property {number} id the unique identifier for this monster
+ * @property {string} id the unique identifier for this monster
  * @property {number} monsterId the unique identifier for this monster type
  * @property {string} name the name of the monster
  * @property {string} assetKey the name of the asset key that should be used for this monster
@@ -56,12 +56,23 @@ import Phaser from '../lib/phaser.js';
  */
 
 /**
+ * @typedef {keyof typeof ITEM_CATEGORY} ItemCategory
+ */
+
+/** @enum {ItemCategory} */
+export const ITEM_CATEGORY = Object.freeze({
+  HEAL: 'HEAL',
+  CAPTURE: 'CAPTURE',
+});
+
+/**
  * @typedef {keyof typeof ITEM_EFFECT} ItemEffect
  */
 
 /** @enum {ItemEffect} */
 export const ITEM_EFFECT = Object.freeze({
   HEAL_30: 'HEAL_30',
+  CAPTURE_1: 'CAPTURE_1',
 });
 
 /**
@@ -71,6 +82,7 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {string} name the name of this item
  * @property {ItemEffect} effect the effect of using this item
  * @property {string} description the description of the item to show in the inventory bag
+ * @property {ItemCategory} category the main category of this item, healing, capture, etc
  */
 
 /**
@@ -118,25 +130,31 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcEventMessage
  * @type {object}
  * @property {'MESSAGE'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {string[]} data.messages
+ * @property {string[]} requires
  */
 
 /**
  * @typedef NpcEventSceneFadeInAndOut
  * @type {object}
  * @property {'SCENE_FADE_IN_AND_OUT'} type
+ * @property {string[]} requires
  * @property {object} data
  * @property {number} data.fadeInDuration
  * @property {number} data.fadeOutDuration
  * @property {number} data.waitDuration
+ * @property {string[]} requires
  */
 
 /**
  * @typedef NpcEventHeal
  * @type {object}
  * @property {'HEAL'} type
+ * @property {string[]} requires
  * @property {object} data
+ * @property {string[]} requires
  */
 
 /**
@@ -148,6 +166,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcDetails
  * @type {object}
  * @property {number} frame
+ * @property {string} animationKeyPrefix
  * @property {NpcEvent[]} events
  */
 
@@ -155,3 +174,120 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @typedef NpcData
  * @type {Object.<string, NpcDetails>}
  */
+
+/** Events JSON Data Types */
+
+/**
+ * @typedef {keyof typeof GAME_EVENT_TYPE} GameEventType
+ */
+
+/** @enum {GameEventType} */
+export const GAME_EVENT_TYPE = Object.freeze({
+  ADD_NPC: 'ADD_NPC',
+  MOVE_TO_PLAYER: 'MOVE_TO_PLAYER',
+  RETRACE_PATH: 'RETRACE_PATH',
+  TALK_TO_PLAYER: 'TALK_TO_PLAYER',
+  REMOVE_NPC: 'REMOVE_NPC',
+  GIVE_MONSTER: 'GIVE_MONSTER',
+  ADD_FLAG: 'ADD_FLAG',
+  REMOVE_FLAG: 'REMOVE_FLAG',
+});
+
+/**
+ * @typedef GameEventAddNpc
+ * @type {object}
+ * @property {'ADD_NPC'} type
+ * @property {object} data
+ * @property {import('../common/direction.js').Direction} data.direction
+ * @property {number} data.x
+ * @property {number} data.y
+ * @property {number} data.frame
+ * @property {number} data.id
+ * @property {string} data.animationKeyPrefix
+ */
+
+/**
+ * @typedef GameEventMoveToPlayer
+ * @type {object}
+ * @property {'MOVE_TO_PLAYER'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
+ * @typedef GameEventRetracePath
+ * @type {object}
+ * @property {'RETRACE_PATH'} type
+ * @property {object} data
+ * @property {number} data.id
+ * @property {import('../common/direction.js').Direction} data.direction
+ */
+
+/**
+ * @typedef GameEventTalkToPlayer
+ * @type {object}
+ * @property {'TALK_TO_PLAYER'} type
+ * @property {object} data
+ * @property {number} data.id
+ * @property {string[]} data.messages
+ */
+
+/**
+ * @typedef GameEventRemoveNpc
+ * @type {object}
+ * @property {'REMOVE_NPC'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
+ * @typedef GameEventGiveMonster
+ * @type {object}
+ * @property {'GIVE_MONSTER'} type
+ * @property {object} data
+ * @property {number} data.id
+ */
+
+/**
+ * @typedef GameEventAddFlag
+ * @type {object}
+ * @property {'ADD_FLAG'} type
+ * @property {object} data
+ * @property {GameFlag} data.flag
+ */
+
+/**
+ * @typedef GameEventRemoveFlag
+ * @type {object}
+ * @property {'REMOVE_FLAG'} type
+ * @property {object} data
+ * @property {GameFlag} data.flag
+ */
+
+/**
+ * @typedef GameEvent
+ * @type {GameEventAddNpc | GameEventMoveToPlayer | GameEventRetracePath | GameEventRemoveNpc | GameEventTalkToPlayer | GameEventGiveMonster | GameEventAddFlag | GameEventRemoveFlag}
+ */
+
+/**
+ * @typedef EventDetails
+ * @type {object}
+ * @property {string[]} requires
+ * @property {GameEvent[]} events
+ */
+
+/**
+ * @typedef EventData
+ * @type {Object.<string, EventDetails>}
+ */
+
+/** Game Flags Data Types */
+/**
+ * @typedef {keyof typeof GAME_FLAG} GameFlag
+ */
+
+/** @enum {GameFlag} */
+export const GAME_FLAG = Object.freeze({
+  LOOKING_FOR_PROFESSOR: 'LOOKING_FOR_PROFESSOR',
+  FOUND_PROFESSOR: 'FOUND_PROFESSOR',
+});

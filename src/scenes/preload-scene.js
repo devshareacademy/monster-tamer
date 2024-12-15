@@ -67,6 +67,7 @@ export class PreloadScene extends BaseScene {
     // battle assets
     this.load.image(BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND, `${kenneysAssetPath}/ui-space-expansion/custom-ui.png`);
     this.load.image(BATTLE_ASSET_KEYS.BALL_THUMBNAIL, `${monsterTamerAssetPath}/battle/cosmoball.png`);
+    this.load.image(BATTLE_ASSET_KEYS.DAMAGED_BALL, `${monsterTamerAssetPath}/battle/damagedBall.png`);
 
     // health bar assets
     this.load.image(
@@ -129,6 +130,7 @@ export class PreloadScene extends BaseScene {
     this.load.json(DATA_ASSET_KEYS.MONSTERS, 'assets/data/monsters.json');
     this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
     this.load.json(DATA_ASSET_KEYS.NPCS, 'assets/data/npcs.json');
+    this.load.json(DATA_ASSET_KEYS.EVENTS, 'assets/data/events.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -234,7 +236,6 @@ export class PreloadScene extends BaseScene {
     this.#createAnimations();
 
     // attempt to populate data manager with saved data and initialize
-    dataManager.init(this);
     dataManager.loadData();
     // set global audio based on data manager settings
     setGlobalSoundSettings(this);
