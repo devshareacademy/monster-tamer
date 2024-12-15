@@ -63,7 +63,7 @@ export class Controls {
     if (this.#fKey === undefined) {
       return false;
     }
-    return Phaser.Input.Keyboard.JustUp(this.#fKey);
+    return Phaser.Input.Keyboard.JustDown(this.#fKey);
   }
 
   /** @returns {import('../common/direction.js').Direction} */
