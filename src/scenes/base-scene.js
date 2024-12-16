@@ -52,6 +52,10 @@ export class BaseScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
+    if (this._controls === undefined) {
+      return;
+    }
+
     if (!this._controls.wasFKeyPressed()) {
       return;
     }
