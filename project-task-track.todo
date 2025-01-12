@@ -204,6 +204,24 @@ Cutscenes & In Game Events:
     ✔ create new cutscene class and trigger from world scene @done(24-11-13 13:26)
     ✔ update dialog ui to be a new scene @done(24-11-13 13:52)
 
+Full Screen Support:
+  ☐ update controls to support full screen button
+  ☐ update base scene to launch full screen mode
+
+Bug Fixes Part 2:
+  ☐ fix bug with resetting battle scene state
+  ☐ fix beach asset file name
+
+Multiple Encounter Areas & Special Tiles:
+  ☐ tiled updates
+    ☐ support multiple encounter zones
+    ☐ new class with tile type
+  ☐ update to support multiple encounter zones
+  ☐ import new spritesheet
+  ☐ refactor encounter check to start before player moves
+  ☐ add grass tiles
+
+
 -------------------------------
 
 Possible Future Content:
