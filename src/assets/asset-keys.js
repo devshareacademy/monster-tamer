@@ -71,6 +71,7 @@ export const WORLD_ASSET_KEYS = Object.freeze({
   WORLD_COLLISION: 'WORLD_COLLISION',
   WORLD_ENCOUNTER_ZONE: 'WORLD_ENCOUNTER_ZONE',
   BEACH: 'BEACH',
+  GRASS: 'GRASS',
 });
 
 export const BUILDING_ASSET_KEYS = Object.freeze({
