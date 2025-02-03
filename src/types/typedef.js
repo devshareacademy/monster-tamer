@@ -291,3 +291,14 @@ export const GAME_FLAG = Object.freeze({
   LOOKING_FOR_PROFESSOR: 'LOOKING_FOR_PROFESSOR',
   FOUND_PROFESSOR: 'FOUND_PROFESSOR',
 });
+
+/** Encounter Zone Tile Types */
+/**
+ * @typedef {keyof typeof ENCOUNTER_TILE_TYPE} EncounterTileType
+ */
+
+/** @enum {EncounterTileType} */
+export const ENCOUNTER_TILE_TYPE = Object.freeze({
+  NONE: 'NONE',
+  GRASS: 'GRASS',
+});
