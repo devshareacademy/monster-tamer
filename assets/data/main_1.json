@@ -352,48 +352,6 @@
       "y": 0
     },
     {
-      "class": "encounter",
-      "data": [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 194, 194,
-        194, 194, 194, 194, 194, 194, 194, 194, 0, 0, 0, 0, 0, 0, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194,
-        194, 194, 194, 194, 194, 0, 0, 0, 0, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194,
-        194, 0, 0, 0, 0, 0, 0, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-      ],
-      "height": 34,
-      "id": 15,
-      "locked": true,
-      "name": "Encounter",
-      "opacity": 0.7,
-      "properties": [
-        {
-          "name": "area",
-          "type": "int",
-          "value": 1
-        }
-      ],
-      "type": "tilelayer",
-      "visible": true,
-      "width": 20,
-      "x": 0,
-      "y": 0
-    },
-    {
       "data": [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -427,38 +385,61 @@
       "y": 0
     },
     {
-      "draworder": "topdown",
-      "id": 26,
-      "locked": true,
-      "name": "Area-Metadata",
-      "objects": [
+      "id": 29,
+      "layers": [
         {
-          "gid": 194,
-          "height": 64,
-          "id": 24,
-          "name": "",
+          "class": "encounter",
+          "data": [
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194,
+            194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 0, 0, 0, 0, 0, 0, 194, 194, 194, 194, 194, 194, 194, 194,
+            194, 194, 194, 194, 194, 194, 194, 194, 0, 0, 0, 0, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194,
+            194, 194, 194, 194, 194, 0, 0, 0, 0, 0, 0, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 194, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 194, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0
+          ],
+          "height": 34,
+          "id": 15,
+          "locked": true,
+          "name": "Encounter-Area-1",
+          "opacity": 0.7,
           "properties": [
             {
-              "name": "faint_location",
-              "type": "string",
-              "value": "building_1"
+              "name": "area",
+              "type": "int",
+              "value": 1
             },
             {
-              "name": "id",
-              "type": "int",
-              "value": 0
+              "name": "tileType",
+              "propertytype": "encounterTileType",
+              "type": "string",
+              "value": "GRASS"
             }
           ],
-          "rotation": 0,
-          "type": "area_metadata",
+          "type": "tilelayer",
           "visible": true,
-          "width": 64,
-          "x": 192,
-          "y": 1408
+          "width": 20,
+          "x": 0,
+          "y": 0
         }
       ],
+      "name": "Encounter",
       "opacity": 1,
-      "type": "objectgroup",
+      "type": "group",
       "visible": true,
       "x": 0,
       "y": 0
@@ -516,6 +497,42 @@
           "width": 64,
           "x": 64,
           "y": 640
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 25,
+      "name": "Area-Metadata",
+      "objects": [
+        {
+          "gid": 194,
+          "height": 64,
+          "id": 23,
+          "name": "",
+          "properties": [
+            {
+              "name": "faint_location",
+              "type": "string",
+              "value": "building_1"
+            },
+            {
+              "name": "id",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "rotation": 0,
+          "type": "area_metadata",
+          "visible": true,
+          "width": 64,
+          "x": 192,
+          "y": 1408
         }
       ],
       "opacity": 1,
@@ -768,7 +785,6 @@
                 },
                 {
                   "name": "movement_pattern",
-                  "propertytype": "npc_movement",
                   "type": "string",
                   "value": "CLOCKWISE"
                 }
@@ -878,7 +894,6 @@
                 },
                 {
                   "name": "movement_pattern",
-                  "propertytype": "npc_movement",
                   "type": "string",
                   "value": "IDLE"
                 }
@@ -907,7 +922,7 @@
       "y": 0
     }
   ],
-  "nextlayerid": 29,
+  "nextlayerid": 30,
   "nextobjectid": 30,
   "orientation": "orthogonal",
   "renderorder": "right-down",
@@ -917,7 +932,7 @@
     {
       "columns": 8,
       "firstgid": 1,
-      "image": "monster-tamer-tiled-assets/BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
+      "image": "../BasicPlains-tileset-Ver.2_by_AxulArt_scaled_4x_pngcrushed.png",
       "imageheight": 512,
       "imagewidth": 512,
       "margin": 0,
@@ -930,7 +945,7 @@
     {
       "columns": 15,
       "firstgid": 65,
-      "image": "monster-tamer-tiled-assets/Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
+      "image": "../Beach-and-caves-tileset_by_AxulArt_scaled_4x_pngcrushed.png",
       "imageheight": 512,
       "imagewidth": 960,
       "margin": 0,
@@ -943,7 +958,7 @@
     {
       "columns": 2,
       "firstgid": 185,
-      "image": "monster-tamer-tiled-assets/grass.png",
+      "image": "../grass.png",
       "imageheight": 128,
       "imagewidth": 128,
       "margin": 0,
@@ -956,7 +971,7 @@
     {
       "columns": 1,
       "firstgid": 189,
-      "image": "monster-tamer-tiled-assets/collision.png",
+      "image": "../collision.png",
       "imageheight": 64,
       "imagewidth": 64,
       "margin": 0,
@@ -969,7 +984,7 @@
     {
       "columns": 2,
       "firstgid": 190,
-      "image": "monster-tamer-tiled-assets/bushes.png",
+      "image": "../bushes.png",
       "imageheight": 128,
       "imagewidth": 128,
       "margin": 0,
@@ -982,7 +997,7 @@
     {
       "columns": 1,
       "firstgid": 194,
-      "image": "monster-tamer-tiled-assets/encounter.png",
+      "image": "../encounter.png",
       "imageheight": 64,
       "imagewidth": 64,
       "margin": 0,
@@ -1001,7 +1016,7 @@
     {
       "columns": 4,
       "firstgid": 195,
-      "image": "monster-tamer-tiled-assets/house2_scaled_4x_pngcrushed.png",
+      "image": "../house2_scaled_4x_pngcrushed.png",
       "imageheight": 192,
       "imagewidth": 256,
       "margin": 0,
@@ -1015,7 +1030,7 @@
       "class": "npc",
       "columns": 1,
       "firstgid": 207,
-      "image": "monster-tamer-tiled-assets/encounter.png",
+      "image": "../encounter.png",
       "imageheight": 64,
       "imagewidth": 64,
       "margin": 0,
@@ -1041,7 +1056,7 @@
     {
       "columns": 12,
       "firstgid": 208,
-      "image": "monster-tamer-tiled-assets/AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png",
+      "image": "../AxulArt\u012bs_Basic-Top-down-interior_By_AxulArt_scaled_4x_pngcrushed.png",
       "imageheight": 640,
       "imagewidth": 768,
       "margin": 0,
@@ -1054,7 +1069,7 @@
     {
       "columns": 3,
       "firstgid": 328,
-      "image": "monster-tamer-tiled-assets/entrance.png",
+      "image": "../entrance.png",
       "imageheight": 64,
       "imagewidth": 192,
       "margin": 0,
