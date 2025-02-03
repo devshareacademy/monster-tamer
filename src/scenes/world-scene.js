@@ -249,8 +249,8 @@ export class WorldScene extends BaseScene {
     if (hasSceneTransitionLayer) {
       this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
     }
-
-    // create collision layer for encounters
+    
+    // create collision layers for encounters
     this.#createEncounterAreas(map);
 
     if (!this.#sceneData.isInterior) {
@@ -600,7 +600,7 @@ export class WorldScene extends BaseScene {
         child.active = false;
         child.visible = false;
       });
-
+    
     if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
