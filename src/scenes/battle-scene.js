@@ -115,18 +115,17 @@ export class BattleScene extends BaseScene {
     this.#activePlayerAttackIndex = -1;
     this.#activeEnemyAttackIndex = -1;
     this.#activePlayerMonsterPartyIndex = 0;
-
-    /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
-    const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
-    if (chosenBattleSceneOption === undefined || chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
-      this.#skipAnimations = false;
-      return;
-    }
     this.#skipAnimations = true;
     this.#playerKnockedOut = false;
     this.#switchingActiveMonster = false;
     this.#activeMonsterKnockedOut = false;
     this.#monsterCaptured = false;
+
+    /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
+    const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
+    if (chosenBattleSceneOption === undefined || chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON) {
+      this.#skipAnimations = false;
+    }
   }
 
   /**

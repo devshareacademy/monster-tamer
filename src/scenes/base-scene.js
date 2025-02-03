@@ -51,7 +51,22 @@ export class BaseScene extends Phaser.Scene {
    * @param {DOMHighResTimeStamp} [time]
    * @returns {void}
    */
-  update(time) {}
+  update(time) {
+    if (this._controls === undefined) {
+      return;
+    }
+
+    if (!this._controls.wasFKeyPressed()) {
+      return;
+    }
+
+    if (this.scale.isFullscreen) {
+      this.scale.stopFullscreen();
+      return;
+    }
+
+    this.scale.startFullscreen();
+  }
 
   /**
    * @param {Phaser.Scenes.Systems} sys
