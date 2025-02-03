@@ -18,7 +18,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
+import { ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
@@ -49,6 +49,7 @@ const TILED_NPC_PROPERTY = Object.freeze({
 
 const TILED_ENCOUNTER_PROPERTY = Object.freeze({
   AREA: 'area',
+  TILE_TYPE: 'tileType',
 });
 
 const TILED_ITEM_PROPERTY = Object.freeze({
@@ -81,8 +82,8 @@ const TILED_EVENT_PROPERTY = Object.freeze({
 export class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
-  #encounterLayer;
+  /** @type {Phaser.Tilemaps.TilemapLayer[]} */
+  #encounterLayers;
   /** @type {boolean} */
   #wildMonsterEncountered;
   /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
@@ -123,6 +124,8 @@ export class WorldScene extends BaseScene {
   #isProcessingCutSceneEvent;
   /** @type {number} */
   #lastCutSceneEventHandledIndex;
+  /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
+  #encounterZonePlayerIsEntering;
 
   constructor() {
     super({
@@ -190,7 +193,7 @@ export class WorldScene extends BaseScene {
     this.#items = [];
     this.#lastNpcEventHandledIndex = -1;
     this.#isProcessingNpcEvent = false;
-    this.#encounterLayer = undefined;
+    this.#encounterLayers = [];
     this.#signLayer = undefined;
     this.#entranceLayer = undefined;
     this.#eventZones = {};
@@ -202,6 +205,7 @@ export class WorldScene extends BaseScene {
     this.#currentCutSceneId = undefined;
     this.#isProcessingCutSceneEvent = false;
     this.#lastCutSceneEventHandledIndex = -1;
+    this.#encounterZonePlayerIsEntering = undefined;
   }
 
   /**
@@ -244,16 +248,7 @@ export class WorldScene extends BaseScene {
     }
 
     // create collision layer for encounters
-    const hasEncounterLayer = map.getLayerIndexByName('Encounter') !== null;
-    if (hasEncounterLayer) {
-      const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
-      if (!encounterTiles) {
-        console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
-        return;
-      }
-      this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
-      this.#encounterLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
-    }
+    this.#createEncounterAreas(map);
 
     if (!this.#sceneData.isInterior) {
       this.cameras.main.setBounds(0, 0, 1280, 2176);
@@ -284,6 +279,9 @@ export class WorldScene extends BaseScene {
       entranceLayer: this.#entranceLayer,
       enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
         this.#handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
+      },
+      spriteGridMovementStartedCallback: () => {
+        this.#handlePlayerMovementStarted();
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
@@ -573,23 +571,28 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    if (!this.#encounterLayer) {
+    if (this.#encounterLayers.length === 0) {
       return;
     }
 
-    const isInEncounterZone =
-      this.#encounterLayer.getTileAtWorldXY(this.#player.sprite.x, this.#player.sprite.y, true).index !== -1;
-    if (!isInEncounterZone) {
+    this.#handlePlayerMovementInEncounterZone();
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handlePlayerMovementInEncounterZone() {
+    if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
+    console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
-    console.log(`[${WorldScene.name}:handlePlayerMovementUpdate] player is in an encounter zone`);
     playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
-      const encounterAreaId = /** @type {TiledObjectProperty[]} */ (this.#encounterLayer.layer.properties).find(
-        (property) => property.name === TILED_ENCOUNTER_PROPERTY.AREA
-      ).value;
+      const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
+        this.#encounterZonePlayerIsEntering.layer.properties
+      ).find((property) => property.name === TILED_ENCOUNTER_PROPERTY.AREA).value;
       const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterAreaId);
       const randomMonsterId = weightedRandom(possibleMonsters);
 
@@ -1196,5 +1199,60 @@ export class WorldScene extends BaseScene {
     dataManager.removeFlag(gameEvent.data.flag);
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
+  }
+
+  /**
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createEncounterAreas(map) {
+    const encounterLayers = map.getTileLayerNames().filter((layerName) => layerName.includes('Encounter'));
+    if (encounterLayers.length > 0) {
+      const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
+      if (!encounterTiles) {
+        console.log(
+          `[${WorldScene.name}:createEncounterAreas] encountered error while creating encounter tiles from tiled`
+        );
+        return;
+      }
+
+      encounterLayers.forEach((layerName) => {
+        const layer = map.createLayer(layerName, encounterTiles, 0, 0);
+        layer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+        this.#encounterLayers.push(layer);
+      });
+    }
+  }
+
+  /**
+   * This method is invoked any time the player is about to start moving between grid spaces.
+   * Before the player moves, check to see they will be moving into an encounter zone, and store the result.
+   * We will use this result after the player finishes moving to see if there should be an encounter.
+   * @returns {void}
+   */
+  #handlePlayerMovementStarted() {
+    // if the player is moving into an encounter zone, check to see if this is a special tile, like grass
+    this.#encounterZonePlayerIsEntering = undefined;
+    /** @type {Phaser.Tilemaps.Tile} */
+    let encounterTile;
+    const playerTargetPosition = getTargetPositionFromGameObjectPositionAndDirection(
+      { x: this.#player.sprite.x, y: this.#player.sprite.y },
+      this.#player.direction
+    );
+    this.#encounterLayers.some((encounterLayer) => {
+      encounterTile = encounterLayer.getTileAtWorldXY(playerTargetPosition.x, playerTargetPosition.y, true);
+      if (encounterTile.index === -1) {
+        return false;
+      }
+      this.#encounterZonePlayerIsEntering = encounterLayer;
+      return true;
+    });
+    if (this.#encounterZonePlayerIsEntering === undefined) {
+      return;
+    }
+
+    console.log(`[${WorldScene.name}:handlePlayerMovementStarted] player is moving to an encounter zone`);
+    // check the tile type for the encounter layer the player is moving through and play related effects
+    // TODO
   }
 }
