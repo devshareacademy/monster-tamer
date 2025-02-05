@@ -600,9 +600,11 @@ export class WorldScene extends BaseScene {
         child.active = false;
         child.visible = false;
       });
+
     if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
+    return;
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
@@ -1265,6 +1267,10 @@ export class WorldScene extends BaseScene {
       return true;
     });
     if (this.#encounterZonePlayerIsEntering === undefined) {
+      if (this.#player.direction === DIRECTION.DOWN) {
+        // if player is moving in the down direction, hide current tile so player does not move under it
+        this.#hideSpecialEncounterTiles();
+      }
       return;
     }
 
@@ -1316,6 +1322,10 @@ export class WorldScene extends BaseScene {
       return;
     }
     // if player is moving in the down direction, hide current tile so player does not move under it
+    this.#hideSpecialEncounterTiles();
+  }
+
+  #hideSpecialEncounterTiles() {
     this.#specialEncounterTileImageGameObjectGroup
       .getChildren()
       .some((/** @type {Phaser.GameObjects.Image} */ child) => {
