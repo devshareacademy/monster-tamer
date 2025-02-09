@@ -18,7 +18,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
+import { ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
@@ -124,6 +124,8 @@ export class WorldScene extends BaseScene {
   #isProcessingCutSceneEvent;
   /** @type {number} */
   #lastCutSceneEventHandledIndex;
+  /** @type {Phaser.GameObjects.Group} */
+  #specialEncounterTileImageGameObjectGroup;
   /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   #encounterZonePlayerIsEntering;
 
@@ -205,6 +207,7 @@ export class WorldScene extends BaseScene {
     this.#currentCutSceneId = undefined;
     this.#isProcessingCutSceneEvent = false;
     this.#lastCutSceneEventHandledIndex = -1;
+    this.#specialEncounterTileImageGameObjectGroup = undefined;
     this.#encounterZonePlayerIsEntering = undefined;
   }
 
@@ -325,6 +328,7 @@ export class WorldScene extends BaseScene {
     this.scene.launch(SCENE_KEYS.CUTSCENE_SCENE);
     this.scene.launch(SCENE_KEYS.DIALOG_SCENE);
     this.#dialogUi = /** @type {DialogScene} */ (this.scene.get(SCENE_KEYS.DIALOG_SCENE));
+    this.#specialEncounterTileImageGameObjectGroup = this.add.group({ classType: Phaser.GameObjects.Image });
   }
 
   /**
@@ -580,12 +584,26 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #handlePlayerMovementInEncounterZone() {
+    // cleanup any special tiles that are not at the players current position
+    this.#specialEncounterTileImageGameObjectGroup
+      .getChildren()
+      .forEach((/** @type {Phaser.GameObjects.Image} */ child) => {
+        if (!child.active) {
+          return;
+        }
+        if (child.x === this.#player.sprite.x && child.y === this.#player.sprite.y) {
+          child.visible = true;
+          return;
+        }
+        child.active = false;
+        child.visible = false;
+      });
+
     if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
-    playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
       const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
@@ -1241,11 +1259,76 @@ export class WorldScene extends BaseScene {
     });
 
     if (this.#encounterZonePlayerIsEntering === undefined) {
+      if (this.#player.direction === DIRECTION.DOWN) {
+        // if player is moving in the down direction, hide current tile so player does not move under it
+        this.#hideSpecialEncounterTiles();
+      }
       return;
     }
 
     console.log(`[${WorldScene.name}:handlePlayerMovementStarted] player is moving to an encounter zone`);
     // check the tile type for the encounter the player is moving through and play related effects
-    // TODO
+    this.#handleEncounterTileTypeEffects(this.#encounterZonePlayerIsEntering, encounterTile, this.#player.direction);
+  }
+
+  /**
+   * Plays the associated special effects when player is about to move through a particular tile type.
+   * Example, when moving through the grass, we play a sound effect and show an additional
+   * game object to make it look like the player is moving through the grass.
+   *
+   * @param {Phaser.Tilemaps.TilemapLayer} encounterLayer
+   * @param {Phaser.Tilemaps.Tile} encounterTile
+   * @param {import('../common/direction.js').Direction} playerDirection
+   * @returns {void}
+   */
+  #handleEncounterTileTypeEffects(encounterLayer, encounterTile, playerDirection) {
+    /** @type {import('../types/typedef.js').EncounterTileType} */
+    const encounterTileType = /** @type {TiledObjectProperty[]} */ (encounterLayer.layer.properties).find(
+      (property) => property.name === TILED_ENCOUNTER_PROPERTY.TILE_TYPE
+    ).value;
+
+    switch (encounterTileType) {
+      case ENCOUNTER_TILE_TYPE.GRASS:
+        // create grass sprite for when player moves through grass
+        /** @type {Phaser.GameObjects.Image} */
+        const object = this.#specialEncounterTileImageGameObjectGroup
+          .getFirstDead(true, encounterTile.pixelX, encounterTile.pixelY, WORLD_ASSET_KEYS.GRASS, 1, true)
+          .setOrigin(0)
+          .setVisible(true)
+          .setActive(true);
+        if (playerDirection === DIRECTION.DOWN || playerDirection === DIRECTION.UP) {
+          object.visible = false;
+        }
+        playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
+        break;
+      case ENCOUNTER_TILE_TYPE.NONE:
+        break;
+      default:
+        exhaustiveGuard(encounterTileType);
+    }
+
+    if (playerDirection !== DIRECTION.DOWN) {
+      return;
+    }
+    this.#hideSpecialEncounterTiles();
+  }
+
+  /**
+   * @returns {void}
+   */
+  #hideSpecialEncounterTiles() {
+    this.#specialEncounterTileImageGameObjectGroup
+      .getChildren()
+      .some((/** @type {Phaser.GameObjects.Image} */ child) => {
+        if (!child.active) {
+          return false;
+        }
+        if (child.x === this.#player.sprite.x && child.y === this.#player.sprite.y) {
+          child.active = false;
+          child.visible = false;
+          return true;
+        }
+        return false;
+      });
   }
 }

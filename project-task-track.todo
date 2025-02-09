@@ -219,7 +219,7 @@ Multiple Encounter Areas & Special Tiles:
   ✔ update to support multiple encounter zones @done(25-02-07 11:50)
   ✔ import new spritesheet @done(25-02-05 08:10)
   ✔ refactor encounter check to start before player moves @done(25-02-07 11:52)
-  ☐ add grass tiles
+  ✔ add grass tiles @done(25-02-09 08:24)
 
 
 -------------------------------
