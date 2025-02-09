@@ -604,7 +604,6 @@ export class WorldScene extends BaseScene {
     if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
-    return;
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
