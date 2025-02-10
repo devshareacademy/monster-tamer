@@ -250,7 +250,7 @@ export class WorldScene extends BaseScene {
       this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
     }
 
-    // create collision layer for encounters
+    // create collision layers for encounters
     this.#createEncounterAreas(map);
 
     if (!this.#sceneData.isInterior) {
@@ -598,7 +598,6 @@ export class WorldScene extends BaseScene {
         child.active = false;
         child.visible = false;
       });
-
     if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
@@ -1226,7 +1225,9 @@ export class WorldScene extends BaseScene {
     if (encounterLayers.length > 0) {
       const encounterTiles = map.addTilesetImage('encounter', WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE);
       if (!encounterTiles) {
-        console.log(`[${WorldScene.name}:create] encountered error while creating encounter tiles from tiled`);
+        console.log(
+          `[${WorldScene.name}:createEncounterAreas] encountered error while creating encounter tiles from tiled`
+        );
         return;
       }
 
@@ -1267,7 +1268,7 @@ export class WorldScene extends BaseScene {
     }
 
     console.log(`[${WorldScene.name}:handlePlayerMovementStarted] player is moving to an encounter zone`);
-    // check the tile type for the encounter the player is moving through and play related effects
+    // check the tile type for the encounter layer the player is moving through and play related effects
     this.#handleEncounterTileTypeEffects(this.#encounterZonePlayerIsEntering, encounterTile, this.#player.direction);
   }
 
@@ -1282,6 +1283,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #handleEncounterTileTypeEffects(encounterLayer, encounterTile, playerDirection) {
+    // check the tile type for the encounter layer the player is moving through and play related effects
     /** @type {import('../types/typedef.js').EncounterTileType} */
     const encounterTileType = /** @type {TiledObjectProperty[]} */ (encounterLayer.layer.properties).find(
       (property) => property.name === TILED_ENCOUNTER_PROPERTY.TILE_TYPE
@@ -1296,6 +1298,7 @@ export class WorldScene extends BaseScene {
           .setOrigin(0)
           .setVisible(true)
           .setActive(true);
+        // if player is moving up or down, don't show grass so they don't appear to be moving under it, will show after they reach the destination
         if (playerDirection === DIRECTION.DOWN || playerDirection === DIRECTION.UP) {
           object.visible = false;
         }
@@ -1310,6 +1313,7 @@ export class WorldScene extends BaseScene {
     if (playerDirection !== DIRECTION.DOWN) {
       return;
     }
+
     this.#hideSpecialEncounterTiles();
   }
 
