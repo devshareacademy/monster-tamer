@@ -1249,6 +1249,7 @@ export class WorldScene extends BaseScene {
   #handlePlayerMovementStarted(position) {
     this.#encounterZonePlayerIsEntering = undefined;
 
+    /** @type {Phaser.Tilemaps.Tile} */
     let encounterTile;
     this.#encounterLayers.some((encounterLayer) => {
       encounterTile = encounterLayer.getTileAtWorldXY(position.x, position.y, true);
@@ -1314,6 +1315,7 @@ export class WorldScene extends BaseScene {
       return;
     }
 
+    // if player is moving in the down direction, hide current tile so player does not move under it
     this.#hideSpecialEncounterTiles();
   }
 
