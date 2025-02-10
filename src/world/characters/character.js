@@ -27,7 +27,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
  * @property {() => void} [spriteChangedDirectionCallback]
  * @property {{position: import('../../types/typedef.js').Coordinate}[]} [objectsToCheckForCollisionsWith]
- * @property {() => void} [spriteGridMovementStartedCallback] an optional callback that will be called before the sprite starts moving
+ * @property {(position: import('../../types/typedef.js').Coordinate) => void} [spriteGridMovementStartedCallback] an optional callback that will be called before the sprite starts moving
  */
 
 export class Character {
@@ -57,7 +57,7 @@ export class Character {
   _spriteChangedDirectionCallback;
   /** @protected @type {{position: import('../../types/typedef.js').Coordinate}[]} */
   _objectsToCheckForCollisionsWith;
-  /** @protected @type {() => void | undefined} */
+  /** @protected @type {(position: import('../../types/typedef.js').Coordinate) => void | undefined} */
   _spriteGridMovementStartedCallback;
 
   /**
@@ -214,7 +214,7 @@ export class Character {
     this._targetPosition.y = updatedPosition.y;
 
     if (this._spriteGridMovementStartedCallback) {
-      this._spriteGridMovementStartedCallback();
+      this._spriteGridMovementStartedCallback({ ...this._targetPosition });
     }
 
     this._scene.add.tween({
