@@ -283,8 +283,8 @@ export class WorldScene extends BaseScene {
       enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
         this.#handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
       },
-      spriteGridMovementStartedCallback: () => {
-        this.#handlePlayerMovementStarted();
+      spriteGridMovementStartedCallback: (position) => {
+        this.#handlePlayerMovementStarted(position);
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
@@ -574,11 +574,9 @@ export class WorldScene extends BaseScene {
     if (this.#currentCutSceneId !== undefined) {
       return;
     }
-
     if (this.#encounterLayers.length === 0) {
       return;
     }
-
     this.#handlePlayerMovementInEncounterZone();
   }
 
@@ -600,7 +598,6 @@ export class WorldScene extends BaseScene {
         child.active = false;
         child.visible = false;
       });
-
     if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
@@ -1246,25 +1243,23 @@ export class WorldScene extends BaseScene {
    * This method is invoked any time the player is about to start moving between grid spaces.
    * Before the player moves, check to see they will be moving into an encounter zone, and store the result.
    * We will use this result after the player finishes moving to see if there should be an encounter.
+   * @param {import('../types/typedef.js').Coordinate} position
    * @returns {void}
    */
-  #handlePlayerMovementStarted() {
-    // if the player is moving into an encounter zone, check to see if this is a special tile, like grass
+  #handlePlayerMovementStarted(position) {
     this.#encounterZonePlayerIsEntering = undefined;
+
     /** @type {Phaser.Tilemaps.Tile} */
     let encounterTile;
-    const playerTargetPosition = getTargetPositionFromGameObjectPositionAndDirection(
-      { x: this.#player.sprite.x, y: this.#player.sprite.y },
-      this.#player.direction
-    );
     this.#encounterLayers.some((encounterLayer) => {
-      encounterTile = encounterLayer.getTileAtWorldXY(playerTargetPosition.x, playerTargetPosition.y, true);
+      encounterTile = encounterLayer.getTileAtWorldXY(position.x, position.y, true);
       if (encounterTile.index === -1) {
         return false;
       }
       this.#encounterZonePlayerIsEntering = encounterLayer;
       return true;
     });
+
     if (this.#encounterZonePlayerIsEntering === undefined) {
       if (this.#player.direction === DIRECTION.DOWN) {
         // if player is moving in the down direction, hide current tile so player does not move under it
@@ -1307,7 +1302,6 @@ export class WorldScene extends BaseScene {
         // if player is moving up or down, don't show grass so they don't appear to be moving under it, will show after they reach the destination
         if (playerDirection === DIRECTION.DOWN || playerDirection === DIRECTION.UP) {
           object.visible = false;
-          break;
         }
         playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
         break;
@@ -1320,10 +1314,14 @@ export class WorldScene extends BaseScene {
     if (playerDirection !== DIRECTION.DOWN) {
       return;
     }
+
     // if player is moving in the down direction, hide current tile so player does not move under it
     this.#hideSpecialEncounterTiles();
   }
 
+  /**
+   * @returns {void}
+   */
   #hideSpecialEncounterTiles() {
     this.#specialEncounterTileImageGameObjectGroup
       .getChildren()

@@ -205,21 +205,21 @@ Cutscenes & In Game Events:
     ✔ update dialog ui to be a new scene @done(24-11-13 13:52)
 
 Full Screen Support:
-  ☐ update controls to support full screen button
-  ☐ update base scene to launch full screen mode
+  ✔ update controls to support full screen button @done(25-02-04 09:14)
+  ✔ update base scene to launch full screen mode @done(25-02-04 09:14)
 
 Bug Fixes Part 2:
-  ☐ fix bug with resetting battle scene state
-  ☐ fix beach asset file name
+  ✔ fix bug with resetting battle scene state @done(25-02-04 09:14)
+  ✔ fix beach asset file name @done(25-02-04 09:14)
 
 Multiple Encounter Areas & Special Tiles:
-  ☐ tiled updates
-    ☐ support multiple encounter zones
-    ☐ new class with tile type
-  ☐ update to support multiple encounter zones
-  ☐ import new spritesheet
-  ☐ refactor encounter check to start before player moves
-  ☐ add grass tiles
+  ✔ tiled updates @done(25-02-05 08:09)
+    ✔ support multiple encounter zones @done(25-02-05 08:09)
+    ✔ new class with tile type @done(25-02-05 08:09)
+  ✔ update to support multiple encounter zones @done(25-02-07 11:50)
+  ✔ import new spritesheet @done(25-02-05 08:10)
+  ✔ refactor encounter check to start before player moves @done(25-02-07 11:52)
+  ✔ add grass tiles @done(25-02-09 08:24)
 
 
 -------------------------------
