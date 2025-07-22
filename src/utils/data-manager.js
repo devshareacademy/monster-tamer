@@ -13,7 +13,6 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @type {object}
  * @property {string} area
  * @property {boolean} isInterior
- * @property {number} zone
  */
 
 /**
@@ -58,7 +57,6 @@ const initialState = {
     location: {
       area: 'main_1',
       isInterior: false,
-      zone: 1,
     },
   },
   options: {

@@ -20,7 +20,7 @@ import { TILE_SIZE } from '../../config.js';
 export class Player extends Character {
   /** @type {Phaser.Tilemaps.ObjectLayer | undefined} */
   #entranceLayer;
-  /** @type {(entranceName: string, entranceId: string, isBuildingEntrance: boolean, zoneId: number) => void} */
+  /** @type {(entranceName: string, entranceId: string, isBuildingEntrance: boolean) => void} */
   #enterEntranceCallback;
 
   /**
@@ -89,10 +89,9 @@ export class Player extends Character {
       // entrance is nearby and the player is trying to enter that location
       const entranceName = nearbyEntrance.properties.find((property) => property.name === 'connects_to').value;
       const entranceId = nearbyEntrance.properties.find((property) => property.name === 'entrance_id').value;
-      const zoneId = nearbyEntrance.properties.find((property) => property.name === 'zone_id').value;
       const isBuildingEntrance =
         nearbyEntrance.properties.find((property) => property.name === 'is_building')?.value || false;
-      this.#enterEntranceCallback(entranceName, entranceId, isBuildingEntrance, zoneId);
+      this.#enterEntranceCallback(entranceName, entranceId, isBuildingEntrance);
     }
   }
 }

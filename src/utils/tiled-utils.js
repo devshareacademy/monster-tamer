@@ -1,12 +1,4 @@
-import { OBJECT_LAYER_NAMES } from '../assets/tiled.js';
-
-/**
- * @typedef TiledObjectProperty
- * @type {object}
- * @property {string} name
- * @property {string} type
- * @property {any} value
- */
+import { OBJECT_LAYER_NAMES } from '../assets/tiled-keys.js';
 
 /**
  * @param {Phaser.Tilemaps.Tilemap} map
@@ -29,7 +21,9 @@ function getObjectsFromLayer(map, layerName) {
 function getObjectsFromLayerWithIdProperty(map, layerName) {
   const objects = getObjectsFromLayer(map, layerName);
   return objects.filter((obj) => {
-    return /** @type {TiledObjectProperty[]} */ (obj.properties).some((property) => property.name === 'id');
+    return /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (obj.properties).some(
+      (property) => property.name === 'id'
+    );
   });
 }
 
@@ -42,21 +36,12 @@ function createMapFromObjectsWithIdProperty(objects) {
   /** @type {{ [key: number]: Phaser.Types.Tilemaps.TiledObject; }} */
   const map = {};
   objects.forEach((obj) => {
-    const id = /** @type {TiledObjectProperty[]} */ (obj.properties).find((property) => property.name === 'id').value;
+    const id = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (obj.properties).find(
+      (property) => property.name === 'id'
+    ).value;
     map[id] = obj;
   });
   return map;
-}
-
-/**
- * Creates an object with the zoneIds as keys and the values as the related TileObjects
- * for the area metadata.
- * @param {Phaser.Tilemaps.Tilemap} map
- * @returns {{ [key: number]: Phaser.Types.Tilemaps.TiledObject }}
- */
-export function createAreaMetaDataMap(map) {
-  const filteredObjects = getObjectsFromLayerWithIdProperty(map, OBJECT_LAYER_NAMES.AREA_METADATA);
-  return createMapFromObjectsWithIdProperty(filteredObjects);
 }
 
 /**
@@ -77,8 +62,8 @@ export function createCameraBoundsMap(map) {
  */
 export function createCameraRegions(map) {
   const filteredObjects = getObjectsFromLayerWithIdProperty(map, OBJECT_LAYER_NAMES.CAMERA_BOUNDS);
-  const cameraRegions = filteredObjects.map(obj => ({
-    id: obj.properties.find(p => p.name === 'id').value,
+  const cameraRegions = filteredObjects.map((obj) => ({
+    id: obj.properties.find((p) => p.name === 'id').value,
     x: obj.x,
     y: obj.y - obj.height, // adjust y since tile objects are bottom aligned
     width: obj.width,
