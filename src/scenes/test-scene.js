@@ -9,6 +9,7 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { makeDraggable } from '../utils/draggable.js';
 import { Ball } from '../battle/ball.js';
 import { sleep } from '../utils/time-utils.js';
+import { dataManager } from '../utils/data-manager.js';
 
 export class TestScene extends Phaser.Scene {
   /** @type {import('../battle/attacks/attack-keys.js').AttackKeys} */
@@ -66,7 +67,13 @@ export class TestScene extends Phaser.Scene {
   #addDataGui() {
     const pane = new TweakPane.Pane();
 
-    const f1 = pane.addFolder({
+    const tab = pane.addTab({
+      pages: [
+        {title: 'Animations'},
+        {title: 'Save Editor'},
+      ],
+    });
+    const f1 = tab.pages[0].addFolder({
       title: 'Monsters',
       expanded: false,
     });
@@ -97,7 +104,7 @@ export class TestScene extends Phaser.Scene {
       x: 745,
       y: 120,
     };
-    const f2 = pane.addFolder({
+    const f2 = tab.pages[0].addFolder({
       title: 'Attacks',
       expanded: false,
     });
@@ -152,7 +159,7 @@ export class TestScene extends Phaser.Scene {
       this.#updateAttackGameObjectPosition('y', ev.value);
     });
 
-    const f3 = pane.addFolder({
+    const f3 = tab.pages[0].addFolder({
       title: 'Monster Ball',
       expanded: true,
     });
@@ -178,6 +185,27 @@ export class TestScene extends Phaser.Scene {
       await sleep(500, this);
       this.#ball.hide();
       await this.#catchEnemyFailed();
+    });
+
+    // level editor
+    const saveEditorFolder = tab.pages[1];
+    
+    const playerPosition = { ...dataManager.store.get('PLAYER_POSITION') };
+    const playerLocation = { ...dataManager.store.get('PLAYER_LOCATION') };
+    let flagsString = (dataManager.store.get('FLAGS') || []).join(',');
+    
+    saveEditorFolder.addBinding(playerPosition, 'x', { min: 0, max: 1024, step: 1 });
+    saveEditorFolder.addBinding(playerPosition, 'y', { min: 0, max: 576, step: 1 });
+    saveEditorFolder.addBinding(playerLocation, 'area');
+    saveEditorFolder.addBinding(playerLocation, 'isInterior');
+    saveEditorFolder.addBinding({ flagsString }, 'flagsString', { label: 'Flags (comma separated)' });
+    
+    saveEditorFolder.addButton({ title: 'Apply & Save' }).on('click', () => {
+      dataManager.store.set('PLAYER_POSITION', { ...playerPosition });
+      dataManager.store.set('PLAYER_LOCATION', { ...playerLocation });
+      dataManager.store.set('FLAGS', flagsString.split(',').map(f => f.trim()).filter(f => f));
+      dataManager.saveData();
+      this.scene.restart();
     });
   }
 

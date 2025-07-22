@@ -17,6 +17,7 @@ export class Controls {
    * @param {Phaser.Scene} scene the Phaser 3 Scene the cursor keys will be created in
    */
   constructor(scene) {
+    console.log('hit')
     this.#scene = scene;
     this.#cursorKeys = this.#scene.input.keyboard?.createCursorKeys();
     this.#enterKey = this.#scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
