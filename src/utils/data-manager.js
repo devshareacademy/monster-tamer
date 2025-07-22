@@ -13,6 +13,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @type {object}
  * @property {string} area
  * @property {boolean} isInterior
+ * @property {number} zone
  */
 
 /**
@@ -50,13 +51,14 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 const initialState = {
   player: {
     position: {
-      x: 4 * TILE_SIZE,
-      y: 21 * TILE_SIZE,
+      x: 0,
+      y: 0,
     },
     direction: DIRECTION.DOWN,
     location: {
       area: 'main_1',
       isInterior: false,
+      zone: 0,
     },
   },
   options: {

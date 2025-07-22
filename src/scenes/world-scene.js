@@ -158,6 +158,9 @@ export class WorldScene extends BaseScene {
       isPlayerKnockedOut,
     };
 
+    // TODO: this will need to be reworked with the new area metadata that was added (we have multiple objects now)
+    // will likely need to use zone information
+
     // update player location, and map data if the player was knocked out in a battle
     if (this.#sceneData.isPlayerKnockedOut) {
       // get the nearest knocked out spawn location from the map meta data
@@ -180,6 +183,20 @@ export class WorldScene extends BaseScene {
         y: reviveLocation.y - TILE_SIZE,
       });
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.UP);
+    }
+
+    // During a new game flow, find the players starting location from the map data, and update
+    // the data manager. Originally, this was a hard coded value, and was updated to be dynamic
+    // based on our level data in Tiled.
+    const isNewGame = dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || true;
+    if (isNewGame) {
+      // find player spawn location and update the data manager
+      const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.MAIN_1_LEVEL });
+      const playerSpawnLocationObject = map.getObjectLayer('Player-Spawn-Location').objects[0];
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: playerSpawnLocationObject.x,
+        y: playerSpawnLocationObject.y - TILE_SIZE,
+      });
     }
 
     dataManager.store.set(
@@ -254,7 +271,8 @@ export class WorldScene extends BaseScene {
     this.#createEncounterAreas(map);
 
     if (!this.#sceneData.isInterior) {
-      this.cameras.main.setBounds(0, 0, 1280, 2176);
+      // TODO: fix this
+      // this.cameras.main.setBounds(0, 0, 1280, 2176);
     }
     this.cameras.main.setZoom(0.8);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);

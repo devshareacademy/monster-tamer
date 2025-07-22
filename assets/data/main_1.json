@@ -1107,7 +1107,6 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":80,
          "id":16,
-         "locked":true,
          "name":"Foreground",
          "opacity":1,
          "type":"tilelayer",
@@ -1386,7 +1385,6 @@
          "class":"area_metadata",
          "draworder":"topdown",
          "id":25,
-         "locked":true,
          "name":"Area-Metadata",
          "objects":[
                 {
@@ -1484,6 +1482,29 @@
          "opacity":0.13,
          "type":"objectgroup",
          "visible":false,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":34,
+         "name":"Player-Spawn-Location",
+         "objects":[
+                {
+                 "gid":194,
+                 "height":64,
+                 "id":40,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":896,
+                 "y":4352
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -1947,8 +1968,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":34,
- "nextobjectid":40,
+ "nextlayerid":35,
+ "nextobjectid":41,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
