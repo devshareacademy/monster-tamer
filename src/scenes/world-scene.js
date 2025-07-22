@@ -295,8 +295,7 @@ export class WorldScene extends BaseScene {
     this.#menu = new WorldMenu(this);
 
     // create event zones
-    // TODO: fix this
-    // this.#createEventEncounterZones(map);
+    this.#createEventEncounterZones(map);
 
     if (ENABLE_ZONE_DEBUGGING) {
       // used for debugging the overlaps for event zones
@@ -602,7 +601,6 @@ export class WorldScene extends BaseScene {
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
-    this.#wildMonsterEncountered = false; // TODO: fix this
     if (this.#wildMonsterEncountered) {
       const encounterAreaId = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (
         this.#encounterZonePlayerIsEntering.layer.properties
