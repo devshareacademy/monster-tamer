@@ -1,3 +1,5 @@
+// TODO: refactor this.make.tilemap( all over this code to have a map and reuse
+
 import Phaser from '../lib/phaser.js';
 import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -23,6 +25,8 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
 import { DialogScene } from './dialog-scene.js';
+import { OBJECT_LAYER_NAMES } from '../assets/tiled.js';
+import * as TiledUtils from '../utils/tiled-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -72,6 +76,7 @@ const TILED_EVENT_PROPERTY = Object.freeze({
  * @property {boolean} [isPlayerKnockedOut]
  * @property {string} [area]
  * @property {boolean} [isInterior]
+ * @property {number} [zone]
  */
 
 /*
@@ -128,6 +133,12 @@ export class WorldScene extends BaseScene {
   #specialEncounterTileImageGameObjectGroup;
   /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   #encounterZonePlayerIsEntering;
+  /** @type {{ [key: number]: Phaser.Types.Tilemaps.TiledObject }} */
+  #areaZoneObjectMap;
+  /** @type {import('../types/typedef.js').CameraRegion[]} */
+  #cameraRegions;
+  /** @type {{ x: number, y: number, width: number, height: number } | undefined} */
+  #lastCameraBounds;
 
   constructor() {
     super({
@@ -151,11 +162,13 @@ export class WorldScene extends BaseScene {
       isInterior = dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).isInterior;
     }
     const isPlayerKnockedOut = this.#sceneData?.isPlayerKnockedOut || false;
+    const zoneId = this.#sceneData?.zone || dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION).zone;
 
     this.#sceneData = {
       area,
       isInterior,
       isPlayerKnockedOut,
+      zone: zoneId,
     };
 
     // TODO: this will need to be reworked with the new area metadata that was added (we have multiple objects now)
@@ -165,7 +178,7 @@ export class WorldScene extends BaseScene {
     if (this.#sceneData.isPlayerKnockedOut) {
       // get the nearest knocked out spawn location from the map meta data
       let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
-      const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
+      const areaMetaDataProperties = map.getObjectLayer(OBJECT_LAYER_NAMES.AREA_METADATA).objects[0].properties;
       const knockOutSpawnLocation = /** @type {TiledObjectProperty[]} */ (areaMetaDataProperties).find(
         (property) => property.name === TILED_AREA_METADATA_PROPERTY.FAINT_LOCATION
       )?.value;
@@ -177,7 +190,7 @@ export class WorldScene extends BaseScene {
       }
 
       // set players spawn location to that map and finds the revive location based on that object
-      const reviveLocation = map.getObjectLayer('Revive-Location').objects[0];
+      const reviveLocation = map.getObjectLayer(OBJECT_LAYER_NAMES.REVIVE_LOCATION).objects[0];
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
         x: reviveLocation.x,
         y: reviveLocation.y - TILE_SIZE,
@@ -188,11 +201,11 @@ export class WorldScene extends BaseScene {
     // During a new game flow, find the players starting location from the map data, and update
     // the data manager. Originally, this was a hard coded value, and was updated to be dynamic
     // based on our level data in Tiled.
-    const isNewGame = dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || true;
+    let isNewGame = !(dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false);
     if (isNewGame) {
       // find player spawn location and update the data manager
       const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.MAIN_1_LEVEL });
-      const playerSpawnLocationObject = map.getObjectLayer('Player-Spawn-Location').objects[0];
+      const playerSpawnLocationObject = map.getObjectLayer(OBJECT_LAYER_NAMES.PLAYER_SPAWN_LOCATION).objects[0];
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
         x: playerSpawnLocationObject.x,
         y: playerSpawnLocationObject.y - TILE_SIZE,
@@ -204,6 +217,7 @@ export class WorldScene extends BaseScene {
       /** @type {import('../utils/data-manager.js').PlayerLocation} */ ({
         area: this.#sceneData.area,
         isInterior: this.#sceneData.isInterior,
+        zone: this.#sceneData.zone,
       })
     );
 
@@ -226,6 +240,9 @@ export class WorldScene extends BaseScene {
     this.#lastCutSceneEventHandledIndex = -1;
     this.#specialEncounterTileImageGameObjectGroup = undefined;
     this.#encounterZonePlayerIsEntering = undefined;
+    this.#areaZoneObjectMap = {};
+    this.#cameraRegions = [];
+    this.#lastCameraBounds = undefined;
   }
 
   /**
@@ -256,24 +273,24 @@ export class WorldScene extends BaseScene {
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
-    const hasSignLayer = map.getObjectLayer('Sign') !== null;
+    const hasSignLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SIGN) !== null;
     if (hasSignLayer) {
-      this.#signLayer = map.getObjectLayer('Sign');
+      this.#signLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SIGN);
     }
 
     // create layer for scene transitions entrances
-    const hasSceneTransitionLayer = map.getObjectLayer('Scene-Transitions') !== null;
+    const hasSceneTransitionLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SCENE_TRANSITIONS) !== null;
     if (hasSceneTransitionLayer) {
-      this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
+      this.#entranceLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SCENE_TRANSITIONS);
     }
 
     // create collision layers for encounters
     this.#createEncounterAreas(map);
 
-    if (!this.#sceneData.isInterior) {
-      // TODO: fix this
-      // this.cameras.main.setBounds(0, 0, 1280, 2176);
-    }
+    // setup zone information for current area, which has tiled objects representing the camera bounds for each
+    // zone in a given level.
+    this.#areaZoneObjectMap = TiledUtils.createAreaMetaDataMap(map);
+
     this.cameras.main.setZoom(0.8);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
@@ -298,14 +315,24 @@ export class WorldScene extends BaseScene {
       otherCharactersToCheckForCollisionsWith: this.#npcs,
       objectsToCheckForCollisionsWith: this.#items,
       entranceLayer: this.#entranceLayer,
-      enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance) => {
-        this.#handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance);
+      enterEntranceCallback: (entranceName, entranceId, isBuildingEntrance, zoneId) => {
+        this.#handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance, zoneId);
       },
       spriteGridMovementStartedCallback: (position) => {
         this.#handlePlayerMovementStarted(position);
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
+
+    // update camera bounds for the given level
+    this.#cameraRegions = TiledUtils.createCameraRegions(map);
+    this.#updateCameraBounds();
+    // console.log(this.#cameraRegions);
+    // const cameraRegion = this.#getCameraRegionForPlayer();
+    // console.log(cameraRegion);
+    // if (cameraRegion) {
+    //   this.cameras.main.setBounds(cameraRegion.x, cameraRegion.y, cameraRegion.width, cameraRegion.height);
+    // }
 
     // update our collisions with npcs
     this.#npcs.forEach((npc) => {
@@ -319,7 +346,8 @@ export class WorldScene extends BaseScene {
     this.#menu = new WorldMenu(this);
 
     // create event zones
-    this.#createEventEncounterZones(map);
+    // TODO: fix this
+    // this.#createEventEncounterZones(map);
 
     if (ENABLE_ZONE_DEBUGGING) {
       // used for debugging the overlaps for event zones
@@ -550,6 +578,9 @@ export class WorldScene extends BaseScene {
       y: this.#player.sprite.y,
     });
 
+    // update camera bounds for the given level
+    this.#updateCameraBounds();
+
     // check to see if the player encountered cut scene zone
     this.#player.sprite.getBounds(this.#rectangleForOverlapCheck1);
     for (const zone of Object.values(this.#eventZones)) {
@@ -622,6 +653,7 @@ export class WorldScene extends BaseScene {
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
+    this.#wildMonsterEncountered = false; // TODO: fix this
     if (this.#wildMonsterEncountered) {
       const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
         this.#encounterZonePlayerIsEntering.layer.properties
@@ -744,7 +776,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #createItems(map) {
-    const itemObjectLayer = map.getObjectLayer('Item');
+    const itemObjectLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.ITEM);
     if (!itemObjectLayer) {
       return;
     }
@@ -789,17 +821,17 @@ export class WorldScene extends BaseScene {
    * @param {string} entranceName
    * @param {string} entranceId
    * @param {boolean} isBuildingEntrance
+   * @param {number} zoneId
    * @returns {void}
    */
-  #handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance) {
+  #handleEntranceEnteredCallback(entranceName, entranceId, isBuildingEntrance, zoneId) {
     this._controls.lockInput = true;
 
     // update player position to match the new entrance data
     // create tilemap using the provided entrance data
     const map = this.make.tilemap({ key: `${entranceName.toUpperCase()}_LEVEL` });
     // get the position of the entrance object using the entrance id
-    const entranceObjectLayer = map.getObjectLayer('Scene-Transitions');
-
+    const entranceObjectLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SCENE_TRANSITIONS);
     const entranceObject = entranceObjectLayer.objects.find((object) => {
       const tempEntranceName = object.properties.find((property) => property.name === 'connects_to').value;
       const tempEntranceId = object.properties.find((property) => property.name === 'entrance_id').value;
@@ -827,6 +859,7 @@ export class WorldScene extends BaseScene {
         const dataToPass = {
           area: entranceName,
           isInterior: isBuildingEntrance,
+          zone: zoneId,
         };
         this.scene.start(SCENE_KEYS.WORLD_SCENE, dataToPass);
       }
@@ -912,7 +945,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #createEventEncounterZones(map) {
-    const eventObjectLayer = map.getObjectLayer('Events');
+    const eventObjectLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.EVENTS);
     if (!eventObjectLayer) {
       return;
     }
@@ -1271,7 +1304,7 @@ export class WorldScene extends BaseScene {
     let encounterTile;
     this.#encounterLayers.some((encounterLayer) => {
       encounterTile = encounterLayer.getTileAtWorldXY(position.x, position.y, true);
-      if (encounterTile.index === -1) {
+      if (encounterTile === null || encounterTile.index === -1) {
         return false;
       }
       this.#encounterZonePlayerIsEntering = encounterLayer;
@@ -1354,5 +1387,43 @@ export class WorldScene extends BaseScene {
         }
         return false;
       });
+  }
+
+  #getCameraRegionsForPlayer() {
+    return this.#cameraRegions.filter((region) => {
+      return (
+        this.#player.sprite.x >= region.x &&
+        this.#player.sprite.x <= region.x + region.width &&
+        this.#player.sprite.y >= region.y &&
+        this.#player.sprite.y <= region.y + region.height
+      );
+    });
+  }
+
+  #getUnionBoundsForCameraRegions(cameraRegions) {
+    if (cameraRegions.length === 0) {
+      return undefined;
+    }
+    const minX = Math.min(...cameraRegions.map((region) => region.x));
+    const minY = Math.min(...cameraRegions.map((region) => region.y));
+    const maxX = Math.max(...cameraRegions.map((region) => region.x + region.width));
+    const maxY = Math.max(...cameraRegions.map((region) => region.y + region.height));
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  }
+
+  #updateCameraBounds() {
+    const cameraRegions = this.#getCameraRegionsForPlayer();
+    const unionBounds = this.#getUnionBoundsForCameraRegions(cameraRegions);
+    if (
+      unionBounds &&
+      (!this.#lastCameraBounds ||
+        unionBounds.x !== this.#lastCameraBounds.x ||
+        unionBounds.y !== this.#lastCameraBounds.y ||
+        unionBounds.width !== this.#lastCameraBounds.width ||
+        unionBounds.height !== this.#lastCameraBounds.height)
+    ) {
+      this.cameras.main.setBounds(unionBounds.x, unionBounds.y, unionBounds.width, unionBounds.height);
+      this.#lastCameraBounds = unionBounds;
+    }
   }
 }

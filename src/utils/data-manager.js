@@ -58,7 +58,7 @@ const initialState = {
     location: {
       area: 'main_1',
       isInterior: false,
-      zone: 0,
+      zone: 1,
     },
   },
   options: {
