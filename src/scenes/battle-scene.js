@@ -46,6 +46,7 @@ const BATTLE_STATES = Object.freeze({
  * @property {import('../types/typedef.js').Monster[]} playerMonsters
  * @property {import('../types/typedef.js').Monster[]} enemyMonsters
  * @property {boolean} [isTrainerBattle=false]
+ * @property {number} [npcId]
  */
 
 /**
@@ -94,6 +95,8 @@ export class BattleScene extends BaseScene {
   #isTrainerBattle;
   /** @type {number} */
   #activeEnemyMonsterIndex;
+  /** @type {number | undefined} */
+  #npcId;
 
   constructor() {
     super({
@@ -120,6 +123,7 @@ export class BattleScene extends BaseScene {
 
     this.#isTrainerBattle = data.isTrainerBattle || false;
     this.#activeEnemyMonsterIndex = 0;
+    this.#npcId = data.npcId;
 
     this.#activePlayerAttackIndex = -1;
     this.#activeEnemyAttackIndex = -1;
@@ -366,6 +370,9 @@ export class BattleScene extends BaseScene {
         });
       } else {
         // This was the last monster, player wins
+        if (this.#isTrainerBattle && this.#npcId !== undefined) {
+          dataManager.addDefeatedNpc(this.#npcId);
+        }
         this.#activeEnemyMonster.playDeathAnimation(() => {
           // TODO: need to modify based on if npc or wild monster
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(

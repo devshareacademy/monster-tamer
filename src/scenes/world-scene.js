@@ -428,6 +428,10 @@ export class WorldScene extends BaseScene {
 
     this.#npcs.forEach((npc) => {
       npc.update(time);
+      // TODO: check if this makes sense
+      if (npc.checkForPlayerInVision(this.#player)) {
+        this.#handleNpcInteraction(npc);
+      }
     });
   }
 
@@ -877,25 +881,49 @@ export class WorldScene extends BaseScene {
         break;
       case NPC_EVENT_TYPE.BATTLE:
         this.#isProcessingNpcEvent = true;
-        // Get monster data from the event
-        // TODO: review and see if this will have all of the stats we need
-        const npcMonsters = eventToHandle.data.monsters.map((monsterId) => {
-          return DataUtils.getMonsterById(this, monsterId);
-        });
+        const defeatedNpcs = dataManager.store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || new Set();
+        if (defeatedNpcs.has(npcToInteractWith.id)) {
+          this.#isProcessingNpcEvent = false;
+          this.#handleNpcInteraction(npcToInteractWith);
+          return;
+        }
 
-        /** @type {import('./battle-scene.js').BattleSceneData} */
-        const dataToPass = {
-          enemyMonsters: npcMonsters,
-          playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
-          isTrainerBattle: true,
-        };
-
-        // TODO: see if we need a transition
-        this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
+        if (eventToHandle.data.canDeclineBattle) {
+          this.#dialogUi.showDialogModal(eventToHandle.data.messages, () => {
+            this.scene.launch(SCENE_KEYS.CONFIRMATION_SCENE, {
+              onConfirm: () => {
+                this.#startBattle(npcToInteractWith, eventToHandle);
+              },
+              onCancel: () => {
+                this.#dialogUi.showDialogModal([eventToHandle.data.battleDeclinedMessage]);
+                this.#isProcessingNpcEvent = false;
+              },
+            });
+          });
+        } else {
+          this.#startBattle(npcToInteractWith, eventToHandle);
+        }
         break;
       default:
         exhaustiveGuard(eventType);
     }
+  }
+
+  #startBattle(npc, event) {
+    // Get monster data from the event
+    const npcMonsters = event.data.monsters.map((monsterId) => {
+      return DataUtils.getMonsterById(this, monsterId);
+    });
+
+    /** @type {import('./battle-scene.js').BattleSceneData} */
+    const dataToPass = {
+      enemyMonsters: npcMonsters,
+      playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
+      isTrainerBattle: true,
+      npcId: npc.id,
+    };
+
+    this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
   }
 
   /**

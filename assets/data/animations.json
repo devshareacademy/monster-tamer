@@ -193,5 +193,59 @@
     "delay": 0,
     "yoyo": true,
     "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_19_RIGHT",
+    "frames": [188, 182, 189],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_19_UP",
+    "frames": [186, 181, 187],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_19_DOWN",
+    "frames": [184, 180, 185],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_20_RIGHT",
+    "frames": [198, 192, 199],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_20_UP",
+    "frames": [196, 191, 197],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_20_DOWN",
+    "frames": [194, 190, 195],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
   }
 ]

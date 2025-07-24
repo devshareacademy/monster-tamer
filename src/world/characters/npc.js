@@ -29,6 +29,9 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @property {import('../../types/typedef.js').NpcEvent[]} events
  * @property {string} animationKeyPrefix
  * @property {number} id
+ * @property {import('../../types/typedef.js').BattleTrigger} [battleTrigger]
+ * @property {number} [visionRange]
+ * @property {import('../../common/direction.js').Direction[]} [visionDirections]
  */
 
 /**
@@ -52,6 +55,12 @@ export class NPC extends Character {
   #animationKeyPrefix;
   /** @type {number} */
   #id;
+  /** @type {import('../../types/typedef.js').BattleTrigger | undefined} */
+  #battleTrigger;
+  /** @type {number | undefined} */
+  #visionRange;
+  /** @type {import('../../common/direction.js').Direction[] | undefined} */
+  #visionDirections;
 
   /**
    * @param {NPCConfig} config
@@ -79,6 +88,9 @@ export class NPC extends Character {
     this.#events = config.events;
     this.#animationKeyPrefix = config.animationKeyPrefix;
     this.#id = config.id;
+    this.#battleTrigger = config.battleTrigger;
+    this.#visionRange = config.visionRange;
+    this.#visionDirections = config.visionDirections;
   }
 
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
@@ -129,6 +141,11 @@ export class NPC extends Character {
     this._spriteGridMovementFinishedCallback = val;
   }
 
+  /** @type {import('../../types/typedef.js').BattleTrigger | undefined} */
+  get battleTrigger() {
+    return this.#battleTrigger;
+  }
+
   /**
    * Resets the lastMovementTime, which is used for when we want to have an npc start moving
    * immediately. This is needed for cutscene support so after the npc appears, that npc starts
@@ -162,6 +179,52 @@ export class NPC extends Character {
       default:
         exhaustiveGuard(playerDirection);
     }
+  }
+
+  /**
+   * @param {import('./player.js').Player} player
+   * @returns {boolean}
+   */
+  checkForPlayerInVision(player) {
+    if (this.#battleTrigger !== 'ON_SIGHT' || !this.#visionDirections || !this.#visionRange) {
+      return false;
+    }
+
+    if (this.isMoving) {
+      return false;
+    }
+
+    // TODO: see if this can be refactored to not need display height
+
+    const npcPosition = this.position;
+    const playerPosition = player.position;
+
+    for (const direction of this.#visionDirections) {
+      if (direction === this.direction) {
+        if (
+          (direction === DIRECTION.DOWN &&
+            playerPosition.x === npcPosition.x &&
+            playerPosition.y > npcPosition.y &&
+            playerPosition.y <= npcPosition.y + this.#visionRange * this._phaserGameObject.displayHeight) ||
+          (direction === DIRECTION.UP &&
+            playerPosition.x === npcPosition.x &&
+            playerPosition.y < npcPosition.y &&
+            playerPosition.y >= npcPosition.y - this.#visionRange * this._phaserGameObject.displayHeight) ||
+          (direction === DIRECTION.LEFT &&
+            playerPosition.y === npcPosition.y &&
+            playerPosition.x < npcPosition.x &&
+            playerPosition.x >= npcPosition.x - this.#visionRange * this._phaserGameObject.displayWidth) ||
+          (direction === DIRECTION.RIGHT &&
+            playerPosition.y === npcPosition.y &&
+            playerPosition.x > npcPosition.x &&
+            playerPosition.x <= npcPosition.x + this.#visionRange * this._phaserGameObject.displayWidth)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**

@@ -1,6 +1,6 @@
 import Phaser from '../lib/phaser.js';
 import { DIRECTION } from '../common/direction.js';
-import { TEXT_SPEED, TILE_SIZE } from '../config.js';
+import { TEXT_SPEED } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
 import { DataUtils } from './data-utils.js';
@@ -44,6 +44,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {number[]} itemsPickedUp
  * @property {number[]} viewedEvents
  * @property {import('../types/typedef.js').GameFlag[]} flags
+ * @property {number[]} defeatedNpcs
  */
 
 /** @type {GlobalState} */
@@ -88,6 +89,7 @@ const initialState = {
   itemsPickedUp: [],
   viewedEvents: [],
   flags: [],
+  defeatedNpcs: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -106,6 +108,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   ITEMS_PICKED_UP: 'ITEMS_PICKED_UP',
   VIEWED_EVENTS: 'VIEWED_EVENTS',
   FLAGS: 'FLAGS',
+  DEFEATED_NPCS: 'DEFEATED_NPCS',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -334,6 +337,19 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * Adds the provided npcId to the defeated npc set in the data manager so player does
+   * not battle that npc again.
+   * @param {number} npcId
+   * @returns {void}
+   */
+  addDefeatedNpc(npcId) {
+    /** @type {Set<number>} */
+    const defeatedNpcs = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || []);
+    defeatedNpcs.add(npcId);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS, Array.from(defeatedNpcs));
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -354,6 +370,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
       [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
       [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
+      [DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS]: data.defeatedNpcs || [],
     });
   }
 
@@ -386,6 +403,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
       viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
       flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
+      defeatedNpcs: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || [])],
     };
   }
 }

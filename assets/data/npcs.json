@@ -75,26 +75,36 @@
   },
   "4": {
     "frame": 190,
-    "animationKeyPrefix": "NPC_1",
+    "animationKeyPrefix": "NPC_20",
+    "battleTrigger": "ON_SIGHT",
+    "visionRange": 3,
+    "visionDirections": ["LEFT"],
     "events": [
       {
         "requires": [],
-        "type": "MESSAGE",
+        "type": "BATTLE",
         "data": {
-          "messages": ["You can save your game from the menu.", "To open the menu, press the ENTER key."]
+          "monsters": [6],
+          "winMessage": "You defeated me!",
+          "lossMessage": "You are not strong enough."
         }
       }
     ]
   },
   "5": {
     "frame": 180,
-    "animationKeyPrefix": "NPC_1",
+    "animationKeyPrefix": "NPC_19",
+    "battleTrigger": "ON_INTERACTION",
     "events": [
       {
         "requires": [],
-        "type": "MESSAGE",
+        "type": "BATTLE",
         "data": {
-          "messages": ["You can save your game from the menu.", "To open the menu, press the ENTER key."]
+          "monsters": [7, 6],
+          "winMessage": "You are a strong trainer!",
+          "lossMessage": "Better luck next time.",
+          "canDeclineBattle": true,
+          "battleDeclinedMessage": "Let's battle next time."
         }
       }
     ]

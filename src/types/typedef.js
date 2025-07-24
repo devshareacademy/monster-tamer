@@ -158,6 +158,10 @@ export const NPC_EVENT_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef {'ON_SIGHT' | 'ON_INTERACTION'} BattleTrigger
+ */
+
+/**
  * @typedef NpcEventBattle
  * @type {object}
  * @property {'BATTLE'} type
@@ -166,6 +170,8 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {number[]} data.monsters
  * @property {string} data.winMessage
  * @property {string} data.lossMessage
+ * @property {boolean} [data.canDeclineBattle=false]
+ * @property {string} [data.battleDeclinedMessage]
  */
 
 /**
@@ -179,7 +185,11 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {number} frame
  * @property {string} animationKeyPrefix
  * @property {NpcEvent[]} events
+ * @property {BattleTrigger} [battleTrigger]
+ * @property {number} [visionRange]
+ * @property {import('../common/direction.js').Direction[]} [visionDirections]
  */
+// figure out how I want to do the vision range...
 
 /**
  * @typedef NpcData
