@@ -3,7 +3,7 @@ import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
-import { ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
+import { DEV_PANEL_CONFIG, ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import {
   getTargetDirectionFromGameObjectPosition,
@@ -596,6 +596,10 @@ export class WorldScene extends BaseScene {
         child.visible = false;
       });
     if (this.#encounterZonePlayerIsEntering === undefined) {
+      return;
+    }
+    if (DEV_PANEL_CONFIG.CONFIG_SETTINGS.DISABLE_WILD_ENCOUNTERS) {
+      console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] wild encounters are disabled`);
       return;
     }
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);

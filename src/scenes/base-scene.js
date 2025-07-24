@@ -1,9 +1,13 @@
+import { ENABLE_DEV_PANEL } from '../config.js';
+import { DeveloperPanel } from '../dev-tools/developer-panel.js';
 import Phaser from '../lib/phaser.js';
 import { Controls } from '../utils/controls.js';
 
 export class BaseScene extends Phaser.Scene {
   /** @protected @type {Controls} */
   _controls;
+  /** @protected @type {import('../dev-tools/developer-panel.js').DeveloperPanel | undefined} */
+  _devPanel;
 
   /**
    * @param {string | Phaser.Types.Scenes.SettingsConfig} [config]
@@ -12,6 +16,9 @@ export class BaseScene extends Phaser.Scene {
     super(config);
     if (this.constructor === BaseScene) {
       throw new Error('BaseScene is an abstract class and cannot be instantiated.');
+    }
+    if (ENABLE_DEV_PANEL) {
+      this._devPanel = DeveloperPanel.instance;
     }
   }
 
