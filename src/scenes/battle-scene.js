@@ -45,6 +45,7 @@ const BATTLE_STATES = Object.freeze({
  * @type {object}
  * @property {import('../types/typedef.js').Monster[]} playerMonsters
  * @property {import('../types/typedef.js').Monster[]} enemyMonsters
+ * @property {boolean} [isTrainerBattle=false]
  */
 
 /**
@@ -89,6 +90,10 @@ export class BattleScene extends BaseScene {
   #monsterCaptured;
   /** @type {Ball} */
   #ball;
+  /** @type {boolean} */
+  #isTrainerBattle;
+  /** @type {number} */
+  #activeEnemyMonsterIndex;
 
   constructor() {
     super({
@@ -109,8 +114,12 @@ export class BattleScene extends BaseScene {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getMonsterById(this, 2)],
         playerMonsters: [...dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
+        isTrainerBattle: false,
       };
     }
+
+    this.#isTrainerBattle = data.isTrainerBattle || false;
+    this.#activeEnemyMonsterIndex = 0;
 
     this.#activePlayerAttackIndex = -1;
     this.#activeEnemyAttackIndex = -1;
@@ -141,7 +150,7 @@ export class BattleScene extends BaseScene {
     // create the player and enemy monsters
     this.#activeEnemyMonster = new EnemyBattleMonster({
       scene: this,
-      monsterDetails: this.#sceneData.enemyMonsters[0],
+      monsterDetails: this.#sceneData.enemyMonsters[this.#activeEnemyMonsterIndex],
       skipBattleAnimations: this.#skipAnimations,
     });
     // find first monster in party that is able to battle
@@ -154,7 +163,7 @@ export class BattleScene extends BaseScene {
     });
 
     // render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
+    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations, this.#isTrainerBattle);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
     this.#createAvailableMonstersUi();
@@ -345,14 +354,29 @@ export class BattleScene extends BaseScene {
 
     if (this.#activeEnemyMonster.isFainted) {
       // play monster fainted animation and wait for animation to finish
-      this.#activeEnemyMonster.playDeathAnimation(() => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`Wild ${this.#activeEnemyMonster.name} fainted.`],
-          () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
-          }
-        );
-      });
+      // ENEMY FAINTED LOGIC
+      this.#activeEnemyMonsterIndex++;
+      // TODO: refactor from if/else block to just return early
+      if (this.#isTrainerBattle && this.#activeEnemyMonsterIndex < this.#sceneData.enemyMonsters.length) {
+        // If it's a trainer battle and there are more monsters, bring out the next one
+        const nextMonster = this.#sceneData.enemyMonsters[this.#activeEnemyMonsterIndex];
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`Foe is about to send in ${nextMonster.name}.`], () => {
+          this.#activeEnemyMonster.switchMonster(nextMonster);
+          this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+        });
+      } else {
+        // This was the last monster, player wins
+        this.#activeEnemyMonster.playDeathAnimation(() => {
+          // TODO: need to modify based on if npc or wild monster
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+            [`Wild ${this.#activeEnemyMonster.name} fainted.`],
+            // [`You defeated the trainer!`], // Use win message from event data
+            () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
+            }
+          );
+        });
+      }
       return;
     }
 

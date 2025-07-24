@@ -1027,6 +1027,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 189, 189, 189, 189, 189, 0, 0, 189, 189, 189, 189, 189, 189, 189, 189, 189, 189, 189, 189, 189, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":81,
          "id":14,
+         "locked":true,
          "name":"Collision",
          "opacity":0.67,
          "type":"tilelayer",
@@ -1981,7 +1982,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -2110,7 +2111,6 @@
                 {
                  "draworder":"topdown",
                  "id":20,
-                 "locked":true,
                  "name":"NPC2",
                  "objects":[
                         {
@@ -2141,17 +2141,51 @@
                  "visible":true,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":36,
+                 "name":"NPC3",
+                 "objects":[
+                        {
+                         "gid":194,
+                         "height":64,
+                         "id":50,
+                         "name":"npc",
+                         "properties":[
+                                {
+                                 "name":"id",
+                                 "type":"int",
+                                 "value":4
+                                }, 
+                                {
+                                 "name":"movement_pattern",
+                                 "propertytype":"npc_movement",
+                                 "type":"string",
+                                 "value":"IDLE"
+                                }],
+                         "rotation":0,
+                         "type":"npc",
+                         "visible":true,
+                         "width":64,
+                         "x":1472,
+                         "y":2752
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
-         "locked":true,
          "name":"NPC",
          "opacity":1,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
- "nextlayerid":36,
- "nextobjectid":49,
+ "nextlayerid":37,
+ "nextobjectid":51,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

@@ -72,5 +72,31 @@
         }
       }
     ]
+  },
+  "4": {
+    "frame": 190,
+    "animationKeyPrefix": "NPC_1",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["You can save your game from the menu.", "To open the menu, press the ENTER key."]
+        }
+      }
+    ]
+  },
+  "5": {
+    "frame": 180,
+    "animationKeyPrefix": "NPC_1",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["You can save your game from the menu.", "To open the menu, press the ENTER key."]
+        }
+      }
+    ]
   }
 }

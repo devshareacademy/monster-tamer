@@ -158,8 +158,19 @@ export const NPC_EVENT_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef NpcEventBattle
+ * @type {object}
+ * @property {'BATTLE'} type
+ * @property {string[]} requires
+ * @property {object} data
+ * @property {number[]} data.monsters
+ * @property {string} data.winMessage
+ * @property {string} data.lossMessage
+ */
+
+/**
  * @typedef NpcEvent
- * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal}
+ * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal | NpcEventBattle}
  */
 
 /**

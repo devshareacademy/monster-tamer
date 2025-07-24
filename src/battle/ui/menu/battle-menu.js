@@ -70,14 +70,17 @@ export class BattleMenu {
   #switchMonsterAttempt;
   /** @type {boolean} */
   #wasItemUsed;
+  /** @type {boolean} */
+  #isTrainerBattle;
 
   /**
    *
    * @param {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
    * @param {BattleMonster} activePlayerMonster the players current active monster in the current battle
    * @param {boolean} [skipBattleAnimations=false] used to skip all animations tied to the battle
+   * @param {boolean} [isTrainerBattle=false] used to determine if the battle is against a trainer
    */
-  constructor(scene, activePlayerMonster, skipBattleAnimations = false) {
+  constructor(scene, activePlayerMonster, skipBattleAnimations = false, isTrainerBattle = false) {
     this.#scene = scene;
     this.#activePlayerMonster = activePlayerMonster;
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
@@ -93,6 +96,7 @@ export class BattleMenu {
     this.#usedItem = undefined;
     this.#fleeAttempt = false;
     this.#switchMonsterAttempt = false;
+    this.#isTrainerBattle = isTrainerBattle;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -170,6 +174,15 @@ export class BattleMenu {
     this.#fleeAttempt = false;
     this.#switchMonsterAttempt = false;
     this.#usedItem = undefined;
+
+    // Conditionally disable FLEE button
+    if (this.#isTrainerBattle) {
+      const fleeButton = this.#mainBattleMenuPhaserContainerGameObject.getAt(4);
+      if (fleeButton) {
+        // TODO
+        fleeButton.setAlpha(0.5);
+      }
+    }
   }
 
   /**
@@ -237,6 +250,11 @@ export class BattleMenu {
     }
     if (input === 'OK') {
       if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MAIN) {
+        // TODO: probably show a message to the player
+        // Add check to prevent selecting disabled options
+        if (this.#isTrainerBattle && this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
+          return;
+        }
         this.#handlePlayerChooseMainBattleOption();
         return;
       }
@@ -754,6 +772,12 @@ export class BattleMenu {
 
     if (data && data.wasMonsterSelected) {
       // do nothing since new active monster was chosen to switch to
+      return;
+    }
+
+    if (this.#isTrainerBattle && data?.item?.category === 'CAPTURE') {
+      this.updateInfoPaneMessagesAndWaitForInput(["You can't use that in a trainer battle!"]);
+      this.#wasItemUsed = false;
       return;
     }
 

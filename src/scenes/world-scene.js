@@ -875,6 +875,24 @@ export class WorldScene extends BaseScene {
         });
         // TODO: play audio cue
         break;
+      case NPC_EVENT_TYPE.BATTLE:
+        this.#isProcessingNpcEvent = true;
+        // Get monster data from the event
+        // TODO: review and see if this will have all of the stats we need
+        const npcMonsters = eventToHandle.data.monsters.map((monsterId) => {
+          return DataUtils.getMonsterById(this, monsterId);
+        });
+
+        /** @type {import('./battle-scene.js').BattleSceneData} */
+        const dataToPass = {
+          enemyMonsters: npcMonsters,
+          playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
+          isTrainerBattle: true,
+        };
+
+        // TODO: see if we need a transition
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
+        break;
       default:
         exhaustiveGuard(eventType);
     }
