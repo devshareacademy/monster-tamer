@@ -109,9 +109,7 @@ export class DeveloperPanel {
             }
           }
         } else {
-          console.log(key, value);
           if (DEV_PANEL_CONFIG[key] !== undefined) {
-            console.log('asdf');
             DEV_PANEL_CONFIG[key] = value;
           }
         }

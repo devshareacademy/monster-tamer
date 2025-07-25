@@ -44,7 +44,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {number[]} itemsPickedUp
  * @property {number[]} viewedEvents
  * @property {import('../types/typedef.js').GameFlag[]} flags
- * @property {number[]} defeatedNpcs
+ * @property {string[]} defeatedNpcs
  */
 
 /** @type {GlobalState} */
@@ -144,7 +144,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       return;
     }
     try {
-      // TODO: we should add error handling and data validation at this step to make sure we get the data we expect.
+      // TODO:future we should add error handling and data validation at this step to make sure we get the data we expect.
       /** @type {GlobalState} */
       const parsedData = JSON.parse(savedData);
       // update the state with the saved data
@@ -189,6 +189,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.itemsPickedUp = [...initialState.itemsPickedUp];
     existingData.viewedEvents = [...initialState.viewedEvents];
     existingData.flags = [...initialState.flags];
+    existingData.defeatedNpcs = [...initialState.defeatedNpcs];
 
     this.#store.reset();
     this.#updateDataManger(existingData);
@@ -344,9 +345,15 @@ class DataManager extends Phaser.Events.EventEmitter {
    */
   addDefeatedNpc(npcId) {
     /** @type {Set<number>} */
-    const defeatedNpcs = new Set(this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || []);
+    const defeatedNpcs = this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS);
     defeatedNpcs.add(npcId);
-    this.#store.set(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS, Array.from(defeatedNpcs));
+  }
+
+  /**
+   * @returns {Set<number>}
+   */
+  getDefeatedNpcs() {
+    return this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS);
   }
 
   /**
@@ -370,12 +377,12 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [...initialState.itemsPickedUp],
       [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
       [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
-      [DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS]: data.defeatedNpcs || [],
+      [DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS]: new Set(data.defeatedNpcs || []),
     });
   }
 
   /**
-   * @returns {GlobalState}
+   * @returns {GlobalState & { defeatedNpcs: string[]; }}
    */
   #dataManagerDataToGlobalStateObject() {
     return {
@@ -403,7 +410,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       itemsPickedUp: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [])],
       viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
       flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
-      defeatedNpcs: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || [])],
+      defeatedNpcs: Array.from(this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || new Set()),
     };
   }
 }

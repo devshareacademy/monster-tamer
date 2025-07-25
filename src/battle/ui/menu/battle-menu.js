@@ -177,11 +177,7 @@ export class BattleMenu {
 
     // Conditionally disable FLEE button
     if (this.#isTrainerBattle) {
-      const fleeButton = this.#mainBattleMenuPhaserContainerGameObject.getAt(4);
-      if (fleeButton) {
-        // TODO
-        fleeButton.setAlpha(0.5);
-      }
+      /** @type {Phaser.GameObjects.Text} */ (this.#mainBattleMenuPhaserContainerGameObject.getAt(4)).setAlpha(0.5);
     }
   }
 
@@ -250,11 +246,6 @@ export class BattleMenu {
     }
     if (input === 'OK') {
       if (this.#activeBattleMenu === ACTIVE_BATTLE_MENU.BATTLE_MAIN) {
-        // TODO: probably show a message to the player
-        // Add check to prevent selecting disabled options
-        if (this.#isTrainerBattle && this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
-          return;
-        }
         this.#handlePlayerChooseMainBattleOption();
         return;
       }
@@ -306,7 +297,6 @@ export class BattleMenu {
   updateInfoPaneMessagesAndWaitForInput(messages, callback) {
     this.#queuedInfoPanelMessages = messages;
     this.#queuedInfoPanelCallback = callback;
-
     this.#updateInfoPaneWithMessage();
   }
 
@@ -705,6 +695,13 @@ export class BattleMenu {
     }
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
+      if (this.#isTrainerBattle) {
+        this.updateInfoPaneMessagesAndWaitForInput(["You can't flee at this time!"], () => {
+          this.showMainBattleMenu();
+        });
+        return;
+      }
+
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_FLEE;
       this.#fleeAttempt = true;
       return;

@@ -65,7 +65,6 @@ export class EnemyBattleMonster extends BattleMonster {
       callback();
       return;
     }
-
     this._scene.tweens.add({
       delay: 0,
       duration: 1500,
@@ -88,9 +87,12 @@ export class EnemyBattleMonster extends BattleMonster {
   playDeathAnimation(callback) {
     const startYPos = this._phaserGameObject.y;
     const endYPos = startYPos - 400;
+    const healthBarStartXPos = this._phaserHealthBarGameContainer.x;
+    const healthBarEndXPos = -600;
 
     if (this._skipBattleAnimations) {
       this._phaserGameObject.setY(endYPos);
+      this._phaserHealthBarGameContainer.setAlpha(0);
       callback();
       return;
     }
@@ -106,6 +108,21 @@ export class EnemyBattleMonster extends BattleMonster {
       targets: this._phaserGameObject,
       onComplete: () => {
         callback();
+      },
+    });
+
+    this._scene.tweens.add({
+      delay: 0,
+      duration: 2000,
+      x: {
+        from: this._phaserHealthBarGameContainer.x,
+        start: this._phaserHealthBarGameContainer.x,
+        to: healthBarEndXPos,
+      },
+      targets: this._phaserHealthBarGameContainer,
+      onComplete: () => {
+        this._phaserHealthBarGameContainer.setAlpha(0);
+        this._phaserHealthBarGameContainer.setX(healthBarStartXPos);
       },
     });
   }

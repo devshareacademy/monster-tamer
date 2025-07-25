@@ -2176,6 +2176,41 @@
                  "visible":true,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":37,
+                 "name":"NPC4",
+                 "objects":[
+                        {
+                         "gid":194,
+                         "height":64,
+                         "id":51,
+                         "name":"npc",
+                         "properties":[
+                                {
+                                 "name":"id",
+                                 "type":"int",
+                                 "value":5
+                                }, 
+                                {
+                                 "name":"movement_pattern",
+                                 "propertytype":"npc_movement",
+                                 "type":"string",
+                                 "value":"IDLE"
+                                }],
+                         "rotation":0,
+                         "type":"npc",
+                         "visible":true,
+                         "width":64,
+                         "x":960,
+                         "y":384
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"NPC",
          "opacity":1,
@@ -2184,8 +2219,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":37,
- "nextobjectid":51,
+ "nextlayerid":38,
+ "nextobjectid":52,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

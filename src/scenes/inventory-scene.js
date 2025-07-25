@@ -233,7 +233,7 @@ export class InventoryScene extends BaseScene {
         // a capture ball, no monster needed, vs selecting a potion, player needs to choose the
         // target monster
         if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
-          // TODO: this logic will need to be updated if we support a monster storage system
+          // TODO:future this logic will need to be updated if we support a monster storage system
           // validate we have room in our party before attempting capture
           if (dataManager.isPartyFull()) {
             this.#selectedInventoryDescriptionText.setText('You have no room in your party! Cannot use that item.');
@@ -264,8 +264,7 @@ export class InventoryScene extends BaseScene {
       this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
       this.scene.pause(SCENE_KEYS.INVENTORY_SCENE);
 
-      // in a future update
-      // TODO: add submenu for accept/cancel after picking an item
+      // TODO:future add submenu for accept/cancel after picking an item
       return;
     }
 
@@ -293,7 +292,7 @@ export class InventoryScene extends BaseScene {
     }
 
     const updatedItem = this.#handleItemUsed();
-    // TODO: add logic to handle when the last of an item was just used
+    // TODO:future add logic to handle when the last of an item was just used
 
     // if previous scene was battle scene, switch back to that scene
     if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {

@@ -76,17 +76,34 @@
   "4": {
     "frame": 190,
     "animationKeyPrefix": "NPC_20",
-    "battleTrigger": "ON_SIGHT",
-    "visionRange": 3,
-    "visionDirections": ["LEFT"],
+    "battle": {
+      "trigger": "ON_SIGHT",
+      "visionRange": 3,
+      "visionDirections": ["LEFT"]
+    },
     "events": [
       {
-        "requires": [],
+        "requires": ["TRAINER_NOT_DEFEATED"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Hey! Let's battle!"]
+        }
+      },
+      {
+        "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "BATTLE",
         "data": {
           "monsters": [6],
-          "winMessage": "You defeated me!",
-          "lossMessage": "You are not strong enough."
+          "trainerLostMessages": ["You defeated me!"],
+          "assetKey": "TRAINER_YOUTH_GIRL",
+          "trainerName": "Jr. Trainer"
+        }
+      },
+      {
+        "requires": ["TRAINER_DEFEATED"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["That was a great battle!"]
         }
       }
     ]
@@ -94,17 +111,32 @@
   "5": {
     "frame": 180,
     "animationKeyPrefix": "NPC_19",
-    "battleTrigger": "ON_INTERACTION",
+    "battle": {
+      "trigger": "ON_INTERACTION"
+    },
     "events": [
       {
-        "requires": [],
+        "requires": ["TRAINER_NOT_DEFEATED"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Hey! Let's battle!"]
+        }
+      },
+      {
+        "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "BATTLE",
         "data": {
           "monsters": [7, 6],
-          "winMessage": "You are a strong trainer!",
-          "lossMessage": "Better luck next time.",
-          "canDeclineBattle": true,
-          "battleDeclinedMessage": "Let's battle next time."
+          "trainerLostMessages": ["You are a strong trainer!"],
+          "assetKey": "TRAINER_YOUTH_BOY",
+          "trainerName": "Jr. Trainer"
+        }
+      },
+      {
+        "requires": ["TRAINER_DEFEATED"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["I'll have to get stronger."]
         }
       }
     ]

@@ -194,7 +194,7 @@ export class NPC extends Character {
       return false;
     }
 
-    // TODO: see if this can be refactored to not need display height
+    // TODO:NOW see if this can be refactored to not need display height
 
     const npcPosition = this.position;
     const playerPosition = player.position;
