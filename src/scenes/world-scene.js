@@ -428,10 +428,6 @@ export class WorldScene extends BaseScene {
 
     this.#npcs.forEach((npc) => {
       npc.update(time);
-      // TODO:NOW check if this makes sense
-      if (npc.checkForPlayerInVision(this.#player)) {
-        this.#handleNpcInteraction();
-      }
     });
   }
 

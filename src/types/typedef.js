@@ -191,21 +191,11 @@ export const BATTLE_TRIGGER_TYPE = Object.freeze({
  */
 
 /**
- * @typedef NpcEventBattleDetails
- * @type {object}
- * @property {BattleTrigger} trigger
- * @property {number} [visionRange] How far the npc can see in a given direction. If not set, then battle is only started when player talks to npc.
- * @property {import('../common/direction.js').Direction[]} [visionDirections] Which directions the npc can face between when on the over world.
- */
-// figure out how I want to do the vision range... If npc turns, might be a new movement pattern instead.
-
-/**
  * @typedef NpcDetails
  * @type {object}
  * @property {number} frame
  * @property {string} animationKeyPrefix
  * @property {NpcEvent[]} events
- * @property {NpcEventBattleDetails} [battle]
  */
 
 /**

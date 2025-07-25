@@ -76,11 +76,6 @@
   "4": {
     "frame": 190,
     "animationKeyPrefix": "NPC_20",
-    "battle": {
-      "trigger": "ON_SIGHT",
-      "visionRange": 3,
-      "visionDirections": ["LEFT"]
-    },
     "events": [
       {
         "requires": ["TRAINER_NOT_DEFEATED"],
@@ -111,9 +106,6 @@
   "5": {
     "frame": 180,
     "animationKeyPrefix": "NPC_19",
-    "battle": {
-      "trigger": "ON_INTERACTION"
-    },
     "events": [
       {
         "requires": ["TRAINER_NOT_DEFEATED"],

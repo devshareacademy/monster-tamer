@@ -182,52 +182,6 @@ export class NPC extends Character {
   }
 
   /**
-   * @param {import('./player.js').Player} player
-   * @returns {boolean}
-   */
-  checkForPlayerInVision(player) {
-    if (this.#battleTrigger !== 'ON_SIGHT' || !this.#visionDirections || !this.#visionRange) {
-      return false;
-    }
-
-    if (this.isMoving) {
-      return false;
-    }
-
-    // TODO:NOW see if this can be refactored to not need display height
-
-    const npcPosition = this.position;
-    const playerPosition = player.position;
-
-    for (const direction of this.#visionDirections) {
-      if (direction === this.direction) {
-        if (
-          (direction === DIRECTION.DOWN &&
-            playerPosition.x === npcPosition.x &&
-            playerPosition.y > npcPosition.y &&
-            playerPosition.y <= npcPosition.y + this.#visionRange * this._phaserGameObject.displayHeight) ||
-          (direction === DIRECTION.UP &&
-            playerPosition.x === npcPosition.x &&
-            playerPosition.y < npcPosition.y &&
-            playerPosition.y >= npcPosition.y - this.#visionRange * this._phaserGameObject.displayHeight) ||
-          (direction === DIRECTION.LEFT &&
-            playerPosition.y === npcPosition.y &&
-            playerPosition.x < npcPosition.x &&
-            playerPosition.x >= npcPosition.x - this.#visionRange * this._phaserGameObject.displayWidth) ||
-          (direction === DIRECTION.RIGHT &&
-            playerPosition.y === npcPosition.y &&
-            playerPosition.x > npcPosition.x &&
-            playerPosition.x <= npcPosition.x + this.#visionRange * this._phaserGameObject.displayWidth)
-        ) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * @param {DOMHighResTimeStamp} time
    * @returns {void}
    */

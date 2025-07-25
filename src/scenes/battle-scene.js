@@ -372,9 +372,7 @@ export class BattleScene extends BaseScene {
     if (this.#monsterCaptured) {
       // enemy monster was captured
       this.#activeEnemyMonster.playDeathAnimation(() => {
-        this._controls.lockInput = false;
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`You caught ${this.#activeEnemyMonster.name}.`], () => {
-          this._controls.lockInput = true;
+        this.#showMessageAndWaitForInput([`You caught ${this.#activeEnemyMonster.name}.`], () => {
           this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
         });
       });
@@ -400,9 +398,7 @@ export class BattleScene extends BaseScene {
       const text = this.#isTrainerBattle
         ? `${this.#activeEnemyMonster.name} has been knocked out.`
         : `Wild ${this.#activeEnemyMonster.name} fainted.`;
-      this._controls.lockInput = false;
-      await promisify(this.#battleMenu.updateInfoPaneMessagesAndWaitForInput, this.#battleMenu, [text]);
-      this._controls.lockInput = true;
+      await promisify(this.#showMessageAndWaitForInput, this, [text]);
       this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
       return;
     }
@@ -422,29 +418,24 @@ export class BattleScene extends BaseScene {
           );
         });
 
-        this._controls.lockInput = false;
         // if not, player faints and battle is over
         if (!hasOtherActiveMonsters) {
           const text = this.#isTrainerBattle
             ? `${this.#sceneData.npc.name} has won the battle!`
             : 'You have no more monsters, escaping to safety...';
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            [`${this.#activePlayerMonster.name} fainted.`, text],
-            () => {
-              this._controls.lockInput = true;
-              this.#playerKnockedOut = true;
-              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-            }
-          );
+
+          this.#showMessageAndWaitForInput([`${this.#activePlayerMonster.name} fainted.`, text], () => {
+            this.#playerKnockedOut = true;
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          });
           return;
         }
 
         // we have active monsters, so show message about monster fainting and then show monster party scene
         // so player can choose next monster
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+        this.#showMessageAndWaitForInput(
           [`${this.#activePlayerMonster.name} fainted.`, 'Choose another monster to continue the battle.'],
           () => {
-            this._controls.lockInput = true;
             this.#activeMonsterKnockedOut = true;
             this.#battleStateMachine.setState(BATTLE_STATES.SWITCH_MONSTER);
           }
@@ -516,14 +507,10 @@ export class BattleScene extends BaseScene {
       onEnter: async () => {
         // wait for enemy npc to appear on screen and notify player they want to battle
         await this.#enemyBattleNpc.playAppearAnimation();
-        // unlock input so we can interact with the dialog
-        this._controls.lockInput = false;
+
         // wait for text animation to complete and move to next state
-        await promisify(this.#battleMenu.updateInfoPaneMessagesAndWaitForInput, this.#battleMenu, [
-          `${this.#sceneData.npc.name} would like to battle!`,
-        ]);
-        // re-lock input until next set of animations are complete
-        this._controls.lockInput = true;
+        await promisify(this.#showMessageAndWaitForInput, this, [`${this.#sceneData.npc.name} would like to battle!`]);
+
         // hide npc as they bring out their monster
         this.#enemyBattleNpc.hide();
         this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
@@ -542,14 +529,13 @@ export class BattleScene extends BaseScene {
             this.#availableMonstersUiContainerForNpc.setAlpha(1);
           }
         });
-        // unlock input so we can acknowledge text was read
-        this._controls.lockInput = false;
+
         const text = this.#isTrainerBattle
           ? `${this.#sceneData.npc.name} brought out ${this.#activeEnemyMonster.name}.`
           : `wild ${this.#activeEnemyMonster.name} appeared!`;
         // wait for text animation to complete and move to next state
-        await promisify(this.#battleMenu.updateInfoPaneMessagesAndWaitForInput, this.#battleMenu, [text]);
-        this._controls.lockInput = true;
+        await promisify(this.#showMessageAndWaitForInput, this, [text]);
+
         this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
       },
     });
@@ -674,12 +660,10 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
-        this._controls.lockInput = false;
         const randomNumber = Phaser.Math.Between(1, 10);
         if (randomNumber > 5) {
           // player has run away successfully
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
-            this._controls.lockInput = true;
+          this.#showMessageAndWaitForInput(['You got away safely!'], () => {
             this.time.delayedCall(200, () => {
               playSoundFx(this, AUDIO_ASSET_KEYS.FLEE);
               this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
@@ -688,8 +672,7 @@ export class BattleScene extends BaseScene {
           return;
         }
         // player failed to run away, allow enemy to take their turn
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You failed to run away...'], () => {
-          this._controls.lockInput = true;
+        this.#showMessageAndWaitForInput(['You failed to run away...'], () => {
           this.time.delayedCall(200, () => {
             this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
           });
@@ -762,9 +745,7 @@ export class BattleScene extends BaseScene {
 
         this._controls.lockInput = true;
         this.#activePlayerMonster.updateMonsterExpBar(didActiveMonsterLevelUp, false, () => {
-          this._controls.lockInput = false;
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
-            this._controls.lockInput = true;
+          this.#showMessageAndWaitForInput(messages, () => {
             this.time.delayedCall(200, async () => {
               if (this.#monsterCaptured) {
                 this.#battleStateMachine.setState(BATTLE_STATES.CAUGHT_MONSTER);
@@ -789,13 +770,7 @@ export class BattleScene extends BaseScene {
                 this.#availableMonstersUiContainerForPlayer.setAlpha(0);
                 this.#availableMonstersUiContainerForNpc.setAlpha(0);
                 await this.#enemyBattleNpc.playAppearAnimation();
-                this._controls.lockInput = false;
-                await promisify(
-                  this.#battleMenu.updateInfoPaneMessagesAndWaitForInput,
-                  this.#battleMenu,
-                  this.#sceneData.npc.trainerLostMessages
-                );
-                this._controls.lockInput = true;
+                await promisify(this.#showMessageAndWaitForInput, this, this.#sceneData.npc.trainerLostMessages);
               }
 
               // if no more monsters, go to the end of the battle
@@ -817,14 +792,9 @@ export class BattleScene extends BaseScene {
           );
         });
         if (!hasOtherActiveMonsters) {
-          this._controls.lockInput = false;
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            ['You have no other monsters able to fight in your party'],
-            () => {
-              this._controls.lockInput = true;
-              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
-            }
-          );
+          this.#showMessageAndWaitForInput(['You have no other monsters able to fight in your party'], () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+          });
           return;
         }
 
@@ -853,10 +823,8 @@ export class BattleScene extends BaseScene {
         // have monster appear, and show updated health bar
         // transition to player input state
 
-        this._controls.lockInput = false;
         const nextMonster = this.#sceneData.enemyMonsters[this.#activeEnemyMonsterIndex];
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`Foe is about to send in ${nextMonster.name}.`], () => {
-          this._controls.lockInput = true;
+        this.#showMessageAndWaitForInput([`Foe is about to send in ${nextMonster.name}.`], () => {
           this.#activeEnemyMonster.switchMonster(nextMonster);
           this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
             this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {
@@ -939,7 +907,7 @@ export class BattleScene extends BaseScene {
         await this.#activeEnemyMonster.playCatchAnimationFailed();
 
         // TODO:future refactor to use async/await
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['The wild monster breaks free!'], () => {
+        this.#showMessageAndWaitForInput(['The wild monster breaks free!'], () => {
           this.time.delayedCall(500, () => {
             this.#enemyAttack(() => {
               this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
@@ -1027,5 +995,21 @@ export class BattleScene extends BaseScene {
       this.#availableMonstersUiContainerForNpc.add(ball);
     });
     this.#availableMonstersUiContainerForNpc.setAlpha(0);
+  }
+
+  /**
+   * Wrapper for the battle menu method to show messages to the player were we
+   * want to wait until the player has confirmed they have read the message. The
+   * wrapper will handle locking and unlocking our input so player can interact
+   * with the dialog window.
+   * @param {string[]} messages array of messages to show the player
+   * @param {() => void} callback function to invoke after all messages have been shown to the player and confirmed
+   */
+  #showMessageAndWaitForInput(messages, callback) {
+    this._controls.lockInput = false;
+    this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
+      this._controls.lockInput = true;
+      callback();
+    });
   }
 }
