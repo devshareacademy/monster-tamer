@@ -3,6 +3,8 @@ import { Character } from './character.js';
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
+import { TILE_SIZE } from '../../config.js';
+import { BATTLE_TRIGGER_TYPE } from '../../types/typedef.js';
 
 /**
  * @typedef {keyof typeof NPC_MOVEMENT_PATTERN} NpcMovementPattern
@@ -169,7 +171,9 @@ export class NPC extends Character {
         this._phaserGameObject.setFrame(this._idleFrameConfig.RIGHT).setFlipX(false);
         break;
       case DIRECTION.RIGHT:
+        console.log(this._idleFrameConfig);
         this._phaserGameObject.setFrame(this._idleFrameConfig.LEFT).setFlipX(true);
+        console.log(123123);
         break;
       case DIRECTION.UP:
         this._phaserGameObject.setFrame(this._idleFrameConfig.DOWN).setFlipX(false);
@@ -179,6 +183,62 @@ export class NPC extends Character {
       default:
         exhaustiveGuard(playerDirection);
     }
+  }
+
+  // TODO:NOW need to review
+  // TODO:NOW battle trigger should come from the enum object
+  /**
+   * Checks if a target is within the NPC's line of sight.
+   * @param {import('./player.js').Player} target The player to check against.
+   * @param {Phaser.Tilemaps.TilemapLayer} collisionLayer The layer with collision data.
+   * @returns {boolean}
+   */
+  isInLineOfSight(target, collisionLayer) {
+    // 1. Return false immediately if this NPC doesn't use this trigger or has no vision range.
+    if (this.#battleTrigger !== BATTLE_TRIGGER_TYPE.LINE_OF_SIGHT || this.#visionRange === undefined) {
+      return false;
+    }
+
+    // 2. Use tile coordinates for grid-based logic.
+    const npcTileX = this._phaserGameObject.x / TILE_SIZE;
+    const npcTileY = this._phaserGameObject.y / TILE_SIZE;
+    const targetTileX = target._phaserGameObject.x / TILE_SIZE;
+    const targetTileY = target._phaserGameObject.y / TILE_SIZE;
+
+    // 3. Check if player is in the correct direction and within range.
+    switch (this.direction) {
+      case DIRECTION.DOWN:
+        if (targetTileX !== npcTileX || targetTileY <= npcTileY || targetTileY > npcTileY + this.#visionRange)
+          return false;
+        break;
+      case DIRECTION.UP:
+        if (targetTileX !== npcTileX || targetTileY >= npcTileY || targetTileY < npcTileY - this.#visionRange)
+          return false;
+        break;
+      case DIRECTION.LEFT:
+        if (targetTileY !== npcTileY || targetTileX >= npcTileX || targetTileX < npcTileX - this.#visionRange)
+          return false;
+        break;
+      case DIRECTION.RIGHT:
+        if (targetTileY !== npcTileY || targetTileX <= npcTileX || targetTileX > npcTileX + this.#visionRange)
+          return false;
+        break;
+      default:
+        return false;
+    }
+
+    // 4. Check for obstacles between the NPC and the player.
+    // This involves iterating through the tiles in the path and checking for a collision property.
+    // If any tile is collidable, return false.
+    const line = new Phaser.Geom.Line(npcTileX, npcTileY, targetTileX, targetTileY);
+    const tiles = collisionLayer.getTilesWithinShape(line);
+    for (const tile of tiles) {
+      if (tile.collides) {
+        return false;
+      }
+    }
+
+    return true; // Return true if all checks pass.
   }
 
   /**

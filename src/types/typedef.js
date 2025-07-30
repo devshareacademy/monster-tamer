@@ -170,7 +170,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
 /** @enum {NpcEventType} */
 export const BATTLE_TRIGGER_TYPE = Object.freeze({
   ON_INTERACTION: 'ON_INTERACTION',
-  ON_SIGHT: 'ON_SIGHT',
+  LINE_OF_SIGHT: 'LINE_OF_SIGHT',
 });
 
 /**
@@ -196,6 +196,8 @@ export const BATTLE_TRIGGER_TYPE = Object.freeze({
  * @property {number} frame
  * @property {string} animationKeyPrefix
  * @property {NpcEvent[]} events
+ * @property {BattleTrigger} [battleTrigger]
+ * @property {number} [visionRange]
  */
 
 /**

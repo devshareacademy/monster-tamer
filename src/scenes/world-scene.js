@@ -18,7 +18,13 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { BATTLE_FLAG, ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
+import {
+  BATTLE_FLAG,
+  BATTLE_TRIGGER_TYPE,
+  ENCOUNTER_TILE_TYPE,
+  GAME_EVENT_TYPE,
+  NPC_EVENT_TYPE,
+} from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
@@ -63,6 +69,8 @@ export class WorldScene extends BaseScene {
   #npcs;
   /** @type {NPC | undefined} */
   #npcPlayerIsInteractingWith;
+  /** @type {boolean} */
+  #isProcessingLineOfSightEncounter;
   /** @type {WorldMenu} */
   #menu;
   /** @type {WorldSceneData} */
@@ -103,6 +111,8 @@ export class WorldScene extends BaseScene {
   #lastCameraBounds;
   /** @type {{ [key: string]: Phaser.Tilemaps.Tilemap}} */
   #tiledLevelMaps;
+  /** @type {Phaser.Tilemaps.TilemapLayer} */
+  #collisionLayer;
 
   constructor() {
     super({
@@ -202,6 +212,7 @@ export class WorldScene extends BaseScene {
     this.#encounterZonePlayerIsEntering = undefined;
     this.#cameraRegions = [];
     this.#lastCameraBounds = undefined;
+    this.#isProcessingLineOfSightEncounter = false;
   }
 
   /**
@@ -224,12 +235,12 @@ export class WorldScene extends BaseScene {
       console.log(`[${WorldScene.name}:create] encountered error while creating collision tiles from tiled`);
       return;
     }
-    const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
-    if (!collisionLayer) {
+    this.#collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
+    if (!this.#collisionLayer) {
       console.log(`[${WorldScene.name}:create] encountered error while creating collision layer using data from tiled`);
       return;
     }
-    collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+    this.#collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
     const hasSignLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SIGN) !== null;
@@ -260,7 +271,7 @@ export class WorldScene extends BaseScene {
       scene: this,
       position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
       direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
-      collisionLayer: collisionLayer,
+      collisionLayer: this.#collisionLayer,
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
       },
@@ -341,7 +352,7 @@ export class WorldScene extends BaseScene {
     const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
 
-    if (this.#isProcessingCutSceneEvent) {
+    if (this.#isProcessingCutSceneEvent || this.#isProcessingLineOfSightEncounter) {
       this.#player.update(time);
       this.#npcs.forEach((npc) => {
         npc.update(time);
@@ -529,6 +540,33 @@ export class WorldScene extends BaseScene {
     // update camera bounds for the given level
     this.#updateCameraBounds();
 
+    // TODO:NOW check this logic
+    // TODO:NOW add enum vs hard coded string
+    // check for line-of-sight battle triggers
+    if (this.#isProcessingLineOfSightEncounter) {
+      return;
+    }
+
+    for (const npc of this.#npcs) {
+      // Skip if NPC is not a line-of-sight trainer or has already been defeated
+      if (npc.battleTrigger !== BATTLE_TRIGGER_TYPE.LINE_OF_SIGHT || dataManager.getDefeatedNpcs().has(npc.id)) {
+        continue;
+      }
+
+      // Check for line of sight (assuming collisionLayer is accessible as this.#collisionLayer)
+      if (npc.isInLineOfSight(this.#player, this.#collisionLayer)) {
+        this.#isProcessingLineOfSightEncounter = true;
+        // If player is spotted, initiate the NPC interaction sequence
+        this.#npcPlayerIsInteractingWith = npc;
+        this.#initiateLineOfSightBattle(npc);
+        // Stop checking to prevent multiple simultaneous battle triggers
+        break;
+      }
+    }
+    if (this.#isProcessingLineOfSightEncounter) {
+      return;
+    }
+
     // check to see if the player encountered cut scene zone
     this.#player.sprite.getBounds(this.#rectangleForOverlapCheck1);
     for (const zone of Object.values(this.#eventZones)) {
@@ -575,6 +613,20 @@ export class WorldScene extends BaseScene {
       return;
     }
     this.#handlePlayerMovementInEncounterZone();
+  }
+
+  // TODO:NOW review this logic
+  /**
+   * Moves an npc to the player after a line of sight battle was triggered.
+   * @param {NPC} npc
+   * @returns {void}
+   */
+  #initiateLineOfSightBattle(npc) {
+    this.#moveNpcToTarget(npc, this.#player, () => {
+      this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, npc.sprite));
+      npc.facePlayer(this.#player.direction);
+      this.#handleNpcInteraction();
+    });
   }
 
   /**
@@ -692,6 +744,8 @@ export class WorldScene extends BaseScene {
         events: npcDetails.events,
         animationKeyPrefix: npcDetails.animationKeyPrefix,
         id: npcId,
+        battleTrigger: npcDetails.battleTrigger,
+        visionRange: npcDetails.visionRange,
       });
       this.#npcs.push(npc);
     });
@@ -827,6 +881,7 @@ export class WorldScene extends BaseScene {
       this.#npcPlayerIsInteractingWith = undefined;
       this.#lastNpcEventHandledIndex = -1;
       this.#isProcessingNpcEvent = false;
+      this.#isProcessingLineOfSightEncounter = false;
       return;
     }
 
@@ -1076,44 +1131,16 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    // determine direction to move based on distance from player
-    const targetPath = getTargetPathToGameObject(targetNpc.sprite, this.#player.sprite);
-    const pathToFollow = targetPath.pathToFollow.splice(0, targetPath.pathToFollow.length - 1);
-
-    // if npc is already next to player, just update directions
-    if (pathToFollow.length === 0) {
+    this.#moveNpcToTarget(targetNpc, this.#player, () => {
       this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+      console.log(this.#player.direction);
+      console.log('app');
       targetNpc.facePlayer(this.#player.direction);
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
-      return;
-    }
-
-    // move npc according to the path
-    /** @type {import('../world/characters/npc.js').NPCPath} */
-    const npcPath = {
-      0: { x: targetNpc.sprite.x, y: targetNpc.sprite.y },
-    };
-    pathToFollow.forEach((coordinate, index) => {
-      npcPath[index + 1] = coordinate;
+      this.time.delayedCall(500, () => {
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      });
     });
-
-    targetNpc.finishedMovementCallback = () => {
-      if (
-        pathToFollow[pathToFollow.length - 1].x === targetNpc.sprite.x &&
-        pathToFollow[pathToFollow.length - 1].y === targetNpc.sprite.y
-      ) {
-        this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
-        targetNpc.facePlayer(this.#player.direction);
-        this.time.delayedCall(500, () => {
-          this.#isProcessingCutSceneEvent = false;
-          this.#handleCutSceneInteraction();
-        });
-      }
-    };
-    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
-    targetNpc.npcPath = npcPath;
-    targetNpc.resetMovementTime();
   }
 
   /**
@@ -1163,6 +1190,41 @@ export class WorldScene extends BaseScene {
     targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
     targetNpc.npcPath = updatedPath;
     targetNpc.resetMovementTime();
+  }
+
+  /**
+   * @param {NPC} npc
+   * @param {Player} target
+   * @param {() => void} onComplete
+   * @returns {void}
+   */
+  #moveNpcToTarget(npc, target, onComplete) {
+    const targetPath = getTargetPathToGameObject(npc.sprite, target.sprite);
+    const pathToFollow = targetPath.pathToFollow.slice(0, -1);
+
+    if (pathToFollow.length === 0) {
+      onComplete();
+      return;
+    }
+
+    const npcPath = { 0: { x: npc.sprite.x, y: npc.sprite.y } };
+    pathToFollow.forEach((coordinate, index) => {
+      npcPath[index + 1] = coordinate;
+    });
+
+    npc.finishedMovementCallback = () => {
+      if (
+        pathToFollow.length > 0 &&
+        pathToFollow[pathToFollow.length - 1].x === npc.sprite.x &&
+        pathToFollow[pathToFollow.length - 1].y === npc.sprite.y
+      ) {
+        onComplete();
+      }
+    };
+
+    npc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    npc.npcPath = npcPath;
+    npc.resetMovementTime();
   }
 
   /**
