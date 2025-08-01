@@ -33,7 +33,6 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @property {number} id
  * @property {import('../../types/typedef.js').BattleTrigger} [battleTrigger]
  * @property {number} [visionRange]
- * @property {import('../../common/direction.js').Direction[]} [visionDirections]
  */
 
 /**
@@ -61,8 +60,6 @@ export class NPC extends Character {
   #battleTrigger;
   /** @type {number | undefined} */
   #visionRange;
-  /** @type {import('../../common/direction.js').Direction[] | undefined} */
-  #visionDirections;
 
   /**
    * @param {NPCConfig} config
@@ -92,7 +89,6 @@ export class NPC extends Character {
     this.#id = config.id;
     this.#battleTrigger = config.battleTrigger;
     this.#visionRange = config.visionRange;
-    this.#visionDirections = config.visionDirections;
   }
 
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
@@ -171,9 +167,7 @@ export class NPC extends Character {
         this._phaserGameObject.setFrame(this._idleFrameConfig.RIGHT).setFlipX(false);
         break;
       case DIRECTION.RIGHT:
-        console.log(this._idleFrameConfig);
         this._phaserGameObject.setFrame(this._idleFrameConfig.LEFT).setFlipX(true);
-        console.log(123123);
         break;
       case DIRECTION.UP:
         this._phaserGameObject.setFrame(this._idleFrameConfig.DOWN).setFlipX(false);
@@ -185,8 +179,6 @@ export class NPC extends Character {
     }
   }
 
-  // TODO:NOW need to review
-  // TODO:NOW battle trigger should come from the enum object
   /**
    * Checks if a target is within the NPC's line of sight.
    * @param {import('./player.js').Player} target The player to check against.
@@ -229,13 +221,16 @@ export class NPC extends Character {
 
     // 4. Check for obstacles between the NPC and the player.
     // This involves iterating through the tiles in the path and checking for a collision property.
-    // If any tile is collidable, return false.
-    const line = new Phaser.Geom.Line(npcTileX, npcTileY, targetTileX, targetTileY);
-    const tiles = collisionLayer.getTilesWithinShape(line);
-    for (const tile of tiles) {
-      if (tile.collides) {
-        return false;
-      }
+    // if any tiles are found, return false
+    const npcCenterX = this._phaserGameObject.x + TILE_SIZE / 2;
+    const npcCenterY = this._phaserGameObject.y + TILE_SIZE / 2;
+    const targetCenterX = target._phaserGameObject.x + TILE_SIZE / 2;
+    const targetCenterY = target._phaserGameObject.y + TILE_SIZE / 2;
+
+    const line = new Phaser.Geom.Line(npcCenterX, npcCenterY, targetCenterX, targetCenterY);
+    const tiles = collisionLayer.getTilesWithinShape(line, { isNotEmpty: true });
+    if (tiles.length > 0) {
+      return false;
     }
 
     return true; // Return true if all checks pass.

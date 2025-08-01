@@ -18,6 +18,7 @@ export class DeveloperPanel {
     const PARAMS = {
       button1Tooltip: SAVES.SAVE_1_INFO,
       button2Tooltip: SAVES.SAVE_2_INFO,
+      button3Tooltip: SAVES.SAVE_3_INFO,
     };
 
     const main = this.#pane.addFolder({
@@ -68,6 +69,24 @@ export class DeveloperPanel {
     });
     save2Button.on('click', () => {
       this.#loadCustomSave(SAVES.SAVE_2);
+    });
+    tab.pages[1].addBlade({
+      view: 'separator',
+    });
+
+    // custom save 3
+    tab.pages[1].addBinding(PARAMS, 'button3Tooltip', {
+      label: 'Save 3',
+      readonly: true,
+      multiline: true,
+      rows: 3,
+      interval: 30000,
+    });
+    const save3Button = tab.pages[1].addButton({
+      title: 'Load Save 3',
+    });
+    save3Button.on('click', () => {
+      this.#loadCustomSave(SAVES.SAVE_3);
     });
     tab.pages[1].addBlade({
       view: 'separator',

@@ -540,13 +540,6 @@ export class WorldScene extends BaseScene {
     // update camera bounds for the given level
     this.#updateCameraBounds();
 
-    // TODO:NOW check this logic
-    // TODO:NOW add enum vs hard coded string
-    // check for line-of-sight battle triggers
-    if (this.#isProcessingLineOfSightEncounter) {
-      return;
-    }
-
     for (const npc of this.#npcs) {
       // Skip if NPC is not a line-of-sight trainer or has already been defeated
       if (npc.battleTrigger !== BATTLE_TRIGGER_TYPE.LINE_OF_SIGHT || dataManager.getDefeatedNpcs().has(npc.id)) {
@@ -615,7 +608,6 @@ export class WorldScene extends BaseScene {
     this.#handlePlayerMovementInEncounterZone();
   }
 
-  // TODO:NOW review this logic
   /**
    * Moves an npc to the player after a line of sight battle was triggered.
    * @param {NPC} npc
@@ -749,6 +741,19 @@ export class WorldScene extends BaseScene {
       });
       this.#npcs.push(npc);
     });
+
+    // restore npc locations from data manager if they exist
+    const tempNpcLocations = dataManager.getTempNpcLocations();
+    if (tempNpcLocations.length > 0) {
+      tempNpcLocations.forEach((npcLocation) => {
+        const npc = this.#npcs.find((npc) => npc.id === npcLocation.id);
+        if (npc) {
+          npc.sprite.setPosition(npcLocation.x, npcLocation.y);
+          npc.facePlayer(this.#player.direction);
+        }
+      });
+      dataManager.clearTempNpcLocations();
+    }
   }
 
   /**
@@ -938,6 +943,13 @@ export class WorldScene extends BaseScene {
         break;
       case NPC_EVENT_TYPE.BATTLE:
         this.#isProcessingNpcEvent = true;
+
+        // save npc location in data manager
+        dataManager.addTempNpcLocation({
+          id: this.#npcPlayerIsInteractingWith.id,
+          x: this.#npcPlayerIsInteractingWith.sprite.x,
+          y: this.#npcPlayerIsInteractingWith.sprite.y,
+        });
 
         // Get monster data from the event
         const npcMonsters = eventToHandle.data.monsters.map((monsterId) => {
@@ -1133,10 +1145,8 @@ export class WorldScene extends BaseScene {
 
     this.#moveNpcToTarget(targetNpc, this.#player, () => {
       this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
-      console.log(this.#player.direction);
-      console.log('app');
-      targetNpc.facePlayer(this.#player.direction);
       this.time.delayedCall(500, () => {
+        targetNpc.facePlayer(this.#player.direction);
         this.#isProcessingCutSceneEvent = false;
         this.#handleCutSceneInteraction();
       });
@@ -1207,6 +1217,8 @@ export class WorldScene extends BaseScene {
       return;
     }
 
+    // move npc according to the path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
     const npcPath = { 0: { x: npc.sprite.x, y: npc.sprite.y } };
     pathToFollow.forEach((coordinate, index) => {
       npcPath[index + 1] = coordinate;

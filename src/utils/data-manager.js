@@ -22,6 +22,14 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  */
 
 /**
+ * @typedef NpcLocation
+ * @type {object}
+ * @property {number} id
+ * @property {number} x
+ * @property {number} y
+ */
+
+/**
  * @typedef GlobalState
  * @type {object}
  * @property {object} player
@@ -45,6 +53,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {number[]} viewedEvents
  * @property {import('../types/typedef.js').GameFlag[]} flags
  * @property {string[]} defeatedNpcs
+ * @property {NpcLocation[]} tempNpcLocations
  */
 
 /** @type {GlobalState} */
@@ -90,6 +99,7 @@ const initialState = {
   viewedEvents: [],
   flags: [],
   defeatedNpcs: [],
+  tempNpcLocations: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -109,6 +119,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   VIEWED_EVENTS: 'VIEWED_EVENTS',
   FLAGS: 'FLAGS',
   DEFEATED_NPCS: 'DEFEATED_NPCS',
+  TEMP_NPC_LOCATIONS: 'TEMP_NPC_LOCATIONS',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -190,6 +201,7 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.viewedEvents = [...initialState.viewedEvents];
     existingData.flags = [...initialState.flags];
     existingData.defeatedNpcs = [...initialState.defeatedNpcs];
+    existingData.tempNpcLocations = [...initialState.tempNpcLocations];
 
     this.#store.reset();
     this.#updateDataManger(existingData);
@@ -357,6 +369,40 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * Adds the provided npc location to the temporary npc locations in the data manager.
+   * This is used to ensure the npc is in the correct spot after a battle.
+   * @param {NpcLocation} npcLocation
+   * @returns {void}
+   */
+  addTempNpcLocation(npcLocation) {
+    /** @type {NpcLocation[]} */
+    const tempNpcLocations = this.#store.get(DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS) || [];
+    const existingNpcIndex = tempNpcLocations.findIndex((location) => location.id === npcLocation.id);
+    if (existingNpcIndex !== -1) {
+      tempNpcLocations[existingNpcIndex] = npcLocation;
+    } else {
+      tempNpcLocations.push(npcLocation);
+    }
+    this.#store.set(DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS, tempNpcLocations);
+  }
+
+  /**
+   * @returns {NpcLocation[]}
+   */
+  getTempNpcLocations() {
+    return this.#store.get(DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS) || [];
+  }
+
+  /**
+   * Clears all temporary npc locations from the data manager.
+   * This should be called after the npc locations have been restored.
+   * @returns {void}
+   */
+  clearTempNpcLocations() {
+    this.#store.set(DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS, []);
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -378,6 +424,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS]: data.viewedEvents || [...initialState.viewedEvents],
       [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
       [DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS]: new Set(data.defeatedNpcs || []),
+      [DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS]: data.tempNpcLocations || [...initialState.tempNpcLocations],
     });
   }
 
@@ -411,6 +458,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       viewedEvents: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [])],
       flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
       defeatedNpcs: Array.from(this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || new Set()),
+      tempNpcLocations: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS) || [])],
     };
   }
 }
