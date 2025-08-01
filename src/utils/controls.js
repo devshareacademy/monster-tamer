@@ -66,6 +66,17 @@ export class Controls {
     return Phaser.Input.Keyboard.JustDown(this.#fKey);
   }
 
+  /**
+   * Returns if the shift key is currently being held down.
+   * @returns {boolean}
+   */
+  isShiftKeyDown() {
+    if (this.#cursorKeys === undefined) {
+      return false;
+    }
+    return this.#cursorKeys.shift.isDown;
+  }
+
   /** @returns {import('../common/direction.js').Direction} */
   getDirectionKeyJustPressed() {
     if (this.#cursorKeys === undefined) {

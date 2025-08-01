@@ -40,6 +40,8 @@ export class Character {
   _direction;
   /** @protected @type {boolean} */
   _isMoving;
+  /** @protected @type {boolean} */
+  _isRunning;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
   _targetPosition;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
@@ -72,6 +74,7 @@ export class Character {
     this._scene = config.scene;
     this._direction = config.direction;
     this._isMoving = false;
+    this._isRunning = false;
     this._targetPosition = { ...config.position };
     this._previousTargetPosition = { ...config.position };
     this._idleFrameConfig = config.idleFrameConfig;
@@ -104,12 +107,14 @@ export class Character {
 
   /**
    * @param {import('../../common/direction.js').Direction} direction
+   * @param {boolean} [isRunning=false]
    * @returns {void}
    */
-  moveCharacter(direction) {
+  moveCharacter(direction, isRunning = false) {
     if (this._isMoving) {
       return;
     }
+    this._isRunning = isRunning;
     this._moveSprite(direction);
   }
 
@@ -220,7 +225,7 @@ export class Character {
 
     this._scene.add.tween({
       delay: 0,
-      duration: 600,
+      duration: this._isRunning ? 300 : 600,
       y: {
         from: this._phaserGameObject.y,
         start: this._phaserGameObject.y,
@@ -234,6 +239,7 @@ export class Character {
       targets: this._phaserGameObject,
       onComplete: () => {
         this._isMoving = false;
+        this._isRunning = false;
         this._previousTargetPosition = { ...this._targetPosition };
         if (this._spriteGridMovementFinishedCallback) {
           this._spriteGridMovementFinishedCallback();
