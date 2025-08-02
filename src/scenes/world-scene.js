@@ -418,11 +418,13 @@ export class WorldScene extends BaseScene {
 
         if (this.#menu.selectedMenuOption === 'BAG') {
           // pause this scene and launch the inventory scene
-          /** @type {import('./inventory-scene.js').InventorySceneData} */
+          /** @type {import('./CLEANUP-inventory-scene.js').InventorySceneData} */
           const sceneDataToPass = {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
           };
+          // TODO:NOW remove test scene from below
           this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
+          //this.scene.launch(SCENE_KEYS.SHOP_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
@@ -970,6 +972,10 @@ export class WorldScene extends BaseScene {
         };
         this.#startBattleScene(dataToPass);
         break;
+      case NPC_EVENT_TYPE.SHOP:
+        this.#isProcessingNpcEvent = true;
+        this.#startShopScene(eventToHandle.data.items);
+        break;
       default:
         exhaustiveGuard(eventType);
     }
@@ -1495,5 +1501,38 @@ export class WorldScene extends BaseScene {
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start(SCENE_KEYS.BATTLE_SCENE, battleSceneData);
     });
+  }
+
+  /**
+   * Transitions to the Shop Inventory Scene and passes along the provided data.
+   * @param {number[]} itemIds an array of itemIds to pass to the shop scene
+   */
+  #startShopScene(itemIds) {
+    /** @type {import('./inventory/shop-inventory-scene.js').ShopInventorySceneData} */
+    const dataToPass = {
+      itemIds,
+      previousSceneName: SCENE_KEYS.WORLD_SCENE,
+    };
+    this.scene.launch(SCENE_KEYS.SHOP_INVENTORY_SCENE, dataToPass);
+    this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+  }
+
+  /**
+   * @param {Phaser.Scenes.Systems} sys
+   * @param {object} [data]
+   * @returns {void}
+   */
+  handleSceneResume(sys, data) {
+    super.handleSceneResume(sys, data);
+
+    // handle coming back to world scene from the shop scene
+    if (
+      data !== undefined &&
+      data['previousScene'] !== undefined &&
+      data.previousScene === SCENE_KEYS.SHOP_INVENTORY_SCENE
+    ) {
+      this.#isProcessingNpcEvent = false;
+      this.#handleNpcInteraction();
+    }
   }
 }

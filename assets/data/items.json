@@ -4,13 +4,15 @@
     "name": "potion",
     "description": "A basic healing item that will heal 30 HP from a single monster.",
     "category": "HEAL",
-    "effect": "HEAL_30"
+    "effect": "HEAL_30",
+    "price": 100
   },
   {
     "id": 2,
     "name": "damaged ball",
     "description": "A damaged ball that can be used for capturing monsters.",
     "category": "CAPTURE",
-    "effect": "CAPTURE_1"
+    "effect": "CAPTURE_1",
+    "price": 200
   }
 ]

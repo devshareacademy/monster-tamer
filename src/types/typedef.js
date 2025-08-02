@@ -92,6 +92,7 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {ItemEffect} effect the effect of using this item
  * @property {string} description the description of the item to show in the inventory bag
  * @property {ItemCategory} category the main category of this item, healing, capture, etc
+ * @property {number} price
  */
 
 /**
@@ -133,6 +134,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
   TRADE: 'TRADE',
   ITEM: 'ITEM',
   BATTLE: 'BATTLE',
+  SHOP: 'SHOP',
 });
 
 /**
@@ -186,8 +188,17 @@ export const BATTLE_TRIGGER_TYPE = Object.freeze({
  */
 
 /**
+ * @typedef NpcEventShop
+ * @type {object}
+ * @property {'SHOP'} type
+ * @property {string[]} requires
+ * @property {object} data
+ * @property {number[]} data.items // Array of item IDs available in the shop
+ */
+
+/**
  * @typedef NpcEvent
- * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal | NpcEventBattle}
+ * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal | NpcEventBattle | NpcEventShop}
  */
 
 /**
@@ -361,4 +372,11 @@ export const ENCOUNTER_TILE_TYPE = Object.freeze({
  * @property {string} name
  * @property {string} type
  * @property {any} value
+ */
+
+/** Custom Phaser Scene Data */
+/**
+ * @typedef BaseSceneResumedData
+ * @type {object}
+ * @property {string} [previousScene] the scene that was left when this scene was resumed.
  */

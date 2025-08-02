@@ -679,7 +679,7 @@ export class BattleMenu {
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_ITEM;
 
       // pause this scene and launch the inventory scene
-      /** @type {import('../../../scenes/inventory-scene.js').InventorySceneData} */
+      /** @type {import('../../../scenes/CLEANUP-inventory-scene.js').InventorySceneData} */
       const sceneDataToPass = {
         previousSceneName: SCENE_KEYS.BATTLE_SCENE,
       };

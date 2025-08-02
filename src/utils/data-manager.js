@@ -54,6 +54,7 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
  * @property {import('../types/typedef.js').GameFlag[]} flags
  * @property {string[]} defeatedNpcs
  * @property {NpcLocation[]} tempNpcLocations
+ * @property {number} money
  */
 
 /** @type {GlobalState} */
@@ -100,6 +101,7 @@ const initialState = {
   flags: [],
   defeatedNpcs: [],
   tempNpcLocations: [],
+  money: 1000,
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -120,6 +122,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   FLAGS: 'FLAGS',
   DEFEATED_NPCS: 'DEFEATED_NPCS',
   TEMP_NPC_LOCATIONS: 'TEMP_NPC_LOCATIONS',
+  PLAYER_MONEY: 'PLAYER_MONEY',
 });
 
 class DataManager extends Phaser.Events.EventEmitter {
@@ -403,6 +406,24 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {number} amount
+   * @returns {void}
+   */
+  addMoney(amount) {
+    const currentMoney = this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_MONEY);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.PLAYER_MONEY, currentMoney + amount);
+  }
+
+  /**
+   * @param {number} amount
+   * @returns {void}
+   */
+  spendMoney(amount) {
+    const currentMoney = this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_MONEY);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.PLAYER_MONEY, currentMoney - amount);
+  }
+
+  /**
    * @param {GlobalState} data
    * @returns {void}
    */
@@ -425,6 +446,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.FLAGS]: data.flags || [...initialState.flags],
       [DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS]: new Set(data.defeatedNpcs || []),
       [DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS]: data.tempNpcLocations || [...initialState.tempNpcLocations],
+      [DATA_MANAGER_STORE_KEYS.PLAYER_MONEY]: data.money || initialState.money,
     });
   }
 
@@ -459,6 +481,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       flags: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.FLAGS) || [])],
       defeatedNpcs: Array.from(this.#store.get(DATA_MANAGER_STORE_KEYS.DEFEATED_NPCS) || new Set()),
       tempNpcLocations: [...(this.#store.get(DATA_MANAGER_STORE_KEYS.TEMP_NPC_LOCATIONS) || [])],
+      money: this.#store.get(DATA_MANAGER_STORE_KEYS.PLAYER_MONEY),
     };
   }
 }
