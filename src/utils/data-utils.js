@@ -95,4 +95,15 @@ export class DataUtils {
     const data = scene.cache.json.get(DATA_ASSET_KEYS.EVENTS);
     return data[eventId];
   }
+
+  /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} signId the id of the sign to get data for form the sign.json file
+   * @returns {import('../types/typedef.js').SignDetails}
+   */
+  static getSignData(scene, signId) {
+    /** @type {import('../types/typedef.js').SignData} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.SIGNS);
+    return data[signId];
+  }
 }

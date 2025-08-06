@@ -380,3 +380,15 @@ export const ENCOUNTER_TILE_TYPE = Object.freeze({
  * @type {object}
  * @property {string} [previousScene] the scene that was left when this scene was resumed.
  */
+
+/** Sign Data */
+/**
+ * @typedef SignDetails
+ * @type {object}
+ * @property {string} message
+ */
+
+/**
+ * @typedef SignData
+ * @type {Object.<string, SignDetails>}
+ */

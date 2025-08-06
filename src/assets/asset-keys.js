@@ -58,6 +58,7 @@ export const DATA_ASSET_KEYS = Object.freeze({
   ENCOUNTERS: 'ENCOUNTERS',
   NPCS: 'NPCS',
   EVENTS: 'EVENTS',
+  SIGNS: 'SIGNS',
 });
 
 export const ATTACK_ASSET_KEYS = Object.freeze({
