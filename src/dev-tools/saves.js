@@ -1,3 +1,5 @@
+// TODO:soon cleanup these and provide as a text file or something for the video course
+
 // just met professor and right outside town at beginning of game
 export const SAVE_1_INFO = 'Just met the professor\nand got first monster.\nJust outside of town.';
 export const SAVE_1 =

@@ -23,6 +23,13 @@ export class BaseScene extends Phaser.Scene {
   }
 
   /**
+   * @type {Controls}
+   */
+  get controls() {
+    return this._controls;
+  }
+
+  /**
    * @param {any | undefined} [data]
    * @returns {void}
    */
@@ -52,6 +59,10 @@ export class BaseScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleSceneCleanup, this);
 
     this.scene.bringToTop();
+
+    if (ENABLE_DEV_PANEL) {
+      this._devPanel.scene = this;
+    }
   }
 
   /**
@@ -59,7 +70,7 @@ export class BaseScene extends Phaser.Scene {
    * @returns {void}
    */
   update(time) {
-    if (this._controls === undefined) {
+    if (this._controls === undefined || this._controls.isInputLocked) {
       return;
     }
 

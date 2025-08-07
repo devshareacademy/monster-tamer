@@ -1,10 +1,11 @@
 export const ENABLE_STATE_MACHINE_LOGGING = false;
-export const ENABLE_DEV_PANEL = false;
+export const ENABLE_DEV_PANEL = true;
 export const DEV_PANEL_CONFIG = {
   AUTO_EXPAND: false,
   CONFIG_SETTINGS: {
     DISABLE_WILD_ENCOUNTERS: false,
   },
+  CUSTOM_SAVES: [],
 };
 export const ENABLE_ZONE_DEBUGGING = false;
 export const SHOW_SOCIAL_LINKS = false;
