@@ -1,3 +1,5 @@
+# Season 1
+
 Project Setup:
   ☐ create basic html page with minor css
   ☐ running project on local web server
@@ -222,6 +224,38 @@ Multiple Encounter Areas & Special Tiles:
   ☐ refactor encounter check to start before player moves
   ☐ add grass tiles
 
+# Season 2
+
+New Areas:
+  ☐ expand "main" level in tiled
+  ☐ organizing tiled level layers
+  ☐ create "foreset" level in tiled
+  ☐ import new tiled levels and test
+  ☐ dynamic spawn locations
+  ☐ event file - npc spawn location updates
+  ☐ tiled level updates - add npcs, signs, and buildings
+
+Dyanmic Camera:
+  ☐ new tiled layers for camera bounds
+  ☐ phaser camera updates
+
+Sign Message Enhancements:
+  ☐ create signs json file
+  ☐ update data utils to import new data
+  ☐ update sign class in tiled
+
+Tools Part 2:
+  ☐ download new tool files
+  ☐ integrate tools with base scene class
+  ☐ state machine logging from config
+  ☐ promisfy util review
+  ☐ custom saves
+  ☐ disable encounters
+  ☐ skip events
+
+Player Running:
+  ☐ enhance player class to support dynamic speed
+  ☐ enhance player class to support dynamic animation duration
 
 -------------------------------
 

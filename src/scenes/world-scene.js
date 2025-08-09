@@ -254,7 +254,7 @@ export class WorldScene extends BaseScene {
     this.#createEncounterAreas(map);
 
     if (!this.#sceneData.isInterior) {
-      this.cameras.main.setBounds(0, 0, 1280, 2176);
+      this.cameras.main.setBounds(0, 0, 2560, 5184);
     }
     this.cameras.main.setZoom(0.8);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
@@ -604,6 +604,7 @@ export class WorldScene extends BaseScene {
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
+    this.#wildMonsterEncountered = false;
     if (this.#wildMonsterEncountered) {
       const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
         this.#encounterZonePlayerIsEntering.layer.properties
