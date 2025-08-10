@@ -182,6 +182,16 @@ export class WorldScene extends BaseScene {
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.UP);
     }
 
+    let isNewGame = !(dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false);
+    if (isNewGame) {
+      const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.MAIN_1_LEVEL });
+      const playerSpawnLocationObject = map.getObjectLayer('Player-Spawn-Location').objects[0];
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: playerSpawnLocationObject.x,
+        y: playerSpawnLocationObject.y - TILE_SIZE,
+      });
+    }
+
     dataManager.store.set(
       DATA_MANAGER_STORE_KEYS.PLAYER_LOCATION,
       /** @type {import('../utils/data-manager.js').PlayerLocation} */ ({
@@ -604,7 +614,7 @@ export class WorldScene extends BaseScene {
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
-    this.#wildMonsterEncountered = false;
+    //this.#wildMonsterEncountered = false;
     if (this.#wildMonsterEncountered) {
       const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
         this.#encounterZonePlayerIsEntering.layer.properties

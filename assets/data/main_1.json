@@ -1926,6 +1926,29 @@
          "y":0
         }, 
         {
+         "draworder":"topdown",
+         "id":39,
+         "name":"Player-Spawn-Location",
+         "objects":[
+                {
+                 "gid":194,
+                 "height":64,
+                 "id":55,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":896,
+                 "y":4416
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "id":19,
          "layers":[
                 {
@@ -2291,8 +2314,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":39,
- "nextobjectid":55,
+ "nextlayerid":40,
+ "nextobjectid":56,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
