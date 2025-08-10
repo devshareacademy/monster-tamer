@@ -232,7 +232,7 @@ New Areas:
   ✔ import new tiled levels and test @done(25-08-09 10:11)
   ☐ dynamic spawn locations
   ✔ event file - npc spawn location updates @done(25-08-09 10:11)
-  ☐ tiled level updates - add npcs, signs, and buildings
+  ✔ tiled level updates - add npcs, signs, and buildings @done(25-08-10 15:12)
 
 
 

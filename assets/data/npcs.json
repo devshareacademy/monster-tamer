@@ -72,5 +72,117 @@
         }
       }
     ]
+  },
+  "4": {
+    "frame": 190,
+    "animationKeyPrefix": "NPC_20",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Hey! Let's battle!"]
+        }
+      }
+    ]
+  },
+  "5": {
+    "frame": 180,
+    "animationKeyPrefix": "NPC_19",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Hey! Let's battle!"]
+        }
+      }
+    ]
+  },
+  "6": {
+    "frame": 60,
+    "animationKeyPrefix": "NPC_7",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["You should make sure to stock up on items."]
+        }
+      }
+    ]
+  },
+  "7": {
+    "frame": 150,
+    "animationKeyPrefix": "NPC_16",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["I would stay out of the spooky forest."]
+        }
+      }
+    ]
+  },
+  "8": {
+    "frame": 160,
+    "animationKeyPrefix": "NPC_17",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Make sure you heal your team before you head out!"]
+        }
+      }
+    ]
+  },
+  "9": {
+    "frame": 180,
+    "animationKeyPrefix": "NPC_19",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Hey! Let's battle!"]
+        }
+      }
+    ]
+  },
+  "10": {
+    "frame": 50,
+    "animationKeyPrefix": "NPC_6",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Feel free to rest here."]
+        }
+      },
+      {
+        "requires": [],
+        "type": "HEAL",
+        "data": {}
+      },
+      {
+        "requires": [],
+        "type": "SCENE_FADE_IN_AND_OUT",
+        "data": {
+          "fadeInDuration": 1000,
+          "fadeOutDuration": 1000,
+          "waitDuration": 1000
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["Oh good! You and your monsters are looking great!"]
+        }
+      }
+    ]
   }
 }
