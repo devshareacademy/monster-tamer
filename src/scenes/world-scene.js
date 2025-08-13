@@ -23,6 +23,8 @@ import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
 import { DialogScene } from './dialog-scene.js';
+import * as TiledUtils from '../utils/tiled-utils.js';
+import * as CameraUtils from '../utils/camera-utils.js';
 
 /**
  * @typedef TiledObjectProperty
@@ -128,6 +130,8 @@ export class WorldScene extends BaseScene {
   #specialEncounterTileImageGameObjectGroup;
   /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   #encounterZonePlayerIsEntering;
+  /** @type {import('../types/typedef.js').CameraRegion[]} */
+  #cameraRegions;
 
   constructor() {
     super({
@@ -219,6 +223,7 @@ export class WorldScene extends BaseScene {
     this.#lastCutSceneEventHandledIndex = -1;
     this.#specialEncounterTileImageGameObjectGroup = undefined;
     this.#encounterZonePlayerIsEntering = undefined;
+    this.#cameraRegions = [];
   }
 
   /**
@@ -298,6 +303,10 @@ export class WorldScene extends BaseScene {
       },
     });
     this.cameras.main.startFollow(this.#player.sprite);
+
+    // update camera bounds for the given level
+    this.#cameraRegions = TiledUtils.createCameraRegions(map);
+    CameraUtils.updateMainCameraBounds(this, this.#player.sprite, this.#cameraRegions);
 
     // update our collisions with npcs
     this.#npcs.forEach((npc) => {
@@ -542,6 +551,9 @@ export class WorldScene extends BaseScene {
       y: this.#player.sprite.y,
     });
 
+    // update camera bounds for given level after player moves
+    CameraUtils.updateMainCameraBounds(this, this.#player.sprite, this.#cameraRegions);
+
     // check to see if the player encountered cut scene zone
     this.#player.sprite.getBounds(this.#rectangleForOverlapCheck1);
     for (const zone of Object.values(this.#eventZones)) {
@@ -614,7 +626,7 @@ export class WorldScene extends BaseScene {
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
-    //this.#wildMonsterEncountered = false;
+    this.#wildMonsterEncountered = false;
     if (this.#wildMonsterEncountered) {
       const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
         this.#encounterZonePlayerIsEntering.layer.properties
