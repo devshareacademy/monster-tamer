@@ -7,7 +7,7 @@
         "data": {
           "direction": "DOWN",
           "x": 16,
-          "y": 67,
+          "y": 73,
           "frame": 30,
           "id": 1001,
           "animationKeyPrefix": "NPC_4"
@@ -59,7 +59,7 @@
         "data": {
           "direction": "DOWN",
           "x": 20,
-          "y": 56,
+          "y": 62,
           "frame": 40,
           "id": 1002,
           "animationKeyPrefix": "NPC_5"

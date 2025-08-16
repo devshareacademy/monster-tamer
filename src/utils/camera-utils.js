@@ -14,6 +14,20 @@ function getCameraRegionsForGameObject(gameObject, cameraRegions) {
 }
 
 /**
+ * @param {import("../types/typedef").CameraRegion[]} cameraRegions
+ */
+function getUnionBoundsForCameraBounds(cameraRegions) {
+  if (cameraRegions.length === 0) {
+    return undefined;
+  }
+  const minX = Math.min(...cameraRegions.map((region) => region.x));
+  const maxX = Math.max(...cameraRegions.map((region) => region.x + region.width));
+  const minY = Math.min(...cameraRegions.map((region) => region.y));
+  const maxY = Math.max(...cameraRegions.map((region) => region.y + region.height));
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+/**
  * Updates the main camera bounds in a phaser scene based on the provided
  * game objects position and the available camera regions.
  * @param {Phaser.Scene} scene
@@ -22,10 +36,12 @@ function getCameraRegionsForGameObject(gameObject, cameraRegions) {
  */
 export function updateMainCameraBounds(scene, gameObject, cameraRegions) {
   const filteredRegions = getCameraRegionsForGameObject(gameObject, cameraRegions);
-  console.log(filteredRegions);
   if (filteredRegions.length === 0) {
     return;
   }
-  const region = filteredRegions[0];
-  scene.cameras.main.setBounds(region.x, region.y, region.width, region.height);
+  const unionBounds = getUnionBoundsForCameraBounds(filteredRegions);
+  if (unionBounds === undefined) {
+    return;
+  }
+  scene.cameras.main.setBounds(unionBounds.x, unionBounds.y, unionBounds.width, unionBounds.height);
 }

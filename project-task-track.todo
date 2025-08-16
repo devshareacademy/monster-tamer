@@ -235,55 +235,55 @@ New Areas:
   ✔ tiled level updates - add npcs, signs, and buildings @done(25-08-10 15:12)
 
 Dynamic Camera:
-  ☐ new tiled layers for camera bounds
-  ☐ phaser camera updates
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  ✔ new tiled layers for camera bounds @done(25-08-13 09:35)
+  ✔ phaser camera updates @done(25-08-16 09:39)
 
 Sign Message Enhancements:
   ☐ create signs json file
   ☐ update data utils to import new data
   ☐ update sign class in tiled
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Tools Part 2:
   ☐ download new tool files
