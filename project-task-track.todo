@@ -244,8 +244,8 @@ Sign Message Enhancements:
   ✔ update sign class in tiled @done(25-08-17 08:41)
 
 Player Running:
-  ☐ enhance player class to support dynamic speed
-  ☐ enhance player class to support dynamic animation duration
+  ✔ enhance player class to support dynamic speed @done(25-08-17 09:14)
+  ✔ enhance player class to support dynamic animation duration @done(25-08-17 09:14)
 
 
 

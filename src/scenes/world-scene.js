@@ -331,6 +331,7 @@ export class WorldScene extends BaseScene {
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
+    const isShiftKeyDown = this._controls.isShiftKeyDown();
 
     if (this.#isProcessingCutSceneEvent) {
       this.#player.update(time);
@@ -344,7 +345,7 @@ export class WorldScene extends BaseScene {
     }
 
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-      this.#player.moveCharacter(selectedDirectionHeldDown);
+      this.#player.moveCharacter(selectedDirectionHeldDown, isShiftKeyDown);
     }
 
     if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {

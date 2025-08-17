@@ -45,10 +45,11 @@ export class Player extends Character {
 
   /**
    * @param {import('../../common/direction.js').Direction} direction
+   * @param {boolean} [isRunning=false]
    * @returns {void}
    */
-  moveCharacter(direction) {
-    super.moveCharacter(direction);
+  moveCharacter(direction, isRunning = false) {
+    super.moveCharacter(direction, isRunning);
 
     switch (this._direction) {
       case DIRECTION.DOWN:
@@ -61,6 +62,7 @@ export class Player extends Character {
         ) {
           this._phaserGameObject.play(`PLAYER_${this._direction}`);
         }
+        this._phaserGameObject.anims.timeScale = this._isRunning ? 2 : 1;
         break;
       case DIRECTION.NONE:
         break;
