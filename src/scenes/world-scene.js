@@ -25,48 +25,16 @@ import { CutsceneScene } from './cutscene-scene.js';
 import { DialogScene } from './dialog-scene.js';
 import * as TiledUtils from '../utils/tiled-utils.js';
 import * as CameraUtils from '../utils/camera-utils.js';
-
-/**
- * @typedef TiledObjectProperty
- * @type {object}
- * @property {string} name
- * @property {string} type
- * @property {any} value
- */
-
-const TILED_SIGN_PROPERTY = Object.freeze({
-  MESSAGE: 'message',
-});
-
-const CUSTOM_TILED_TYPES = Object.freeze({
-  NPC: 'npc',
-  NPC_PATH: 'npc_path',
-});
-
-const TILED_NPC_PROPERTY = Object.freeze({
-  MOVEMENT_PATTERN: 'movement_pattern',
-  FRAME: 'frame',
-  ID: 'id',
-});
-
-const TILED_ENCOUNTER_PROPERTY = Object.freeze({
-  AREA: 'area',
-  TILE_TYPE: 'tileType',
-});
-
-const TILED_ITEM_PROPERTY = Object.freeze({
-  ITEM_ID: 'item_id',
-  ID: 'id',
-});
-
-const TILED_AREA_METADATA_PROPERTY = Object.freeze({
-  FAINT_LOCATION: 'faint_location',
-  ID: 'id',
-});
-
-const TILED_EVENT_PROPERTY = Object.freeze({
-  ID: 'id',
-});
+import {
+  CUSTOM_TILED_TYPES,
+  OBJECT_LAYER_NAMES,
+  TILED_AREA_METADATA_PROPERTY,
+  TILED_ENCOUNTER_PROPERTY,
+  TILED_EVENT_PROPERTY,
+  TILED_ITEM_PROPERTY,
+  TILED_NPC_PROPERTY,
+  TILED_SIGN_PROPERTY,
+} from '../assets/tiled-keys.js';
 
 /**
  * @typedef WorldSceneData
@@ -75,11 +43,6 @@ const TILED_EVENT_PROPERTY = Object.freeze({
  * @property {string} [area]
  * @property {boolean} [isInterior]
  */
-
-/*
-  Our scene will be 16 x 9 (1024 x 576 pixels)
-  each grid size will be 64 x 64 pixels
-*/
 
 export class WorldScene extends BaseScene {
   /** @type {Player} */
@@ -132,6 +95,8 @@ export class WorldScene extends BaseScene {
   #encounterZonePlayerIsEntering;
   /** @type {import('../types/typedef.js').CameraRegion[]} */
   #cameraRegions;
+  /** @type {{ [key: string]: Phaser.Tilemaps.Tilemap}} */
+  #tiledLevelMaps;
 
   constructor() {
     super({
@@ -146,6 +111,7 @@ export class WorldScene extends BaseScene {
   init(data) {
     super.init(data);
     this.#sceneData = data;
+    this.#tiledLevelMaps = {};
 
     // handle when some of the fields for scene data are not populated, default to values provided, otherwise use safe defaults
     /** @type {string} */
@@ -165,20 +131,20 @@ export class WorldScene extends BaseScene {
     // update player location, and map data if the player was knocked out in a battle
     if (this.#sceneData.isPlayerKnockedOut) {
       // get the nearest knocked out spawn location from the map meta data
-      let map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
-      const areaMetaDataProperties = map.getObjectLayer('Area-Metadata').objects[0].properties;
-      const knockOutSpawnLocation = /** @type {TiledObjectProperty[]} */ (areaMetaDataProperties).find(
-        (property) => property.name === TILED_AREA_METADATA_PROPERTY.FAINT_LOCATION
-      )?.value;
+      let map = this.#getLevelTileMap(`${this.#sceneData.area.toUpperCase()}_LEVEL`);
+      const areaMetaDataProperties = map.getObjectLayer(OBJECT_LAYER_NAMES.AREA_METADATA).objects[0].properties;
+      const knockOutSpawnLocation = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (
+        areaMetaDataProperties
+      ).find((property) => property.name === TILED_AREA_METADATA_PROPERTY.FAINT_LOCATION)?.value;
 
       // check to see if the level data we need to load is different and load that map to get player spawn data
       if (knockOutSpawnLocation !== this.#sceneData.area) {
         this.#sceneData.area = knockOutSpawnLocation;
-        map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
+        map = this.#getLevelTileMap(`${this.#sceneData.area.toUpperCase()}_LEVEL`);
       }
 
       // set players spawn location to that map and finds the revive location based on that object
-      const reviveLocation = map.getObjectLayer('Revive-Location').objects[0];
+      const reviveLocation = map.getObjectLayer(OBJECT_LAYER_NAMES.REVIVE_LOCATION).objects[0];
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
         x: reviveLocation.x,
         y: reviveLocation.y - TILE_SIZE,
@@ -188,8 +154,8 @@ export class WorldScene extends BaseScene {
 
     let isNewGame = !(dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false);
     if (isNewGame) {
-      const map = this.make.tilemap({ key: WORLD_ASSET_KEYS.MAIN_1_LEVEL });
-      const playerSpawnLocationObject = map.getObjectLayer('Player-Spawn-Location').objects[0];
+      const map = this.#getLevelTileMap(WORLD_ASSET_KEYS.MAIN_1_LEVEL);
+      const playerSpawnLocationObject = map.getObjectLayer(OBJECT_LAYER_NAMES.PLAYER_SPAWN_LOCATION).objects[0];
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
         x: playerSpawnLocationObject.x,
         y: playerSpawnLocationObject.y - TILE_SIZE,
@@ -238,7 +204,7 @@ export class WorldScene extends BaseScene {
     this.#rectangleOverlapResult = new Phaser.Geom.Rectangle();
 
     // create map and collision layer
-    const map = this.make.tilemap({ key: `${this.#sceneData.area.toUpperCase()}_LEVEL` });
+    const map = this.#getLevelTileMap(`${this.#sceneData.area.toUpperCase()}_LEVEL`);
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
     const collisionTiles = map.addTilesetImage('collision', WORLD_ASSET_KEYS.WORLD_COLLISION);
@@ -254,15 +220,15 @@ export class WorldScene extends BaseScene {
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
-    const hasSignLayer = map.getObjectLayer('Sign') !== null;
+    const hasSignLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SIGN) !== null;
     if (hasSignLayer) {
-      this.#signLayer = map.getObjectLayer('Sign');
+      this.#signLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SIGN);
     }
 
     // create layer for scene transitions entrances
-    const hasSceneTransitionLayer = map.getObjectLayer('Scene-Transitions') !== null;
+    const hasSceneTransitionLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SCENE_TRANSITIONS) !== null;
     if (hasSceneTransitionLayer) {
-      this.#entranceLayer = map.getObjectLayer('Scene-Transitions');
+      this.#entranceLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SCENE_TRANSITIONS);
     }
 
     // create collision layers for encounters
@@ -496,7 +462,7 @@ export class WorldScene extends BaseScene {
     });
 
     if (nearbySign) {
-      /** @type {TiledObjectProperty[]} */
+      /** @type {import('../types/typedef.js').TiledObjectProperty[]} */
       const props = nearbySign.properties;
       /** @type {string} */
       const msg = props.find((prop) => prop.name === TILED_SIGN_PROPERTY.MESSAGE)?.value;
@@ -628,7 +594,7 @@ export class WorldScene extends BaseScene {
     this.#wildMonsterEncountered = Math.random() < 0.2;
     // this.#wildMonsterEncountered = false;
     if (this.#wildMonsterEncountered) {
-      const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
+      const encounterAreaId = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (
         this.#encounterZonePlayerIsEntering.layer.properties
       ).find((property) => property.name === TILED_ENCOUNTER_PROPERTY.AREA).value;
       const possibleMonsters = DataUtils.getEncounterAreaDetails(this, encounterAreaId);
@@ -697,12 +663,12 @@ export class WorldScene extends BaseScene {
 
       /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
       const npcMovement =
-        /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+        /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (npcObject.properties).find(
           (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
         )?.value || 'IDLE';
 
       /** @type {number} */
-      const npcId = /** @type {TiledObjectProperty[]} */ (npcObject.properties).find(
+      const npcId = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (npcObject.properties).find(
         (property) => property.name === TILED_NPC_PROPERTY.ID
       )?.value;
       const npcDetails = DataUtils.getNpcData(this, npcId);
@@ -749,7 +715,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #createItems(map) {
-    const itemObjectLayer = map.getObjectLayer('Item');
+    const itemObjectLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.ITEM);
     if (!itemObjectLayer) {
       return;
     }
@@ -763,12 +729,12 @@ export class WorldScene extends BaseScene {
 
     for (const tiledItem of validItems) {
       /** @type {number} */
-      const itemId = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+      const itemId = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (tiledItem.properties).find(
         (property) => property.name === TILED_ITEM_PROPERTY.ITEM_ID
       )?.value;
 
       /** @type {number} */
-      const id = /** @type {TiledObjectProperty[]} */ (tiledItem.properties).find(
+      const id = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (tiledItem.properties).find(
         (property) => property.name === TILED_ITEM_PROPERTY.ID
       )?.value;
 
@@ -801,9 +767,9 @@ export class WorldScene extends BaseScene {
 
     // update player position to match the new entrance data
     // create tilemap using the provided entrance data
-    const map = this.make.tilemap({ key: `${entranceName.toUpperCase()}_LEVEL` });
+    const map = this.#getLevelTileMap(`${entranceName.toUpperCase()}_LEVEL`);
     // get the position of the entrance object using the entrance id
-    const entranceObjectLayer = map.getObjectLayer('Scene-Transitions');
+    const entranceObjectLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SCENE_TRANSITIONS);
 
     const entranceObject = entranceObjectLayer.objects.find((object) => {
       const tempEntranceName = object.properties.find((property) => property.name === 'connects_to').value;
@@ -917,7 +883,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #createEventEncounterZones(map) {
-    const eventObjectLayer = map.getObjectLayer('Events');
+    const eventObjectLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.EVENTS);
     if (!eventObjectLayer) {
       return;
     }
@@ -931,7 +897,7 @@ export class WorldScene extends BaseScene {
 
     for (const tiledEvent of validEvents) {
       /** @type {string} */
-      const eventId = /** @type {TiledObjectProperty[]} */ (tiledEvent.properties).find(
+      const eventId = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (tiledEvent.properties).find(
         (property) => property.name === TILED_EVENT_PROPERTY.ID
       )?.value;
 
@@ -1309,9 +1275,9 @@ export class WorldScene extends BaseScene {
   #handleEncounterTileTypeEffects(encounterLayer, encounterTile, playerDirection) {
     // check the tile type for the encounter layer the player is moving through and play related effects
     /** @type {import('../types/typedef.js').EncounterTileType} */
-    const encounterTileType = /** @type {TiledObjectProperty[]} */ (encounterLayer.layer.properties).find(
-      (property) => property.name === TILED_ENCOUNTER_PROPERTY.TILE_TYPE
-    ).value;
+    const encounterTileType = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (
+      encounterLayer.layer.properties
+    ).find((property) => property.name === TILED_ENCOUNTER_PROPERTY.TILE_TYPE).value;
 
     switch (encounterTileType) {
       case ENCOUNTER_TILE_TYPE.GRASS:
@@ -1359,5 +1325,17 @@ export class WorldScene extends BaseScene {
         }
         return false;
       });
+  }
+
+  /**
+   * @param {string} key
+   * @returns {Phaser.Tilemaps.Tilemap}
+   */
+  #getLevelTileMap(key) {
+    if (this.#tiledLevelMaps[key]) {
+      return this.#tiledLevelMaps[key];
+    }
+    this.#tiledLevelMaps[key] = this.make.tilemap({ key });
+    return this.#tiledLevelMaps[key];
   }
 }
