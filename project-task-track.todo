@@ -239,10 +239,13 @@ Dynamic Camera:
   ✔ phaser camera updates @done(25-08-16 09:39)
 
 Sign Message Enhancements:
-  ☐ create signs json file
-  ☐ update data utils to import new data
-  ☐ update sign class in tiled
+  ✔ create signs json file @done(25-08-17 08:32)
+  ✔ update data utils to import new data @done(25-08-17 08:41)
+  ✔ update sign class in tiled @done(25-08-17 08:41)
 
+Player Running:
+  ☐ enhance player class to support dynamic speed
+  ☐ enhance player class to support dynamic animation duration
 
 
 
@@ -294,9 +297,6 @@ Tools Part 2:
   ☐ disable encounters
   ☐ skip events
 
-Player Running:
-  ☐ enhance player class to support dynamic speed
-  ☐ enhance player class to support dynamic animation duration
 
 
 -------------------------------

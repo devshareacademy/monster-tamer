@@ -321,3 +321,15 @@ export const ENCOUNTER_TILE_TYPE = Object.freeze({
  * @property {string} type
  * @property {any} value
  */
+
+/** Sign Data */
+/**
+ * @typedef SignDetails
+ * @type {object}
+ * @property {string} message
+ */
+
+/**
+ * @typedef SignData
+ * @type {Object.<string, SignDetails>}
+ */

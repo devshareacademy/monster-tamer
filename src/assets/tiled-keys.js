@@ -10,7 +10,7 @@ export const OBJECT_LAYER_NAMES = Object.freeze({
 });
 
 export const TILED_SIGN_PROPERTY = Object.freeze({
-  MESSAGE: 'message',
+  ID: 'id',
 });
 
 export const CUSTOM_TILED_TYPES = Object.freeze({
