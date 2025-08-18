@@ -1,8 +1,5 @@
-import Phaser from '../lib/phaser.js';
 import { DEV_PANEL_CONFIG } from '../config.js';
 import TweakPane from '../lib/tweakpane.js';
-import * as SAVES from './saves.js';
-import { Controls } from '../utils/controls.js';
 import { BaseScene } from '../scenes/base-scene.js';
 
 const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DEV_DATA';
