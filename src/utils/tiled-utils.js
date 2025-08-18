@@ -27,33 +27,33 @@ function getObjectsFromLayerWithIdProperty(map, layerName) {
   });
 }
 
-/**
- * Creates an object with the id property as the key and the value as the related TileObject.
- * @param {Phaser.Types.Tilemaps.TiledObject[]} objects
- * @returns {{ [key: number]: Phaser.Types.Tilemaps.TiledObject; }}
- */
-function createMapFromObjectsWithIdProperty(objects) {
-  /** @type {{ [key: number]: Phaser.Types.Tilemaps.TiledObject; }} */
-  const map = {};
-  objects.forEach((obj) => {
-    const id = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (obj.properties).find(
-      (property) => property.name === 'id'
-    ).value;
-    map[id] = obj;
-  });
-  return map;
-}
+// /**
+//  * Creates an object with the id property as the key and the value as the related TileObject.
+//  * @param {Phaser.Types.Tilemaps.TiledObject[]} objects
+//  * @returns {{ [key: number]: Phaser.Types.Tilemaps.TiledObject; }}
+//  */
+// function createMapFromObjectsWithIdProperty(objects) {
+//   /** @type {{ [key: number]: Phaser.Types.Tilemaps.TiledObject; }} */
+//   const map = {};
+//   objects.forEach((obj) => {
+//     const id = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (obj.properties).find(
+//       (property) => property.name === 'id'
+//     ).value;
+//     map[id] = obj;
+//   });
+//   return map;
+// }
 
-/**
- * Creates an object with the camera bounds ids as keys and the values as the related TileObjects
- * for the camera bounds.
- * @param {Phaser.Tilemaps.Tilemap} map
- * @returns {{ [key: number]: Phaser.Types.Tilemaps.TiledObject }}
- */
-export function createCameraBoundsMap(map) {
-  const filteredObjects = getObjectsFromLayerWithIdProperty(map, OBJECT_LAYER_NAMES.CAMERA_BOUNDS);
-  return createMapFromObjectsWithIdProperty(filteredObjects);
-}
+// /**
+//  * Creates an object with the camera bounds ids as keys and the values as the related TileObjects
+//  * for the camera bounds.
+//  * @param {Phaser.Tilemaps.Tilemap} map
+//  * @returns {{ [key: number]: Phaser.Types.Tilemaps.TiledObject }}
+//  */
+// export function createCameraBoundsMap(map) {
+//   const filteredObjects = getObjectsFromLayerWithIdProperty(map, OBJECT_LAYER_NAMES.CAMERA_BOUNDS);
+//   return createMapFromObjectsWithIdProperty(filteredObjects);
+// }
 
 /**
  * Creates an array of camera regions from the camera bounds layer.
