@@ -302,3 +302,34 @@ export const ENCOUNTER_TILE_TYPE = Object.freeze({
   NONE: 'NONE',
   GRASS: 'GRASS',
 });
+
+/** Camera Region */
+/**
+ * @typedef CameraRegion
+ * @type {object}
+ * @property {number} id the unique id of this camera region
+ * @property {number} x the x position of this camera region
+ * @property {number} y the y position of this camera region
+ * @property {number} width the width of this camera region
+ * @property {number} height the height of this camera region
+ */
+
+/**
+ * @typedef TiledObjectProperty
+ * @type {object}
+ * @property {string} name
+ * @property {string} type
+ * @property {any} value
+ */
+
+/** Sign Data */
+/**
+ * @typedef SignDetails
+ * @type {object}
+ * @property {string} message
+ */
+
+/**
+ * @typedef SignData
+ * @type {Object.<string, SignDetails>}
+ */

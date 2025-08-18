@@ -131,6 +131,7 @@ export class PreloadScene extends BaseScene {
     this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
     this.load.json(DATA_ASSET_KEYS.NPCS, 'assets/data/npcs.json');
     this.load.json(DATA_ASSET_KEYS.EVENTS, 'assets/data/events.json');
+    this.load.json(DATA_ASSET_KEYS.SIGNS, 'assets/data/signs.json');
 
     // load custom fonts
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
@@ -180,7 +181,20 @@ export class PreloadScene extends BaseScene {
       BUILDING_ASSET_KEYS.BUILDING_2_BACKGROUND,
       `${monsterTamerAssetPath}/map/buildings/building_2_level_background.png`
     );
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_3_LEVEL, `assets/data/building_3.json`);
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_3_FOREGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_3_level_foreground.png`
+    );
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_3_BACKGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_3_level_background.png`
+    );
     this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_2_LEVEL, `assets/data/building_2.json`);
+
+    this.load.image(WORLD_ASSET_KEYS.FOREST_1_BACKGROUND, `${monsterTamerAssetPath}/map/forest_1_level_background.png`);
+    this.load.image(WORLD_ASSET_KEYS.FOREST_1_FOREGROUND, `${monsterTamerAssetPath}/map/forest_1_level_foreground.png`);
+    this.load.tilemapTiledJSON(WORLD_ASSET_KEYS.FOREST_1_LEVEL, `assets/data/forest_1.json`);
 
     // load character images
     this.load.spritesheet(CHARACTER_ASSET_KEYS.PLAYER, `${axulArtAssetPath}/character/custom.png`, {

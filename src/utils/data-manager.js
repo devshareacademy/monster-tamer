@@ -1,6 +1,6 @@
 import Phaser from '../lib/phaser.js';
 import { DIRECTION } from '../common/direction.js';
-import { TEXT_SPEED, TILE_SIZE } from '../config.js';
+import { TEXT_SPEED } from '../config.js';
 import { TEXT_SPEED_OPTIONS, BATTLE_SCENE_OPTIONS, BATTLE_STYLE_OPTIONS, SOUND_OPTIONS } from '../common/options.js';
 import { exhaustiveGuard } from './guard.js';
 import { DataUtils } from './data-utils.js';
@@ -50,8 +50,8 @@ const LOCAL_STORAGE_KEY = 'MONSTER_TAMER_DATA';
 const initialState = {
   player: {
     position: {
-      x: 4 * TILE_SIZE,
-      y: 21 * TILE_SIZE,
+      x: 0,
+      y: 0,
     },
     direction: DIRECTION.DOWN,
     location: {

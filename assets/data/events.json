@@ -6,8 +6,8 @@
         "type": "ADD_NPC",
         "data": {
           "direction": "DOWN",
-          "x": 6,
-          "y": 21,
+          "x": 16,
+          "y": 73,
           "frame": 30,
           "id": 1001,
           "animationKeyPrefix": "NPC_4"
@@ -58,8 +58,8 @@
         "type": "ADD_NPC",
         "data": {
           "direction": "DOWN",
-          "x": 10,
-          "y": 11,
+          "x": 20,
+          "y": 62,
           "frame": 40,
           "id": 1002,
           "animationKeyPrefix": "NPC_5"
