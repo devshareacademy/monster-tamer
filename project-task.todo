@@ -229,13 +229,13 @@ Multiple Encounter Areas & Special Tiles:
 New Areas:
   ☐ expand "main" level in tiled
   ☐ organizing tiled level layers
-  ☐ create "foreset" level in tiled
+  ☐ create "forest" level in tiled
   ☐ import new tiled levels and test
   ☐ dynamic spawn locations
   ☐ event file - npc spawn location updates
   ☐ tiled level updates - add npcs, signs, and buildings
 
-Dyanmic Camera:
+Dynamic Camera:
   ☐ new tiled layers for camera bounds
   ☐ phaser camera updates
 
@@ -244,18 +244,18 @@ Sign Message Enhancements:
   ☐ update data utils to import new data
   ☐ update sign class in tiled
 
+Player Running:
+  ☐ enhance player class to support dynamic speed
+  ☐ enhance player class to support dynamic animation duration
+
 Tools Part 2:
   ☐ download new tool files
   ☐ integrate tools with base scene class
   ☐ state machine logging from config
-  ☐ promisfy util review
+  ☐ promisify util review
   ☐ custom saves
   ☐ disable encounters
   ☐ skip events
-
-Player Running:
-  ☐ enhance player class to support dynamic speed
-  ☐ enhance player class to support dynamic animation duration
 
 -------------------------------
 
