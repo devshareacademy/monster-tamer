@@ -1086,7 +1086,7 @@
          "name":"Collision",
          "opacity":0.5,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":40,
          "x":0,
          "y":0
@@ -1696,7 +1696,7 @@
                  "visible":true,
                  "width":64,
                  "x":1152,
-                 "y":448
+                 "y":64
                 }, 
                 {
                  "gid":194,
@@ -1724,7 +1724,7 @@
                  "visible":true,
                  "width":64,
                  "x":1216,
-                 "y":448
+                 "y":64
                 }, 
                 {
                  "gid":194,
@@ -1752,7 +1752,7 @@
                  "visible":true,
                  "width":64,
                  "x":1280,
-                 "y":448
+                 "y":64
                 }, 
                 {
                  "gid":194,
@@ -1784,7 +1784,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -1800,12 +1800,12 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"MONSTER FAN CLUB\nAll Monster fans welcome!"
+                         "name":"id",
+                         "type":"int",
+                         "value":2
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"sign",
                  "visible":true,
                  "width":64,
                  "x":1344,
@@ -1818,12 +1818,12 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"Don't leave home without a MAP!"
+                         "name":"id",
+                         "type":"int",
+                         "value":4
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"sign",
                  "visible":true,
                  "width":64,
                  "x":1472,
@@ -1836,12 +1836,12 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"TRAINER TIPS\nIf you want to avoid battles, stay away from grassy areas!"
+                         "name":"id",
+                         "type":"int",
+                         "value":1
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"sign",
                  "visible":true,
                  "width":64,
                  "x":832,
@@ -1854,12 +1854,12 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"For poison, use ANTIDOTE! Get it at the MARKET!"
+                         "name":"id",
+                         "type":"int",
+                         "value":3
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"sign",
                  "visible":true,
                  "width":64,
                  "x":1088,
@@ -1872,9 +1872,9 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"Spooky Forest"
+                         "name":"id",
+                         "type":"int",
+                         "value":9
                         }],
                  "rotation":0,
                  "type":"sign",
@@ -1890,9 +1890,9 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"Welcome to new city!"
+                         "name":"id",
+                         "type":"int",
+                         "value":6
                         }],
                  "rotation":0,
                  "type":"sign",
@@ -1908,9 +1908,9 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"Watch out!\nSome trainers will battle\nyou on sight."
+                         "name":"id",
+                         "type":"int",
+                         "value":5
                         }],
                  "rotation":0,
                  "type":"sign",
@@ -1926,9 +1926,9 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"New items in stock!"
+                         "name":"id",
+                         "type":"int",
+                         "value":7
                         }],
                  "rotation":0,
                  "type":"sign",
@@ -1944,9 +1944,9 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"message",
-                         "type":"string",
-                         "value":"Rest here"
+                         "name":"id",
+                         "type":"int",
+                         "value":8
                         }],
                  "rotation":0,
                  "type":"sign",
@@ -1957,7 +1957,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -2093,7 +2093,7 @@
                 }],
          "opacity":0.29,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 

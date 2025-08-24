@@ -324,8 +324,14 @@
                  "height":768,
                  "id":11,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"id",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
-                 "type":"",
+                 "type":"cameraBounds",
                  "visible":true,
                  "width":1280,
                  "x":0,
