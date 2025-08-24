@@ -228,7 +228,7 @@ Multiple Encounter Areas & Special Tiles:
 New Areas:
   ✔ expand "main" level in tiled @done(25-08-09 09:49)
   ✔ organizing tiled level layers @done(25-08-09 09:49)
-  ✔ create "foreset" level in tiled @done(25-08-09 09:49)
+  ✔ create "forest" level in tiled @done(25-08-09 09:49)
   ✔ import new tiled levels and test @done(25-08-09 10:11)
   ✔ dynamic spawn locations @done(25-08-10 15:44)
   ✔ event file - npc spawn location updates @done(25-08-09 10:11)
@@ -247,57 +247,14 @@ Player Running:
   ✔ enhance player class to support dynamic speed @done(25-08-17 09:14)
   ✔ enhance player class to support dynamic animation duration @done(25-08-17 09:14)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Tools Part 2:
   ☐ download new tool files
   ☐ integrate tools with base scene class
   ☐ state machine logging from config
-  ☐ promisfy util review
+  ☐ promisify util review
   ☐ custom saves
   ☐ disable encounters
   ☐ skip events
-
-
 
 -------------------------------
 
