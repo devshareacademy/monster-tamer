@@ -1181,6 +1181,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":87,
          "id":16,
+         "locked":true,
          "name":"Foreground",
          "opacity":1,
          "type":"tilelayer",
@@ -1612,6 +1613,7 @@
         {
          "draworder":"topdown",
          "id":24,
+         "locked":true,
          "name":"Scene-Transitions",
          "objects":[
                 {
@@ -1784,13 +1786,14 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
         {
          "draworder":"topdown",
          "id":21,
+         "locked":true,
          "name":"Sign",
          "objects":[
                 {
@@ -2012,6 +2015,7 @@
         {
          "draworder":"topdown",
          "id":39,
+         "locked":true,
          "name":"Player-Spawn-Location",
          "objects":[
                 {
@@ -2035,6 +2039,7 @@
         {
          "draworder":"topdown",
          "id":40,
+         "locked":true,
          "name":"Camera-Bounds",
          "objects":[
                 {
