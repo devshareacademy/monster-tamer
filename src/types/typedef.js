@@ -133,7 +133,6 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {string[]} requires
  * @property {object} data
  * @property {string[]} data.messages
- * @property {string[]} requires
  */
 
 /**
@@ -145,7 +144,6 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {number} data.fadeInDuration
  * @property {number} data.fadeOutDuration
  * @property {number} data.waitDuration
- * @property {string[]} requires
  */
 
 /**
@@ -154,12 +152,23 @@ export const NPC_EVENT_TYPE = Object.freeze({
  * @property {'HEAL'} type
  * @property {string[]} requires
  * @property {object} data
+ */
+
+/**
+ * @typedef NpcEventBattle
+ * @type {object}
+ * @property {'BATTLE'} type
  * @property {string[]} requires
+ * @property {object} data
+ * @property {number[]} data.monsters
+ * @property {string} data.assetKey
+ * @property {string} data.trainerName
+ * @property {string[]} data.trainerLostMessages
  */
 
 /**
  * @typedef NpcEvent
- * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal}
+ * @type {NpcEventMessage | NpcEventSceneFadeInAndOut | NpcEventHeal | NpcEventBattle}
  */
 
 /**
@@ -290,6 +299,16 @@ export const GAME_EVENT_TYPE = Object.freeze({
 export const GAME_FLAG = Object.freeze({
   LOOKING_FOR_PROFESSOR: 'LOOKING_FOR_PROFESSOR',
   FOUND_PROFESSOR: 'FOUND_PROFESSOR',
+});
+
+/**
+ * @typedef {keyof typeof BATTLE_FLAG} BattleFlag
+ */
+
+/** @enum {BattleFlag} */
+export const BATTLE_FLAG = Object.freeze({
+  TRAINER_NOT_DEFEATED: 'TRAINER_NOT_DEFEATED',
+  TRAINER_DEFEATED: 'TRAINER_DEFEATED',
 });
 
 /** Encounter Zone Tile Types */

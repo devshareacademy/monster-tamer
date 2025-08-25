@@ -249,16 +249,16 @@ Player Running:
 
 NPC Battles 1:
   ✔ load new assets for trainers @done(25-08-25 10:29)
-  ☐ npc json enhancements
-  ☐ monster json enhancements
+  ✔ npc json enhancements @done(25-08-25 11:50)
+  ✔ monster json enhancements @done(25-08-25 11:50)
   ☐ battle scene updates
     ☐ prevent flee attempt
     ☐ prevent capture attempts
     ☐ state machine updates for npc trainer
   ☐ world scene updates
     ☐ support for npc battle event triggers
-    ☐ data manager and tracking defeated npcs
-    ☐ fix data utils for monster lookup
+    ✔ data manager and tracking defeated npcs @done(25-08-25 11:50)
+    ✔ fix data utils for monster lookup @done(25-08-25 11:50)
 
 Tools Part 2:
   ☐ download new tool files
@@ -273,7 +273,6 @@ Tools Part 2:
 
 Possible Future Content:
   ☐ shops
-  ☐ battle npcs
   ☐ monster encyclopedia
   ☐ monster league/gyms
 

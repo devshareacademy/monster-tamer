@@ -78,10 +78,27 @@
     "animationKeyPrefix": "NPC_20",
     "events": [
       {
-        "requires": [],
+        "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "MESSAGE",
         "data": {
           "messages": ["Hey! Let's battle!"]
+        }
+      },
+      {
+        "requires": ["TRAINER_NOT_DEFEATED"],
+        "type": "BATTLE",
+        "data": {
+          "monsters": [6, 7],
+          "assetKey": "TRAINER_YOUTH_GIRL",
+          "trainerName": "Jr. Trainer",
+          "trainerLostMessages": ["You defeated me!"]
+        }
+      },
+      {
+        "requires": ["TRAINER_DEFEATED"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["That was great battle!"]
         }
       }
     ]

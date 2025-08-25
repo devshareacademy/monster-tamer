@@ -18,7 +18,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
+import { BATTLE_FLAG, ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
@@ -594,7 +594,7 @@ export class WorldScene extends BaseScene {
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
-    // this.#wildMonsterEncountered = false;
+    this.#wildMonsterEncountered = false;
     if (this.#wildMonsterEncountered) {
       const encounterAreaId = /** @type {import('../types/typedef.js').TiledObjectProperty[]} */ (
         this.#encounterZonePlayerIsEntering.layer.properties
@@ -833,6 +833,13 @@ export class WorldScene extends BaseScene {
     // check to see if this event should be handled based on story flags
     const currentGameFlags = dataManager.getFlags();
     const eventRequirementsMet = eventToHandle.requires.every((flag) => {
+      if (flag === BATTLE_FLAG.TRAINER_DEFEATED) {
+        return dataManager.getDefeatedNpcs().has(this.#npcPlayerIsInteractingWith.id);
+      }
+      if (flag === BATTLE_FLAG.TRAINER_NOT_DEFEATED) {
+        return !dataManager.getDefeatedNpcs().has(this.#npcPlayerIsInteractingWith.id);
+      }
+
       return currentGameFlags.has(flag);
     });
     if (!eventRequirementsMet) {
@@ -869,6 +876,18 @@ export class WorldScene extends BaseScene {
           });
         });
         // TODO: play audio cue
+        break;
+      case NPC_EVENT_TYPE.BATTLE:
+        this.#isProcessingNpcEvent = true;
+        console.log(eventToHandle);
+
+        const npcMonsters = eventToHandle.data.monsters.map((monsterId) => {
+          return DataUtils.getMonsterById(this, monsterId);
+        });
+        console.log(npcMonsters);
+        dataManager.addDefeatedNpc(this.#npcPlayerIsInteractingWith.id);
+        this.#isProcessingNpcEvent = false;
+        this.#handleNpcInteraction();
         break;
       default:
         exhaustiveGuard(eventType);
