@@ -247,6 +247,19 @@ Player Running:
   ✔ enhance player class to support dynamic speed @done(25-08-17 09:14)
   ✔ enhance player class to support dynamic animation duration @done(25-08-17 09:14)
 
+NPC Battles 1:
+  ✔ load new assets for trainers @done(25-08-25 10:29)
+  ☐ npc json enhancements
+  ☐ monster json enhancements
+  ☐ battle scene updates
+    ☐ prevent flee attempt
+    ☐ prevent capture attempts
+    ☐ state machine updates for npc trainer
+  ☐ world scene updates
+    ☐ support for npc battle event triggers
+    ☐ data manager and tracking defeated npcs
+    ☐ fix data utils for monster lookup
+
 Tools Part 2:
   ☐ download new tool files
   ☐ integrate tools with base scene class
