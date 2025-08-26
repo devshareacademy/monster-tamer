@@ -25,6 +25,7 @@ export const INVENTORY_TEXT_STYLE = {
  * @typedef BaseInventorySceneData
  * @type {object}
  * @property {string} previousSceneName
+ * @property {import('../../types/typedef.js').ItemCategory[]} [itemCategoriesThatCannotBeUsed]
  */
 
 /**

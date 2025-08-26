@@ -83,7 +83,7 @@ export class InventoryScene extends BaseInventoryScene {
     // if previous scene was battle scene, switch back to that scene
     if (this._sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
       this.#selectedItem = updatedItem.item;
-      this._goBackToPreviousScene(this._createSceneDataToPass());
+      this._goBackToPreviousScene(this._createSceneDataToPass(true, this.#selectedItem));
     }
   }
 
@@ -100,6 +100,17 @@ export class InventoryScene extends BaseInventoryScene {
 
     this.#selectedItem = this._inventory[this._selectedInventoryOptionIndex].item;
 
+    // check if this category cannot be used at this time
+    if (
+      this._sceneData.itemCategoriesThatCannotBeUsed !== undefined &&
+      this._sceneData.itemCategoriesThatCannotBeUsed.includes(this.#selectedItem.category)
+    ) {
+      // display message to player that the item cant be used now
+      this._selectedInventoryDescriptionText.setText(CANNOT_USE_ITEM_TEXT);
+      this._waitingForInput = true;
+      return;
+    }
+
     // validate that the item can be used if we are outside battle (capture ball example)
     if (this._sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
       // check to see if the selected item needs a target monster, example if selecting
@@ -115,16 +126,9 @@ export class InventoryScene extends BaseInventoryScene {
         }
 
         this.#handleItemUsed();
-        this._goBackToPreviousScene(this._createSceneDataToPass());
+        this._goBackToPreviousScene(this._createSceneDataToPass(true, this.#selectedItem));
         return;
       }
-    }
-
-    if (this.#selectedItem.category === ITEM_CATEGORY.CAPTURE) {
-      // display message to player that the item cant be used now
-      this._selectedInventoryDescriptionText.setText(CANNOT_USE_ITEM_TEXT);
-      this._waitingForInput = true;
-      return;
     }
 
     this._controls.lockInput = true;
@@ -143,13 +147,15 @@ export class InventoryScene extends BaseInventoryScene {
   /**
    * Creates the data that is needed to be based back to the previous scene.
    * @protected
+   * @param {boolean} [wasItemUsed = false]
+   * @param {import('../../types/typedef.js').Item} [item = undefined]
    * @returns {object}
    */
-  _createSceneDataToPass() {
+  _createSceneDataToPass(wasItemUsed = false, item = undefined) {
     /** @type {InventorySceneItemUsedData} */
     const sceneDataToPass = {
-      wasItemUsed: true,
-      item: this.#selectedItem,
+      wasItemUsed,
+      item,
     };
     this.#selectedItem = undefined;
     return sceneDataToPass;

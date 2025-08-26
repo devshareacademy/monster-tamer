@@ -23,6 +23,7 @@ import {
   BATTLE_TRIGGER_TYPE,
   ENCOUNTER_TILE_TYPE,
   GAME_EVENT_TYPE,
+  ITEM_CATEGORY,
   NPC_EVENT_TYPE,
 } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
@@ -418,13 +419,12 @@ export class WorldScene extends BaseScene {
 
         if (this.#menu.selectedMenuOption === 'BAG') {
           // pause this scene and launch the inventory scene
-          /** @type {import('./CLEANUP-inventory-scene.js').InventorySceneData} */
+          /** @type {import('./inventory/base-inventory-scene.js').BaseInventorySceneData} */
           const sceneDataToPass = {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
+            itemCategoriesThatCannotBeUsed: [ITEM_CATEGORY.CAPTURE],
           };
-          // TODO:NOW remove test scene from below
           this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
-          //this.scene.launch(SCENE_KEYS.SHOP_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 

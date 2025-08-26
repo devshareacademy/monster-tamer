@@ -8,6 +8,7 @@ import { BattleMonster } from '../../monsters/battle-monster.js';
 import { animateText } from '../../../utils/text-utils.js';
 import { dataManager } from '../../../utils/data-manager.js';
 import { SCENE_KEYS } from '../../../scenes/scene-keys.js';
+import { ITEM_CATEGORY } from '../../../types/typedef.js';
 
 const BATTLE_MENU_CURSOR_POS = Object.freeze({
   x: 42,
@@ -679,9 +680,10 @@ export class BattleMenu {
       this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_ITEM;
 
       // pause this scene and launch the inventory scene
-      /** @type {import('../../../scenes/CLEANUP-inventory-scene.js').InventorySceneData} */
+      /** @type {import('../../../scenes/inventory/base-inventory-scene.js').BaseInventorySceneData} */
       const sceneDataToPass = {
         previousSceneName: SCENE_KEYS.BATTLE_SCENE,
+        itemCategoriesThatCannotBeUsed: this.#isTrainerBattle ? [ITEM_CATEGORY.CAPTURE] : [],
       };
       this.#scene.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
       this.#scene.scene.pause(SCENE_KEYS.BATTLE_SCENE);
@@ -769,12 +771,6 @@ export class BattleMenu {
 
     if (data && data.wasMonsterSelected) {
       // do nothing since new active monster was chosen to switch to
-      return;
-    }
-
-    if (this.#isTrainerBattle && data?.item?.category === 'CAPTURE') {
-      this.updateInfoPaneMessagesAndWaitForInput(["You can't use that in a trainer battle!"]);
-      this.#wasItemUsed = false;
       return;
     }
 
