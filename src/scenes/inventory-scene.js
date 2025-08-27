@@ -46,6 +46,7 @@ const INVENTORY_TEXT_STYLE = {
  * @typedef InventorySceneData
  * @type {object}
  * @property {string} previousSceneName
+ * @property {import('../types/typedef.js').ItemCategory[]} [itemCategoriesThatCannotBeUsed]
  */
 
 /**
@@ -227,6 +228,16 @@ export class InventoryScene extends BaseScene {
 
       const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex].item;
 
+      if (
+        this.#sceneData.itemCategoriesThatCannotBeUsed !== undefined &&
+        this.#sceneData.itemCategoriesThatCannotBeUsed.includes(selectedItem.category)
+      ) {
+        // display message to player that the item cant be used now
+        this.#selectedInventoryDescriptionText.setText(CANNOT_USE_ITEM_TEXT);
+        this.#waitingForInput = true;
+        return;
+      }
+
       // validate that the item can be used if we are outside battle (capture ball example)
       if (this.#sceneData.previousSceneName === SCENE_KEYS.BATTLE_SCENE) {
         // check to see if the selected item needs a target monster, example if selecting
@@ -245,13 +256,6 @@ export class InventoryScene extends BaseScene {
           this.#goBackToPreviousScene(true, selectedItem);
           return;
         }
-      }
-
-      if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
-        // display message to player that the item cant be used now
-        this.#selectedInventoryDescriptionText.setText(CANNOT_USE_ITEM_TEXT);
-        this.#waitingForInput = true;
-        return;
       }
 
       this._controls.lockInput = true;

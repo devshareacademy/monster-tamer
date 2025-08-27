@@ -45,6 +45,12 @@ const BATTLE_STATES = Object.freeze({
  * @type {object}
  * @property {import('../types/typedef.js').Monster[]} playerMonsters
  * @property {import('../types/typedef.js').Monster[]} enemyMonsters
+ * @property {boolean} [isTrainerBattle=false]
+ * @property {object} [npc]
+ * @property {number} npc.id
+ * @property {string} npc.assetKey
+ * @property {string} npc.name
+ * @property {string[]} npc.trainerLostMessages
  */
 
 /**
@@ -89,6 +95,8 @@ export class BattleScene extends BaseScene {
   #monsterCaptured;
   /** @type {Ball} */
   #ball;
+  /** @type {boolean} */
+  #isTrainerBattle;
 
   constructor() {
     super({
@@ -109,9 +117,12 @@ export class BattleScene extends BaseScene {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getMonsterById(this, 2)],
         playerMonsters: [...dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
+        isTrainerBattle: false,
+        npc: undefined,
       };
     }
 
+    this.#isTrainerBattle = this.#sceneData.isTrainerBattle || false;
     this.#activePlayerAttackIndex = -1;
     this.#activeEnemyAttackIndex = -1;
     this.#activePlayerMonsterPartyIndex = 0;
@@ -154,7 +165,7 @@ export class BattleScene extends BaseScene {
     });
 
     // render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
+    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations, this.#isTrainerBattle);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
     this.#createAvailableMonstersUi();

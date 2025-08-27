@@ -18,7 +18,7 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-import { BATTLE_FLAG, ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, NPC_EVENT_TYPE } from '../types/typedef.js';
+import { BATTLE_FLAG, ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, ITEM_CATEGORY, NPC_EVENT_TYPE } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
@@ -401,6 +401,7 @@ export class WorldScene extends BaseScene {
           /** @type {import('./inventory-scene.js').InventorySceneData} */
           const sceneDataToPass = {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
+            itemCategoriesThatCannotBeUsed: [ITEM_CATEGORY.CAPTURE],
           };
           this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
@@ -605,16 +606,12 @@ export class WorldScene extends BaseScene {
       console.log(
         `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterAreaId} and monster id has been picked randomly ${randomMonsterId}`
       );
-      this.cameras.main.fadeOut(2000);
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        /** @type {import('./battle-scene.js').BattleSceneData} */
-        const dataToPass = {
-          enemyMonsters: [DataUtils.getMonsterById(this, randomMonsterId)],
-          playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
-        };
-
-        this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
-      });
+      /** @type {import('./battle-scene.js').BattleSceneData} */
+      const dataToPass = {
+        enemyMonsters: [DataUtils.getMonsterById(this, randomMonsterId)],
+        playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
+      };
+      this.#startBattleScene(dataToPass);
     }
   }
 
@@ -875,19 +872,28 @@ export class WorldScene extends BaseScene {
             });
           });
         });
-        // TODO: play audio cue
+        // TODO:future play audio cue
         break;
       case NPC_EVENT_TYPE.BATTLE:
         this.#isProcessingNpcEvent = true;
-        console.log(eventToHandle);
 
+        // Get monster data from the event
         const npcMonsters = eventToHandle.data.monsters.map((monsterId) => {
           return DataUtils.getMonsterById(this, monsterId);
         });
-        console.log(npcMonsters);
-        dataManager.addDefeatedNpc(this.#npcPlayerIsInteractingWith.id);
-        this.#isProcessingNpcEvent = false;
-        this.#handleNpcInteraction();
+        /** @type {import('./battle-scene.js').BattleSceneData} */
+        const dataToPass = {
+          enemyMonsters: npcMonsters,
+          playerMonsters: dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY),
+          isTrainerBattle: true,
+          npc: {
+            id: this.#npcPlayerIsInteractingWith.id,
+            assetKey: eventToHandle.data.assetKey,
+            name: eventToHandle.data.trainerName,
+            trainerLostMessages: eventToHandle.data.trainerLostMessages,
+          },
+        };
+        this.#startBattleScene(dataToPass);
         break;
       default:
         exhaustiveGuard(eventType);
@@ -1358,5 +1364,16 @@ export class WorldScene extends BaseScene {
     }
     this.#tiledLevelMaps[key] = this.make.tilemap({ key });
     return this.#tiledLevelMaps[key];
+  }
+
+  /**
+   * Transitions to the BattleScene and passes along the provided data.
+   * @param {import('./battle-scene.js').BattleSceneData} battleSceneData
+   */
+  #startBattleScene(battleSceneData) {
+    this.cameras.main.fadeOut(2000);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start(SCENE_KEYS.BATTLE_SCENE, battleSceneData);
+    });
   }
 }

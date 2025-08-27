@@ -252,8 +252,8 @@ NPC Battles 1:
   ✔ npc json enhancements @done(25-08-25 11:50)
   ✔ monster json enhancements @done(25-08-25 11:50)
   ☐ battle scene updates
-    ☐ prevent flee attempt
-    ☐ prevent capture attempts
+    ✔ prevent flee attempt @done(25-08-27 12:34)
+    ✔ prevent capture attempts @done(25-08-27 12:34)
     ☐ state machine updates for npc trainer
   ☐ world scene updates
     ☐ support for npc battle event triggers
