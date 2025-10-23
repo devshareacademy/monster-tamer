@@ -63,6 +63,9 @@ export const ATTACK_ASSET_KEYS = Object.freeze({
   ICE_SHARD: 'ICE_SHARD',
   ICE_SHARD_START: 'ICE_SHARD_START',
   SLASH: 'SLASH',
+  BUBBLE_1: 'BUBBLE_1',
+  BUBBLE_2: 'BUBBLE_2',
+  BUBBLE_3: 'BUBBLE_3',
 });
 
 export const WORLD_ASSET_KEYS = Object.freeze({
