@@ -22,7 +22,6 @@ import { sleep } from '../utils/time-utils.js';
 import { generateUuid } from '../utils/random.js';
 import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
 import { EnemyBattleNpc } from '../battle/enemy-battle-npc.js';
-import { promisify } from '../utils/general-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -513,13 +512,12 @@ export class BattleScene extends BaseScene {
         // wait for enemy npc to appear on screen and notify player they want to battle
         await this.#enemyBattleNpc.playAppearAnimation();
 
-        // TODO: see if i can remove promisify
         // wait for text animation to complete and move to next state
-        await promisify(this.#showMessagesAndWaitForInput, this, [`${this.#sceneData.npc.name} would like to battle!`]);
-
-        // hide npc as they bring out their monster
-        this.#enemyBattleNpc.hide();
-        this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
+        this.#showMessagesAndWaitForInput([`${this.#sceneData.npc.name} would like to battle!`], () => {
+          // hide npc as they bring out their monster
+          this.#enemyBattleNpc.hide();
+          this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
+        });
       },
     });
 
@@ -772,13 +770,16 @@ export class BattleScene extends BaseScene {
                 return;
               }
               // if npc battle have npc re-appear and show message to player
-              // TODO: remove promisify if possible
               if (this.#isTrainerBattle) {
-                await promisify(this.#activePlayerMonster.playDeathAnimation, this.#activePlayerMonster);
-                this.#availableMonstersUiContainerForPlayer.setAlpha(0);
-                this.#availableMonstersUiContainerForNpc.setAlpha(0);
-                await this.#enemyBattleNpc.playAppearAnimation();
-                await promisify(this.#showMessagesAndWaitForInput, this, this.#sceneData.npc.trainerLostMessages);
+                this.#activePlayerMonster.playDeathAnimation(async () => {
+                  this.#availableMonstersUiContainerForPlayer.setAlpha(0);
+                  this.#availableMonstersUiContainerForNpc.setAlpha(0);
+                  await this.#enemyBattleNpc.playAppearAnimation();
+                  this.#showMessagesAndWaitForInput(this.#sceneData.npc.trainerLostMessages, () => {
+                    this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+                  });
+                });
+                return;
               }
 
               // if no more monsters, go to the end of the battle
