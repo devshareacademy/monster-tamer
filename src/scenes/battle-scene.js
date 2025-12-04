@@ -363,9 +363,12 @@ export class BattleScene extends BaseScene {
    * @returns {void}
    */
   #postBattleSequenceCheck() {
+    this._controls.lockInput = true;
+
     // update monster details in scene data and data manager to align with changes from battle
     this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp = this.#activePlayerMonster.currentHp;
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+    this.#sceneData.enemyMonsters[this.#activeEnemyMonsterPartyIndex].currentHp = this.#activeEnemyMonster.currentHp;
 
     if (this.#monsterCaptured) {
       // enemy monster was captured
@@ -378,6 +381,12 @@ export class BattleScene extends BaseScene {
     }
 
     if (this.#activeEnemyMonster.isFainted) {
+      // if trainer battle, update ui to show monster fainted
+      if (this.#isTrainerBattle) {
+        /** @type {Phaser.GameObjects.Image} */
+        (this.#availableMonstersUiContainerForNpc.getAt(this.#activeEnemyMonsterPartyIndex)).setAlpha(0.4);
+      }
+
       // play monster fainted animation and wait for animation to finish
       this.#activeEnemyMonster.playDeathAnimation(() => {
         const text = this.#isTrainerBattle
@@ -407,13 +416,14 @@ export class BattleScene extends BaseScene {
 
         // if not, player faints and battle is over
         if (!hasOtherActiveMonsters) {
-          this.#showMessagesAndWaitForInput(
-            [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
-            () => {
-              this.#playerKnockedOut = true;
-              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-            }
-          );
+          const text = this.#isTrainerBattle
+            ? `${this.#sceneData.npc.name} has won the battle!`
+            : 'You have no more monsters, escaping to safety...';
+
+          this.#showMessagesAndWaitForInput([`${this.#activePlayerMonster.name} fainted.`, text], () => {
+            this.#playerKnockedOut = true;
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          });
           return;
         }
 
@@ -511,6 +521,9 @@ export class BattleScene extends BaseScene {
           // don't wait for health bar to appear, play at the same time
           this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {
             // if this is a trainer battle show number of enemies
+            if (this.#isTrainerBattle) {
+              this.#availableMonstersUiContainerForNpc.setAlpha(1);
+            }
           });
 
           const text = this.#isTrainerBattle
@@ -634,6 +647,9 @@ export class BattleScene extends BaseScene {
         // update the data manager with latest monster data
         dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
         // update the data manager with the npc that was defeated
+        if (this.#isTrainerBattle && this.#sceneData.npc !== undefined && this.#sceneData.npc.id !== undefined) {
+          dataManager.addDefeatedNpc(this.#sceneData.npc.id);
+        }
         this.#transitionToNextScene();
       },
     });
@@ -758,6 +774,7 @@ export class BattleScene extends BaseScene {
               if (this.#isTrainerBattle) {
                 this.#activePlayerMonster.playDeathAnimation(async () => {
                   this.#availableMonstersUiContainerForPlayer.setAlpha(0);
+                  this.#availableMonstersUiContainerForNpc.setAlpha(0);
                   await this.#enemyBattleNpc.playAppearAnimation();
                   this.#showMessagesAndWaitForInput(this.#sceneData.npc.trainerLostMessages, () => {
                     this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
@@ -770,7 +787,6 @@ export class BattleScene extends BaseScene {
               this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
             });
           });
-          this._controls.lockInput = false;
         });
       },
     });
@@ -808,7 +824,24 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.NPC_SWITCH_MONSTER,
       onEnter: () => {
-        // TODO
+        // npc has other monsters that can be switched to, for now npc will just switch to the next monster in the battle line
+        // TODO:FUTURE this could be enhanced if we wanted the npc to pick a random monster, choose one based on the monster
+        // the player has out, etc.
+        this.#activeEnemyMonsterPartyIndex += 1;
+
+        // show text about bringing out next monster
+        const nextMonster = this.#sceneData.enemyMonsters[this.#activeEnemyMonsterPartyIndex];
+        this.#showMessagesAndWaitForInput([`Foe is about to send in ${nextMonster.name}.`], () => {
+          this.#activeEnemyMonster.switchMonster(nextMonster);
+          // have monster appear, and show updated health bar
+          this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
+            this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {
+              // transition to player input state
+              this.#availableMonstersUiContainerForNpc.setAlpha(1);
+              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            });
+          });
+        });
       },
     });
 
@@ -959,6 +992,20 @@ export class BattleScene extends BaseScene {
       this.#availableMonstersUiContainerForPlayer.add(ball);
     });
     this.#availableMonstersUiContainerForPlayer.setAlpha(0);
+
+    // add logic to show available enemy monsters during trainer battles
+    if (this.#isTrainerBattle) {
+      this.#availableMonstersUiContainerForNpc = this.add.container(24, 116, []);
+      this.#sceneData.enemyMonsters.forEach((monster, index) => {
+        const alpha = monster.currentHp > 0 ? 1 : 0.4;
+        const ball = this.add
+          .image(30 * index, 0, BATTLE_ASSET_KEYS.BALL_THUMBNAIL, 0)
+          .setScale(0.8)
+          .setAlpha(alpha);
+        this.#availableMonstersUiContainerForNpc.add(ball);
+      });
+      this.#availableMonstersUiContainerForNpc.setAlpha(0);
+    }
   }
 
   /**
