@@ -88,7 +88,7 @@
         "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "BATTLE",
         "data": {
-          "monsters": [6, 7],
+          "monsters": [6],
           "assetKey": "TRAINER_YOUTH_GIRL",
           "trainerName": "Jr. Trainer",
           "trainerLostMessages": ["You defeated me!"]
