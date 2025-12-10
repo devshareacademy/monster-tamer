@@ -132,7 +132,6 @@ export class BattleScene extends BaseScene {
     }
 
     this.#isTrainerBattle = this.#sceneData.isTrainerBattle || false;
-    this.#activeEnemyMonsterPartyIndex = 0;
     this.#activePlayerAttackIndex = -1;
     this.#activeEnemyAttackIndex = -1;
     this.#activePlayerMonsterPartyIndex = 0;
@@ -361,7 +360,7 @@ export class BattleScene extends BaseScene {
   }
 
   /**
-   * @returns {Promise<void>}
+   * @returns {void}
    */
   #postBattleSequenceCheck() {
     this._controls.lockInput = true;
@@ -680,7 +679,7 @@ export class BattleScene extends BaseScene {
 
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.GAIN_EXPERIENCE,
-      onEnter: async () => {
+      onEnter: () => {
         // update exp bar based on experience gained, then transition to finished state
         const gainedExpForActiveMonster = calculateExpGainedFromMonster(
           this.#activeEnemyMonster.baseExpValue,
@@ -744,7 +743,7 @@ export class BattleScene extends BaseScene {
         this._controls.lockInput = true;
         this.#activePlayerMonster.updateMonsterExpBar(didActiveMonsterLevelUp, false, () => {
           this.#showMessagesAndWaitForInput(messages, () => {
-            this.time.delayedCall(200, async () => {
+            this.time.delayedCall(200, () => {
               if (this.#monsterCaptured) {
                 this.#battleStateMachine.setState(BATTLE_STATES.CAUGHT_MONSTER);
                 return;
