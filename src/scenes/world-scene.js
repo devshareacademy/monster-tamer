@@ -152,8 +152,12 @@ export class WorldScene extends BaseScene {
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION, DIRECTION.UP);
     }
 
+    // During a new game flow, find the players starting location from the map data, and update
+    // the data manager. Originally, this was a hard coded value, and was updated to be dynamic
+    // based on our level data in Tiled.
     let isNewGame = !(dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false);
     if (isNewGame) {
+      // find player spawn location and update the data manager
       const map = this.#getLevelTileMap(WORLD_ASSET_KEYS.MAIN_1_LEVEL);
       const playerSpawnLocationObject = map.getObjectLayer(OBJECT_LAYER_NAMES.PLAYER_SPAWN_LOCATION).objects[0];
       dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
@@ -768,7 +772,6 @@ export class WorldScene extends BaseScene {
     const map = this.#getLevelTileMap(`${entranceName.toUpperCase()}_LEVEL`);
     // get the position of the entrance object using the entrance id
     const entranceObjectLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SCENE_TRANSITIONS);
-
     const entranceObject = entranceObjectLayer.objects.find((object) => {
       const tempEntranceName = object.properties.find((property) => property.name === 'connects_to').value;
       const tempEntranceId = object.properties.find((property) => property.name === 'entrance_id').value;
@@ -1268,7 +1271,7 @@ export class WorldScene extends BaseScene {
     let encounterTile;
     this.#encounterLayers.some((encounterLayer) => {
       encounterTile = encounterLayer.getTileAtWorldXY(position.x, position.y, true);
-      if (encounterTile.index === -1) {
+      if (encounterTile === null || encounterTile.index === -1) {
         return false;
       }
       this.#encounterZonePlayerIsEntering = encounterLayer;
