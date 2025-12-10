@@ -88,7 +88,7 @@
         "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "BATTLE",
         "data": {
-          "monsters": [6],
+          "monsters": [7],
           "assetKey": "TRAINER_YOUTH_GIRL",
           "trainerName": "Jr. Trainer",
           "trainerLostMessages": ["You defeated me!"]
@@ -108,10 +108,27 @@
     "animationKeyPrefix": "NPC_19",
     "events": [
       {
-        "requires": [],
+        "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "MESSAGE",
         "data": {
           "messages": ["Hey! Let's battle!"]
+        }
+      },
+      {
+        "requires": ["TRAINER_NOT_DEFEATED"],
+        "type": "BATTLE",
+        "data": {
+          "monsters": [7],
+          "assetKey": "TRAINER_YOUTH_BOY",
+          "trainerName": "Jr. Trainer",
+          "trainerLostMessages": ["You are a strong trainer!"]
+        }
+      },
+      {
+        "requires": ["TRAINER_DEFEATED"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["I'll have to get stronger."]
         }
       }
     ]
@@ -160,10 +177,27 @@
     "animationKeyPrefix": "NPC_19",
     "events": [
       {
-        "requires": [],
+        "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "MESSAGE",
         "data": {
           "messages": ["Hey! Let's battle!"]
+        }
+      },
+      {
+        "requires": ["TRAINER_NOT_DEFEATED"],
+        "type": "BATTLE",
+        "data": {
+          "monsters": [6, 7],
+          "assetKey": "TRAINER_YOUTH_BOY",
+          "trainerName": "Jr. Trainer",
+          "trainerLostMessages": ["I'll need to keep practicing."]
+        }
+      },
+      {
+        "requires": ["TRAINER_DEFEATED"],
+        "type": "MESSAGE",
+        "data": {
+          "messages": ["I'll need to train before we battle again!"]
         }
       }
     ]
