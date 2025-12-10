@@ -342,6 +342,7 @@ export const ENCOUNTER_TILE_TYPE = Object.freeze({
  * @property {number} height the height of this camera region
  */
 
+/** Tiled */
 /**
  * @typedef TiledObjectProperty
  * @type {object}
