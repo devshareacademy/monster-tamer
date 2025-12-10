@@ -7,13 +7,13 @@ const ENEMY_POSITION = Object.freeze({
 export class EnemyBattleNpc {
   /** @type {Phaser.Scene} */
   #scene;
-  /**  @type {Phaser.GameObjects.Image} */
+  /** @type {Phaser.GameObjects.Image} */
   #phaserGameObject;
-  /**  @type {boolean} */
+  /** @type {boolean} */
   #skipBattleAnimations;
 
   /**
-   * @param {import("../types/typedef").BattleNpcConfig} config
+   * @param {import('../types/typedef.js').BattleNpcConfig} config
    */
   constructor(config) {
     this.#scene = config.scene;
