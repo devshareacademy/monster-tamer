@@ -118,7 +118,7 @@
         "requires": ["TRAINER_NOT_DEFEATED"],
         "type": "BATTLE",
         "data": {
-          "monsters": [7],
+          "monsters": [6],
           "assetKey": "TRAINER_YOUTH_BOY",
           "trainerName": "Jr. Trainer",
           "trainerLostMessages": ["You are a strong trainer!"]

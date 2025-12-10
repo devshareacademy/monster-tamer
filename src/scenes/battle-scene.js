@@ -382,13 +382,6 @@ export class BattleScene extends BaseScene {
     }
 
     if (this.#activeEnemyMonster.isFainted) {
-      /**
-       * When a monster faints, we need to give experience to the active monster.
-       * After giving experience, we need to check if there are more active monsters,
-       * and if so we need to have the npc bring out the next monster. If no more
-       * monsters, then we can go to the end of the battle.
-       */
-
       // if trainer battle, update ui to show monster fainted
       if (this.#isTrainerBattle) {
         /** @type {Phaser.GameObjects.Image} */
@@ -757,6 +750,13 @@ export class BattleScene extends BaseScene {
                 return;
               }
 
+              /**
+               * When a monster faints, we need to give experience to the active monster.
+               * After giving experience, we need to check if there are more active monsters,
+               * and if so we need to have the npc bring out the next monster. If no more
+               * monsters, then we can go to the end of the battle.
+               */
+
               // check to see if there are more active monsters
               const hasOtherActiveMonsters = this.#sceneData.enemyMonsters.some((monster) => {
                 return (
@@ -764,11 +764,13 @@ export class BattleScene extends BaseScene {
                   monster.currentHp > 0
                 );
               });
+
               if (hasOtherActiveMonsters) {
                 // if npc has other monsters, we need to switch to the next monster in their party
                 this.#battleStateMachine.setState(BATTLE_STATES.NPC_SWITCH_MONSTER);
                 return;
               }
+
               // if npc battle have npc re-appear and show message to player
               if (this.#isTrainerBattle) {
                 this.#activePlayerMonster.playDeathAnimation(async () => {
@@ -829,14 +831,13 @@ export class BattleScene extends BaseScene {
         this.#activeEnemyMonsterPartyIndex += 1;
 
         // show text about bringing out next monster
-        // have monster appear, and show updated health bar
-        // transition to player input state
-
         const nextMonster = this.#sceneData.enemyMonsters[this.#activeEnemyMonsterPartyIndex];
         this.#showMessagesAndWaitForInput([`Foe is about to send in ${nextMonster.name}.`], () => {
           this.#activeEnemyMonster.switchMonster(nextMonster);
+          // have monster appear, and show updated health bar
           this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
             this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {
+              // transition to player input state
               this.#availableMonstersUiContainerForNpc.setAlpha(1);
               this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
             });

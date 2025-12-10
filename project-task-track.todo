@@ -251,12 +251,12 @@ NPC Battles 1:
   ✔ load new assets for trainers @done(25-08-25 10:29)
   ✔ npc json enhancements @done(25-08-25 11:50)
   ✔ monster json enhancements @done(25-08-25 11:50)
-  ☐ battle scene updates
+  ✔ battle scene updates @done(25-12-04 14:15)
     ✔ prevent flee attempt @done(25-08-27 12:34)
     ✔ prevent capture attempts @done(25-08-27 12:34)
-    ☐ state machine updates for npc trainer
-  ☐ world scene updates
-    ☐ support for npc battle event triggers
+    ✔ state machine updates for npc trainer @done(25-12-04 14:15)
+  ✔ world scene updates @done(25-12-04 14:15)
+    ✔ support for npc battle event triggers @done(25-12-04 14:15)
     ✔ data manager and tracking defeated npcs @done(25-08-25 11:50)
     ✔ fix data utils for monster lookup @done(25-08-25 11:50)
 
