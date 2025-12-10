@@ -60,9 +60,7 @@ export class DataUtils {
   static getMonsterById(scene, id) {
     /** @type {import('../types/typedef.js').Monster[]} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
-    const monster = data.find((monster) => monster.id === id.toString(10));
-    // we use JSON.parse and JSON.stringify to create a deep copy of the monster data to not mutate the cache
-    return monster ? JSON.parse(JSON.stringify(monster)) : undefined;
+    return data.find((monster) => monster.id === id.toString(10));
   }
 
   /**
