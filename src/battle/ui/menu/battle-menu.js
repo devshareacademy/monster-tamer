@@ -45,10 +45,8 @@ export class BattleMenu {
   #selectedAttackMenuOption;
   /** @type {import('./battle-menu-options.js').ActiveBattleMenu} */
   #activeBattleMenu;
-  /** @type {string[]} */
-  #queuedInfoPanelMessages;
-  /** @type {() => void | undefined} */
-  #queuedInfoPanelCallback;
+  /** @type {{ messages: string[]; callback: () => void | undefined; isProcessing: boolean; }[]} */
+  #infoPanelMessagesQueue;
   /** @type {boolean} */
   #waitingForPlayerInput;
   /** @type {number | undefined} */
@@ -87,8 +85,7 @@ export class BattleMenu {
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
     this.#selectedBattleMenuOption = BATTLE_MENU_OPTIONS.FIGHT;
     this.#selectedAttackMenuOption = ATTACK_MOVE_OPTIONS.MOVE_1;
-    this.#queuedInfoPanelCallback = undefined;
-    this.#queuedInfoPanelMessages = [];
+    this.#infoPanelMessagesQueue = [];
     this.#waitingForPlayerInput = false;
     this.#selectedAttackIndex = undefined;
     this.#skipAnimations = skipBattleAnimations;
@@ -296,10 +293,15 @@ export class BattleMenu {
    * @returns {void}
    */
   updateInfoPaneMessagesAndWaitForInput(messages, callback) {
-    this.#queuedInfoPanelMessages = messages;
-    this.#queuedInfoPanelCallback = callback;
+    this.#infoPanelMessagesQueue.push({
+      messages,
+      callback,
+      isProcessing: false,
+    });
 
-    this.#updateInfoPaneWithMessage();
+    if (this.#infoPanelMessagesQueue.length === 1) {
+      this.#updateInfoPaneWithMessage();
+    }
   }
 
   /**
@@ -310,17 +312,30 @@ export class BattleMenu {
     this.#battleTextGameObjectLine1.setText('').setAlpha(1);
     this.hideInputCursor();
 
+    if (this.#infoPanelMessagesQueue.length === 0) {
+      return;
+    }
+
+    const currentMessage = this.#infoPanelMessagesQueue[0];
+    if (!currentMessage.isProcessing) {
+      currentMessage.isProcessing = true;
+    }
+
     // check if all messages have been displayed from the queue and call the callback
-    if (this.#queuedInfoPanelMessages.length === 0) {
-      if (this.#queuedInfoPanelCallback) {
-        this.#queuedInfoPanelCallback();
-        this.#queuedInfoPanelCallback = undefined;
+    if (currentMessage.messages.length === 0) {
+      if (currentMessage.callback) {
+        currentMessage.callback();
+      }
+      this.#infoPanelMessagesQueue.shift();
+
+      if (this.#infoPanelMessagesQueue.length > 0) {
+        this.#updateInfoPaneWithMessage();
       }
       return;
     }
 
     // get first message from queue and animate message
-    const messageToDisplay = this.#queuedInfoPanelMessages.shift();
+    const messageToDisplay = currentMessage.messages.shift();
 
     if (this.#skipAnimations) {
       this.#battleTextGameObjectLine1.setText(messageToDisplay);
