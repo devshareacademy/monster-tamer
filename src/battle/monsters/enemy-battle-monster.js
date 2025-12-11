@@ -65,6 +65,7 @@ export class EnemyBattleMonster extends BattleMonster {
       callback();
       return;
     }
+    
     this._scene.tweens.add({
       delay: 0,
       duration: 1500,

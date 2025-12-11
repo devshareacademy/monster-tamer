@@ -12,11 +12,7 @@ import Phaser from '../lib/phaser.js';
 /**
  * @typedef BattleNpcConfig
  * @type {object}
-<<<<<<< HEAD
  * @property {Phaser.Scene} scene the Phaser 3 Scene the npc will be added to
-=======
- * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
->>>>>>> GH-157-player-run
  * @property {string} assetKey the asset key that should be used for this npc
  * @property {number} [assetFrame=0] if the asset key is tied to a spritesheet, this frame will be used, defaults to 0
  * @property {boolean} [skipBattleAnimations=false] used to skip all animations tied to the npc during battle
@@ -168,8 +164,6 @@ export const NPC_EVENT_TYPE = Object.freeze({
  */
 
 /**
-<<<<<<< HEAD
-=======
  * @typedef {keyof typeof BATTLE_TRIGGER_TYPE} BattleTrigger
  */
 
@@ -180,22 +174,15 @@ export const BATTLE_TRIGGER_TYPE = Object.freeze({
 });
 
 /**
->>>>>>> GH-157-player-run
  * @typedef NpcEventBattle
  * @type {object}
  * @property {'BATTLE'} type
  * @property {string[]} requires
  * @property {object} data
  * @property {number[]} data.monsters
-<<<<<<< HEAD
  * @property {string} data.assetKey
  * @property {string} data.trainerName
  * @property {string[]} data.trainerLostMessages
-=======
- * @property {string[]} data.trainerLostMessages
- * @property {string} data.assetKey
- * @property {string} data.trainerName
->>>>>>> GH-157-player-run
  */
 
 /**
@@ -374,7 +361,6 @@ export const ENCOUNTER_TILE_TYPE = Object.freeze({
  * @property {string} name
  * @property {string} type
  * @property {any} value
-<<<<<<< HEAD
  */
 
 /** Sign Data */
@@ -388,6 +374,3 @@ export const ENCOUNTER_TILE_TYPE = Object.freeze({
  * @typedef SignData
  * @type {Object.<string, SignDetails>}
  */
-=======
- */
->>>>>>> GH-157-player-run

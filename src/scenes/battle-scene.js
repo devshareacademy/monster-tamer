@@ -22,7 +22,6 @@ import { sleep } from '../utils/time-utils.js';
 import { generateUuid } from '../utils/random.js';
 import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
 import { EnemyBattleNpc } from '../battle/enemy-battle-npc.js';
-import { promisify } from '../utils/general-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
