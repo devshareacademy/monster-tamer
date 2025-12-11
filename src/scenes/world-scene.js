@@ -18,17 +18,14 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
-<<<<<<< HEAD
-import { BATTLE_FLAG, ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, ITEM_CATEGORY, NPC_EVENT_TYPE } from '../types/typedef.js';
-=======
 import {
   BATTLE_FLAG,
   BATTLE_TRIGGER_TYPE,
   ENCOUNTER_TILE_TYPE,
   GAME_EVENT_TYPE,
   NPC_EVENT_TYPE,
+  ITEM_CATEGORY,
 } from '../types/typedef.js';
->>>>>>> GH-157-player-run
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
@@ -208,11 +205,7 @@ export class WorldScene extends BaseScene {
     this.#specialEncounterTileImageGameObjectGroup = undefined;
     this.#encounterZonePlayerIsEntering = undefined;
     this.#cameraRegions = [];
-<<<<<<< HEAD
-=======
-    this.#lastCameraBounds = undefined;
     this.#isProcessingLineOfSightEncounter = false;
->>>>>>> GH-157-player-run
   }
 
   /**
@@ -354,11 +347,7 @@ export class WorldScene extends BaseScene {
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
-<<<<<<< HEAD
     const isShiftKeyDown = this._controls.isShiftKeyDown();
-=======
-    const isRunning = this._controls.isShiftKeyDown();
->>>>>>> GH-157-player-run
 
     if (this.#isProcessingCutSceneEvent || this.#isProcessingLineOfSightEncounter) {
       this.#player.update(time);
@@ -372,11 +361,7 @@ export class WorldScene extends BaseScene {
     }
 
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-<<<<<<< HEAD
       this.#player.moveCharacter(selectedDirectionHeldDown, isShiftKeyDown);
-=======
-      this.#player.moveCharacter(selectedDirectionHeldDown, isRunning);
->>>>>>> GH-157-player-run
     }
 
     if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {
@@ -918,10 +903,7 @@ export class WorldScene extends BaseScene {
       if (flag === BATTLE_FLAG.TRAINER_NOT_DEFEATED) {
         return !dataManager.getDefeatedNpcs().has(this.#npcPlayerIsInteractingWith.id);
       }
-<<<<<<< HEAD
 
-=======
->>>>>>> GH-157-player-run
       return currentGameFlags.has(flag);
     });
     if (!eventRequirementsMet) {
@@ -962,8 +944,6 @@ export class WorldScene extends BaseScene {
       case NPC_EVENT_TYPE.BATTLE:
         this.#isProcessingNpcEvent = true;
 
-<<<<<<< HEAD
-=======
         // save npc location in data manager
         dataManager.addTempNpcLocation({
           id: this.#npcPlayerIsInteractingWith.id,
@@ -971,7 +951,6 @@ export class WorldScene extends BaseScene {
           y: this.#npcPlayerIsInteractingWith.sprite.y,
         });
 
->>>>>>> GH-157-player-run
         // Get monster data from the event
         const npcMonsters = eventToHandle.data.monsters.map((monsterId) => {
           return DataUtils.getMonsterById(this, monsterId);

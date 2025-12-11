@@ -211,9 +211,11 @@ export class BattleScene extends BaseScene {
     super.update();
 
     this.#battleStateMachine.update();
+
     if (this._controls.isInputLocked) {
       return;
     }
+
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     // limit input based on the current battle state we are in
     // if we are not in the right battle state, return early and do not process input
@@ -358,7 +360,7 @@ export class BattleScene extends BaseScene {
   }
 
   /**
-   * @returns {Promise<void>}
+   * @returns {void}
    */
   #postBattleSequenceCheck() {
     this._controls.lockInput = true;
@@ -634,8 +636,8 @@ export class BattleScene extends BaseScene {
 
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.POST_ATTACK_CHECK,
-      onEnter: async () => {
-        await this.#postBattleSequenceCheck();
+      onEnter: () => {
+        this.#postBattleSequenceCheck();
       },
     });
 
@@ -677,7 +679,7 @@ export class BattleScene extends BaseScene {
 
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.GAIN_EXPERIENCE,
-      onEnter: async () => {
+      onEnter: () => {
         // update exp bar based on experience gained, then transition to finished state
         const gainedExpForActiveMonster = calculateExpGainedFromMonster(
           this.#activeEnemyMonster.baseExpValue,
