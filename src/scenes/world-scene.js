@@ -3,7 +3,7 @@ import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
-import { ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
+import { DEV_PANEL_CONFIG, ENABLE_ZONE_DEBUGGING, TILED_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import {
   getTargetDirectionFromGameObjectPosition,
@@ -18,7 +18,17 @@ import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
 import { Item } from '../world/item.js';
+<<<<<<< HEAD
 import { BATTLE_FLAG, ENCOUNTER_TILE_TYPE, GAME_EVENT_TYPE, ITEM_CATEGORY, NPC_EVENT_TYPE } from '../types/typedef.js';
+=======
+import {
+  BATTLE_FLAG,
+  BATTLE_TRIGGER_TYPE,
+  ENCOUNTER_TILE_TYPE,
+  GAME_EVENT_TYPE,
+  NPC_EVENT_TYPE,
+} from '../types/typedef.js';
+>>>>>>> GH-157-player-run
 import { exhaustiveGuard } from '../utils/guard.js';
 import { sleep } from '../utils/time-utils.js';
 import { CutsceneScene } from './cutscene-scene.js';
@@ -59,6 +69,8 @@ export class WorldScene extends BaseScene {
   #npcs;
   /** @type {NPC | undefined} */
   #npcPlayerIsInteractingWith;
+  /** @type {boolean} */
+  #isProcessingLineOfSightEncounter;
   /** @type {WorldMenu} */
   #menu;
   /** @type {WorldSceneData} */
@@ -97,6 +109,8 @@ export class WorldScene extends BaseScene {
   #cameraRegions;
   /** @type {{ [key: string]: Phaser.Tilemaps.Tilemap}} */
   #tiledLevelMaps;
+  /** @type {Phaser.Tilemaps.TilemapLayer} */
+  #collisionLayer;
 
   constructor() {
     super({
@@ -194,6 +208,11 @@ export class WorldScene extends BaseScene {
     this.#specialEncounterTileImageGameObjectGroup = undefined;
     this.#encounterZonePlayerIsEntering = undefined;
     this.#cameraRegions = [];
+<<<<<<< HEAD
+=======
+    this.#lastCameraBounds = undefined;
+    this.#isProcessingLineOfSightEncounter = false;
+>>>>>>> GH-157-player-run
   }
 
   /**
@@ -216,12 +235,12 @@ export class WorldScene extends BaseScene {
       console.log(`[${WorldScene.name}:create] encountered error while creating collision tiles from tiled`);
       return;
     }
-    const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
-    if (!collisionLayer) {
+    this.#collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
+    if (!this.#collisionLayer) {
       console.log(`[${WorldScene.name}:create] encountered error while creating collision layer using data from tiled`);
       return;
     }
-    collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+    this.#collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
 
     // create interactive layer
     const hasSignLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SIGN) !== null;
@@ -255,7 +274,7 @@ export class WorldScene extends BaseScene {
       scene: this,
       position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
       direction: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION),
-      collisionLayer: collisionLayer,
+      collisionLayer: this.#collisionLayer,
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
       },
@@ -335,9 +354,13 @@ export class WorldScene extends BaseScene {
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
+<<<<<<< HEAD
     const isShiftKeyDown = this._controls.isShiftKeyDown();
+=======
+    const isRunning = this._controls.isShiftKeyDown();
+>>>>>>> GH-157-player-run
 
-    if (this.#isProcessingCutSceneEvent) {
+    if (this.#isProcessingCutSceneEvent || this.#isProcessingLineOfSightEncounter) {
       this.#player.update(time);
       this.#npcs.forEach((npc) => {
         npc.update(time);
@@ -349,7 +372,11 @@ export class WorldScene extends BaseScene {
     }
 
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
+<<<<<<< HEAD
       this.#player.moveCharacter(selectedDirectionHeldDown, isShiftKeyDown);
+=======
+      this.#player.moveCharacter(selectedDirectionHeldDown, isRunning);
+>>>>>>> GH-157-player-run
     }
 
     if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {
@@ -527,6 +554,26 @@ export class WorldScene extends BaseScene {
     // update camera bounds for given level after player moves
     CameraUtils.updateMainCameraBounds(this, this.#player.sprite, this.#cameraRegions);
 
+    for (const npc of this.#npcs) {
+      // Skip if NPC is not a line-of-sight trainer or has already been defeated
+      if (npc.battleTrigger !== BATTLE_TRIGGER_TYPE.LINE_OF_SIGHT || dataManager.getDefeatedNpcs().has(npc.id)) {
+        continue;
+      }
+
+      // Check for line of sight (assuming collisionLayer is accessible as this.#collisionLayer)
+      if (npc.isInLineOfSight(this.#player, this.#collisionLayer)) {
+        this.#isProcessingLineOfSightEncounter = true;
+        // If player is spotted, initiate the NPC interaction sequence
+        this.#npcPlayerIsInteractingWith = npc;
+        this.#initiateLineOfSightBattle(npc);
+        // Stop checking to prevent multiple simultaneous battle triggers
+        break;
+      }
+    }
+    if (this.#isProcessingLineOfSightEncounter) {
+      return;
+    }
+
     // check to see if the player encountered cut scene zone
     this.#player.sprite.getBounds(this.#rectangleForOverlapCheck1);
     for (const zone of Object.values(this.#eventZones)) {
@@ -576,6 +623,19 @@ export class WorldScene extends BaseScene {
   }
 
   /**
+   * Moves an npc to the player after a line of sight battle was triggered.
+   * @param {NPC} npc
+   * @returns {void}
+   */
+  #initiateLineOfSightBattle(npc) {
+    this.#moveNpcToTarget(npc, this.#player, () => {
+      this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, npc.sprite));
+      npc.facePlayer(this.#player.direction);
+      this.#handleNpcInteraction();
+    });
+  }
+
+  /**
    * @returns {void}
    */
   #handlePlayerMovementInEncounterZone() {
@@ -594,6 +654,10 @@ export class WorldScene extends BaseScene {
         child.visible = false;
       });
     if (this.#encounterZonePlayerIsEntering === undefined) {
+      return;
+    }
+    if (DEV_PANEL_CONFIG.CONFIG_SETTINGS.DISABLE_WILD_ENCOUNTERS) {
+      console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] wild encounters are disabled`);
       return;
     }
     console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
@@ -686,9 +750,24 @@ export class WorldScene extends BaseScene {
         events: npcDetails.events,
         animationKeyPrefix: npcDetails.animationKeyPrefix,
         id: npcId,
+        battleTrigger: npcDetails.battleTrigger,
+        visionRange: npcDetails.visionRange,
       });
       this.#npcs.push(npc);
     });
+
+    // restore npc locations from data manager if they exist
+    const tempNpcLocations = dataManager.getTempNpcLocations();
+    if (tempNpcLocations.length > 0) {
+      tempNpcLocations.forEach((npcLocation) => {
+        const npc = this.#npcs.find((npc) => npc.id === npcLocation.id);
+        if (npc) {
+          npc.sprite.setPosition(npcLocation.x, npcLocation.y);
+          npc.facePlayer(this.#player.direction);
+        }
+      });
+      dataManager.clearTempNpcLocations();
+    }
   }
 
   /**
@@ -821,6 +900,7 @@ export class WorldScene extends BaseScene {
       this.#npcPlayerIsInteractingWith = undefined;
       this.#lastNpcEventHandledIndex = -1;
       this.#isProcessingNpcEvent = false;
+      this.#isProcessingLineOfSightEncounter = false;
       return;
     }
 
@@ -838,7 +918,10 @@ export class WorldScene extends BaseScene {
       if (flag === BATTLE_FLAG.TRAINER_NOT_DEFEATED) {
         return !dataManager.getDefeatedNpcs().has(this.#npcPlayerIsInteractingWith.id);
       }
+<<<<<<< HEAD
 
+=======
+>>>>>>> GH-157-player-run
       return currentGameFlags.has(flag);
     });
     if (!eventRequirementsMet) {
@@ -879,6 +962,16 @@ export class WorldScene extends BaseScene {
       case NPC_EVENT_TYPE.BATTLE:
         this.#isProcessingNpcEvent = true;
 
+<<<<<<< HEAD
+=======
+        // save npc location in data manager
+        dataManager.addTempNpcLocation({
+          id: this.#npcPlayerIsInteractingWith.id,
+          x: this.#npcPlayerIsInteractingWith.sprite.x,
+          y: this.#npcPlayerIsInteractingWith.sprite.y,
+        });
+
+>>>>>>> GH-157-player-run
         // Get monster data from the event
         const npcMonsters = eventToHandle.data.monsters.map((monsterId) => {
           return DataUtils.getMonsterById(this, monsterId);
@@ -1071,44 +1164,14 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    // determine direction to move based on distance from player
-    const targetPath = getTargetPathToGameObject(targetNpc.sprite, this.#player.sprite);
-    const pathToFollow = targetPath.pathToFollow.splice(0, targetPath.pathToFollow.length - 1);
-
-    // if npc is already next to player, just update directions
-    if (pathToFollow.length === 0) {
+    this.#moveNpcToTarget(targetNpc, this.#player, () => {
       this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
-      targetNpc.facePlayer(this.#player.direction);
-      this.#isProcessingCutSceneEvent = false;
-      this.#handleCutSceneInteraction();
-      return;
-    }
-
-    // move npc according to the path
-    /** @type {import('../world/characters/npc.js').NPCPath} */
-    const npcPath = {
-      0: { x: targetNpc.sprite.x, y: targetNpc.sprite.y },
-    };
-    pathToFollow.forEach((coordinate, index) => {
-      npcPath[index + 1] = coordinate;
-    });
-
-    targetNpc.finishedMovementCallback = () => {
-      if (
-        pathToFollow[pathToFollow.length - 1].x === targetNpc.sprite.x &&
-        pathToFollow[pathToFollow.length - 1].y === targetNpc.sprite.y
-      ) {
-        this.#player.moveCharacter(getTargetDirectionFromGameObjectPosition(this.#player.sprite, targetNpc.sprite));
+      this.time.delayedCall(500, () => {
         targetNpc.facePlayer(this.#player.direction);
-        this.time.delayedCall(500, () => {
-          this.#isProcessingCutSceneEvent = false;
-          this.#handleCutSceneInteraction();
-        });
-      }
-    };
-    targetNpc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
-    targetNpc.npcPath = npcPath;
-    targetNpc.resetMovementTime();
+        this.#isProcessingCutSceneEvent = false;
+        this.#handleCutSceneInteraction();
+      });
+    });
   }
 
   /**
@@ -1161,6 +1224,43 @@ export class WorldScene extends BaseScene {
   }
 
   /**
+   * @param {NPC} npc
+   * @param {Player} target
+   * @param {() => void} onComplete
+   * @returns {void}
+   */
+  #moveNpcToTarget(npc, target, onComplete) {
+    const targetPath = getTargetPathToGameObject(npc.sprite, target.sprite);
+    const pathToFollow = targetPath.pathToFollow.slice(0, -1);
+
+    if (pathToFollow.length === 0) {
+      onComplete();
+      return;
+    }
+
+    // move npc according to the path
+    /** @type {import('../world/characters/npc.js').NPCPath} */
+    const npcPath = { 0: { x: npc.sprite.x, y: npc.sprite.y } };
+    pathToFollow.forEach((coordinate, index) => {
+      npcPath[index + 1] = coordinate;
+    });
+
+    npc.finishedMovementCallback = () => {
+      if (
+        pathToFollow.length > 0 &&
+        pathToFollow[pathToFollow.length - 1].x === npc.sprite.x &&
+        pathToFollow[pathToFollow.length - 1].y === npc.sprite.y
+      ) {
+        onComplete();
+      }
+    };
+
+    npc.npcMovementPattern = NPC_MOVEMENT_PATTERN.SET_PATH;
+    npc.npcPath = npcPath;
+    npc.resetMovementTime();
+  }
+
+  /**
    * @param {import('../types/typedef.js').GameEventRemoveNpc} gameEvent
    * @returns {void}
    */
@@ -1204,7 +1304,7 @@ export class WorldScene extends BaseScene {
    * @returns {void}
    */
   #addMonsterFromNpc(gameEvent) {
-    // TODO: add check to see if party is full and do something with 7th monster that is being added
+    // TODO:future add check to see if party is full and do something with 7th monster that is being added
     /** @type {import('../types/typedef.js').Monster[]} */
     const monstersInParty = dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY);
     const newMonster = DataUtils.getMonsterById(this, gameEvent.data.id);

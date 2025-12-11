@@ -22,6 +22,7 @@ import { sleep } from '../utils/time-utils.js';
 import { generateUuid } from '../utils/random.js';
 import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
 import { EnemyBattleNpc } from '../battle/enemy-battle-npc.js';
+import { promisify } from '../utils/general-utils.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
@@ -211,11 +212,9 @@ export class BattleScene extends BaseScene {
     super.update();
 
     this.#battleStateMachine.update();
-
     if (this._controls.isInputLocked) {
       return;
     }
-
     const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     // limit input based on the current battle state we are in
     // if we are not in the right battle state, return early and do not process input
@@ -360,7 +359,7 @@ export class BattleScene extends BaseScene {
   }
 
   /**
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   #postBattleSequenceCheck() {
     this._controls.lockInput = true;
@@ -636,8 +635,8 @@ export class BattleScene extends BaseScene {
 
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.POST_ATTACK_CHECK,
-      onEnter: () => {
-        this.#postBattleSequenceCheck();
+      onEnter: async () => {
+        await this.#postBattleSequenceCheck();
       },
     });
 
@@ -679,7 +678,7 @@ export class BattleScene extends BaseScene {
 
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.GAIN_EXPERIENCE,
-      onEnter: () => {
+      onEnter: async () => {
         // update exp bar based on experience gained, then transition to finished state
         const gainedExpForActiveMonster = calculateExpGainedFromMonster(
           this.#activeEnemyMonster.baseExpValue,

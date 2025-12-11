@@ -95,6 +95,7 @@ export class BattleMenu {
     this.#usedItem = undefined;
     this.#fleeAttempt = false;
     this.#switchMonsterAttempt = false;
+    this.#isTrainerBattle = isTrainerBattle;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
     this.#createMonsterAttackSubMenu();
@@ -177,6 +178,11 @@ export class BattleMenu {
     this.#fleeAttempt = false;
     this.#switchMonsterAttempt = false;
     this.#usedItem = undefined;
+
+    // Conditionally disable FLEE button
+    if (this.#isTrainerBattle) {
+      /** @type {Phaser.GameObjects.Text} */ (this.#mainBattleMenuPhaserContainerGameObject.getAt(4)).setAlpha(0.5);
+    }
   }
 
   /**
@@ -787,6 +793,12 @@ export class BattleMenu {
 
     if (data && data.wasMonsterSelected) {
       // do nothing since new active monster was chosen to switch to
+      return;
+    }
+
+    if (this.#isTrainerBattle && data?.item?.category === 'CAPTURE') {
+      this.updateInfoPaneMessagesAndWaitForInput(["You can't use that in a trainer battle!"]);
+      this.#wasItemUsed = false;
       return;
     }
 
