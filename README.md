@@ -28,14 +28,12 @@ This project is currently setup to require a very minimal amount of tools to run
 
 ### Downloading Assets
 
-By default, none of the audio and image assets are included in the code repository. As the size of the project grows, it was chosen to omit these files and to instead provide a link to zipped folder that contains the assets that are used in this project. You find the latest assets for this game here: [Latest Game Assets](https://github.com/devshareacademy/monster-tamer/releases/download/assets/all-game-assets.zip).
+By default, none of the audio and image assets are included in the code repository. As the size of the project grows, it was chosen to omit these files and to instead provide a link to zipped folder that contains the assets that are used in this project. You find the latest assets for this game here: [Latest Game Assets](https://github.com/devshareacademy/monster-tamer/releases/download/assets/all-game-assets-v2.zip).
 
 After you have downloaded the assets, you will need to place the following folders in the `/assets` folder:
 
 - audio
 - images
-
-**Note:** the `data` and `font` folders can be ignored since these are included as part of the main source code in this repo.
 
 ## How To Play
 
