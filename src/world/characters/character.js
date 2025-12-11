@@ -2,7 +2,6 @@ import Phaser from '../../lib/phaser.js';
 import { DIRECTION } from '../../common/direction.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
-import { TILE_SIZE } from '../../config.js';
 
 /**
  * @typedef CharacterIdleFrameConfig
@@ -40,8 +39,6 @@ export class Character {
   _direction;
   /** @protected @type {boolean} */
   _isMoving;
-  /** @protected @type {boolean} */
-  _isRunning;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
   _targetPosition;
   /** @protected @type {import('../../types/typedef.js').Coordinate} */
