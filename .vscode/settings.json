@@ -42,5 +42,30 @@
     "webfontloader",
     "xdeviruchi",
     "yoyo"
-  ]
+  ],
+  "todohighlight.keywords": [
+    {
+      "text": "TODO:FUTURE",
+      "color": "#00ff00",
+      "border": "1px solid green",
+      "borderRadius": "2px",
+      "backgroundColor": "rgba(0,0,0,.2)"
+    },
+    {
+      "text": "TODO:NOW",
+      "color": "red",
+      "border": "1px solid red",
+      "borderRadius": "2px",
+      "backgroundColor": "rgba(0,0,0,.2)"
+    },
+    {
+      "text": "TODO:",
+      "color": "yellow",
+      "border": "1px solid yellow",
+      "borderRadius": "2px",
+      "backgroundColor": "rgba(0,0,0,.2)"
+    }
+  ],
+  "todohighlight.isEnable": true,
+  "todohighlight.isCaseSensitive": false
 }
