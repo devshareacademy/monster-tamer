@@ -3,6 +3,8 @@ import { Character } from './character.js';
 import { CHARACTER_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { DIRECTION } from '../../common/direction.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
+import { TILE_SIZE } from '../../config.js';
+import { BATTLE_TRIGGER_TYPE } from '../../types/typedef.js';
 
 /**
  * @typedef {keyof typeof NPC_MOVEMENT_PATTERN} NpcMovementPattern
@@ -29,6 +31,8 @@ export const NPC_MOVEMENT_PATTERN = Object.freeze({
  * @property {import('../../types/typedef.js').NpcEvent[]} events
  * @property {string} animationKeyPrefix
  * @property {number} id
+ * @property {import('../../types/typedef.js').BattleTrigger} [battleTrigger]
+ * @property {number} [visionRange]
  */
 
 /**
@@ -52,6 +56,10 @@ export class NPC extends Character {
   #animationKeyPrefix;
   /** @type {number} */
   #id;
+  /** @type {import('../../types/typedef.js').BattleTrigger | undefined} */
+  #battleTrigger;
+  /** @type {number | undefined} */
+  #visionRange;
 
   /**
    * @param {NPCConfig} config
@@ -79,6 +87,8 @@ export class NPC extends Character {
     this.#events = config.events;
     this.#animationKeyPrefix = config.animationKeyPrefix;
     this.#id = config.id;
+    this.#battleTrigger = config.battleTrigger;
+    this.#visionRange = config.visionRange;
   }
 
   /** @type {import('../../types/typedef.js').NpcEvent[]} */
@@ -129,6 +139,11 @@ export class NPC extends Character {
     this._spriteGridMovementFinishedCallback = val;
   }
 
+  /** @type {import('../../types/typedef.js').BattleTrigger | undefined} */
+  get battleTrigger() {
+    return this.#battleTrigger;
+  }
+
   /**
    * Resets the lastMovementTime, which is used for when we want to have an npc start moving
    * immediately. This is needed for cutscene support so after the npc appears, that npc starts
@@ -162,6 +177,63 @@ export class NPC extends Character {
       default:
         exhaustiveGuard(playerDirection);
     }
+  }
+
+  /**
+   * Checks if a target is within the NPC's line of sight.
+   * @param {import('./player.js').Player} target The player to check against.
+   * @param {Phaser.Tilemaps.TilemapLayer} collisionLayer The layer with collision data.
+   * @returns {boolean}
+   */
+  isInLineOfSight(target, collisionLayer) {
+    // 1. Return false immediately if this NPC doesn't use this trigger or has no vision range.
+    if (this.#battleTrigger !== BATTLE_TRIGGER_TYPE.LINE_OF_SIGHT || this.#visionRange === undefined) {
+      return false;
+    }
+
+    // 2. Use tile coordinates for grid-based logic.
+    const npcTileX = this._phaserGameObject.x / TILE_SIZE;
+    const npcTileY = this._phaserGameObject.y / TILE_SIZE;
+    const targetTileX = target._phaserGameObject.x / TILE_SIZE;
+    const targetTileY = target._phaserGameObject.y / TILE_SIZE;
+
+    // 3. Check if player is in the correct direction and within range.
+    switch (this.direction) {
+      case DIRECTION.DOWN:
+        if (targetTileX !== npcTileX || targetTileY <= npcTileY || targetTileY > npcTileY + this.#visionRange)
+          return false;
+        break;
+      case DIRECTION.UP:
+        if (targetTileX !== npcTileX || targetTileY >= npcTileY || targetTileY < npcTileY - this.#visionRange)
+          return false;
+        break;
+      case DIRECTION.LEFT:
+        if (targetTileY !== npcTileY || targetTileX >= npcTileX || targetTileX < npcTileX - this.#visionRange)
+          return false;
+        break;
+      case DIRECTION.RIGHT:
+        if (targetTileY !== npcTileY || targetTileX <= npcTileX || targetTileX > npcTileX + this.#visionRange)
+          return false;
+        break;
+      default:
+        return false;
+    }
+
+    // 4. Check for obstacles between the NPC and the player.
+    // This involves iterating through the tiles in the path and checking for a collision property.
+    // if any tiles are found, return false
+    const npcCenterX = this._phaserGameObject.x + TILE_SIZE / 2;
+    const npcCenterY = this._phaserGameObject.y + TILE_SIZE / 2;
+    const targetCenterX = target._phaserGameObject.x + TILE_SIZE / 2;
+    const targetCenterY = target._phaserGameObject.y + TILE_SIZE / 2;
+
+    const line = new Phaser.Geom.Line(npcCenterX, npcCenterY, targetCenterX, targetCenterY);
+    const tiles = collisionLayer.getTilesWithinShape(line, { isNotEmpty: true });
+    if (tiles.length > 0) {
+      return false;
+    }
+
+    return true; // Return true if all checks pass.
   }
 
   /**
