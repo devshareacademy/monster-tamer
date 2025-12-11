@@ -73,5 +73,35 @@
     "currentLevel": 5,
     "baseExp": 53,
     "currentExp": 125
+  },
+  {
+    "id": "6",
+    "monsterId": 3,
+    "name": "ignivolt",
+    "assetKey": "IGNIVOLT",
+    "assetFrame": 0,
+    "currentHp": 15,
+    "maxHp": 15,
+    "attackIds": [2],
+    "baseAttack": 3,
+    "currentAttack": 3,
+    "currentLevel": 3,
+    "baseExp": 40,
+    "currentExp": 27
+  },
+  {
+    "id": "7",
+    "monsterId": 2,
+    "name": "carnodusk",
+    "assetKey": "CARNODUSK",
+    "assetFrame": 0,
+    "currentHp": 15,
+    "maxHp": 15,
+    "attackIds": [1],
+    "baseAttack": 3,
+    "currentAttack": 3,
+    "currentLevel": 3,
+    "baseExp": 41,
+    "currentExp": 27
   }
 ]

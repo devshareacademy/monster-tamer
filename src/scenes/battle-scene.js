@@ -21,10 +21,12 @@ import { Ball } from '../battle/ball.js';
 import { sleep } from '../utils/time-utils.js';
 import { generateUuid } from '../utils/random.js';
 import { calculateMonsterCaptureResults } from '../utils/catch-utils.js';
+import { EnemyBattleNpc } from '../battle/enemy-battle-npc.js';
 
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
   PRE_BATTLE_INFO: 'PRE_BATTLE_INFO',
+  PRE_BATTLE_INFO_NPC: 'PRE_BATTLE_INFO_NPC',
   BRING_OUT_MONSTER: 'BRING_OUT_MONSTER',
   PLAYER_INPUT: 'PLAYER_INPUT',
   ENEMY_INPUT: 'ENEMY_INPUT',
@@ -34,6 +36,7 @@ const BATTLE_STATES = Object.freeze({
   FLEE_ATTEMPT: 'FLEE_ATTEMPT',
   GAIN_EXPERIENCE: 'GAIN_EXPERIENCE',
   SWITCH_MONSTER: 'SWITCH_MONSTER',
+  NPC_SWITCH_MONSTER: 'NPC_SWITCH_MONSTER',
   USED_ITEM: 'USED_ITEM',
   HEAL_ITEM_USED: 'HEAL_ITEM_USED',
   CAPTURE_ITEM_USED: 'CAPTURE_ITEM_USED',
@@ -45,6 +48,12 @@ const BATTLE_STATES = Object.freeze({
  * @type {object}
  * @property {import('../types/typedef.js').Monster[]} playerMonsters
  * @property {import('../types/typedef.js').Monster[]} enemyMonsters
+ * @property {boolean} [isTrainerBattle=false]
+ * @property {object} [npc]
+ * @property {number} npc.id
+ * @property {string} npc.assetKey
+ * @property {string} npc.name
+ * @property {string[]} npc.trainerLostMessages
  */
 
 /**
@@ -84,11 +93,19 @@ export class BattleScene extends BaseScene {
   /** @type {boolean} */
   #activeMonsterKnockedOut;
   /** @type {Phaser.GameObjects.Container} */
-  #availableMonstersUiContainer;
+  #availableMonstersUiContainerForPlayer;
   /** @type {boolean} */
   #monsterCaptured;
   /** @type {Ball} */
   #ball;
+  /** @type {boolean} */
+  #isTrainerBattle;
+  /** @type {number} */
+  #activeEnemyMonsterPartyIndex;
+  /** @type {Phaser.GameObjects.Container | undefined } */
+  #availableMonstersUiContainerForNpc;
+  /** @type {EnemyBattleNpc | undefined} */
+  #enemyBattleNpc;
 
   constructor() {
     super({
@@ -109,17 +126,23 @@ export class BattleScene extends BaseScene {
       this.#sceneData = {
         enemyMonsters: [DataUtils.getMonsterById(this, 2)],
         playerMonsters: [...dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY)],
+        isTrainerBattle: false,
+        npc: undefined,
       };
     }
 
+    this.#isTrainerBattle = this.#sceneData.isTrainerBattle || false;
     this.#activePlayerAttackIndex = -1;
     this.#activeEnemyAttackIndex = -1;
     this.#activePlayerMonsterPartyIndex = 0;
+    this.#activeEnemyMonsterPartyIndex = 0;
     this.#skipAnimations = true;
     this.#playerKnockedOut = false;
     this.#switchingActiveMonster = false;
     this.#activeMonsterKnockedOut = false;
     this.#monsterCaptured = false;
+    this.#availableMonstersUiContainerForNpc = undefined;
+    this.#enemyBattleNpc = undefined;
 
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS);
@@ -141,7 +164,7 @@ export class BattleScene extends BaseScene {
     // create the player and enemy monsters
     this.#activeEnemyMonster = new EnemyBattleMonster({
       scene: this,
-      monsterDetails: this.#sceneData.enemyMonsters[0],
+      monsterDetails: this.#sceneData.enemyMonsters[this.#activeEnemyMonsterPartyIndex],
       skipBattleAnimations: this.#skipAnimations,
     });
     // find first monster in party that is able to battle
@@ -153,8 +176,17 @@ export class BattleScene extends BaseScene {
       skipBattleAnimations: this.#skipAnimations,
     });
 
+    // create the enemy npc if trainer battle
+    if (this.#isTrainerBattle) {
+      this.#enemyBattleNpc = new EnemyBattleNpc({
+        scene: this,
+        assetKey: this.#sceneData.npc.assetKey,
+        skipBattleAnimations: this.#skipAnimations,
+      });
+    }
+
     // render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations);
+    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster, this.#skipAnimations, this.#isTrainerBattle);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
     this.#createAvailableMonstersUi();
@@ -190,9 +222,11 @@ export class BattleScene extends BaseScene {
     if (
       wasSpaceKeyPressed &&
       (this.#battleStateMachine.currentStateName === BATTLE_STATES.PRE_BATTLE_INFO ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.PRE_BATTLE_INFO_NPC ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.POST_ATTACK_CHECK ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.GAIN_EXPERIENCE ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.SWITCH_MONSTER ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.NPC_SWITCH_MONSTER ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.CAPTURE_ITEM_USED ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT)
     ) {
@@ -329,14 +363,17 @@ export class BattleScene extends BaseScene {
    * @returns {void}
    */
   #postBattleSequenceCheck() {
+    this._controls.lockInput = true;
+
     // update monster details in scene data and data manager to align with changes from battle
     this.#sceneData.playerMonsters[this.#activePlayerMonsterPartyIndex].currentHp = this.#activePlayerMonster.currentHp;
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+    this.#sceneData.enemyMonsters[this.#activeEnemyMonsterPartyIndex].currentHp = this.#activeEnemyMonster.currentHp;
 
     if (this.#monsterCaptured) {
       // enemy monster was captured
       this.#activeEnemyMonster.playDeathAnimation(() => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput([`You caught ${this.#activeEnemyMonster.name}.`], () => {
+        this.#showMessagesAndWaitForInput([`You caught ${this.#activeEnemyMonster.name}.`], () => {
           this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
         });
       });
@@ -344,14 +381,20 @@ export class BattleScene extends BaseScene {
     }
 
     if (this.#activeEnemyMonster.isFainted) {
+      // if trainer battle, update ui to show monster fainted
+      if (this.#isTrainerBattle) {
+        /** @type {Phaser.GameObjects.Image} */
+        (this.#availableMonstersUiContainerForNpc.getAt(this.#activeEnemyMonsterPartyIndex)).setAlpha(0.4);
+      }
+
       // play monster fainted animation and wait for animation to finish
       this.#activeEnemyMonster.playDeathAnimation(() => {
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`Wild ${this.#activeEnemyMonster.name} fainted.`],
-          () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
-          }
-        );
+        const text = this.#isTrainerBattle
+          ? `${this.#activeEnemyMonster.name} has been knocked out.`
+          : `Wild ${this.#activeEnemyMonster.name} fainted.`;
+        this.#showMessagesAndWaitForInput([text], () => {
+          this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
+        });
       });
       return;
     }
@@ -361,7 +404,7 @@ export class BattleScene extends BaseScene {
       this.#activePlayerMonster.playDeathAnimation(() => {
         // update ui to show monster fainted
         /** @type {Phaser.GameObjects.Image} */
-        (this.#availableMonstersUiContainer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(0.4);
+        (this.#availableMonstersUiContainerForPlayer.getAt(this.#activePlayerMonsterPartyIndex)).setAlpha(0.4);
 
         // check to see if we have other monsters that are able to battle
         const hasOtherActiveMonsters = this.#sceneData.playerMonsters.some((monster) => {
@@ -373,19 +416,20 @@ export class BattleScene extends BaseScene {
 
         // if not, player faints and battle is over
         if (!hasOtherActiveMonsters) {
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            [`${this.#activePlayerMonster.name} fainted.`, 'You have no more monsters, escaping to safety...'],
-            () => {
-              this.#playerKnockedOut = true;
-              this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-            }
-          );
+          const text = this.#isTrainerBattle
+            ? `${this.#sceneData.npc.name} has won the battle!`
+            : 'You have no more monsters, escaping to safety...';
+
+          this.#showMessagesAndWaitForInput([`${this.#activePlayerMonster.name} fainted.`, text], () => {
+            this.#playerKnockedOut = true;
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          });
           return;
         }
 
         // we have active monsters, so show message about monster fainting and then show monster party scene
         // so player can choose next monster
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+        this.#showMessagesAndWaitForInput(
           [`${this.#activePlayerMonster.name} fainted.`, 'Choose another monster to continue the battle.'],
           () => {
             this.#activeMonsterKnockedOut = true;
@@ -423,13 +467,16 @@ export class BattleScene extends BaseScene {
      * scene transition to the battle menu
      * battle states
      * intro -> setup everything that is needed
-     * pre-battle -> animations as characters and stuff appears
+     * pre-battle-npc -> animations as characters appear
+     * pre-battle -> animations as monsters appear
      * monster info text renders onto the page & wait for player input
      * any key press, and now menu stuff shows up
      * player_turn -> choose what to do, wait for input from player
      * enemy_turn -> random choice,
      * battle_fight -> enemy and player options evaluated, play each attack animation
      * battle_fight_post_check -> see if one of the characters died, repeat
+     *
+     * // TODO:FUTURE update with latest set of states
      */
 
     this.#battleStateMachine = new StateMachine('battle', this);
@@ -441,8 +488,27 @@ export class BattleScene extends BaseScene {
         createSceneTransition(this, {
           skipSceneTransition: this.#skipAnimations,
           callback: () => {
+            if (this.#isTrainerBattle) {
+              this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO_NPC);
+              return;
+            }
             this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
           },
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.PRE_BATTLE_INFO_NPC,
+      onEnter: async () => {
+        // wait for enemy npc to appear on screen and notify player they want to battle
+        await this.#enemyBattleNpc.playAppearAnimation();
+
+        // wait for text animation to complete and move to next state
+        this.#showMessagesAndWaitForInput([`${this.#sceneData.npc.name} would like to battle!`], () => {
+          // hide npc as they bring out their monster
+          this.#enemyBattleNpc.hide();
+          this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
         });
       },
     });
@@ -452,15 +518,21 @@ export class BattleScene extends BaseScene {
       onEnter: () => {
         // wait for enemy monster to appear on the screen and notify player about the wild monster
         this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
-          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {});
-          this._controls.lockInput = false;
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            [`wild ${this.#activeEnemyMonster.name} appeared!`],
-            () => {
-              // wait for text animation to complete and move to next state
-              this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
+          // don't wait for health bar to appear, play at the same time
+          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {
+            // if this is a trainer battle show number of enemies
+            if (this.#isTrainerBattle) {
+              this.#availableMonstersUiContainerForNpc.setAlpha(1);
             }
-          );
+          });
+
+          const text = this.#isTrainerBattle
+            ? `${this.#sceneData.npc.name} brought out ${this.#activeEnemyMonster.name}.`
+            : `wild ${this.#activeEnemyMonster.name} appeared!`;
+          this.#showMessagesAndWaitForInput([text], () => {
+            // wait for text animation to complete and move to next state
+            this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
+          });
         });
       },
     });
@@ -471,7 +543,7 @@ export class BattleScene extends BaseScene {
         // wait for player monster to appear on the screen and notify the player about monster
         this.#activePlayerMonster.playMonsterAppearAnimation(() => {
           this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(() => {
-            this.#availableMonstersUiContainer.setAlpha(1);
+            this.#availableMonstersUiContainerForPlayer.setAlpha(1);
           });
           this.#battleMenu.updateInfoPaneMessageNoInputRequired(`go ${this.#activePlayerMonster.name}!`, () => {
             // wait for text animation to complete and move to next state
@@ -493,6 +565,7 @@ export class BattleScene extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.PLAYER_INPUT,
       onEnter: () => {
+        this._controls.lockInput = false;
         this.#battleMenu.showMainBattleMenu();
       },
     });
@@ -573,6 +646,10 @@ export class BattleScene extends BaseScene {
       onEnter: () => {
         // update the data manager with latest monster data
         dataManager.store.set(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY, this.#sceneData.playerMonsters);
+        // update the data manager with the npc that was defeated
+        if (this.#isTrainerBattle && this.#sceneData.npc !== undefined && this.#sceneData.npc.id !== undefined) {
+          dataManager.addDefeatedNpc(this.#sceneData.npc.id);
+        }
         this.#transitionToNextScene();
       },
     });
@@ -583,7 +660,7 @@ export class BattleScene extends BaseScene {
         const randomNumber = Phaser.Math.Between(1, 10);
         if (randomNumber > 5) {
           // player has run away successfully
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You got away safely!'], () => {
+          this.#showMessagesAndWaitForInput(['You got away safely!'], () => {
             this.time.delayedCall(200, () => {
               playSoundFx(this, AUDIO_ASSET_KEYS.FLEE);
               this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
@@ -592,7 +669,7 @@ export class BattleScene extends BaseScene {
           return;
         }
         // player failed to run away, allow enemy to take their turn
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['You failed to run away...'], () => {
+        this.#showMessagesAndWaitForInput(['You failed to run away...'], () => {
           this.time.delayedCall(200, () => {
             this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
           });
@@ -665,16 +742,51 @@ export class BattleScene extends BaseScene {
 
         this._controls.lockInput = true;
         this.#activePlayerMonster.updateMonsterExpBar(didActiveMonsterLevelUp, false, () => {
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
+          this.#showMessagesAndWaitForInput(messages, () => {
             this.time.delayedCall(200, () => {
               if (this.#monsterCaptured) {
                 this.#battleStateMachine.setState(BATTLE_STATES.CAUGHT_MONSTER);
                 return;
               }
+
+              /**
+               * When a monster faints, we need to give experience to the active monster.
+               * After giving experience, we need to check if there are more active monsters,
+               * and if so we need to have the npc bring out the next monster. If no more
+               * monsters, then we can go to the end of the battle.
+               */
+
+              // check to see if there are more active monsters
+              const hasOtherActiveMonsters = this.#sceneData.enemyMonsters.some((monster) => {
+                return (
+                  monster.id !== this.#sceneData.enemyMonsters[this.#activeEnemyMonsterPartyIndex].id &&
+                  monster.currentHp > 0
+                );
+              });
+
+              if (hasOtherActiveMonsters) {
+                // if npc has other monsters, we need to switch to the next monster in their party
+                this.#battleStateMachine.setState(BATTLE_STATES.NPC_SWITCH_MONSTER);
+                return;
+              }
+
+              // if npc battle have npc re-appear and show message to player
+              if (this.#isTrainerBattle) {
+                this.#activePlayerMonster.playDeathAnimation(async () => {
+                  this.#availableMonstersUiContainerForPlayer.setAlpha(0);
+                  this.#availableMonstersUiContainerForNpc.setAlpha(0);
+                  await this.#enemyBattleNpc.playAppearAnimation();
+                  this.#showMessagesAndWaitForInput(this.#sceneData.npc.trainerLostMessages, () => {
+                    this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+                  });
+                });
+                return;
+              }
+
+              // if no more monsters, go to the end of the battle
               this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
             });
           });
-          this._controls.lockInput = false;
         });
       },
     });
@@ -690,12 +802,9 @@ export class BattleScene extends BaseScene {
           );
         });
         if (!hasOtherActiveMonsters) {
-          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            ['You have no other monsters able to fight in your party'],
-            () => {
-              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
-            }
-          );
+          this.#showMessagesAndWaitForInput(['You have no other monsters able to fight in your party'], () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+          });
           return;
         }
 
@@ -709,6 +818,30 @@ export class BattleScene extends BaseScene {
         };
         this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
         this.scene.pause(SCENE_KEYS.BATTLE_SCENE);
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.NPC_SWITCH_MONSTER,
+      onEnter: () => {
+        // npc has other monsters that can be switched to, for now npc will just switch to the next monster in the battle line
+        // TODO:FUTURE this could be enhanced if we wanted the npc to pick a random monster, choose one based on the monster
+        // the player has out, etc.
+        this.#activeEnemyMonsterPartyIndex += 1;
+
+        // show text about bringing out next monster
+        const nextMonster = this.#sceneData.enemyMonsters[this.#activeEnemyMonsterPartyIndex];
+        this.#showMessagesAndWaitForInput([`Foe is about to send in ${nextMonster.name}.`], () => {
+          this.#activeEnemyMonster.switchMonster(nextMonster);
+          // have monster appear, and show updated health bar
+          this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
+            this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(() => {
+              // transition to player input state
+              this.#availableMonstersUiContainerForNpc.setAlpha(1);
+              this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            });
+          });
+        });
       },
     });
 
@@ -783,7 +916,7 @@ export class BattleScene extends BaseScene {
         await this.#activeEnemyMonster.playCatchAnimationFailed();
 
         // TODO: refactor to use async/await
-        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(['The wild monster breaks free!'], () => {
+        this.#showMessagesAndWaitForInput(['The wild monster breaks free!'], () => {
           this.time.delayedCall(500, () => {
             this.#enemyAttack(() => {
               this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
@@ -844,18 +977,50 @@ export class BattleScene extends BaseScene {
    * Creates the UI component that shows the ball icons that represent the available monsters in the
    * players current party. A transparent ball means a monster is knocked out, while a non-transparent
    * ball means the monster is eligible to battle.
+   *
+   * Updated to support showing ball icons that represent the available monsters in the npc party as well.
    * @returns {void}
    */
   #createAvailableMonstersUi() {
-    this.#availableMonstersUiContainer = this.add.container(this.scale.width - 24, 304, []);
+    this.#availableMonstersUiContainerForPlayer = this.add.container(this.scale.width - 24, 304, []);
     this.#sceneData.playerMonsters.forEach((monster, index) => {
       const alpha = monster.currentHp > 0 ? 1 : 0.4;
       const ball = this.add
         .image(30 * -index, 0, BATTLE_ASSET_KEYS.BALL_THUMBNAIL, 0)
         .setScale(0.8)
         .setAlpha(alpha);
-      this.#availableMonstersUiContainer.add(ball);
+      this.#availableMonstersUiContainerForPlayer.add(ball);
     });
-    this.#availableMonstersUiContainer.setAlpha(0);
+    this.#availableMonstersUiContainerForPlayer.setAlpha(0);
+
+    // add logic to show available enemy monsters during trainer battles
+    if (this.#isTrainerBattle) {
+      this.#availableMonstersUiContainerForNpc = this.add.container(24, 116, []);
+      this.#sceneData.enemyMonsters.forEach((monster, index) => {
+        const alpha = monster.currentHp > 0 ? 1 : 0.4;
+        const ball = this.add
+          .image(30 * index, 0, BATTLE_ASSET_KEYS.BALL_THUMBNAIL, 0)
+          .setScale(0.8)
+          .setAlpha(alpha);
+        this.#availableMonstersUiContainerForNpc.add(ball);
+      });
+      this.#availableMonstersUiContainerForNpc.setAlpha(0);
+    }
+  }
+
+  /**
+   * Wrapper for the battle menu method to show messages to the player were we
+   * want to wait until the player has confirmed they have read the message. The
+   * wrapper will handle locking and unlocking our input so player can interact
+   * with the dialog window.
+   * @param {string[]} messages array of messages to show the player
+   * @param {() => void} callback function to invoke after all messages have been shown to the player and confirmed
+   */
+  #showMessagesAndWaitForInput(messages, callback) {
+    this._controls.lockInput = false;
+    this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(messages, () => {
+      this._controls.lockInput = true;
+      callback();
+    });
   }
 }
