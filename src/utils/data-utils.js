@@ -54,13 +54,15 @@ export class DataUtils {
   /**
    * Utility function for retrieving a Monster object from the monsters.json data file.
    * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
-   * @param {number} monsterId the monster id to retrieve from the monsters.json file
+   * @param {number} id the monster id to retrieve from the monsters.json file
    * @returns {import('../types/typedef.js').Monster}
    */
-  static getMonsterById(scene, monsterId) {
+  static getMonsterById(scene, id) {
     /** @type {import('../types/typedef.js').Monster[]} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.MONSTERS);
-    return data.find((monster) => monster.monsterId === monsterId);
+    const monster = data.find((monster) => monster.id === id.toString(10));
+    // we use JSON.parse and JSON.stringify to create a deep copy of the monster data to not mutate the cache
+    return monster ? JSON.parse(JSON.stringify(monster)) : undefined;
   }
 
   /**
