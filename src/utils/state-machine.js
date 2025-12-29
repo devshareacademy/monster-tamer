@@ -5,6 +5,8 @@
  * @property {() => void} [onEnter]
  */
 
+import { ENABLE_STATE_MACHINE_LOGGING } from '../config.js';
+
 export class StateMachine {
   /** @type {Map<string, State>} */
   #states;
@@ -72,14 +74,18 @@ export class StateMachine {
     }
 
     this.#isChangingState = true;
-    console.log(
-      `[${StateMachine.name}-${this.#id}:${methodName}] change from ${this.#currentState?.name ?? 'none'} to ${name}`
-    );
+    if (ENABLE_STATE_MACHINE_LOGGING) {
+      console.log(
+        `[${StateMachine.name}-${this.#id}:${methodName}] change from ${this.#currentState?.name ?? 'none'} to ${name}`
+      );
+    }
 
     this.#currentState = this.#states.get(name);
 
     if (this.#currentState.onEnter) {
-      console.log(`[${StateMachine.name}-${this.#id}:${methodName}] ${this.#currentState.name} on enter invoked`);
+      if (ENABLE_STATE_MACHINE_LOGGING) {
+        console.log(`[${StateMachine.name}-${this.#id}:${methodName}] ${this.#currentState.name} on enter invoked`);
+      }
       this.#currentState.onEnter();
     }
 

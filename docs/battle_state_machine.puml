@@ -1,0 +1,70 @@
+@startuml BattleStateMachine
+
+state INTRO
+state PRE_BATTLE_INFO
+state BRING_OUT_MONSTER
+state PLAYER_INPUT
+state ENEMY_INPUT
+state BATTLE
+state POST_ATTACK_CHECK
+state FINISHED
+state FLEE_ATTEMPT
+state GAIN_EXPERIENCE
+state SWITCH_MONSTER
+state USED_ITEM
+state HEAL_ITEM_USED
+state CAPTURE_ITEM_USED
+state CAUGHT_MONSTER
+
+[*] --> INTRO
+
+INTRO --> PRE_BATTLE_INFO : onEnter: createSceneTransition complete
+
+PRE_BATTLE_INFO --> BRING_OUT_MONSTER : onEnter: enemy monster appeared
+
+BRING_OUT_MONSTER --> ENEMY_INPUT : onEnter: switchingActiveMonster && !activeMonsterKnockedOut
+BRING_OUT_MONSTER --> PLAYER_INPUT : onEnter: else
+
+PLAYER_INPUT --> ENEMY_INPUT : onInput: player used item
+PLAYER_INPUT --> FLEE_ATTEMPT : onInput: player attempted to flee
+PLAYER_INPUT --> SWITCH_MONSTER : onInput: player attempted to switch monsters
+PLAYER_INPUT --> ENEMY_INPUT : onInput: player selected attack
+
+ENEMY_INPUT --> BATTLE
+
+BATTLE --> USED_ITEM : onEnter: item was used
+BATTLE --> POST_ATTACK_CHECK : onEnter: player failed to flee (enemy attack complete)
+BATTLE --> POST_ATTACK_CHECK : onEnter: player switched monster (enemy attack complete)
+BATTLE --> POST_ATTACK_CHECK : onEnter: player and enemy attack complete
+
+POST_ATTACK_CHECK --> GAIN_EXPERIENCE : onEnter: enemy fainted or captured
+POST_ATTACK_CHECK --> SWITCH_MONSTER : onEnter: player monster fainted, has other monsters
+POST_ATTACK_CHECK --> FINISHED : onEnter: player monster fainted, no other monsters
+POST_ATTACK_CHECK --> PLAYER_INPUT : onEnter: both monsters active
+
+FLEE_ATTEMPT --> FINISHED : onEnter: flee successful
+FLEE_ATTEMPT --> ENEMY_INPUT : onEnter: flee failed
+
+GAIN_EXPERIENCE --> CAUGHT_MONSTER : onEnter: monster captured
+GAIN_EXPERIENCE --> FINISHED : onEnter: else
+
+SWITCH_MONSTER --> PLAYER_INPUT : onEnter: no other monsters to switch to
+SWITCH_MONSTER --> MONSTER_PARTY_SCENE : onEnter: launch MonsterPartyScene
+
+USED_ITEM --> CAPTURE_ITEM_USED : onEnter: item category is CAPTURE
+USED_ITEM --> HEAL_ITEM_USED : onEnter: item category is HEAL
+
+HEAL_ITEM_USED --> POST_ATTACK_CHECK : onEnter: enemy attack complete
+
+CAPTURE_ITEM_USED --> POST_ATTACK_CHECK : onEnter: monster captured
+CAPTURE_ITEM_USED --> POST_ATTACK_CHECK : onEnter: monster breaks free (enemy attack complete)
+
+CAUGHT_MONSTER --> FINISHED
+
+FINISHED --> [*]
+
+note right of SWITCH_MONSTER : MonsterPartyScene is launched, then BattleScene is paused.\nUpon resume, if monster was selected, it transitions to BRING_OUT_MONSTER.
+note right of PLAYER_INPUT : handleSceneResume transitions to PLAYER_INPUT if no monster was selected.
+note right of BRING_OUT_MONSTER : handleSceneResume transitions to BRING_OUT_MONSTER if monster was selected.
+
+@enduml
